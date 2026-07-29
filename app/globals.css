@@ -1,0 +1,225 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* ── Theme Cat & Ribbon: Soft Pink Pastel Palette ── */
+    --color-primary-50:  #FFF5F8;
+    --color-primary-100: #FFE4EC;
+    --color-primary-200: #FFC9DA;
+    --color-primary-300: #FFA8C4;
+    --color-primary-400: #FF8AAF;
+    --color-primary-500: #FF6D9E;
+    --color-primary-600: #E85A8A;
+
+    --color-secondary-50:  #FFFBF5;
+    --color-secondary-100: #FFF3E2;
+    --color-secondary-300: #FFE0B8;
+
+    --color-accent-bow: #FF4D8D;
+    --color-accent-gold: #F5C56B;
+
+    --color-neutral-white: #FFFFFF;
+    --color-neutral-bg: #FFF9FB;
+    --color-neutral-100: #F7EEF2;
+    --color-neutral-300: #E5D3DB;
+    --color-neutral-500: #A98C97;
+    --color-neutral-700: #6B4F58;
+    --color-neutral-900: #3D2A30;
+
+    --color-success: #7ED9A8;
+    --color-warning: #FFCB77;
+    --color-error:   #FF8FA3;
+    --color-info:    #A8D8FF;
+
+    /* RGB compatibility variables for Tailwind alpha syntax */
+    --primary: 255 109 158;          /* #FF6D9E - primary main */
+    --primary-active: 232 90 138;    /* #E85A8A - primary dark */
+    --primary-neutral: 255 245 248; /* #FFF5F8 - primary lightest */
+    --primary-pale: 255 228 236;    /* #FFE4EC - primary light */
+
+    --canvas: 255 255 255;          /* #FFFFFF */
+    --canvas-soft: 255 249 251;     /* #FFF9FB - pastel bg */
+
+    --ink: 61 42 48;                /* #3D2A30 - main text */
+    --ink-deep: 35 22 27;
+    --body: 107 79 88;              /* #6B4F58 - secondary text */
+    --mute: 169 140 151;            /* #A98C97 - muted text */
+
+    --positive: 126 217 168;        /* #7ED9A8 */
+    --negative: 255 143 163;        /* #FF8FA3 */
+    --warning-deep: 255 203 119;    /* #FFCB77 */
+
+    --accent-green: 230 248 238;
+    --accent-purple: 252 233 243;
+    --accent-yellow: 255 248 225;
+    --accent-cyan: 230 244 255;
+    --accent-orange: 255 240 230;
+  }
+
+  *, *::before, *::after {
+    box-sizing: border-box;
+  }
+
+  body {
+    @apply antialiased;
+    font-family: var(--font-be-vietnam), "Quicksand", "Be Vietnam Pro", system-ui, sans-serif;
+    background-color: var(--color-neutral-bg);
+    color: var(--color-neutral-900);
+    font-feature-settings: "calt";
+  }
+
+  /* Custom soft scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: var(--color-neutral-bg); }
+  ::-webkit-scrollbar-thumb { background: var(--color-primary-200); border-radius: 99px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--color-primary-400); }
+
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
+  .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+}
+
+@layer utilities {
+  /* ── Typography ── */
+  .display-mega {
+    font-family: var(--font-be-vietnam), "Quicksand", sans-serif;
+    font-weight: 800;
+    font-size: clamp(40px, 8vw, 110px);
+    line-height: 1.05;
+  }
+  .display-xl  { font-family: var(--font-be-vietnam), "Quicksand", sans-serif; font-weight: 800; font-size: 56px; line-height: 1.1; }
+  .display-lg  { font-family: var(--font-be-vietnam), "Quicksand", sans-serif; font-weight: 800; font-size: 42px; line-height: 1.15; }
+  .display-md  { font-family: var(--font-be-vietnam), "Quicksand", sans-serif; font-weight: 800; font-size: 36px; line-height: 1.15; }
+  .display-sm  { font-family: var(--font-be-vietnam), "Quicksand", sans-serif; font-weight: 700; font-size: 28px; line-height: 1.2; }
+  .display-xs  { font-family: var(--font-be-vietnam), "Quicksand", sans-serif; font-weight: 700; font-size: 22px; line-height: 1.3; }
+  .body-lg     { font-size: 18px; font-weight: 500; line-height: 1.6; }
+  .body-md     { font-size: 15px; font-weight: 400; line-height: 1.6; }
+  .body-md-strong { font-size: 15px; font-weight: 700; line-height: 1.6; }
+  .body-sm     { font-size: 13px; font-weight: 400; line-height: 1.5; }
+  .body-sm-strong { font-size: 13px; font-weight: 700; line-height: 1.5; }
+  .caption     { font-size: 12px; font-weight: 500; line-height: 1.4; }
+
+  /* ── Cat & Ribbon Gradients ── */
+  .gradient-primary {
+    background: linear-gradient(135deg, #FF8AAF 0%, #FF6D9E 100%);
+  }
+  .gradient-hero {
+    background: linear-gradient(160deg, #FFF5F8 0%, #FFF9FB 50%, #FFE4EC 100%);
+  }
+  .gradient-peach {
+    background: linear-gradient(135deg, #FFF5F8 0%, #FFE4EC 100%);
+  }
+  .gradient-cream {
+    background: linear-gradient(135deg, #FFFBF5 0%, #FFF3E2 100%);
+  }
+
+  /* ── Cute Soft Shadows ── */
+  .shadow-cute {
+    box-shadow: 0 4px 16px rgba(255, 109, 158, 0.12), 0 2px 6px rgba(61, 42, 48, 0.03);
+  }
+  .shadow-cute-lg {
+    box-shadow: 0 8px 32px rgba(255, 109, 158, 0.16), 0 4px 12px rgba(61, 42, 48, 0.04);
+  }
+  .shadow-bow {
+    box-shadow: 0 4px 20px rgba(255, 77, 141, 0.2);
+  }
+
+  /* ── Animations ── */
+  .fade-in {
+    animation: fadeIn 0.4s ease-out;
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .float {
+    animation: float 3.5s ease-in-out infinite;
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    50%       { transform: translateY(-6px) rotate(1.5deg); }
+  }
+
+  .bounce-in {
+    animation: bounceIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  @keyframes bounceIn {
+    from { opacity: 0; transform: scale(0.85); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+
+  .slide-in-left {
+    animation: slideInLeft 0.25s ease-out;
+  }
+  @keyframes slideInLeft {
+    from { opacity: 0; transform: translateX(-12px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+
+  .paw-step {
+    animation: pawStep 1.2s infinite ease-in-out;
+  }
+  @keyframes pawStep {
+    0%, 100% { opacity: 0.3; transform: scale(0.9); }
+    50% { opacity: 1; transform: scale(1.1); }
+  }
+
+  /* ── Marquee ── */
+  .marquee-track { animation: marquee 18s linear infinite; }
+  .marquee-track:hover { animation-play-state: paused; }
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+  }
+
+  /* ── Shimmer skeleton ── */
+  .shimmer {
+    background: linear-gradient(90deg, #FFE4EC 25%, #FFF5F8 50%, #FFE4EC 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+  @keyframes shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  /* ── Responsive table (mobile card stacking) ── */
+  @media (max-width: 639px) {
+    .responsive-table { overflow-x: visible !important; }
+    .responsive-table table,
+    .responsive-table thead,
+    .responsive-table tbody,
+    .responsive-table tr,
+    .responsive-table th,
+    .responsive-table td { display: block; width: 100%; min-width: 0; }
+    .responsive-table thead {
+      position: absolute; width: 1px; height: 1px;
+      overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+    }
+    .responsive-table tbody tr {
+      margin: 0 0 12px; padding: 6px 16px;
+      border: 1.5px solid var(--color-primary-100);
+      border-radius: 20px;
+      background: white;
+      box-shadow: 0 2px 8px rgba(255, 109, 158, 0.05);
+    }
+    .responsive-table tbody tr:last-child { margin-bottom: 0; }
+    .responsive-table td {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 12px; text-align: right; padding: 10px 0;
+      border-bottom: 1px solid var(--color-primary-50);
+      white-space: normal;
+    }
+    .responsive-table td:last-child { border-bottom: 0; }
+    .responsive-table td[data-label]::before {
+      content: attr(data-label);
+      font-size: 11px; font-weight: 800;
+      text-transform: uppercase; letter-spacing: 0.06em;
+      color: var(--color-neutral-500); text-align: left; flex-shrink: 0;
+    }
+    .responsive-table td[colspan] { display: block; text-align: center; }
+  }
+}
+

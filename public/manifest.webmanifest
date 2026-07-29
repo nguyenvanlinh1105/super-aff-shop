@@ -1,0 +1,38 @@
+{
+  "name": "MeowBack — Hoàn Tiền Mua Sắm",
+  "short_name": "MeowBack",
+  "description": "Nền tảng hoàn tiền affiliate uy tín cho Shopee và TikTok Shop tại Việt Nam.",
+  "start_url": "/app",
+  "id": "/app",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#FFF5F8",
+  "theme_color": "#FF6D9E",
+  "lang": "vi",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

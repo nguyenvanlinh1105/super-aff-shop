@@ -1,0 +1,602 @@
+// Dịch 1:1 từ 04-database-schema-khoi-dong.sql, chỉ thêm User.customerId
+// để một customer có thể đăng nhập cổng riêng (bảng customers gốc không có mật khẩu).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(uuid())
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  fullName     String   @map("full_name")
+  role         String // 'admin' | 'customer'
+  status       String   @default("active")
+  customerId   String?  @unique @map("customer_id")
+  customer     Customer? @relation(fields: [customerId], references: [id])
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @default(now()) @updatedAt @map("updated_at")
+
+  createdLinks     TrackingLink[]  @relation("LinkCreatedBy")
+  createdVouchers  Voucher[]       @relation("VoucherCreatedBy")
+  importBatches    ImportBatch[]   @relation("ImportedBy")
+  commissionRules  CommissionRule[] @relation("CommissionRuleCreatedBy")
+  paidBatches      PaymentBatch[]  @relation("PaidBy")
+  auditLogs        AuditLog[]      @relation("AuditActor")
+  passwordResetTokens PasswordResetToken[]
+  notifications    Notification[]
+  chatMessages     ChatMessage[]
+
+  @@map("users")
+}
+
+model Customer {
+  id               String   @id @default(uuid())
+  customerCode     String   @unique @map("customer_code")
+  fullName         String   @map("full_name")
+  phone            String?
+  zaloUserId       String?  @map("zalo_user_id")
+  zaloDisplayName  String?  @map("zalo_display_name")
+  telegramUserId   String?  @map("telegram_user_id")
+  telegramUsername String?  @map("telegram_username")
+  status           String   @default("active")
+  note             String?
+  bankName         String?  @map("bank_name")
+  bankAccountNumber String? @map("bank_account_number")
+  bankAccountName  String?  @map("bank_account_name")
+  momoNumber       String?  @map("momo_number")
+  momoName         String?  @map("momo_name")
+  referredById     String?  @map("referred_by_id")
+  // Đối tác — admin gán khách nào referredById về đây thì đơn của khách đó
+  // luôn tính hoa hồng giới thiệu cho đối tác này, KHÔNG áp giới hạn 5 đơn
+  // hay hạn 6 tháng như người giới thiệu tự do bình thường (vĩnh viễn).
+  isPartner        Boolean  @default(false) @map("is_partner")
+  // State tạm cho hội thoại nhiều bước qua Telegram (vd: bot đang hỏi lần
+  // lượt tên ngân hàng -> số tài khoản -> tên chủ TK trước khi rút tiền).
+  // telegramFlowData lưu JSON các câu trả lời đã thu thập được của bước
+  // hiện tại; null nghĩa là khách không đang ở giữa hội thoại nào.
+  telegramFlowStep String?  @map("telegram_flow_step")
+  telegramFlowData String?  @map("telegram_flow_data")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @default(now()) @updatedAt @map("updated_at")
+
+  user             User?
+  referredBy       Customer? @relation("CustomerToCustomer", fields: [referredById], references: [id])
+  referredUsers    Customer[] @relation("CustomerToCustomer")
+  trackingLinks    TrackingLink[]
+  orders           Order[]
+  paymentBatches   PaymentBatch[]
+  zaloMessageLogs  ZaloMessageLog[]
+  telegramMessageLogs TelegramMessageLog[]
+  telegramLinkCodes   TelegramLinkCode[]
+  withdrawRequests    WithdrawRequest[]
+
+  @@index([phone])
+  @@index([zaloUserId])
+  @@index([telegramUserId])
+  @@index([referredById])
+  @@map("customers")
+}
+
+// Yêu cầu rút tiền do khách chủ động gửi — admin chỉ tạo phiếu thanh toán
+// khi có yêu cầu ở đây (không tự động quét toàn bộ khách có số dư), giúp
+// admin dễ quản lý, không bị loạn danh sách.
+model WithdrawRequest {
+  id         String    @id @default(uuid())
+  customerId String    @map("customer_id")
+  customer   Customer  @relation(fields: [customerId], references: [id])
+  amount     Decimal // số dư khả dụng tại thời điểm gửi yêu cầu (chỉ để hiển thị)
+  status     String    @default("pending") // pending | fulfilled | cancelled
+  createdAt  DateTime  @default(now()) @map("created_at")
+  resolvedAt DateTime? @map("resolved_at")
+
+  @@index([customerId])
+  @@index([status])
+  @@map("withdraw_requests")
+}
+
+// Mã liên kết ngắn hạn để đồng bộ tài khoản Telegram với đúng customer đang
+// đăng nhập trên web — tránh bot tự tạo customer rời rạc không khớp danh tính thật.
+model TelegramLinkCode {
+  id         String    @id @default(uuid())
+  code       String    @unique
+  customerId String    @map("customer_id")
+  customer   Customer  @relation(fields: [customerId], references: [id])
+  expiresAt  DateTime  @map("expires_at")
+  usedAt     DateTime? @map("used_at")
+  createdAt  DateTime  @default(now()) @map("created_at")
+
+  @@index([customerId])
+  @@map("telegram_link_codes")
+}
+
+model Platform {
+  id        String   @id @default(uuid())
+  code      String   @unique
+  name      String
+  status    String   @default("active")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  affiliateChannels AffiliateChannel[]
+  trackingLinks     TrackingLink[]
+  vouchers          Voucher[]
+  orders            Order[]
+
+  @@map("platforms")
+}
+
+model AffiliateChannel {
+  id         String   @id @default(uuid())
+  code       String   @unique
+  name       String
+  platformId String   @map("platform_id")
+  platform   Platform @relation(fields: [platformId], references: [id])
+  status     String   @default("active")
+  metadata   String?
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  trackingLinks TrackingLink[]
+
+  @@map("affiliate_channels")
+}
+
+model TrackingLink {
+  id                 String   @id @default(uuid())
+  customerId         String   @map("customer_id")
+  customer           Customer @relation(fields: [customerId], references: [id])
+  platformId         String   @map("platform_id")
+  platform           Platform @relation(fields: [platformId], references: [id])
+  affiliateChannelId String?  @map("affiliate_channel_id")
+  affiliateChannel   AffiliateChannel? @relation(fields: [affiliateChannelId], references: [id])
+  channelSource      String   @map("channel_source") // 'web' | 'zalo' | 'telegram'
+  trackingCode       String   @unique @map("tracking_code")
+  originalUrl        String   @map("original_url")
+  normalizedUrl      String?  @map("normalized_url")
+  affiliateUrl       String   @map("affiliate_url")
+  productTitle       String?  @map("product_title")
+  productImage       String?  @map("product_image")
+  productPrice       Decimal? @map("product_price")
+  productSold        Int?     @map("product_sold")
+  estimatedCashback  Decimal? @map("estimated_cashback")
+  subId1             String?  @map("sub_id1")
+  subId2             String?  @map("sub_id2")
+  subId3             String?  @map("sub_id3")
+  subId4             String?  @map("sub_id4")
+  subId5             String?  @map("sub_id5")
+  shortCode          String?  @unique @map("short_code")
+  shortUrl           String?  @map("short_url")
+  isFavorite         Boolean  @default(false) @map("is_favorite")
+  clicks             Int      @default(0)
+  lastClickedAt      DateTime? @map("last_clicked_at")
+  status             String   @default("active")
+  createdByUserId    String?  @map("created_by_user_id")
+  createdByUser      User?    @relation("LinkCreatedBy", fields: [createdByUserId], references: [id])
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @default(now()) @updatedAt @map("updated_at")
+
+  voucherMatches LinkVoucherMatch[]
+  orders         Order[]
+
+  @@index([customerId])
+  @@index([platformId])
+  @@index([channelSource])
+  @@index([createdAt])
+  @@map("tracking_links")
+}
+
+model Voucher {
+  id              String    @id @default(uuid())
+  platformId      String    @map("platform_id")
+  platform        Platform  @relation(fields: [platformId], references: [id])
+  title           String
+  voucherCode     String?   @map("voucher_code")
+  voucherUrl      String?   @map("voucher_url")
+  productImage    String?   @map("product_image")
+  benefitText     String?   @map("benefit_text")
+  conditionsText  String?   @map("conditions_text")
+  startsAt        DateTime? @map("starts_at")
+  endsAt          DateTime? @map("ends_at")
+  status          String    @default("draft")
+  priority        Int       @default(0)
+  metadata        String?
+  createdByUserId String?   @map("created_by_user_id")
+  createdByUser   User?     @relation("VoucherCreatedBy", fields: [createdByUserId], references: [id])
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @default(now()) @updatedAt @map("updated_at")
+
+  linkMatches LinkVoucherMatch[]
+
+  @@index([platformId])
+  @@index([status])
+  @@index([endsAt])
+  @@map("vouchers")
+}
+
+model LinkVoucherMatch {
+  id             String       @id @default(uuid())
+  trackingLinkId String       @map("tracking_link_id")
+  trackingLink   TrackingLink @relation(fields: [trackingLinkId], references: [id], onDelete: Cascade)
+  voucherId      String       @map("voucher_id")
+  voucher        Voucher      @relation(fields: [voucherId], references: [id])
+  createdAt      DateTime     @default(now()) @map("created_at")
+
+  @@unique([trackingLinkId, voucherId])
+  @@map("link_voucher_matches")
+}
+
+model ImportBatch {
+  id               String   @id @default(uuid())
+  sourceName       String   @map("source_name")
+  fileName         String   @map("file_name")
+  fileStorageKey   String?  @map("file_storage_key")
+  importedByUserId String?  @map("imported_by_user_id")
+  importedByUser   User?    @relation("ImportedBy", fields: [importedByUserId], references: [id])
+  totalRows        Int      @default(0) @map("total_rows")
+  successRows      Int      @default(0) @map("success_rows")
+  duplicateRows    Int      @default(0) @map("duplicate_rows")
+  unmappedRows     Int      @default(0) @map("unmapped_rows")
+  errorRows        Int      @default(0) @map("error_rows")
+  status           String   @default("uploaded")
+  columnMapping    String?    @map("column_mapping")
+  notes            String?
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @default(now()) @updatedAt @map("updated_at")
+
+  rows   ImportBatchRow[]
+  orders Order[]
+
+  @@map("import_batches")
+}
+
+model ImportBatchRow {
+  id                String      @id @default(uuid())
+  batchId           String      @map("batch_id")
+  batch             ImportBatch @relation(fields: [batchId], references: [id], onDelete: Cascade)
+  rowNumber         Int         @map("row_number")
+  orderExternalId   String?     @map("order_external_id")
+  checkoutId        String?     @map("checkout_id")
+  trackingCode      String?     @map("tracking_code")
+  channel           String?     @map("channel")
+  orderedAt         DateTime?   @map("ordered_at")
+  completedAt       DateTime?   @map("completed_at")
+  clickedAt         DateTime?   @map("clicked_at")
+  shopName          String?     @map("shop_name")
+  shopId            String?     @map("shop_id")
+  itemId            String?     @map("item_id")
+  itemName          String?     @map("item_name")
+  commissionAmount  Decimal?    @map("commission_amount")
+  grossCommissionAmount Decimal? @map("gross_commission_amount")
+  netCommissionAmount Decimal?   @map("net_commission_amount")
+  orderAmount       Decimal?    @map("order_amount")
+  orderStatus       String?     @map("order_status")
+  productAffiliateStatus String? @map("product_affiliate_status")
+  subId1            String?     @map("sub_id1")
+  subId2            String?     @map("sub_id2")
+  subId3            String?     @map("sub_id3")
+  subId4            String?     @map("sub_id4")
+  subId5            String?     @map("sub_id5")
+  paymentStatus     String?     @map("payment_status")
+  rawData           String        @map("raw_data")
+  processingStatus  String      @default("pending") @map("processing_status")
+  errorMessage      String?     @map("error_message")
+  createdAt         DateTime    @default(now()) @map("created_at")
+
+  @@index([batchId])
+  @@index([trackingCode])
+  @@map("import_batch_rows")
+}
+
+model Order {
+  id                    String   @id @default(uuid())
+  platformId            String   @map("platform_id")
+  platform              Platform @relation(fields: [platformId], references: [id])
+  customerId            String?  @map("customer_id")
+  customer              Customer? @relation(fields: [customerId], references: [id])
+  trackingLinkId        String?  @map("tracking_link_id")
+  trackingLink          TrackingLink? @relation(fields: [trackingLinkId], references: [id])
+  importBatchId         String?  @map("import_batch_id")
+  importBatch           ImportBatch? @relation(fields: [importBatchId], references: [id])
+  orderExternalId       String   @map("order_external_id")
+  checkoutId            String?  @map("checkout_id")
+  trackingCode          String?  @map("tracking_code")
+  channel               String?  @map("channel")
+  orderedAt             DateTime? @map("ordered_at")
+  completedAt           DateTime? @map("completed_at")
+  clickedAt             DateTime? @map("clicked_at")
+  shopName              String?  @map("shop_name")
+  shopId                String?  @map("shop_id")
+  itemId                String?  @map("item_id")
+  itemName              String?  @map("item_name")
+  orderAmount           Decimal? @map("order_amount")
+  grossCommissionAmount Decimal? @map("gross_commission_amount")
+  netCommissionAmount   Decimal? @map("net_commission_amount")
+  commissionAmount      Decimal  @default(0) @map("commission_amount")
+  customerRewardAmount  Decimal  @default(0) @map("customer_reward_amount")
+  systemProfitAmount    Decimal  @default(0) @map("system_profit_amount")
+  orderStatus           String   @default("pending") @map("order_status")
+  productAffiliateStatus String? @map("product_affiliate_status")
+  subId1                String?  @map("sub_id1")
+  subId2                String?  @map("sub_id2")
+  subId3                String?  @map("sub_id3")
+  subId4                String?  @map("sub_id4")
+  subId5                String?  @map("sub_id5")
+  payoutStatus           String   @default("unpaid") @map("payout_status")
+  sourceType             String   @default("import") @map("source_type")
+  // Chỉ set cho đơn sourceType="referral" — id của người bạn (F1) có đơn
+  // hàng thật vừa được duyệt, sinh ra khoản hoa hồng giới thiệu này. Dùng
+  // để đếm đúng "tối đa 5 đơn MỖI người bạn", không phải 5 đơn tổng gộp
+  // trên mọi người mà A đã mời.
+  referralSourceCustomerId String? @map("referral_source_customer_id")
+  // Số tiền đã bị trích từ systemProfitAmount của CHÍNH đơn này để trả hoa
+  // hồng giới thiệu (0 nếu đơn không có giới thiệu). Lưu trực tiếp trên đơn
+  // gốc để admin biết ngay số "Giữ lại" đã bị giảm do giới thiệu, không phải
+  // tính sai — không cần join/tra ngược qua đơn REF- mới biết được.
+  referralBonusDeducted  Decimal  @default(0) @map("referral_bonus_deducted")
+  rawData                String?    @map("raw_data")
+  approvedAt              DateTime? @map("approved_at")
+  createdAt               DateTime  @default(now()) @map("created_at")
+  updatedAt               DateTime  @default(now()) @updatedAt @map("updated_at")
+
+  paymentItems PaymentBatchItem[]
+
+  @@unique([platformId, orderExternalId])
+  @@index([customerId])
+  @@index([trackingCode])
+  @@index([orderStatus])
+  @@index([payoutStatus])
+  @@index([referralSourceCustomerId])
+  @@map("orders")
+}
+
+model CommissionRule {
+  id                     String    @id @default(uuid())
+  name                   String
+  taxRate                Decimal   @default(10.98) @map("tax_rate")
+  customerRate           Decimal   @map("customer_rate")
+  systemRate             Decimal   @map("system_rate")
+  referralRate           Decimal   @default(0.05) @map("referral_rate")
+  maxReferralOrders      Int       @default(5) @map("max_referral_orders")
+  referralValidityMonths Int       @default(6) @map("referral_validity_months")
+  active                 Boolean   @default(false)
+  startsAt               DateTime? @map("starts_at")
+  endsAt                 DateTime? @map("ends_at")
+  createdByUserId        String?   @map("created_by_user_id")
+  createdByUser          User?     @relation("CommissionRuleCreatedBy", fields: [createdByUserId], references: [id])
+  createdAt              DateTime  @default(now()) @map("created_at")
+  
+  @@map("commission_rules")
+}
+
+// Tỷ lệ hoa hồng gộp (chưa trừ thuế/chia 80-20) theo ngành hàng Shopee, dùng để
+// ước tính cashback ngay lúc khách dán link — vì Shopee không có API trả trước
+// % hoa hồng thật của từng sản phẩm, chỉ biết chính xác sau khi đối soát CSV.
+model CategoryCommissionRate {
+  id        String   @id @default(uuid())
+  name      String
+  keywords  String // các từ khoá tiêu đề sản phẩm, phân tách bằng dấu phẩy
+  rate      Decimal // % hoa hồng gộp ước tính cho ngành hàng này
+  sortOrder Int      @default(0) @map("sort_order")
+  isDefault Boolean  @default(false) @map("is_default") // dùng khi không khớp từ khoá nào
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@map("category_commission_rates")
+}
+
+model PaymentBatch {
+  id                String   @id @default(uuid())
+  paymentCode       String   @unique @map("payment_code")
+  periodLabel       String?  @map("period_label")
+  customerId        String   @map("customer_id")
+  customer          Customer @relation(fields: [customerId], references: [id])
+  totalAmount       Decimal  @map("total_amount")
+  transferReference String?  @map("transfer_reference")
+  transferNote      String?  @map("transfer_note")
+  billStorageKey    String?  @map("bill_storage_key")
+  status            String   @default("pending")
+  paidByUserId      String?  @map("paid_by_user_id")
+  paidByUser        User?    @relation("PaidBy", fields: [paidByUserId], references: [id])
+  paidAt            DateTime? @map("paid_at")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @default(now()) @updatedAt @map("updated_at")
+
+  items PaymentBatchItem[]
+
+  @@index([customerId])
+  @@index([status])
+  @@map("payment_batches")
+}
+
+model PaymentBatchItem {
+  id             String       @id @default(uuid())
+  paymentBatchId String       @map("payment_batch_id")
+  paymentBatch   PaymentBatch @relation(fields: [paymentBatchId], references: [id], onDelete: Cascade)
+  orderId        String       @map("order_id")
+  order          Order        @relation(fields: [orderId], references: [id])
+  amount         Decimal
+  createdAt      DateTime     @default(now()) @map("created_at")
+
+  @@unique([paymentBatchId, orderId])
+  @@map("payment_batch_items")
+}
+
+model ZaloAccount {
+  id         String   @id @default(uuid())
+  oaName     String   @map("oa_name")
+  oaId       String?  @map("oa_id")
+  appId      String?  @map("app_id")
+  webhookUrl String?  @map("webhook_url")
+  status     String   @default("inactive")
+  metadata   String?
+  createdAt  DateTime @default(now()) @map("created_at")
+  updatedAt  DateTime @default(now()) @updatedAt @map("updated_at")
+
+  messageLogs ZaloMessageLog[]
+
+  @@map("zalo_accounts")
+}
+
+model ZaloMessageLog {
+  id                 String   @id @default(uuid())
+  zaloAccountId      String?  @map("zalo_account_id")
+  zaloAccount        ZaloAccount? @relation(fields: [zaloAccountId], references: [id])
+  customerId         String?  @map("customer_id")
+  customer           Customer? @relation(fields: [customerId], references: [id])
+  direction          String // 'in' | 'out'
+  externalMessageId  String?  @map("external_message_id")
+  senderId           String?  @map("sender_id")
+  receiverId         String?  @map("receiver_id")
+  messageType        String?  @map("message_type")
+  messageText        String?  @map("message_text")
+  payload            String?
+  processingStatus   String   @default("received") @map("processing_status")
+  createdAt          DateTime @default(now()) @map("created_at")
+
+  @@index([customerId])
+  @@index([direction])
+  @@index([createdAt])
+  @@map("zalo_message_logs")
+}
+
+model TelegramAccount {
+  id            String   @id @default(uuid())
+  botName       String   @map("bot_name")
+  botUsername   String?  @map("bot_username")
+  botTokenHint  String?  @map("bot_token_hint")
+  webhookUrl    String?  @map("webhook_url")
+  status        String   @default("inactive")
+  metadata      String?
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @default(now()) @updatedAt @map("updated_at")
+
+  messageLogs TelegramMessageLog[]
+
+  @@map("telegram_accounts")
+}
+
+model TelegramMessageLog {
+  id                 String   @id @default(uuid())
+  telegramAccountId  String?  @map("telegram_account_id")
+  telegramAccount    TelegramAccount? @relation(fields: [telegramAccountId], references: [id])
+  customerId         String?  @map("customer_id")
+  customer           Customer? @relation(fields: [customerId], references: [id])
+  direction          String
+  externalMessageId  String?  @map("external_message_id")
+  senderId           String?  @map("sender_id")
+  receiverId         String?  @map("receiver_id")
+  messageType        String?  @map("message_type")
+  messageText        String?  @map("message_text")
+  payload            String?
+  processingStatus   String   @default("received") @map("processing_status")
+  createdAt          DateTime @default(now()) @map("created_at")
+
+  @@index([customerId])
+  @@index([direction])
+  @@index([createdAt])
+  @@map("telegram_message_logs")
+}
+
+model AuditLog {
+  id           String   @id @default(uuid())
+  actorUserId  String?  @map("actor_user_id")
+  actorUser    User?    @relation("AuditActor", fields: [actorUserId], references: [id])
+  entityType   String   @map("entity_type")
+  entityId     String   @map("entity_id")
+  action       String
+  beforeData   String?    @map("before_data")
+  afterData    String?    @map("after_data")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@index([entityType, entityId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+// Thông báo trong app cho từng user — mỗi sự kiện (đơn được duyệt, đã trả tiền,
+// hoa hồng giới thiệu, admin gửi thông báo hệ thống) sinh ra 1 dòng riêng cho
+// user đó, kể cả broadcast (tạo N dòng cho N user) để track đã đọc theo từng người.
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String   // order_approved | payment_paid | referral_bonus | broadcast | system
+  title     String
+  message   String
+  link      String?
+  isRead    Boolean  @default(false) @map("is_read")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([userId, isRead])
+  @@index([createdAt])
+  @@map("notifications")
+}
+
+// Room chat chung cho toàn hệ thống — mọi user (khách hàng lẫn admin) đăng
+// nhập đều thấy và gửi được vào cùng 1 room duy nhất.
+model ChatMessage {
+  id        String   @id @default(uuid())
+  userId    String   @map("user_id")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  message   String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([createdAt])
+  @@map("chat_messages")
+}
+
+model DealPost {
+  id              String   @id @default(uuid())
+  title           String
+  description     String?
+  originalPrice   Decimal? @map("original_price")
+  salePrice       Decimal? @map("sale_price")
+  discountPercent Int?     @map("discount_percent")
+  tags            String?  // JSON array of tags
+  platformCode    String   @default("SHOPEE") @map("platform_code")
+  category        String?  // Thời trang | Mỹ phẩm | Thực phẩm | Mẹ & Bé | Gia dụng | Điện tử | Khác
+  expiresAt       DateTime? @map("expires_at")
+  // product = link trỏ thẳng 1 sản phẩm, bấm là mua luôn, hoàn tiền tự ghi
+  // nhận. shop = link trỏ cả shop/bộ sưu tập, khách phải tự chọn sản phẩm
+  // rồi tạo link riêng ở mục Hoàn tiền trước khi mua mới được ghi nhận.
+  linkType        String   @default("product") @map("link_type")
+
+  // Links
+  rawInputLink    String   @map("raw_input_link")   // Link bẩn admin dán vào
+  cleanLink       String   @map("clean_link")        // Link đã tẩy params đối thủ
+  affiliateUrl    String   @map("affiliate_url")     // Link cuối gắn aff của mình
+  shortCode       String?  @unique @map("short_code")
+  shortUrl        String?  @map("short_url")
+
+  // Images: admin upload hoặc auto-fetch từ Shopee
+  uploadedImageUrl  String? @map("uploaded_image_url") // Ảnh admin upload
+  shopeeImageUrl    String? @map("shopee_image_url")   // Ảnh auto-fetch từ Shopee
+
+  status          String   @default("active") // active | hidden
+  clicks          Int      @default(0)
+  createdByUserId String?  @map("created_by_user_id")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@index([status])
+  @@index([createdAt])
+  @@map("deal_posts")
+}
+
+
+model PasswordResetToken {
+  id        String    @id @default(uuid())
+  token     String    @unique
+  userId    String    @map("user_id")
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime  @map("expires_at")
+  usedAt    DateTime? @map("used_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  @@index([userId])
+  @@map("password_reset_tokens")
+}
