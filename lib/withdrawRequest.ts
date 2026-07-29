@@ -1,5 +1,6 @@
 import { prisma } from "./prisma";
 import { sendMail, buildAdminWithdrawRequestEmail, buildCustomerWithdrawRequestEmail } from "./mailer";
+import { notifyAdminsInApp, notifyCustomerInApp } from "./notifications";
 
 export const MIN_WITHDRAW_AMOUNT = 10000;
 
@@ -54,6 +55,7 @@ export async function createWithdrawRequest(customerId: string): Promise<CreateW
     data: { customerId: customer.id, amount: available },
   });
 
+  // ── Email notifications ──────────────────────────────────────────────
   const adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL;
   if (adminEmail) {
     void sendMail({
@@ -81,6 +83,25 @@ export async function createWithdrawRequest(customerId: string): Promise<CreateW
       }),
     });
   }
+
+  // ── In-app notifications ─────────────────────────────────────────────
+  const formattedAmount = available.toLocaleString("vi-VN");
+
+  // Thông báo cho TẤT CẢ admin trong hệ thống
+  void notifyAdminsInApp({
+    type: "system",
+    title: "🔔 Yêu cầu rút tiền mới",
+    message: `${customer.fullName} (${customer.customerCode}) yêu cầu rút ${formattedAmount}đ`,
+    link: "/admin/payments",
+  });
+
+  // Xác nhận cho chính khách hàng
+  void notifyCustomerInApp(customer.id, {
+    type: "system",
+    title: "✅ Đã gửi yêu cầu rút tiền",
+    message: `Yêu cầu rút ${formattedAmount}đ đã được gửi. Admin sẽ xử lý sớm nhất.`,
+    link: "/app/wallet",
+  });
 
   return {
     ok: true,

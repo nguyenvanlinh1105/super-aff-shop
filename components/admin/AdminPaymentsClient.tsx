@@ -15,9 +15,10 @@ import { MarkPaidForm } from "@/components/admin/MarkPaidForm";
 import type { ComboboxOption } from "@/components/ui/SearchableSelect";
 
 type CustomerPending = {
-  id: string; name: string; code: string; amount: number; count: number;
+  id: string; name: string; code: string;
+  requestAmount: number; approvedAmount: number; approvedCount: number;
   bankName: string | null; bankAccountNumber: string | null; bankAccountName: string | null;
-  requestedAt: string | null;
+  requestedAt: string;
 };
 
 type PaymentBatch = {
@@ -65,7 +66,8 @@ function CopyInfoBtn({ c }: { c: CustomerPending }) {
   const go = () => {
     const lines = [`${c.name} (${c.code})`];
     if (c.bankAccountNumber) lines.push(`${c.bankName} — ${c.bankAccountNumber} — ${c.bankAccountName}`);
-    lines.push(`Số tiền: ${formatCurrency(c.amount)}`);
+    lines.push(`Yêu cầu rút: ${formatCurrency(c.requestAmount)}`);
+    lines.push(`Sẵn sàng trả: ${formatCurrency(c.approvedAmount)}`);
     navigator.clipboard.writeText(lines.join("\n"));
     setOk(true); setTimeout(() => setOk(false), 1400);
   };
@@ -277,7 +279,7 @@ export function AdminPaymentsClient({ pendingList, batches, waitingList, custome
   const [expandedWaiting, setExpandedWaiting] = useState<string | null>(null);
   const itemsPerPage = 9;
 
-  const todayTotal = pendingList.reduce((s, c) => s + c.amount, 0);
+  const todayTotal = pendingList.reduce((s, c) => s + c.approvedAmount, 0);
   const paidBatches = batches.filter((b) => b.status === "paid");
   const pendingBatches = batches.filter((b) => b.status !== "paid");
 
@@ -383,7 +385,7 @@ export function AdminPaymentsClient({ pendingList, batches, waitingList, custome
         ) : (
           <div className="flex flex-col gap-lg">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-lg">
-              {paginatedPending.map((c) => (
+            {paginatedPending.map((c) => (
                 <div key={c.id} className="rounded-3xl bg-white p-lg shadow-sm ring-1 ring-black/[0.06] flex flex-col gap-md hover:shadow-md transition-shadow">
                   {/* Avatar + name */}
                   <div className="flex items-center gap-sm">
@@ -394,17 +396,36 @@ export function AdminPaymentsClient({ pendingList, batches, waitingList, custome
                       <div className="font-bold text-gray-900 truncate">{c.name}</div>
                       <div className="font-mono text-[11px] text-gray-400">{c.code}</div>
                     </div>
-                    {c.requestedAt && (
-                      <span className="shrink-0 rounded-full bg-amber-50 px-sm py-[3px] text-[10px] font-bold text-amber-600 ring-1 ring-amber-100">
-                        🔔 {formatDate(c.requestedAt)}
-                      </span>
-                    )}
+                    <span className="shrink-0 rounded-full bg-amber-50 px-sm py-[3px] text-[10px] font-bold text-amber-600 ring-1 ring-amber-100">
+                      🔔 {formatDate(c.requestedAt)}
+                    </span>
                   </div>
 
                   {/* Amount */}
                   <div>
-                    <div className="text-[11px] font-semibold uppercase tracking-wider text-gray-400 mb-[2px]">{c.count} đơn cần thanh toán</div>
-                    <div className="text-[28px] font-black text-[#e86a33] leading-none tabular-nums">{formatCurrency(c.amount)}</div>
+                    <div className="text-[11px] font-semibold uppercase tracking-wider text-gray-400 mb-[2px]">Yêu cầu rút</div>
+                    <div className="text-[22px] font-black text-[#e86a33] leading-none tabular-nums">{formatCurrency(c.requestAmount)}</div>
+                  </div>
+
+                  {/* Approved amount */}
+                  <div className={`flex items-center gap-sm rounded-xl p-sm ${c.approvedCount > 0 ? 'bg-emerald-50 ring-1 ring-emerald-100' : 'bg-amber-50 ring-1 ring-amber-100'}`}>
+                    {c.approvedCount > 0 ? (
+                      <>
+                        <CheckCircle2 size={14} className="text-emerald-500 shrink-0" />
+                        <div className="min-w-0 flex-1">
+                          <div className="text-[11px] font-bold text-emerald-700">Sẵn sàng trả: {formatCurrency(c.approvedAmount)}</div>
+                          <div className="text-[10px] text-emerald-500">{c.approvedCount} đơn đã duyệt</div>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <AlertCircle size={14} className="text-amber-500 shrink-0" />
+                        <div className="min-w-0 flex-1">
+                          <div className="text-[11px] font-bold text-amber-700">Chưa có đơn sẵn sàng trả</div>
+                          <div className="text-[10px] text-amber-500">Cần đối soát CSV trước khi tạo phiếu</div>
+                        </div>
+                      </>
+                    )}
                   </div>
 
                   {/* Payment info */}
@@ -434,7 +455,7 @@ export function AdminPaymentsClient({ pendingList, batches, waitingList, custome
                       <CreatePaymentButton
                         customerId={c.id}
                         customerName={c.name}
-                        amount={c.amount}
+                        amount={c.approvedAmount}
                         hasPaymentInfo={!!c.bankAccountNumber}
                       />
                     </div>
