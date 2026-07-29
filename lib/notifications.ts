@@ -25,3 +25,14 @@ export async function broadcastNotification(data: NotificationInput) {
   });
   return users.length;
 }
+
+/** Gửi thông báo trong app cho toàn bộ admin — dùng khi có sự kiện cần admin xử lý
+ *  (VD: khách gửi yêu cầu rút tiền mới). */
+export async function notifyAdminsInApp(data: NotificationInput) {
+  const admins = await prisma.user.findMany({ where: { role: "admin" }, select: { id: true } });
+  if (admins.length === 0) return 0;
+  await prisma.notification.createMany({
+    data: admins.map((u) => ({ userId: u.id, ...data })),
+  });
+  return admins.length;
+}
