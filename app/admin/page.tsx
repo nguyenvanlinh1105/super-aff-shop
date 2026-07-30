@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { formatCurrency } from "@/lib/format";
+import { AdminRevenueChart } from "@/components/admin/AdminRevenueChart";
 import { IconBow } from "@/components/icons/CatRibbonIcons";
 
 export default async function AdminDashboardPage() {
@@ -241,148 +242,19 @@ export default async function AdminDashboardPage() {
         </div>
       </div>
 
-      {/* ═══ 1. FULL-WIDTH TREND LINE CHART ═══ */}
-      <div className="rounded-3xl bg-white p-6 sm:p-8 shadow-sm border border-neutral-200/70 flex flex-col">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-rose-50 p-1 flex items-center justify-center shadow-xs border border-rose-100 shrink-0 overflow-hidden">
-              <img src="/meow-back-analytics.png" alt="Analytics" className="w-full h-full object-contain" />
-            </div>
-            <div>
-              <h2 className="text-base sm:text-lg font-extrabold text-neutral-900 tracking-tight">Xu Hướng Tăng Trưởng Doanh Thu</h2>
-              <p className="text-xs text-neutral-500 font-medium">Hoa hồng sàn · Hoàn khách · Lợi nhuận theo tháng</p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3.5 text-[11px] font-extrabold shrink-0">
-            <div className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-rose-500" />
-              <span className="text-neutral-700">Hoa hồng</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-amber-400" />
-              <span className="text-neutral-700">Hoàn khách</span>
-            </div>
-            <div className="flex items-center gap-1.5">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
-              <span className="text-neutral-700">Lợi nhuận</span>
-            </div>
-          </div>
-        </div>
-
-        {/* Summary chips */}
-        <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-5 p-3.5 rounded-2xl bg-neutral-50/80 border border-neutral-200/60">
-          <div className="flex flex-col">
-            <span className="text-[10px] font-extrabold uppercase text-rose-600 tracking-wider">Hoa hồng {lastM.label}</span>
-            <span className="text-sm sm:text-base font-black text-neutral-900 tabular-nums">{formatCurrency(lastM.commission)}</span>
-          </div>
-          <div className="flex flex-col">
-            <span className="text-[10px] font-extrabold uppercase text-amber-600 tracking-wider">Hoàn khách {lastM.label}</span>
-            <span className="text-sm sm:text-base font-black text-neutral-900 tabular-nums">{formatCurrency(lastM.reward)}</span>
-          </div>
-          <div className="flex flex-col">
-            <span className="text-[10px] font-extrabold uppercase text-emerald-600 tracking-wider">Lợi nhuận {lastM.label}</span>
-            <span className="text-sm sm:text-base font-black text-emerald-700 tabular-nums">{formatCurrency(lastM.profit)}</span>
-          </div>
-        </div>
-
-        {/* SVG 3-Line Graph */}
-        <div className="w-full">
-          <svg viewBox="0 0 600 180" className="w-full h-auto select-none" role="img" aria-label="Biểu đồ xu hướng doanh thu">
-            <defs>
-              <linearGradient id="roseGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#F43F5E" stopOpacity="0.22" />
-                <stop offset="100%" stopColor="#F43F5E" stopOpacity="0" />
-              </linearGradient>
-              <linearGradient id="emeraldGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#10B981" stopOpacity="0.14" />
-                <stop offset="100%" stopColor="#10B981" stopOpacity="0" />
-              </linearGradient>
-            </defs>
-
-            {(() => {
-              const PLOT = { left: 46, right: 584, top: 20, bottom: 145 };
-              const n = chartMonths.length;
-              const getX = (i: number) => PLOT.left + 14 + i * ((PLOT.right - PLOT.left - 28) / Math.max(n - 1, 1));
-              const getY = (val: number) => PLOT.bottom - (val / maxVal) * (PLOT.bottom - PLOT.top);
-
-              const commPoints = chartMonths.map((m, i) => ({ x: getX(i), y: getY(m.commission), val: m.commission }));
-              const rewPoints = chartMonths.map((m, i) => ({ x: getX(i), y: getY(m.reward), val: m.reward }));
-              const profPoints = chartMonths.map((m, i) => ({ x: getX(i), y: getY(m.profit), val: m.profit }));
-
-              const makePath = (pts: typeof commPoints) => pts.map((p, i) => `${i === 0 ? "M" : "L"} ${p.x} ${p.y}`).join(" ");
-              const makeArea = (pts: typeof commPoints) =>
-                `${makePath(pts)} L ${pts[pts.length - 1].x} ${PLOT.bottom} L ${pts[0].x} ${PLOT.bottom} Z`;
-
-              const fmt = (v: number) => {
-                if (v >= 1000000) return `${(v / 1000000).toFixed(1).replace(/\.0$/, "")}M`;
-                if (v >= 1000) return `${Math.round(v / 1000)}k`;
-                return `${v}`;
-              };
-
-              const midY = (PLOT.top + PLOT.bottom) / 2;
-
-              return (
-                <>
-                  <line x1={PLOT.left} y1={PLOT.top} x2={PLOT.right} y2={PLOT.top} stroke="#F1F5F9" strokeWidth="1" />
-                  <line x1={PLOT.left} y1={midY} x2={PLOT.right} y2={midY} stroke="#E5E7EB" strokeDasharray="4 4" strokeWidth="1" />
-                  <line x1={PLOT.left} y1={PLOT.bottom} x2={PLOT.right} y2={PLOT.bottom} stroke="#D1D5DB" strokeWidth="1.5" />
-
-                  <text x={PLOT.left - 6} y={PLOT.top + 4} textAnchor="end" className="text-[10px] font-bold fill-neutral-400">{fmt(maxVal)}</text>
-                  <text x={PLOT.left - 6} y={midY + 4} textAnchor="end" className="text-[10px] font-bold fill-neutral-400">{fmt(maxVal / 2)}</text>
-                  <text x={PLOT.left - 6} y={PLOT.bottom + 4} textAnchor="end" className="text-[10px] font-bold fill-neutral-400">0</text>
-
-                  <path d={makeArea(commPoints)} fill="url(#roseGradient)" />
-                  <path d={makeArea(profPoints)} fill="url(#emeraldGradient)" />
-
-                  <path d={makePath(commPoints)} fill="none" stroke="#F43F5E" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-                  <path d={makePath(rewPoints)} fill="none" stroke="#F59E0B" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-                  <path d={makePath(profPoints)} fill="none" stroke="#10B981" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-
-                  {commPoints.map((p, i) => (
-                    <g key={`comm-${i}`}>
-                      <circle cx={p.x} cy={p.y} r="4.5" fill="#FFFFFF" stroke="#F43F5E" strokeWidth="2.5" />
-                      <text x={p.x} y={p.y - 8} textAnchor="middle" className="text-[10px] font-black fill-rose-600 font-mono">{fmt(p.val)}</text>
-                    </g>
-                  ))}
-                  {rewPoints.map((p, i) => (
-                    <g key={`rew-${i}`}>
-                      <circle cx={p.x} cy={p.y} r="4" fill="#FFFFFF" stroke="#F59E0B" strokeWidth="2" />
-                      {p.val > 0 && Math.abs(p.y - commPoints[i].y) > 16 && (
-                        <text x={p.x} y={p.y - 7} textAnchor="middle" className="text-[9px] font-extrabold fill-amber-600 font-mono">{fmt(p.val)}</text>
-                      )}
-                    </g>
-                  ))}
-                  {profPoints.map((p, i) => (
-                    <circle key={`prof-${i}`} cx={p.x} cy={p.y} r="3.5" fill="#FFFFFF" stroke="#10B981" strokeWidth="2" />
-                  ))}
-
-                  {chartMonths.map((m, i) => (
-                    <g key={`lbl-${i}`}>
-                      <text x={getX(i)} y={PLOT.bottom + 16} textAnchor="middle" className="text-[11px] font-black fill-neutral-700">{m.label}</text>
-                      <text x={getX(i)} y={PLOT.bottom + 29} textAnchor="middle" className="text-[9px] font-bold fill-neutral-400">{m.count} đơn</text>
-                    </g>
-                  ))}
-                </>
-              );
-            })()}
-          </svg>
-        </div>
-
-        <div className="mt-3 pt-3 border-t border-neutral-100 flex flex-wrap items-center justify-between text-xs text-neutral-500 font-medium gap-2">
-          <span className={`flex items-center gap-1 font-bold ${growthPct >= 0 ? "text-emerald-600" : "text-rose-600"}`}>
-            {growthPct >= 0 ? <TrendingUp size={15} /> : <TrendingDown size={15} />}
-            {growthPct >= 0 ? "+" : ""}{growthPct}% hoa hồng so với {prevM?.label ?? "kỳ trước"}
-          </span>
-          <span>Nguồn: báo cáo đối soát affiliate</span>
-        </div>
-      </div>
+      {/* ═══ 1. FULL-WIDTH TREND LINE CHART (INTERACTIVE HOVER TOOLTIP) ═══ */}
+      <AdminRevenueChart
+        chartMonths={chartMonths}
+        growthPct={growthPct}
+        prevMLabel={prevM?.label}
+        maxVal={maxVal}
+      />
 
       {/* ═══ 2. TỶ TRỌNG SÀN & SỨC KHOẺ ĐƠN HÀNG (2 CARD TRONG 1 ROW) ═══ */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
         {/* Donut: Ty trong nen tang */}
-        <div className="rounded-3xl bg-white p-6 sm:p-8 shadow-sm border border-neutral-200/70 flex flex-col justify-between">
+        <div className="rounded-3xl bg-white p-6 sm:p-8 shadow-sm border border-neutral-200/70 flex flex-col justify-between overflow-hidden">
           <div>
             <div className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10 rounded-2xl bg-sky-50 flex items-center justify-center shadow-xs border border-sky-100 shrink-0 text-lg">
@@ -394,8 +266,8 @@ export default async function AdminDashboardPage() {
               </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row items-center gap-6 sm:gap-10">
-              <svg viewBox="0 0 120 120" className="w-36 h-36 shrink-0 -rotate-90">
+            <div className="flex flex-col sm:flex-row items-center gap-5 sm:gap-6">
+              <svg viewBox="0 0 120 120" className="w-28 h-28 sm:w-32 sm:h-32 shrink-0 -rotate-90">
                 {(() => {
                   const R = 46;
                   const C = 2 * Math.PI * R;
@@ -424,20 +296,20 @@ export default async function AdminDashboardPage() {
                 </g>
               </svg>
 
-              <div className="flex flex-col gap-3 w-full">
+              <div className="flex flex-col gap-3 w-full min-w-0">
                 {platformShare.map((s) => (
-                  <div key={s.name} className="flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-2.5 min-w-0">
+                  <div key={s.name} className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
                       <span className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: s.color }} />
-                      <span className="text-sm font-extrabold text-neutral-800 truncate">{s.name}</span>
+                      <span className="text-xs sm:text-sm font-extrabold text-neutral-800 whitespace-nowrap">{s.name}</span>
                     </div>
-                    <div className="flex items-center gap-3 shrink-0">
+                    <div className="flex items-center gap-2 shrink-0">
                       <span className="text-xs font-bold text-neutral-400 tabular-nums">{s.count} đơn</span>
-                      <span className="text-sm font-black text-neutral-900 tabular-nums w-11 text-right">{s.pct}%</span>
+                      <span className="text-xs sm:text-sm font-black text-rose-600 tabular-nums w-9 text-right">{s.pct}%</span>
                     </div>
                   </div>
                 ))}
-                <div className="mt-1 h-2.5 w-full rounded-full overflow-hidden flex">
+                <div className="mt-1 h-2.5 w-full rounded-full overflow-hidden flex bg-neutral-100">
                   {platformShare.map((s) => (
                     <div key={s.name} style={{ width: `${s.pct}%`, backgroundColor: s.color }} className="h-full first:rounded-l-full last:rounded-r-full" />
                   ))}

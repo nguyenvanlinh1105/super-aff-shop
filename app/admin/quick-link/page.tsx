@@ -30,7 +30,7 @@ export default async function AdminQuickLinkPage() {
             <div>
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/80 border border-rose-200/80 text-[11px] font-black uppercase tracking-widest text-rose-600 shadow-xs mb-2">
                 <Zap size={13} className="text-amber-500 fill-amber-500" />
-                MeowBack Instant Link Engine
+                MeowBack Link Engine
               </div>
               <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold leading-tight text-neutral-900 tracking-tight">
                 Tạo Link Affiliate Siêu Tốc ⚡
