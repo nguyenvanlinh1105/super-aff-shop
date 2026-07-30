@@ -72,26 +72,26 @@ export default async function AdminCustomersPage({ searchParams }: { searchParam
   const totalPages = Math.ceil(filteredCount / limit);
 
   return (
-    <div className="flex flex-col gap-lg fade-in">
+    <div className="flex flex-col gap-6 fade-in pb-8">
 
-      {/* ── HERO BANNER ── */}
-      <div
-        className="relative overflow-hidden rounded-3xl p-xl sm:p-2xl"
-        style={{ background: "linear-gradient(135deg, #fff3ee 0%, #fde8d8 50%, #ffecd2 100%)" }}
-      >
-        <div className="pointer-events-none absolute -right-8 -top-8 h-36 w-36 rounded-full bg-[#ffcba4] opacity-30" />
-        <div className="pointer-events-none absolute bottom-0 right-0 h-40 w-40 rounded-full bg-[#ffe0cc] opacity-40" />
-        <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-lg flex-wrap">
-          <div className="flex items-center gap-lg">
-            <img src="/meowback_lucky_cat_logo.png" alt="MeowBack" className="h-20 w-20 object-contain drop-shadow-lg shrink-0" />
+      {/* ── LUXURY HERO BANNER ── */}
+      <div className="relative overflow-hidden rounded-3xl p-6 sm:p-8 border border-rose-200/60 shadow-lg shadow-rose-500/5 bg-gradient-to-br from-white via-[#FFF5F8] to-[#FFE8F0]">
+        <div className="pointer-events-none absolute -right-10 -top-10 h-48 w-48 rounded-full bg-gradient-to-br from-rose-200/30 to-pink-300/20 blur-xl" />
+        <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-6 flex-wrap">
+          <div className="flex items-center gap-5">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-3xl bg-gradient-to-br from-rose-400 via-pink-500 to-rose-600 text-white flex items-center justify-center shadow-md shadow-rose-500/20 shrink-0 border border-white/40 overflow-hidden p-1">
+              <img src="/meow-back-customers.png" alt="Khách hàng" className="w-full h-full object-contain rounded-2xl" />
+            </div>
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-widest text-[#e86a33]/60 mb-1">Quản lý hệ thống</p>
-              <h1 className="text-[26px] sm:text-[30px] font-black leading-tight text-[#2d1f14]">
-                Khách hàng
+              <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-white/80 border border-rose-200 text-[10px] font-black uppercase tracking-widest text-rose-600 shadow-xs mb-1.5">
+                Quản Lý Tài Khoản
+              </div>
+              <h1 className="text-2xl sm:text-3xl font-extrabold leading-tight text-neutral-900 tracking-tight">
+                Danh Sách Khách Hàng
               </h1>
-              <p className="mt-1 text-[13px] text-[#a0816a]">
-                <span className="font-bold text-[#e86a33]">{activeCount}</span> đang hoạt động •{" "}
-                <span className="font-bold">{totalCount}</span> tổng cộng
+              <p className="mt-1 text-xs text-neutral-600 font-medium">
+                <span className="font-bold text-rose-600">{activeCount.toLocaleString()}</span> tài khoản đang hoạt động •{" "}
+                <span className="font-bold text-neutral-800">{totalCount.toLocaleString()}</span> tổng tài khoản
               </p>
             </div>
           </div>
@@ -100,40 +100,39 @@ export default async function AdminCustomersPage({ searchParams }: { searchParam
       </div>
 
       {/* ── STAT CARDS ── */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-md">
-        <div className="group relative overflow-hidden rounded-2xl bg-white p-lg shadow-sm ring-1 ring-black/[0.06] hover:-translate-y-1 hover:shadow-md transition-all">
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-sky-50 opacity-60" />
-          <div className="relative flex items-center gap-md">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-100/90 text-blue-600 shadow-sm transition-transform group-hover:scale-110 shrink-0">
-              <Users size={24} strokeWidth={2.5} />
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+        <div className="group relative overflow-hidden rounded-3xl bg-white p-5 shadow-sm border border-neutral-200/70 hover:border-sky-200 transition-all duration-300 hover:-translate-y-0.5">
+          <div className="relative flex items-center gap-4">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-50 text-sky-600 border border-sky-100 font-black text-xl shadow-xs shrink-0 group-hover:scale-105 transition-transform">
+              <Users size={22} strokeWidth={2.2} />
             </div>
             <div>
-              <div className="text-[11px] font-semibold uppercase tracking-wider text-gray-400">Tổng khách</div>
-              <div className="text-[26px] font-black text-gray-900 tabular-nums leading-tight">{totalCount}</div>
+              <div className="text-[10px] font-extrabold uppercase tracking-widest text-neutral-400">Tổng Khách Hàng</div>
+              <div className="text-2xl font-black text-neutral-900 tabular-nums leading-tight">{totalCount.toLocaleString()}</div>
             </div>
           </div>
         </div>
-        <div className="group relative overflow-hidden rounded-2xl p-lg shadow-sm ring-1 ring-black/[0.06] hover:-translate-y-1 hover:shadow-md transition-all"
-          style={{ background: "linear-gradient(135deg,#e8f5e9,#f1fdf2)" }}>
-          <div className="relative flex items-center gap-md">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-100/90 text-emerald-600 shadow-sm transition-transform group-hover:scale-110 shrink-0">
-              <UserCheck size={24} strokeWidth={2.5} />
+
+        <div className="group relative overflow-hidden rounded-3xl bg-white p-5 shadow-sm border border-neutral-200/70 hover:border-emerald-200 transition-all duration-300 hover:-translate-y-0.5">
+          <div className="relative flex items-center gap-4">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-100 font-black text-xl shadow-xs shrink-0 group-hover:scale-105 transition-transform">
+              <UserCheck size={22} strokeWidth={2.2} />
             </div>
             <div>
-              <div className="text-[11px] font-semibold uppercase tracking-wider text-gray-400">Hoạt động</div>
-              <div className="text-[26px] font-black text-emerald-600 tabular-nums leading-tight">{activeCount}</div>
+              <div className="text-[10px] font-extrabold uppercase tracking-widest text-neutral-400">Đang Hoạt Động</div>
+              <div className="text-2xl font-black text-emerald-600 tabular-nums leading-tight">{activeCount.toLocaleString()}</div>
             </div>
           </div>
         </div>
-        <div className="group relative overflow-hidden rounded-2xl bg-white p-lg shadow-sm ring-1 ring-black/[0.06] hover:-translate-y-1 hover:shadow-md transition-all col-span-2 sm:col-span-1">
-          <div className="absolute inset-0 bg-gradient-to-br from-red-50 to-rose-50 opacity-60" />
-          <div className="relative flex items-center gap-md">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-100/90 text-rose-600 shadow-sm transition-transform group-hover:scale-110 shrink-0">
-              <UserX size={24} strokeWidth={2.5} />
+
+        <div className="group relative overflow-hidden rounded-3xl bg-white p-5 shadow-sm border border-neutral-200/70 hover:border-rose-200 transition-all duration-300 hover:-translate-y-0.5 col-span-2 sm:col-span-1">
+          <div className="relative flex items-center gap-4">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-50 text-rose-600 border border-rose-100 font-black text-xl shadow-xs shrink-0 group-hover:scale-105 transition-transform">
+              <UserX size={22} strokeWidth={2.2} />
             </div>
             <div>
-              <div className="text-[11px] font-semibold uppercase tracking-wider text-gray-400">Bị khoá</div>
-              <div className="text-[26px] font-black text-red-500 tabular-nums leading-tight">{lockedCount}</div>
+              <div className="text-[10px] font-extrabold uppercase tracking-widest text-neutral-400">Bị Tạm Khoá</div>
+              <div className="text-2xl font-black text-rose-600 tabular-nums leading-tight">{lockedCount.toLocaleString()}</div>
             </div>
           </div>
         </div>
@@ -148,3 +147,4 @@ export default async function AdminCustomersPage({ searchParams }: { searchParam
     </div>
   );
 }
+

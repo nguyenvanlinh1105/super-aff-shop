@@ -314,7 +314,7 @@ export function AdminPaymentsClient({ pendingList, batches, waitingList, custome
   const paginatedBatches = filteredBatches.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
   return (
-    <div className="flex flex-col gap-lg fade-in pb-2xl">
+    <div className="flex flex-col gap-6 fade-in pb-8">
       {/* Detail modal */}
       {viewingBatch && (
         <BatchDetailModal batchId={viewingBatch} onClose={() => setViewingBatch(null)} />
@@ -322,17 +322,17 @@ export function AdminPaymentsClient({ pendingList, batches, waitingList, custome
 
       {/* Search */}
       <div className="relative">
-        <Search size={16} className="absolute left-md top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-        <input type="text" placeholder="Tìm tên khách, mã KH, mã phiếu, số tài khoản..."
+        <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none" />
+        <input type="text" placeholder="Tìm tên khách hàng, mã KH, mã phiếu, số tài khoản ngân hàng..."
           value={search}
           onChange={(e) => { setSearch(e.target.value); setCurrentPage(1); }}
-          className="h-11 w-full rounded-2xl bg-white pl-10 pr-md text-[14px] font-medium shadow-sm ring-1 ring-black/[0.08] focus:outline-none focus:ring-2 focus:ring-[#e86a33]/40 transition-all"
+          className="h-11 w-full rounded-2xl bg-white pl-10 pr-4 text-xs font-semibold shadow-sm border border-neutral-200/70 focus:outline-none focus:border-rose-400 focus:ring-2 focus:ring-rose-400/20 transition-all"
         />
       </div>
 
       {/* Tabs + summary */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-md">
-        <div className="flex items-center gap-sm overflow-x-auto">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="flex items-center gap-2 overflow-x-auto custom-scrollbar">
           {[
             { id: "pending" as const, label: "Yêu cầu rút tiền", count: pendingList.length, icon: <Wallet size={14} /> },
             { id: "waiting" as const, label: "Chờ Shopee duyệt", count: waitingList.length, icon: <Clock size={14} /> },
@@ -340,36 +340,29 @@ export function AdminPaymentsClient({ pendingList, batches, waitingList, custome
             { id: "manual" as const, label: "Tạo phiếu chủ động", count: null, icon: <UserSearch size={14} /> },
           ].map((t) => (
             <button key={t.id} onClick={() => handleTabChange(t.id)}
-              className={`flex h-10 shrink-0 items-center gap-xs whitespace-nowrap rounded-full px-lg text-[13px] font-bold transition-all ${
+              className={`flex h-10 shrink-0 items-center gap-2 whitespace-nowrap rounded-2xl px-4 text-xs font-extrabold transition-all ${
                 activeTab === t.id
-                  ? "bg-[#e86a33] text-white shadow-md shadow-[#e86a33]/25"
-                  : "bg-white text-gray-500 ring-1 ring-black/[0.08] hover:bg-gray-50 hover:text-gray-900"
+                  ? "bg-gradient-to-r from-neutral-900 to-neutral-800 text-white shadow-sm scale-[1.02]"
+                  : "bg-white text-neutral-600 border border-neutral-200/70 hover:bg-rose-50/60 hover:text-neutral-900"
               }`}>
-              <span className={activeTab === t.id ? "text-white/80" : "text-gray-400"}>{t.icon}</span>
-              {t.label}
+              <span className={activeTab === t.id ? "text-white" : "text-neutral-400"}>{t.icon}</span>
+              <span>{t.label}</span>
               {t.count !== null && (
-                <span className={`flex h-5 min-w-[20px] items-center justify-center rounded-full px-1 text-[11px] ${
-                  activeTab === t.id ? "bg-white/20 text-white" : "bg-gray-100 text-gray-400"
+                <span className={`flex h-5 min-w-[20px] items-center justify-center rounded-full px-1 text-[10px] font-black ${
+                  activeTab === t.id ? "bg-white/20 text-white" : "bg-neutral-100 text-neutral-600"
                 }`}>{t.count}</span>
               )}
             </button>
           ))}
         </div>
         {activeTab === "pending" && pendingList.length > 0 && (
-          <div className="flex items-center gap-md rounded-2xl bg-white px-lg py-sm shadow-sm ring-1 ring-black/[0.06] shrink-0">
-            <img src="/heovitien.png" alt="" className="h-10 w-10 object-contain" />
-            <div>
-              <div className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">{pendingList.length} khách chờ thanh toán</div>
-              <div className="text-[16px] font-black text-[#e86a33]">{formatCurrency(todayTotal)}</div>
+          <div className="flex items-center gap-3 rounded-2xl bg-white px-4 py-2 shadow-sm border border-neutral-200/70 shrink-0">
+            <div className="w-9 h-9 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center font-black">
+              💳
             </div>
-          </div>
-        )}
-        {activeTab === "history" && (
-          <div className="flex items-center gap-md rounded-2xl bg-white px-lg py-sm shadow-sm ring-1 ring-black/[0.06] shrink-0">
-            <img src="/heongansach.png" alt="" className="h-10 w-10 object-contain" />
             <div>
-              <div className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Đã thanh toán</div>
-              <div className="text-[16px] font-black text-emerald-600">{paidBatches.length} phiếu</div>
+              <div className="text-[10px] font-extrabold text-neutral-400 uppercase tracking-widest">{pendingList.length} khách chờ rút</div>
+              <div className="text-sm font-black text-rose-600 tabular-nums">{formatCurrency(todayTotal)}</div>
             </div>
           </div>
         )}
@@ -378,51 +371,51 @@ export function AdminPaymentsClient({ pendingList, batches, waitingList, custome
       {/* ── PENDING TAB ── */}
       {activeTab === "pending" && (
         filteredPending.length === 0 ? (
-          <div className="flex flex-col items-center gap-sm rounded-3xl bg-white py-3xl shadow-sm ring-1 ring-black/[0.06]">
-            <img src="/heochodoi.png" alt="" className="h-16 w-16 object-contain opacity-70" />
-            <span className="text-[14px] font-bold text-gray-400">Chưa có khách nào yêu cầu rút tiền 🎉</span>
+          <div className="flex flex-col items-center gap-2 rounded-3xl bg-white py-16 shadow-sm border border-neutral-200/70">
+            <img src="/heochodoi.png" alt="" className="h-14 w-14 object-contain opacity-70" />
+            <span className="text-xs font-bold text-neutral-400">Chưa có khách nào yêu cầu rút tiền 🎉</span>
           </div>
         ) : (
-          <div className="flex flex-col gap-lg">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-lg">
+          <div className="flex flex-col gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {paginatedPending.map((c) => (
-                <div key={c.id} className="rounded-3xl bg-white p-lg shadow-sm ring-1 ring-black/[0.06] flex flex-col gap-md hover:shadow-md transition-shadow">
+                <div key={c.id} className="rounded-3xl bg-white p-5 sm:p-6 shadow-sm border border-neutral-200/70 flex flex-col gap-4 hover:border-rose-200 transition-all duration-300 hover:-translate-y-0.5">
                   {/* Avatar + name */}
-                  <div className="flex items-center gap-sm">
-                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#e86a33] to-[#d65d2a] text-white font-black text-[16px] shadow-md shadow-[#e86a33]/20">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-rose-400 to-pink-600 text-white font-black text-base shadow-xs">
                       {c.name.charAt(0).toUpperCase()}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <div className="font-bold text-gray-900 truncate">{c.name}</div>
-                      <div className="font-mono text-[11px] text-gray-400">{c.code}</div>
+                      <div className="font-extrabold text-neutral-900 truncate">{c.name}</div>
+                      <div className="font-mono text-[10px] font-bold text-neutral-400">{c.code}</div>
                     </div>
-                    <span className="shrink-0 rounded-full bg-amber-50 px-sm py-[3px] text-[10px] font-bold text-amber-600 ring-1 ring-amber-100">
+                    <span className="shrink-0 rounded-full bg-amber-50 px-2 py-0.5 text-[9px] font-black text-amber-700 border border-amber-200/70">
                       🔔 {formatDate(c.requestedAt)}
                     </span>
                   </div>
 
                   {/* Amount */}
-                  <div>
-                    <div className="text-[11px] font-semibold uppercase tracking-wider text-gray-400 mb-[2px]">Yêu cầu rút</div>
-                    <div className="text-[22px] font-black text-[#e86a33] leading-none tabular-nums">{formatCurrency(c.requestAmount)}</div>
+                  <div className="bg-neutral-50/80 p-3.5 rounded-2xl border border-neutral-100">
+                    <div className="text-[10px] font-extrabold uppercase tracking-widest text-neutral-400 mb-0.5">SỐ TIỀN YÊU CẦU RÚT</div>
+                    <div className="text-xl font-black text-rose-600 tabular-nums leading-none">{formatCurrency(c.requestAmount)}</div>
                   </div>
 
                   {/* Approved amount */}
-                  <div className={`flex items-center gap-sm rounded-xl p-sm ${c.approvedCount > 0 ? 'bg-emerald-50 ring-1 ring-emerald-100' : 'bg-amber-50 ring-1 ring-amber-100'}`}>
+                  <div className={`flex items-center gap-2.5 rounded-2xl p-3 border ${c.approvedCount > 0 ? 'bg-emerald-50/80 border-emerald-200' : 'bg-amber-50/80 border-amber-200'}`}>
                     {c.approvedCount > 0 ? (
                       <>
-                        <CheckCircle2 size={14} className="text-emerald-500 shrink-0" />
+                        <CheckCircle2 size={16} className="text-emerald-600 shrink-0" />
                         <div className="min-w-0 flex-1">
-                          <div className="text-[11px] font-bold text-emerald-700">Sẵn sàng trả: {formatCurrency(c.approvedAmount)}</div>
-                          <div className="text-[10px] text-emerald-500">{c.approvedCount} đơn đã duyệt</div>
+                          <div className="text-xs font-black text-emerald-800">Sẵn sàng trả: {formatCurrency(c.approvedAmount)}</div>
+                          <div className="text-[10px] text-emerald-600 font-medium">{c.approvedCount} đơn đã duyệt thành công</div>
                         </div>
                       </>
                     ) : (
                       <>
-                        <AlertCircle size={14} className="text-amber-500 shrink-0" />
+                        <AlertCircle size={16} className="text-amber-600 shrink-0" />
                         <div className="min-w-0 flex-1">
-                          <div className="text-[11px] font-bold text-amber-700">Chưa có đơn sẵn sàng trả</div>
-                          <div className="text-[10px] text-amber-500">Cần đối soát CSV trước khi tạo phiếu</div>
+                          <div className="text-xs font-black text-amber-800">Chưa có đơn khả dụng</div>
+                          <div className="text-[10px] text-amber-600 font-medium">Cần đối soát CSV trước khi tạo phiếu chi</div>
                         </div>
                       </>
                     )}
@@ -430,26 +423,26 @@ export function AdminPaymentsClient({ pendingList, batches, waitingList, custome
 
                   {/* Payment info */}
                   {c.bankAccountNumber ? (
-                    <div className="flex flex-col gap-[6px]">
-                      <div className="flex items-center gap-sm rounded-xl bg-gray-50 p-sm ring-1 ring-gray-100">
-                        <CreditCard size={13} className="text-[#e86a33] shrink-0" />
+                    <div className="flex flex-col gap-1.5">
+                      <div className="flex items-center gap-2.5 rounded-2xl bg-white p-3 border border-neutral-200/70">
+                        <CreditCard size={15} className="text-rose-500 shrink-0" />
                         <div className="min-w-0 flex-1">
-                          <div className="text-[11px] font-bold text-gray-800 truncate">{c.bankName}</div>
-                          <div className="font-mono text-[11px] text-gray-500">{c.bankAccountNumber}</div>
-                          <div className="text-[10px] text-gray-400 uppercase truncate">{c.bankAccountName}</div>
+                          <div className="text-xs font-extrabold text-neutral-900 truncate">{c.bankName}</div>
+                          <div className="font-mono text-xs font-bold text-neutral-700">{c.bankAccountNumber}</div>
+                          <div className="text-[10px] font-bold text-neutral-400 uppercase truncate">{c.bankAccountName}</div>
                         </div>
                         <CopyBtn value={c.bankAccountNumber} />
                       </div>
                     </div>
                   ) : (
-                    <div className="flex items-center gap-sm rounded-xl bg-amber-50 p-sm ring-1 ring-amber-100">
-                      <AlertCircle size={14} className="text-amber-400 shrink-0" />
-                      <span className="text-[12px] font-medium text-amber-600">Chưa cập nhật thông tin TT</span>
+                    <div className="flex items-center gap-2 rounded-2xl bg-amber-50 p-3 border border-amber-200 text-amber-800 text-xs font-bold">
+                      <AlertCircle size={15} className="shrink-0 text-amber-600" />
+                      <span>Khách chưa cập nhật TK ngân hàng</span>
                     </div>
                   )}
 
                   {/* Actions */}
-                  <div className="mt-auto flex items-center gap-sm pt-sm border-t border-gray-50">
+                  <div className="mt-auto flex items-center gap-2 pt-2 border-t border-neutral-100">
                     <CopyInfoBtn c={c} />
                     <div className="flex-1">
                       <CreatePaymentButton
@@ -474,66 +467,57 @@ export function AdminPaymentsClient({ pendingList, batches, waitingList, custome
       {/* ── WAITING TAB ── */}
       {activeTab === "waiting" && (
         filteredWaiting.length === 0 ? (
-          <div className="flex flex-col items-center gap-sm rounded-3xl bg-white py-3xl shadow-sm ring-1 ring-black/[0.06]">
-            <img src="/heochaomung.png" alt="" className="h-16 w-16 object-contain opacity-70" />
-            <span className="text-[14px] font-bold text-gray-400">Không có đơn nào đang chờ Shopee duyệt 🎉</span>
+          <div className="flex flex-col items-center gap-2 rounded-3xl bg-white py-16 shadow-sm border border-neutral-200/70">
+            <img src="/heochaomung.png" alt="" className="h-14 w-14 object-contain opacity-70" />
+            <span className="text-xs font-bold text-neutral-400">Không có đơn nào đang chờ Shopee duyệt 🎉</span>
           </div>
         ) : (
-          <div className="flex flex-col gap-lg">
-            {/* Info box */}
-            <div className="flex items-start gap-sm rounded-2xl bg-blue-50 border border-blue-200 px-lg py-md">
-              <img src="/heochodoi.png" alt="" className="h-7 w-7 object-contain shrink-0 mt-[1px]" />
-              <p className="text-[13px] text-blue-700 font-medium leading-relaxed">
-                Các đơn bên dưới có <strong>tiếp thị liên kết chưa hoàn thành</strong> (Shopee chưa xác nhận hoa hồng).
-                Khi nào import lại CSV mới và Shopee đã duyệt, đơn sẽ tự chuyển sang <strong>"Sẵn sàng thanh toán"</strong>.
-              </p>
-            </div>
-
-            <div className="flex flex-col gap-md">
+          <div className="flex flex-col gap-6">
+            <div className="flex flex-col gap-4">
               {paginatedWaiting.map((c) => (
-                <div key={c.id} className="rounded-3xl bg-white shadow-sm ring-1 ring-black/[0.06] overflow-hidden">
+                <div key={c.id} className="rounded-3xl bg-white shadow-sm border border-neutral-200/70 overflow-hidden">
                   {/* Customer header */}
-                  <div className="flex items-center justify-between p-lg border-b border-gray-100 bg-gray-50/60">
-                    <div className="flex items-center gap-sm">
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-blue-400 to-blue-600 text-white font-black text-[15px]">
+                  <div className="flex items-center justify-between p-4 bg-neutral-50/70 border-b border-neutral-200/70">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-400 to-sky-600 text-white font-black text-sm shadow-xs">
                         {c.name.charAt(0).toUpperCase()}
                       </div>
                       <div>
-                        <div className="font-bold text-gray-900">{c.name}</div>
-                        <div className="font-mono text-[11px] text-gray-400">{c.code}</div>
+                        <div className="font-extrabold text-neutral-900 text-xs">{c.name}</div>
+                        <div className="font-mono text-[10px] text-neutral-400 font-bold">{c.code}</div>
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="text-[11px] text-gray-400">{c.count} đơn đang chờ</div>
-                      <div className="text-[16px] font-black text-blue-600">{formatCurrency(c.amount)}</div>
+                      <div className="text-[10px] text-neutral-400 font-bold uppercase tracking-wider">{c.count} đơn chưa đối soát</div>
+                      <div className="text-base font-black text-sky-600 tabular-nums">{formatCurrency(c.amount)}</div>
                     </div>
                   </div>
 
                   {/* Orders list */}
-                  <div className="flex flex-col divide-y divide-gray-50">
+                  <div className="flex flex-col divide-y divide-neutral-100">
                     {c.orders.map((o) => (
-                      <div key={o.id} className="flex items-center gap-md p-md">
+                      <div key={o.id} className="flex items-center gap-3 p-3.5">
                         {o.productImage ? (
                           <img src={o.productImage} alt="" className="h-10 w-10 rounded-xl object-cover ring-1 ring-black/5 shrink-0" />
                         ) : (
-                          <div className="h-10 w-10 rounded-xl bg-gray-100 flex items-center justify-center shrink-0">
-                            <ShoppingBag size={14} className="text-gray-300" />
+                          <div className="h-10 w-10 rounded-xl bg-neutral-100 flex items-center justify-center shrink-0">
+                            <ShoppingBag size={15} className="text-neutral-400" />
                           </div>
                         )}
                         <div className="flex-1 min-w-0">
-                          <p className="truncate text-[13px] font-semibold text-gray-800">
+                          <p className="truncate text-xs font-bold text-neutral-800">
                             {o.productTitle ?? o.orderExternalId}
                           </p>
-                          <div className="flex items-center gap-xs mt-[2px]">
-                            <span className="text-[10px] font-bold text-gray-400 uppercase">{o.platformName}</span>
-                            <span className="text-gray-200">•</span>
-                            <span className="font-mono text-[10px] text-gray-400">{o.orderExternalId}</span>
+                          <div className="flex items-center gap-1.5 mt-0.5">
+                            <span className="text-[9px] font-black text-neutral-500 uppercase">{o.platformName}</span>
+                            <span className="text-neutral-300">•</span>
+                            <span className="font-mono text-[10px] text-neutral-400">{o.orderExternalId}</span>
                           </div>
                         </div>
                         <div className="text-right shrink-0">
-                          <div className="text-[13px] font-black text-gray-700">{formatCurrency(o.customerRewardAmount)}</div>
+                          <div className="text-xs font-black text-neutral-900 tabular-nums">{formatCurrency(o.customerRewardAmount)}</div>
                           {o.productAffiliateStatus && (
-                            <span className="text-[10px] font-bold text-amber-500 bg-amber-50 rounded-full px-sm py-[2px]">
+                            <span className="text-[9px] font-black text-amber-700 bg-amber-50 rounded-full px-2 py-0.5 border border-amber-200">
                               {o.productAffiliateStatus}
                             </span>
                           )}
@@ -555,55 +539,53 @@ export function AdminPaymentsClient({ pendingList, batches, waitingList, custome
       {/* ── HISTORY TAB ── */}
       {activeTab === "history" && (
         filteredBatches.length === 0 ? (
-          <div className="flex flex-col items-center gap-sm rounded-3xl bg-white py-3xl shadow-sm ring-1 ring-black/[0.06]">
-            <img src="/10_empty.png" alt="" className="h-16 w-16 object-contain opacity-60" />
-            <span className="text-[14px] font-bold text-gray-400">Không có phiếu nào</span>
+          <div className="flex flex-col items-center gap-2 rounded-3xl bg-white py-16 shadow-sm border border-neutral-200/70">
+            <img src="/10_empty.png" alt="" className="h-14 w-14 object-contain opacity-60" />
+            <span className="text-xs font-bold text-neutral-400">Không có phiếu nào</span>
           </div>
         ) : (
-          <div className="flex flex-col gap-lg">
-            <div className="rounded-3xl bg-white shadow-sm ring-1 ring-black/[0.06] overflow-hidden">
+          <div className="flex flex-col gap-6">
+            <div className="rounded-3xl bg-white shadow-sm border border-neutral-200/70 overflow-hidden">
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-[13px]">
+                <table className="w-full text-left text-xs">
                   <thead>
-                    <tr className="border-b border-gray-100 bg-gray-50/80">
+                    <tr className="border-b border-neutral-100 bg-neutral-50/80">
                       {["Mã phiếu", "Khách hàng", "Số tiền", "Đơn", "Trạng thái", "Ngày trả", "Thao tác"].map((h) => (
-                        <th key={h} className="px-md py-sm text-[11px] font-bold uppercase tracking-wider text-gray-400">{h}</th>
+                        <th key={h} className="px-4 py-3 text-[10px] font-extrabold uppercase tracking-wider text-neutral-400">{h}</th>
                       ))}
                     </tr>
                   </thead>
                   <tbody>
                     {paginatedBatches.map((b) => (
                       <tr key={b.id}
-                        className={`border-b border-gray-50 transition-colors hover:bg-orange-50/20 ${b.status === "paid" ? "" : "bg-amber-50/30"}`}>
-                        <td className="px-md py-md">
-                          <span className="font-mono font-bold text-[13px] text-gray-900">{b.paymentCode}</span>
+                        className={`border-b border-neutral-100 transition-colors hover:bg-rose-50/20 ${b.status === "paid" ? "" : "bg-amber-50/30"}`}>
+                        <td className="px-4 py-3">
+                          <span className="font-mono font-bold text-xs text-neutral-900">{b.paymentCode}</span>
                           {b.billStorageKey && (
-                            <span className="ml-xs inline-flex items-center gap-[2px] rounded-md bg-sky-100 px-[5px] py-[2px] text-[10px] font-bold text-sky-600">
-                              <ImageIcon size={9} /> Bill
+                            <span className="ml-1 inline-flex items-center gap-0.5 rounded-md bg-sky-100 px-1.5 py-0.5 text-[9px] font-black text-sky-700">
+                              <ImageIcon size={10} /> Bill
                             </span>
                           )}
                         </td>
-                        <td className="px-md py-md font-semibold text-gray-800">{b.customerName}</td>
-                        <td className="px-md py-md font-black text-[14px] text-[#e86a33]">{formatCurrency(b.totalAmount)}</td>
-                        <td className="px-md py-md text-center">
-                          <span className="inline-flex items-center justify-center h-6 min-w-6 rounded-md bg-gray-100 font-mono text-[12px] font-bold text-gray-600 px-sm">
+                        <td className="px-4 py-3 font-extrabold text-neutral-900">{b.customerName}</td>
+                        <td className="px-4 py-3 font-black text-xs text-rose-600 tabular-nums">{formatCurrency(b.totalAmount)}</td>
+                        <td className="px-4 py-3 text-center">
+                          <span className="inline-flex items-center justify-center h-5 min-w-[20px] rounded-md bg-neutral-100 font-mono text-[10px] font-bold text-neutral-700 px-1.5">
                             {b.itemCount}
                           </span>
                         </td>
-                        <td className="px-md py-md">
+                        <td className="px-4 py-3">
                           <Badge tone={b.status === "paid" ? "positive" : "warning"} dot>
                             {b.status === "paid" ? "Đã thanh toán" : "Chờ xử lý"}
                           </Badge>
                         </td>
-                        <td className="px-md py-md text-[12px] text-gray-500">{b.paidAt ?? "—"}</td>
-                        <td className="px-md py-md">
-                          <div className="flex items-center gap-sm">
-                            {/* Xem chi tiết — quan trọng nhất */}
+                        <td className="px-4 py-3 text-[11px] text-neutral-500 font-medium">{b.paidAt ?? "—"}</td>
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-2">
                             <button onClick={() => setViewingBatch(b.id)}
-                              className="flex h-8 items-center gap-xs rounded-xl bg-[#e86a33]/10 px-sm text-[12px] font-bold text-[#e86a33] hover:bg-[#e86a33]/20 transition-colors">
+                              className="flex h-7 items-center gap-1 rounded-xl bg-rose-50 px-2.5 text-[11px] font-bold text-rose-600 hover:bg-rose-100 transition-colors">
                               <Eye size={13} strokeWidth={2} /> Xem
                             </button>
-                            {/* Mark paid nếu chưa xong */}
                             {b.status !== "paid" && <MarkPaidForm batchId={b.id} />}
                           </div>
                         </td>
@@ -630,6 +612,7 @@ export function AdminPaymentsClient({ pendingList, batches, waitingList, custome
     </div>
   );
 }
+
 
 function PagerFooter({ currentPage, totalPages, itemsPerPage, totalItems, unitLabel, onPrev, onNext }:
   { currentPage: number; totalPages: number; itemsPerPage: number; totalItems: number; unitLabel: string; onPrev: () => void; onNext: () => void }) {

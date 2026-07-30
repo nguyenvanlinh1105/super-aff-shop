@@ -11,6 +11,7 @@ import {
   Settings,
   Flame,
   MessagesSquare,
+  Zap,
 } from "lucide-react";
 import { getSession } from "@/lib/auth";
 import { AdminSidebar } from "@/components/layout/AdminSidebar";
@@ -20,11 +21,12 @@ const sections = [
   {
     title: "Vận hành",
     items: [
-      { href: "/admin",           label: "Tổng quan",      emoji: "🏠", icon: <LayoutDashboard size={16} strokeWidth={1.75} /> },
-      { href: "/admin/customers", label: "Khách hàng",     emoji: "👥", icon: <Users           size={16} strokeWidth={1.75} /> },
-      { href: "/admin/links",     label: "Link Affiliate",  emoji: "🔗", icon: <Link2           size={16} strokeWidth={1.75} /> },
-      { href: "/admin/deals",     label: "Deals Hot",       emoji: "🔥", icon: <Flame           size={16} strokeWidth={1.75} /> },
-      { href: "/admin/community", label: "Cộng đồng",       emoji: "💬", icon: <MessagesSquare  size={16} strokeWidth={1.75} /> },
+      { href: "/admin",            label: "Tổng quan",           emoji: "🏠", icon: <LayoutDashboard size={16} strokeWidth={1.75} /> },
+      { href: "/admin/quick-link", label: "Tạo Link Aff Nhanh",  emoji: "⚡", icon: <Zap             size={16} strokeWidth={1.75} /> },
+      { href: "/admin/customers",  label: "Khách hàng",          emoji: "👥", icon: <Users           size={16} strokeWidth={1.75} /> },
+      { href: "/admin/links",      label: "Link Affiliate",       emoji: "🔗", icon: <Link2           size={16} strokeWidth={1.75} /> },
+      { href: "/admin/deals",      label: "Deals Hot",            emoji: "🔥", icon: <Flame           size={16} strokeWidth={1.75} /> },
+      { href: "/admin/community",  label: "Cộng đồng",            emoji: "💬", icon: <MessagesSquare  size={16} strokeWidth={1.75} /> },
     ],
   },
   {
@@ -51,18 +53,19 @@ export default async function AdminLayout({ children }: { children: React.ReactN
 
   return (
     <div
-      className="flex h-screen overflow-hidden flex-col md:flex-row bg-neutral-bg text-neutral-900"
+      className="flex h-screen overflow-hidden flex-col md:flex-row bg-gradient-to-br from-[#FFF9FB] via-[#FFF5F8] to-[#FFF2F6] text-neutral-900 font-sans"
     >
       <AdminSidebar adminName={session.fullName} sections={sections} />
 
       {/* ── Main content ── */}
-      <main className="relative flex-1 overflow-y-auto bg-neutral-bg">
-        <div className="min-h-full p-4 sm:p-6 md:p-8 w-full max-w-[100vw]">
+      <main className="relative flex-1 overflow-y-auto bg-transparent selection:bg-rose-500 selection:text-white">
+        <div className="min-h-full p-4 sm:p-6 lg:p-8 w-full max-w-[1600px] mx-auto">
           {children}
         </div>
       </main>
     </div>
   );
 }
+
 
 
