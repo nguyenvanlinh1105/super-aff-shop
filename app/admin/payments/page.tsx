@@ -141,25 +141,26 @@ export default async function AdminPaymentsPage() {
   }));
 
   return (
-    <div className="flex flex-col gap-lg fade-in">
+    <div className="flex flex-col gap-6 fade-in pb-8">
 
-      {/* ── HERO BANNER ── */}
-      <div
-        className="relative overflow-hidden rounded-3xl p-xl sm:p-2xl"
-        style={{ background: "linear-gradient(135deg, #fff3ee 0%, #fde8d8 50%, #ffecd2 100%)" }}
-      >
-        <div className="pointer-events-none absolute -right-8 -top-8 h-36 w-36 rounded-full bg-[#ffcba4] opacity-30" />
-        <div className="pointer-events-none absolute bottom-0 right-0 h-40 w-40 rounded-full bg-[#ffe0cc] opacity-40" />
-        <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-lg flex-wrap">
-          <div className="flex items-center gap-lg">
-            <img src="/meowback_lucky_cat_logo.png" alt="" className="h-20 w-20 object-contain drop-shadow-lg shrink-0" />
+      {/* ── LUXURY HERO BANNER ── */}
+      <div className="relative overflow-hidden rounded-3xl p-6 sm:p-8 border border-rose-200/60 shadow-lg shadow-rose-500/5 bg-gradient-to-br from-white via-[#FFF5F8] to-[#FFE8F0]">
+        <div className="pointer-events-none absolute -right-10 -top-10 h-48 w-48 rounded-full bg-gradient-to-br from-rose-200/30 to-pink-300/20 blur-xl" />
+        <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-6 flex-wrap">
+          <div className="flex items-center gap-5">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-3xl bg-gradient-to-br from-rose-400 via-pink-500 to-rose-600 text-white flex items-center justify-center shadow-md shadow-rose-500/20 shrink-0 border border-white/40 overflow-hidden p-1">
+              <img src="/meow-back-payments.png" alt="Thanh Toán" className="w-full h-full object-contain rounded-2xl" />
+            </div>
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-widest text-[#e86a33]/60 mb-1">Đối soát & Chi trả</p>
-              <h1 className="text-[26px] sm:text-[30px] font-black leading-tight text-[#2d1f14]">Thanh toán</h1>
-              <p className="mt-1 text-[13px] text-[#a0816a]">
-                <span className="font-bold text-[#e86a33]">{pendingList.length}</span> yêu cầu rút tiền •{" "}
-                Sẵn sàng trả:{" "}
-                <span className="font-bold text-[#e86a33]">{formatCurrency(totalApprovedAmount)}</span>
+              <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-white/80 border border-rose-200 text-[10px] font-black uppercase tracking-widest text-rose-600 shadow-xs mb-1.5">
+                Duyệt Lệnh Chi Trả Ngân Hàng
+              </div>
+              <h1 className="text-2xl sm:text-3xl font-extrabold leading-tight text-neutral-900 tracking-tight">
+                Quản Lý Rút Tiền & Thanh Toán
+              </h1>
+              <p className="mt-1 text-xs text-neutral-600 font-medium">
+                <span className="font-bold text-rose-600">{pendingList.length}</span> yêu cầu rút tiền đang chờ xử lý • Tổng tiền sẵn sàng trả:{" "}
+                <span className="font-extrabold text-emerald-700 tabular-nums">{formatCurrency(totalApprovedAmount)}</span>
               </p>
             </div>
           </div>
@@ -167,57 +168,51 @@ export default async function AdminPaymentsPage() {
       </div>
 
       {/* ── STAT CARDS ── */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-md">
-        <div className="group relative overflow-hidden rounded-2xl bg-white p-lg shadow-sm ring-1 ring-black/[0.06] hover:-translate-y-1 hover:shadow-md transition-all">
-          <div className="absolute inset-0 bg-gradient-to-br from-amber-50 to-orange-50 opacity-70" />
-          <div className="relative flex items-center gap-md">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-100/90 text-amber-600 shadow-sm transition-transform group-hover:scale-110 shrink-0">
-              <Clock size={22} strokeWidth={2.5} />
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div className="group relative overflow-hidden rounded-3xl bg-white p-5 shadow-sm border border-neutral-200/70 hover:border-amber-200 transition-all duration-300 hover:-translate-y-0.5">
+          <div className="relative flex items-center gap-3.5">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-amber-50 text-amber-600 border border-amber-100 font-black text-xl shadow-xs shrink-0 group-hover:scale-105 transition-transform">
+              <Clock size={20} strokeWidth={2.2} />
             </div>
             <div>
-              <div className="text-[11px] font-semibold uppercase tracking-wider text-gray-400">Yêu cầu rút</div>
-              <div className="text-[24px] font-black text-[#e86a33] tabular-nums leading-tight">{pendingList.length}</div>
-              <div className="text-[10px] text-gray-400">Khách đã gửi yêu cầu</div>
+              <div className="text-[10px] font-extrabold uppercase tracking-widest text-neutral-400">Yêu Cầu Rút</div>
+              <div className="text-xl font-black text-amber-600 tabular-nums leading-tight">{pendingList.length}</div>
             </div>
           </div>
         </div>
 
-        <div className="group relative overflow-hidden rounded-2xl bg-white p-lg shadow-sm ring-1 ring-black/[0.06] hover:-translate-y-1 hover:shadow-md transition-all">
-          <div className="absolute inset-0 bg-gradient-to-br from-rose-50 to-pink-50 opacity-70" />
-          <div className="relative flex items-center gap-md">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-100/90 text-rose-600 shadow-sm transition-transform group-hover:scale-110 shrink-0">
-              <Receipt size={22} strokeWidth={2.5} />
+        <div className="group relative overflow-hidden rounded-3xl bg-white p-5 shadow-sm border border-neutral-200/70 hover:border-rose-200 transition-all duration-300 hover:-translate-y-0.5">
+          <div className="relative flex items-center gap-3.5">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-rose-50 text-rose-600 border border-rose-100 font-black text-xl shadow-xs shrink-0 group-hover:scale-105 transition-transform">
+              <Receipt size={20} strokeWidth={2.2} />
             </div>
             <div>
-              <div className="text-[11px] font-semibold uppercase tracking-wider text-gray-400">Sẵn sàng trả</div>
-              <div className="text-[16px] font-black text-rose-600 tabular-nums leading-tight">{formatCurrency(totalApprovedAmount)}</div>
+              <div className="text-[10px] font-extrabold uppercase tracking-widest text-neutral-400">Sẵn Sàng Trả</div>
+              <div className="text-base font-black text-rose-600 tabular-nums leading-tight">{formatCurrency(totalApprovedAmount)}</div>
             </div>
           </div>
         </div>
 
-        <div className="group relative overflow-hidden rounded-2xl p-lg shadow-sm ring-1 ring-black/[0.06] hover:-translate-y-1 hover:shadow-md transition-all"
-          style={{ background: "linear-gradient(135deg,#e8f5e9,#f1fdf2)" }}>
-          <div className="relative flex items-center gap-md">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-100/90 text-emerald-600 shadow-sm transition-transform group-hover:scale-110 shrink-0">
-              <CheckCircle2 size={22} strokeWidth={2.5} />
+        <div className="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-white to-emerald-50/60 p-5 shadow-sm border border-emerald-200/70 hover:border-emerald-300 transition-all duration-300 hover:-translate-y-0.5">
+          <div className="relative flex items-center gap-3.5">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700 font-black text-xl shadow-xs shrink-0 group-hover:scale-105 transition-transform">
+              <CheckCircle2 size={20} strokeWidth={2.2} />
             </div>
             <div>
-              <div className="text-[11px] font-semibold uppercase tracking-wider text-gray-400">Đã trả</div>
-              <div className="text-[16px] font-black text-emerald-600 tabular-nums leading-tight">{formatCurrency(totalPaidAmount)}</div>
+              <div className="text-[10px] font-extrabold uppercase tracking-widest text-emerald-700/70">Đã Chi Trả</div>
+              <div className="text-base font-black text-emerald-700 tabular-nums leading-tight">{formatCurrency(totalPaidAmount)}</div>
             </div>
           </div>
         </div>
 
-        <div className="group relative overflow-hidden rounded-2xl bg-white p-lg shadow-sm ring-1 ring-black/[0.06] hover:-translate-y-1 hover:shadow-md transition-all">
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-50 to-sky-50 opacity-70" />
-          <div className="relative flex items-center gap-md">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-100/90 text-blue-600 shadow-sm transition-transform group-hover:scale-110 shrink-0">
-              <Hourglass size={22} strokeWidth={2.5} />
+        <div className="group relative overflow-hidden rounded-3xl bg-white p-5 shadow-sm border border-neutral-200/70 hover:border-sky-200 transition-all duration-300 hover:-translate-y-0.5">
+          <div className="relative flex items-center gap-3.5">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-sky-50 text-sky-600 border border-sky-100 font-black text-xl shadow-xs shrink-0 group-hover:scale-105 transition-transform">
+              <Hourglass size={20} strokeWidth={2.2} />
             </div>
             <div>
-              <div className="text-[11px] font-semibold uppercase tracking-wider text-gray-400">Chờ Shopee duyệt</div>
-              <div className="text-[24px] font-black text-blue-500 tabular-nums leading-tight">{waitingOrders.length}</div>
-              <div className="text-[10px] text-gray-400">Chưa thể tạo phiếu</div>
+              <div className="text-[10px] font-extrabold uppercase tracking-widest text-neutral-400">Chờ Đơn Đủ Điều Kiện</div>
+              <div className="text-xl font-black text-sky-600 tabular-nums leading-tight">{waitingOrders.length}</div>
             </div>
           </div>
         </div>
@@ -232,3 +227,4 @@ export default async function AdminPaymentsPage() {
     </div>
   );
 }
+

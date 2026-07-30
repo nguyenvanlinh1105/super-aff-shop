@@ -63,24 +63,25 @@ export default async function AdminDealsPage({ searchParams }: { searchParams: {
   const totalPages = Math.ceil(filteredCount / limit);
 
   return (
-    <div className="flex flex-col gap-lg fade-in">
+    <div className="flex flex-col gap-6 fade-in pb-8">
 
-      {/* ── HERO BANNER ── */}
-      <div
-        className="relative overflow-hidden rounded-3xl p-xl sm:p-2xl"
-        style={{ background: "linear-gradient(135deg, #fff7ed 0%, #ffedd5 50%, #fef3c7 100%)" }}
-      >
-        <div className="pointer-events-none absolute -right-8 -top-8 h-36 w-36 rounded-full bg-[#fcd34d] opacity-25" />
-        <div className="pointer-events-none absolute bottom-0 right-0 h-40 w-40 rounded-full bg-[#fdba74] opacity-30" />
-        <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-lg flex-wrap">
-          <div className="flex items-center gap-lg">
-            <img src="/meowback_lucky_cat_logo.png" alt="" className="h-20 w-20 object-contain drop-shadow-lg shrink-0" />
+      {/* ── LUXURY HERO BANNER ── */}
+      <div className="relative overflow-hidden rounded-3xl p-6 sm:p-8 border border-amber-200/60 shadow-lg shadow-amber-500/5 bg-gradient-to-br from-white via-[#FFF7ED] to-[#FFEDD5]">
+        <div className="pointer-events-none absolute -right-10 -top-10 h-48 w-48 rounded-full bg-gradient-to-br from-amber-200/30 to-orange-300/20 blur-xl" />
+        <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-6 flex-wrap">
+          <div className="flex items-center gap-5">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-3xl bg-gradient-to-br from-amber-400 via-orange-500 to-amber-600 text-white flex items-center justify-center shadow-md shadow-amber-500/20 shrink-0 border border-white/40 overflow-hidden p-1">
+              <img src="/meow-back-deals.png" alt="Deals Hot" className="w-full h-full object-contain rounded-2xl" />
+            </div>
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-widest text-amber-500 mb-1">Hot Deals</p>
-              <h1 className="text-[26px] sm:text-[30px] font-black leading-tight text-[#451a03]">Deals giảm giá</h1>
-              <p className="mt-1 text-[13px] text-amber-600">
-                Đăng deal từ các group —{" "}
-                <span className="font-bold text-amber-700">hệ thống tự đổi sang link affiliate</span>
+              <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-white/80 border border-amber-200 text-[10px] font-black uppercase tracking-widest text-amber-700 shadow-xs mb-1.5">
+                Hot Deals & Flash Sale Manager
+              </div>
+              <h1 className="text-2xl sm:text-3xl font-extrabold leading-tight text-neutral-900 tracking-tight">
+                Quản Lý Deals Giảm Giá
+              </h1>
+              <p className="mt-1 text-xs text-neutral-600 font-medium">
+                Đăng tin deal sản phẩm từ cộng đồng — <span className="font-bold text-amber-700">hệ thống tự động gắn mã tracking link affiliate</span>
               </p>
             </div>
           </div>
@@ -89,72 +90,72 @@ export default async function AdminDealsPage({ searchParams }: { searchParams: {
       </div>
 
       {/* ── STAT CARDS ── */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-md">
-        <div className="group relative overflow-hidden rounded-2xl bg-white p-lg shadow-sm ring-1 ring-black/[0.06] hover:-translate-y-1 hover:shadow-md transition-all">
-          <div className="absolute inset-0 bg-gradient-to-br from-orange-50 to-amber-50 opacity-70" />
-          <div className="relative flex items-center gap-md">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-100/90 text-amber-600 shadow-sm transition-transform group-hover:scale-110 shrink-0">
-              <Tag size={24} strokeWidth={2.5} />
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div className="group relative overflow-hidden rounded-3xl bg-white p-5 shadow-sm border border-neutral-200/70 hover:border-amber-200 transition-all duration-300 hover:-translate-y-0.5">
+          <div className="relative flex items-center gap-3.5">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-amber-50 text-amber-600 border border-amber-100 font-black text-xl shadow-xs shrink-0 group-hover:scale-105 transition-transform">
+              <Tag size={20} strokeWidth={2.2} />
             </div>
             <div>
-              <div className="text-[11px] font-semibold uppercase tracking-wider text-gray-400">Tổng deal</div>
-              <div className="text-[26px] font-black text-[#e86a33] tabular-nums leading-tight">{allDealsCount}</div>
+              <div className="text-[10px] font-extrabold uppercase tracking-widest text-neutral-400">Tổng Deals Đăng</div>
+              <div className="text-xl font-black text-amber-600 tabular-nums leading-tight">{allDealsCount.toLocaleString()}</div>
             </div>
           </div>
         </div>
-        <div className="group relative overflow-hidden rounded-2xl p-lg shadow-sm ring-1 ring-black/[0.06] hover:-translate-y-1 hover:shadow-md transition-all"
-          style={{ background: "linear-gradient(135deg,#e8f5e9,#f1fdf2)" }}>
-          <div className="relative flex items-center gap-md">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-100/90 text-emerald-600 shadow-sm transition-transform group-hover:scale-110 shrink-0">
-              <Eye size={24} strokeWidth={2.5} />
+
+        <div className="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-white to-emerald-50/60 p-5 shadow-sm border border-emerald-200/70 hover:border-emerald-300 transition-all duration-300 hover:-translate-y-0.5">
+          <div className="relative flex items-center gap-3.5">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700 font-black text-xl shadow-xs shrink-0 group-hover:scale-105 transition-transform">
+              <Eye size={20} strokeWidth={2.2} />
             </div>
             <div>
-              <div className="text-[11px] font-semibold uppercase tracking-wider text-gray-400">Đang hiện</div>
-              <div className="text-[26px] font-black text-emerald-600 tabular-nums leading-tight">{activeDealsCount}</div>
+              <div className="text-[10px] font-extrabold uppercase tracking-widest text-emerald-700/70">Đang Hiển Thị</div>
+              <div className="text-xl font-black text-emerald-700 tabular-nums leading-tight">{activeDealsCount.toLocaleString()}</div>
             </div>
           </div>
         </div>
-        <div className="group relative overflow-hidden rounded-2xl bg-white p-lg shadow-sm ring-1 ring-black/[0.06] hover:-translate-y-1 hover:shadow-md transition-all">
-          <div className="absolute inset-0 bg-gradient-to-br from-sky-50 to-blue-50 opacity-60" />
-          <div className="relative flex items-center gap-md">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-100/90 text-sky-600 shadow-sm transition-transform group-hover:scale-110 shrink-0">
-              <MousePointerClick size={24} strokeWidth={2.5} />
+
+        <div className="group relative overflow-hidden rounded-3xl bg-white p-5 shadow-sm border border-neutral-200/70 hover:border-sky-200 transition-all duration-300 hover:-translate-y-0.5">
+          <div className="relative flex items-center gap-3.5">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-sky-50 text-sky-600 border border-sky-100 font-black text-xl shadow-xs shrink-0 group-hover:scale-105 transition-transform">
+              <MousePointerClick size={20} strokeWidth={2.2} />
             </div>
             <div>
-              <div className="text-[11px] font-semibold uppercase tracking-wider text-gray-400 flex items-center gap-1">
-                Tổng click
-              </div>
-              <div className="text-[22px] font-black text-sky-600 tabular-nums leading-tight">{totalClicks.toLocaleString()}</div>
+              <div className="text-[10px] font-extrabold uppercase tracking-widest text-neutral-400">Tổng Click</div>
+              <div className="text-xl font-black text-sky-600 tabular-nums leading-tight">{totalClicks.toLocaleString()}</div>
             </div>
           </div>
         </div>
-        <div className="group relative overflow-hidden rounded-2xl bg-white p-lg shadow-sm ring-1 ring-black/[0.06] hover:-translate-y-1 hover:shadow-md transition-all">
-          <div className="absolute inset-0 bg-gradient-to-br from-gray-50 to-slate-50 opacity-60" />
-          <div className="relative flex items-center gap-md">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100/90 text-slate-600 shadow-sm transition-transform group-hover:scale-110 shrink-0">
-              <TrendingUp size={24} strokeWidth={2.5} />
+
+        <div className="group relative overflow-hidden rounded-3xl bg-white p-5 shadow-sm border border-neutral-200/70 hover:border-slate-300 transition-all duration-300 hover:-translate-y-0.5">
+          <div className="relative flex items-center gap-3.5">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-100 text-slate-700 font-black text-xl shadow-xs shrink-0 group-hover:scale-105 transition-transform">
+              <TrendingUp size={20} strokeWidth={2.2} />
             </div>
             <div>
-              <div className="text-[11px] font-semibold uppercase tracking-wider text-gray-400">TB/deal</div>
-              <div className="text-[22px] font-black text-gray-600 tabular-nums leading-tight">{avgClicks}</div>
+              <div className="text-[10px] font-extrabold uppercase tracking-widest text-neutral-400">TB Click / Deal</div>
+              <div className="text-xl font-black text-slate-700 tabular-nums leading-tight">{avgClicks.toLocaleString()}</div>
             </div>
           </div>
         </div>
       </div>
 
       {/* ── DEAL LIST ── */}
-      <div className="rounded-3xl bg-white shadow-sm ring-1 ring-black/[0.06] overflow-hidden">
-        <div className="flex items-center gap-sm px-xl pt-xl pb-lg border-b border-gray-100">
-          <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-amber-50 text-amber-500">
-            <Sparkles size={18} />
+      <div className="rounded-3xl bg-white shadow-sm border border-neutral-200/70 overflow-hidden">
+        <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-neutral-200/70 bg-gradient-to-r from-amber-50/50 to-white">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-amber-100 text-amber-600 font-black">
+              <Sparkles size={16} />
+            </div>
+            <h2 className="text-sm font-extrabold text-neutral-900 tracking-tight">Danh Sách Deals Đang Phát Sóng</h2>
           </div>
-          <h2 className="text-[15px] font-bold text-gray-900">Danh sách Deals</h2>
-          <span className="ml-auto text-[12px] font-semibold text-gray-400">{allDealsCount} deals</span>
+          <span className="text-xs font-extrabold text-neutral-500 bg-neutral-100 px-3 py-1 rounded-full">{allDealsCount} deals</span>
         </div>
-        <div className="p-lg">
+        <div className="p-6">
           <AdminDealList initialDeals={formattedDeals} totalPages={totalPages} currentPage={page} />
         </div>
       </div>
     </div>
   );
 }
+

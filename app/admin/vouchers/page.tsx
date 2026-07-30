@@ -31,16 +31,41 @@ export default async function AdminVouchersPage() {
   }));
 
   return (
-    <div className="flex flex-col gap-2xl">
-      <PageHeader
-        title="Kho Voucher"
-        subtitle={`${vouchers.length} chương trình ưu đãi đang có trong hệ thống.`}
-        action={<CreateVoucherForm platforms={platformOptions} />}
-      />
+    <div className="flex flex-col gap-6 fade-in pb-8">
+      {/* LUXURY HERO BANNER */}
+      <div className="relative overflow-hidden rounded-3xl p-6 sm:p-8 border border-rose-200/60 shadow-lg shadow-rose-500/5 bg-gradient-to-br from-white via-[#FFF5F8] to-[#FFE8F0]">
+        <div className="pointer-events-none absolute -right-10 -top-10 h-48 w-48 rounded-full bg-gradient-to-br from-rose-200/30 to-pink-300/20 blur-xl" />
+        <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+          <div className="flex items-center gap-5">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-3xl bg-gradient-to-br from-rose-400 via-pink-500 to-rose-600 text-white flex items-center justify-center text-3xl shadow-md shadow-rose-500/20 shrink-0 border border-white/40">
+              🎟️
+            </div>
+            <div>
+              <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-white/80 border border-rose-200 text-[10px] font-black uppercase tracking-widest text-rose-600 shadow-xs mb-1.5">
+                Shopee / Lazada Voucher Hub
+              </div>
+              <h1 className="text-2xl sm:text-3xl font-extrabold leading-tight text-neutral-900 tracking-tight">
+                Kho Mã Giảm Giá & Voucher
+              </h1>
+              <p className="mt-1 text-xs text-neutral-600 font-medium max-w-xl">
+                Quản lý <span className="font-bold text-rose-600">{vouchers.length}</span> chương trình ưu đãi, mã giảm giá hot và đính kèm link affiliate tự động.
+              </p>
+            </div>
+          </div>
+          <CreateVoucherForm platforms={platformOptions} />
+        </div>
+      </div>
 
-      <QuickVoucherForm platforms={platformOptions} />
+      <div className="rounded-3xl bg-white shadow-sm border border-neutral-200/70 p-6 sm:p-8">
+        <h2 className="text-base font-extrabold text-neutral-900 mb-4 tracking-tight">Thêm Voucher Nhanh Từ Link</h2>
+        <QuickVoucherForm platforms={platformOptions} />
+      </div>
 
-      <AdminVouchersClient vouchers={rows} />
+      <div className="rounded-3xl bg-white shadow-sm border border-neutral-200/70 p-6 sm:p-8">
+        <h2 className="text-base font-extrabold text-neutral-900 mb-4 tracking-tight">Danh Sách Voucher Hiện Có ({vouchers.length})</h2>
+        <AdminVouchersClient vouchers={rows} />
+      </div>
     </div>
   );
 }
+

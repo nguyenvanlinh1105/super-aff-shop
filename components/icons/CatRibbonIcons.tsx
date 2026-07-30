@@ -7,7 +7,7 @@ export function LogoMeowBack({ className = "h-9 text-primary-500" }: { className
       {/* Lucky Cat (Mèo Thần Tài) icon logo */}
       <div className="relative flex items-center justify-center w-10 h-10 rounded-2xl bg-gradient-to-br from-primary-400 to-primary-500 text-white shadow-cute overflow-hidden p-0.5 shrink-0" suppressHydrationWarning>
         <img
-          src="/meowback_lucky_cat_logo.png"
+          src="/meow-back-mascot.png"
           alt="MeowBack Lucky Cat Logo"
           className="w-full h-full object-cover rounded-xl"
         />

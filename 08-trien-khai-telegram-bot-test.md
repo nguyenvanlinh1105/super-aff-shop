@@ -16,7 +16,7 @@ Cap nhat file `.env`:
 
 ```env
 NEXT_PUBLIC_APP_URL="https://ten-domain-public-cua-ban"
-SHOPEE_AFFILIATE_ID="17303870157"
+SHOPEE_AFFILIATE_ID="17436430629"
 TELEGRAM_BOT_TOKEN="token-tu-botfather"
 TELEGRAM_WEBHOOK_SECRET="mot-secret-ngan-de-kiem-tra"
 ```

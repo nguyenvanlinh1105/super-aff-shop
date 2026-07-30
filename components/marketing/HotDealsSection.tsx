@@ -194,7 +194,7 @@ export function HotDealsSection() {
                   className="w-full flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-2xl bg-gradient-to-r from-primary-500 to-rose-500 hover:from-primary-600 hover:to-rose-600 text-white font-black text-xs shadow-cute hover:shadow-cute-lg transition-all active:scale-95"
                 >
                   <ShoppingBag size={14} />
-                  <span>Chốt Đơn & Nhận Hoàn Tiền 🎀</span>
+                  <span>Nhận Hoàn Tiền 🎀</span>
                 </Link>
               </div>
             </div>
