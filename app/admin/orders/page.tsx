@@ -103,84 +103,84 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
   };
 
   return (
-    <div className="flex flex-col gap-lg fade-in">
+    <div className="flex flex-col gap-6 fade-in pb-8">
 
-      {/* ── HERO BANNER ── */}
-      <div
-        className="relative overflow-hidden rounded-3xl p-xl sm:p-2xl"
-        style={{ background: "linear-gradient(135deg, #f0fdf4 0%, #dcfce7 50%, #d1fae5 100%)" }}
-      >
-        <div className="pointer-events-none absolute -right-8 -top-8 h-36 w-36 rounded-full bg-[#6ee7b7] opacity-25" />
-        <div className="pointer-events-none absolute bottom-0 right-0 h-40 w-40 rounded-full bg-[#a7f3d0] opacity-35" />
-        <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-lg flex-wrap">
-          <div className="flex items-center gap-lg">
-            <img src="/meowback_lucky_cat_logo.png" alt="" className="h-20 w-20 object-contain drop-shadow-lg shrink-0" />
+      {/* ── LUXURY HERO BANNER ── */}
+      <div className="relative overflow-hidden rounded-3xl p-6 sm:p-8 border border-emerald-200/60 shadow-lg shadow-emerald-500/5 bg-gradient-to-br from-white via-[#F4FBF7] to-[#E6F8EE]">
+        <div className="pointer-events-none absolute -right-10 -top-10 h-48 w-48 rounded-full bg-gradient-to-br from-emerald-200/30 to-teal-300/20 blur-xl" />
+        <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-6 flex-wrap">
+          <div className="flex items-center gap-5">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-3xl bg-gradient-to-br from-emerald-400 via-teal-500 to-emerald-600 text-white flex items-center justify-center shadow-md shadow-emerald-500/20 shrink-0 border border-white/40 overflow-hidden p-1">
+              <img src="/meow-back-orders.png" alt="Đơn hàng" className="w-full h-full object-contain rounded-2xl" />
+            </div>
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-widest text-emerald-500 mb-1">Quản lý đối soát</p>
-              <h1 className="text-[26px] sm:text-[30px] font-black leading-tight text-[#064e3b]">Đơn hàng</h1>
-              <p className="mt-1 text-[13px] text-emerald-600">
-                <span className="font-bold text-emerald-700">{allCount.toLocaleString()}</span> đơn •{" "}
-                Công nợ chưa trả:{" "}
-                <span className="font-bold text-[#e86a33]">{formatCurrency(sums.unpaidTotal)}</span>
+              <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-white/80 border border-emerald-200 text-[10px] font-black uppercase tracking-widest text-emerald-700 shadow-xs mb-1.5">
+                Đối Soát Đơn Hàng & Chi Trả
+              </div>
+              <h1 className="text-2xl sm:text-3xl font-extrabold leading-tight text-neutral-900 tracking-tight">
+                Quản Lý Đơn Hàng Affiliate
+              </h1>
+              <p className="mt-1 text-xs text-neutral-600 font-medium">
+                <span className="font-bold text-neutral-900">{allCount.toLocaleString()}</span> đơn hàng ghi nhận • Công nợ chưa trả khách:{" "}
+                <span className="font-extrabold text-rose-600 tabular-nums">{formatCurrency(sums.unpaidTotal)}</span>
               </p>
             </div>
           </div>
           <Link href="/admin/orders/import">
-            <Button variant="primary" size="md">
-              <Upload size={16} strokeWidth={2} />
-              Import đối soát
-            </Button>
+            <button className="flex items-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 px-6 py-3 text-xs font-black text-white shadow-md shadow-emerald-600/20 hover:shadow-lg transition-all active:scale-[0.98]">
+              <Upload size={16} strokeWidth={2.5} />
+              <span>Import CSV Đối Soát</span>
+            </button>
           </Link>
         </div>
       </div>
 
       {/* ── STAT CARDS ── */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-md">
-        <div className="group relative overflow-hidden rounded-2xl bg-white p-lg shadow-sm ring-1 ring-black/[0.06] hover:-translate-y-1 hover:shadow-md transition-all">
-          <div className="absolute inset-0 bg-gradient-to-br from-gray-50 to-slate-50 opacity-60" />
-          <div className="relative flex items-center gap-md">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-700 shadow-sm transition-transform group-hover:scale-110 shrink-0">
-              <ShoppingCart size={22} strokeWidth={2.5} />
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div className="group relative overflow-hidden rounded-3xl bg-white p-5 shadow-sm border border-neutral-200/70 hover:border-slate-300 transition-all duration-300 hover:-translate-y-0.5">
+          <div className="relative flex items-center gap-3.5">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-100 text-slate-700 font-black text-xl shadow-xs shrink-0 group-hover:scale-105 transition-transform">
+              <ShoppingCart size={20} strokeWidth={2.2} />
             </div>
             <div>
-              <div className="text-[11px] font-semibold uppercase tracking-wider text-gray-400">Tổng đơn</div>
-              <div className="text-[24px] font-black text-gray-900 tabular-nums leading-tight">{allCount.toLocaleString()}</div>
+              <div className="text-[10px] font-extrabold uppercase tracking-widest text-neutral-400">Tổng Đơn Hàng</div>
+              <div className="text-xl font-black text-neutral-900 tabular-nums leading-tight">{allCount.toLocaleString()}</div>
             </div>
           </div>
         </div>
-        <div className="group relative overflow-hidden rounded-2xl p-lg shadow-sm ring-1 ring-black/[0.06] hover:-translate-y-1 hover:shadow-md transition-all"
-          style={{ background: "linear-gradient(135deg,#e8f5e9,#f1fdf2)" }}>
-          <div className="relative flex items-center gap-md">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-600 shadow-sm transition-transform group-hover:scale-110 shrink-0">
-              <Wallet size={22} strokeWidth={2.5} />
+
+        <div className="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-white to-emerald-50/60 p-5 shadow-sm border border-emerald-200/70 hover:border-emerald-300 transition-all duration-300 hover:-translate-y-0.5">
+          <div className="relative flex items-center gap-3.5">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700 font-black text-xl shadow-xs shrink-0 group-hover:scale-105 transition-transform">
+              <Wallet size={20} strokeWidth={2.2} />
             </div>
             <div>
-              <div className="text-[11px] font-semibold uppercase tracking-wider text-gray-400">Tiền đã về</div>
-              <div className="text-[16px] font-black text-emerald-600 tabular-nums leading-tight">{formatCurrency(sums.moneyInTotal)}</div>
+              <div className="text-[10px] font-extrabold uppercase tracking-widest text-emerald-700/70">Tiền Đã Về Ví</div>
+              <div className="text-base font-black text-emerald-700 tabular-nums leading-tight">{formatCurrency(sums.moneyInTotal)}</div>
             </div>
           </div>
         </div>
-        <div className="group relative overflow-hidden rounded-2xl bg-white p-lg shadow-sm ring-1 ring-black/[0.06] hover:-translate-y-1 hover:shadow-md transition-all">
-          <div className="absolute inset-0 bg-gradient-to-br from-amber-50 to-orange-50 opacity-60" />
-          <div className="relative flex items-center gap-md">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-100 text-amber-600 shadow-sm transition-transform group-hover:scale-110 shrink-0">
-              <Clock size={22} strokeWidth={2.5} />
+
+        <div className="group relative overflow-hidden rounded-3xl bg-white p-5 shadow-sm border border-neutral-200/70 hover:border-amber-200 transition-all duration-300 hover:-translate-y-0.5">
+          <div className="relative flex items-center gap-3.5">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-amber-50 text-amber-600 border border-amber-100 font-black text-xl shadow-xs shrink-0 group-hover:scale-105 transition-transform">
+              <Clock size={20} strokeWidth={2.2} />
             </div>
             <div>
-              <div className="text-[11px] font-semibold uppercase tracking-wider text-gray-400">Chưa trả</div>
-              <div className="text-[24px] font-black text-[#e86a33] tabular-nums leading-tight">{unpaidCount}</div>
+              <div className="text-[10px] font-extrabold uppercase tracking-widest text-neutral-400">Chưa Trả Khách</div>
+              <div className="text-xl font-black text-amber-600 tabular-nums leading-tight">{unpaidCount.toLocaleString()}</div>
             </div>
           </div>
         </div>
-        <div className="group relative overflow-hidden rounded-2xl bg-white p-lg shadow-sm ring-1 ring-black/[0.06] hover:-translate-y-1 hover:shadow-md transition-all">
-          <div className="absolute inset-0 bg-gradient-to-br from-red-50 to-rose-50 opacity-60" />
-          <div className="relative flex items-center gap-md">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-100 text-rose-600 shadow-sm transition-transform group-hover:scale-110 shrink-0">
-              <HelpCircle size={22} strokeWidth={2.5} />
+
+        <div className="group relative overflow-hidden rounded-3xl bg-white p-5 shadow-sm border border-neutral-200/70 hover:border-rose-200 transition-all duration-300 hover:-translate-y-0.5">
+          <div className="relative flex items-center gap-3.5">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-rose-50 text-rose-600 border border-rose-100 font-black text-xl shadow-xs shrink-0 group-hover:scale-105 transition-transform">
+              <HelpCircle size={20} strokeWidth={2.2} />
             </div>
             <div>
-              <div className="text-[11px] font-semibold uppercase tracking-wider text-gray-400">Chưa map</div>
-              <div className="text-[24px] font-black text-red-500 tabular-nums leading-tight">{unassignedCount}</div>
+              <div className="text-[10px] font-extrabold uppercase tracking-widest text-neutral-400">Chưa Map Khách</div>
+              <div className="text-xl font-black text-rose-600 tabular-nums leading-tight">{unassignedCount.toLocaleString()}</div>
             </div>
           </div>
         </div>
@@ -197,3 +197,4 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
     </div>
   );
 }
+
