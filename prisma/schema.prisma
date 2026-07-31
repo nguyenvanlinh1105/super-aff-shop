@@ -19,6 +19,15 @@ model User {
   status       String   @default("active")
   customerId   String?  @unique @map("customer_id")
   customer     Customer? @relation(fields: [customerId], references: [id])
+
+  // ─── 2MFA Fields ──────────────────────────────────────────────
+  mfaEnabled        Boolean   @default(false) @map("mfa_enabled")
+  mfaSecret         String?   @map("mfa_secret")
+  mfaMethod         String?   @default("totp") @map("mfa_method")
+  mfaBackupCodes    String?   @map("mfa_backup_codes")
+  mfaResetToken     String?   @map("mfa_reset_token")
+  mfaResetExpiresAt DateTime? @map("mfa_reset_expires_at")
+
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @default(now()) @updatedAt @map("updated_at")
 

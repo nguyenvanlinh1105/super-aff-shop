@@ -10,7 +10,7 @@ export type SessionPayload = {
   customerId?: string | null;
 };
 
-type TokenType = "access" | "refresh";
+type TokenType = "access" | "refresh" | "mfa_pending";
 
 type TokenClaims = SessionPayload & { typ: TokenType; exp: number };
 
@@ -105,4 +105,12 @@ export async function verifyAccessToken(token: string | undefined | null): Promi
 
 export async function verifyRefreshToken(token: string | undefined | null): Promise<SessionPayload | null> {
   return verifyToken(token, "refresh");
+}
+
+export async function createMfaPendingToken(payload: SessionPayload): Promise<string> {
+  return signToken({ ...payload, typ: "mfa_pending", exp: Math.floor(Date.now() / 1000) + 60 * 5 }); // 5 phút
+}
+
+export async function verifyMfaPendingToken(token: string | undefined | null): Promise<SessionPayload | null> {
+  return verifyToken(token, "mfa_pending");
 }

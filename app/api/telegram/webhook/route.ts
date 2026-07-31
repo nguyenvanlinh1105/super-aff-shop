@@ -379,6 +379,7 @@ export async function POST(req: NextRequest) {
       }
     }
   }
+}
 
   const sendResult = await sendTelegramTextMessage({
     chatId: incoming.chatId,
