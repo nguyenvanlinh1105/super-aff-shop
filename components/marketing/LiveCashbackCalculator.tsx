@@ -7,11 +7,10 @@ import { ShopeeIcon, TiktokIcon } from "@/components/icons/PlatformIcons";
 
 /*
  * Tỷ lệ hoa hồng trung bình mà sàn (Shopee/TikTok) trả cho affiliate
- * theo từng ngành hàng. MeowBack sau đó chia lại 20% số hoa hồng này
- * cho khách hàng.
+ * theo từng ngành hàng. MeowBack sau đó chia lại 80% số hoa hồng sau thuế
+ * cho khách hàng (Admin giữ lại 20%).
  *
- * Công thức: Hoàn tiền = Chi tiêu × commissionRate × 20%
- * Ví dụ: 1.000.000 × 8% = 80.000 (hoa hồng) → 80.000 × 20% = 16.000đ hoàn
+ * Công thức: Hoàn tiền = Hoa hồng sau thuế × 80%
  */
 const CATEGORIES = [
   { id: "fashion", name: "Thời Trang & Giày Dép", avgRate: 0.12, emoji: "👗" },
@@ -21,8 +20,9 @@ const CATEGORIES = [
   { id: "home", name: "Nhà Cửa & Đời Sống", avgRate: 0.07, emoji: "🏡" },
 ];
 
-/* Tỷ lệ MeowBack chia lại cho khách hàng (20% trên tổng hoa hồng affiliate) */
-const CASHBACK_SHARE_RATE = 0.2;
+/* Tỷ lệ MeowBack chia lại cho khách hàng (80% trên hoa hồng sau thuế) */
+const CASHBACK_SHARE_RATE = 0.8;
+const DEFAULT_TAX_RATE = 0.1098; // 10.98%
 
 export function LiveCashbackCalculator() {
   const [monthlySpend, setMonthlySpend] = useState<number>(3000000);
@@ -34,8 +34,9 @@ export function LiveCashbackCalculator() {
 
   // Hoa hồng sàn trả cho affiliate
   const grossCommission = Math.round(monthlySpend * selectedCat.avgRate * platformMultiplier);
-  // MeowBack chia lại 20% hoa hồng cho khách
-  const monthlyCashback = Math.round(grossCommission * CASHBACK_SHARE_RATE);
+  const afterTaxCommission = grossCommission * (1 - DEFAULT_TAX_RATE);
+  // MeowBack chia lại 80% hoa hồng sau thuế cho khách
+  const monthlyCashback = Math.round(afterTaxCommission * CASHBACK_SHARE_RATE);
   const yearlyCashback = monthlyCashback * 12;
 
   const formatCurrency = (val: number) =>
@@ -182,7 +183,7 @@ export function LiveCashbackCalculator() {
                   <Sparkles size={14} className="text-amber-300" /> Kết quả dành riêng cho bạn
                 </span>
                 <span className="bg-white/20 text-white text-[11px] font-black px-2.5 py-0.5 rounded-full backdrop-blur-md flex items-center gap-1">
-                  <Gift size={12} /> Hoàn lại 20%
+                  <Gift size={12} /> Hoàn lại 80% sau thuế
                 </span>
               </div>
 
@@ -192,7 +193,7 @@ export function LiveCashbackCalculator() {
                   ~ {formatCurrency(monthlyCashback)}
                 </div>
                 <div className="text-[11px] font-semibold text-white/60 mt-1">
-                  Từ hoa hồng {formatCurrency(grossCommission)} × 20% chia sẻ
+                  Từ hoa hồng sau thuế {formatCurrency(Math.round(afterTaxCommission))} × 80% hoàn khách
                 </div>
               </div>
 
