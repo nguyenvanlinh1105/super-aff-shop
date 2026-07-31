@@ -97,3 +97,16 @@ export function GoogleIcon({ size = 22, className = "" }: IconProps) {
 export function TiktokIcon(props: IconProps) {
   return <Icons8Image {...props} style="color" slug="tiktok" alt="Tiktok" />;
 }
+
+export function TelegramIcon({ size = 22, className = "" }: IconProps) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 240 240" className={className}>
+      <circle cx="120" cy="120" r="120" fill="#24A1DE" />
+      <path
+        fill="#FFF"
+        d="M98 175c-4 0-3-2-5-6l-14-46 102-64c5-3 9-1 6 2L67 141l-24-7c-5-2-5-5 1-7l146-56c7-3 13 2 11 10L174 163c-2 10-8 12-16 7l-45-33-22 21c-2 3-5 4-9 4z"
+      />
+    </svg>
+  );
+}
+
