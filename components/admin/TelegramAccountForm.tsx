@@ -70,7 +70,7 @@ export function TelegramAccountForm({ account }: { account: TelegramAccount | nu
       </div>
       <label className="flex items-center gap-sm text-[14px]">
         <input type="checkbox" checked={status === "active"} onChange={(e) => setStatus(e.target.checked ? "active" : "inactive")} />
-        Bat bot auto reply
+        Bật bot auto reply
       </label>
       {error && (
         <div className="rounded-xl bg-negative/10 border border-negative/20 px-lg py-md text-[13px] font-semibold text-negative-darkest">
@@ -83,7 +83,7 @@ export function TelegramAccountForm({ account }: { account: TelegramAccount | nu
         </div>
       )}
       <Button type="submit" disabled={loading} className="w-fit">
-        {loading ? "Dang luu..." : "Luu cau hinh"}
+        {loading ? "Đang xử lý" : "Lưu cấu hình"}
       </Button>
     </form>
   );

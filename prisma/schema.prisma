@@ -19,6 +19,15 @@ model User {
   status       String   @default("active")
   customerId   String?  @unique @map("customer_id")
   customer     Customer? @relation(fields: [customerId], references: [id])
+
+  // ─── 2MFA Fields ──────────────────────────────────────────────
+  mfaEnabled        Boolean   @default(false) @map("mfa_enabled")
+  mfaSecret         String?   @map("mfa_secret")
+  mfaMethod         String?   @default("totp") @map("mfa_method")
+  mfaBackupCodes    String?   @map("mfa_backup_codes")
+  mfaResetToken     String?   @map("mfa_reset_token")
+  mfaResetExpiresAt DateTime? @map("mfa_reset_expires_at")
+
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @default(now()) @updatedAt @map("updated_at")
 
@@ -499,6 +508,18 @@ model TelegramMessageLog {
   @@index([direction])
   @@index([createdAt])
   @@map("telegram_message_logs")
+}
+
+model TelegramBotCommand {
+  id          String   @id @default(uuid())
+  command     String   @unique
+  title       String
+  replyText   String   @map("reply_text")
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@map("telegram_bot_commands")
 }
 
 model AuditLog {

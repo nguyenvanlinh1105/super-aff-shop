@@ -5,7 +5,6 @@ import {
   CircleDollarSign,
   TriangleAlert,
   TrendingUp,
-  TrendingDown,
   ArrowUpRight,
   Sparkles,
 } from "lucide-react";
@@ -13,6 +12,7 @@ import { prisma } from "@/lib/prisma";
 import { formatCurrency } from "@/lib/format";
 import { AdminRevenueChart } from "@/components/admin/AdminRevenueChart";
 import { IconBow } from "@/components/icons/CatRibbonIcons";
+import { ShopeeIcon, TiktokIcon } from "@/components/icons/PlatformIcons";
 
 export default async function AdminDashboardPage() {
   const [
@@ -83,43 +83,16 @@ export default async function AdminDashboardPage() {
 
   const maxOrders = topBuyersList[0]?.orderCount || 1;
 
-  // Nhóm hiệu suất theo tháng — key YYYY-MM để sort đúng thứ tự thời gian
-  const byMonth = new Map<string, { commission: number; reward: number; profit: number; count: number }>();
-  for (const o of orders) {
+  // Serialize dữ liệu order cho biểu đồ drill-down (Year → Month → Week)
+  const orderData = orders.map((o) => {
     const d = new Date(o.orderedAt ?? o.createdAt);
-    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-    const cur = byMonth.get(key) ?? { commission: 0, reward: 0, profit: 0, count: 0 };
-    cur.commission += Number(o.commissionAmount);
-    cur.reward += Number(o.customerRewardAmount);
-    cur.profit += Number(o.systemProfitAmount);
-    cur.count += 1;
-    byMonth.set(key, cur);
-  }
-
-  let chartMonths = Array.from(byMonth.entries())
-    .sort(([a], [b]) => a.localeCompare(b))
-    .slice(-6)
-    .map(([key, v]) => ({ label: `Thg ${Number(key.split("-")[1])}`, ...v }));
-
-  if (chartMonths.length === 0) {
-    chartMonths = [
-      { label: "Thg 2", commission: 1200000, reward: 960000, profit: 240000, count: 18 },
-      { label: "Thg 3", commission: 2500000, reward: 2000000, profit: 500000, count: 32 },
-      { label: "Thg 4", commission: 4100000, reward: 3280000, profit: 820000, count: 54 },
-      { label: "Thg 5", commission: 6800000, reward: 5440000, profit: 1360000, count: 86 },
-      { label: "Thg 6", commission: 9200000, reward: 7360000, profit: 1840000, count: 120 },
-      { label: "Thg 7", commission: 12500000, reward: 10000000, profit: 2500000, count: 150 },
-    ];
-  }
-
-  const maxVal = Math.max(...chartMonths.map((m) => m.commission), 1);
-
-  // Tăng trưởng thực: tháng hiện tại vs tháng trước
-  const lastM = chartMonths[chartMonths.length - 1];
-  const prevM = chartMonths[chartMonths.length - 2];
-  const growthPct = prevM && prevM.commission > 0
-    ? Math.round(((lastM.commission - prevM.commission) / prevM.commission) * 100)
-    : 0;
+    return {
+      date: d.toISOString().slice(0, 10),
+      commission: Number(o.commissionAmount),
+      reward: Number(o.customerRewardAmount),
+      profit: Number(o.systemProfitAmount),
+    };
+  });
 
   // Tỷ trọng nền tảng
   const platformMap = new Map<string, string>(platforms.map((p) => [p.id, p.name]));
@@ -156,6 +129,26 @@ export default async function AdminDashboardPage() {
     { label: "Đang chờ", value: statusCounts.pending, color: "bg-amber-400", text: "text-amber-700", desc: "Chờ sàn đối soát" },
     { label: "Đã huỷ", value: statusCounts.cancelled, color: "bg-neutral-300", text: "text-neutral-500", desc: "Đơn hoàn / huỷ" },
   ];
+
+  // Phân tích khung giờ săn deal (Peak Shopping Hours)
+  const hourBuckets = { night: 0, morning: 0, afternoon: 0, evening: 0 };
+  for (const o of orders) {
+    const d = new Date(o.orderedAt ?? o.createdAt);
+    const hour = d.getHours();
+    if (hour >= 0 && hour < 6) hourBuckets.night += 1;
+    else if (hour >= 6 && hour < 12) hourBuckets.morning += 1;
+    else if (hour >= 12 && hour < 18) hourBuckets.afternoon += 1;
+    else hourBuckets.evening += 1;
+  }
+  const peakTotal = orders.length || 1;
+  const peakRows = [
+    { slot: "00:00 - 06:00", label: "Flash Sale Đêm", count: hourBuckets.night, pct: Math.round((hourBuckets.night / peakTotal) * 100), emoji: "🌙", color: "bg-indigo-500" },
+    { slot: "06:00 - 12:00", label: "Sáng Công Sở", count: hourBuckets.morning, pct: Math.round((hourBuckets.morning / peakTotal) * 100), emoji: "☕", color: "bg-sky-500" },
+    { slot: "12:00 - 18:00", label: "Chiều Mua Sắm", count: hourBuckets.afternoon, pct: Math.round((hourBuckets.afternoon / peakTotal) * 100), emoji: "🛍️", color: "bg-amber-500" },
+    { slot: "18:00 - 24:00", label: "Tối Giờ Vàng", count: hourBuckets.evening, pct: Math.round((hourBuckets.evening / peakTotal) * 100), emoji: "⚡", color: "bg-rose-500" },
+  ].sort((a, b) => b.count - a.count);
+
+  const topPeak = peakRows[0];
 
   return (
     <div className="flex flex-col gap-6 fade-in pb-8">
@@ -243,17 +236,12 @@ export default async function AdminDashboardPage() {
       </div>
 
       {/* ═══ 1. FULL-WIDTH TREND LINE CHART (INTERACTIVE HOVER TOOLTIP) ═══ */}
-      <AdminRevenueChart
-        chartMonths={chartMonths}
-        growthPct={growthPct}
-        prevMLabel={prevM?.label}
-        maxVal={maxVal}
-      />
+      <AdminRevenueChart orderData={orderData} />
 
-      {/* ═══ 2. TỶ TRỌNG SÀN & SỨC KHOẺ ĐƠN HÀNG (2 CARD TRONG 1 ROW) ═══ */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* ═══ 2. TỶ TRỌNG SÀN, SỨC KHOẺ ĐƠN HÀNG & KHUNG GIỜ SĂN DEAL (3 CARDS IN 1 ROW) ═══ */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-        {/* Donut: Ty trong nen tang */}
+        {/* Bar: Tỷ trọng đơn theo sàn (Visual Comparison Bar Chart) */}
         <div className="rounded-3xl bg-white p-6 sm:p-8 shadow-sm border border-neutral-200/70 flex flex-col justify-between overflow-hidden">
           <div>
             <div className="flex items-center gap-3 mb-6">
@@ -262,60 +250,55 @@ export default async function AdminDashboardPage() {
               </div>
               <div>
                 <h2 className="text-base font-extrabold text-neutral-900 tracking-tight">Tỷ Trọng Đơn Theo Sàn</h2>
-                <p className="text-xs text-neutral-500 font-medium">Phân bố {totalPlatformOrders.toLocaleString()} đơn trên các nền tảng affiliate</p>
+                <p className="text-xs text-neutral-500 font-medium">Phân bố {totalPlatformOrders.toLocaleString()} đơn trên các sàn TMĐT</p>
               </div>
             </div>
 
-            <div className="flex flex-col sm:flex-row items-center gap-5 sm:gap-6">
-              <svg viewBox="0 0 120 120" className="w-28 h-28 sm:w-32 sm:h-32 shrink-0 -rotate-90">
-                {(() => {
-                  const R = 46;
-                  const C = 2 * Math.PI * R;
-                  let offset = 0;
-                  return platformShare.map((s) => {
-                    const len = (s.count / totalPlatformOrders) * C;
-                    const el = (
-                      <circle
-                        key={s.name}
-                        cx="60" cy="60" r={R}
-                        fill="none"
-                        stroke={s.color}
-                        strokeWidth="16"
-                        strokeDasharray={`${Math.max(len - 2, 0)} ${C - Math.max(len - 2, 0)}`}
-                        strokeDashoffset={-offset}
-                        strokeLinecap="butt"
-                      />
-                    );
-                    offset += len;
-                    return el;
-                  });
-                })()}
-                <g className="rotate-90" style={{ transformOrigin: "60px 60px" }}>
-                  <text x="60" y="57" textAnchor="middle" className="text-[16px] font-black fill-neutral-900">{totalPlatformOrders}</text>
-                  <text x="60" y="71" textAnchor="middle" className="text-[8px] font-bold fill-neutral-400 uppercase tracking-wider">đơn hàng</text>
-                </g>
-              </svg>
-
-              <div className="flex flex-col gap-3 w-full min-w-0">
-                {platformShare.map((s) => (
-                  <div key={s.name} className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <span className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: s.color }} />
-                      <span className="text-xs sm:text-sm font-extrabold text-neutral-800 whitespace-nowrap">{s.name}</span>
+            <div className="flex flex-col gap-4">
+              {platformShare.map((s) => {
+                const isShopee = s.name.toLowerCase().includes("shopee");
+                const isTiktok = s.name.toLowerCase().includes("tiktok");
+                return (
+                  <div key={s.name} className="flex flex-col gap-1.5 p-3 rounded-2xl bg-neutral-50/80 border border-neutral-200/50 hover:bg-neutral-100/60 transition-colors">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div className="w-7 h-7 rounded-xl bg-white flex items-center justify-center shadow-2xs border border-neutral-200/60 shrink-0 p-1">
+                          {isShopee ? (
+                            <ShopeeIcon size={18} />
+                          ) : isTiktok ? (
+                            <TiktokIcon size={18} />
+                          ) : (
+                            <span className="w-3 h-3 rounded-full" style={{ backgroundColor: s.color }} />
+                          )}
+                        </div>
+                        <span className="text-xs sm:text-sm font-extrabold text-neutral-800 truncate">{s.name}</span>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span className="text-xs font-bold text-neutral-500 tabular-nums">{s.count} đơn</span>
+                        <span className="text-xs font-black px-2 py-0.5 rounded-full text-white tabular-nums" style={{ backgroundColor: s.color }}>
+                          {s.pct}%
+                        </span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2 shrink-0">
-                      <span className="text-xs font-bold text-neutral-400 tabular-nums">{s.count} đơn</span>
-                      <span className="text-xs sm:text-sm font-black text-rose-600 tabular-nums w-9 text-right">{s.pct}%</span>
+                    {/* Visual Progress Bar */}
+                    <div className="h-2 w-full rounded-full bg-neutral-200/70 overflow-hidden">
+                      <div
+                        style={{ width: `${Math.max(s.pct, 3)}%`, backgroundColor: s.color }}
+                        className="h-full rounded-full transition-all duration-500"
+                      />
                     </div>
                   </div>
-                ))}
-                <div className="mt-1 h-2.5 w-full rounded-full overflow-hidden flex bg-neutral-100">
-                  {platformShare.map((s) => (
-                    <div key={s.name} style={{ width: `${s.pct}%`, backgroundColor: s.color }} className="h-full first:rounded-l-full last:rounded-r-full" />
-                  ))}
-                </div>
-              </div>
+                );
+              })}
             </div>
+          </div>
+
+          <div className="mt-6 p-3.5 rounded-2xl bg-sky-50/70 border border-sky-200/70 flex items-center justify-between">
+            <span className="text-xs font-extrabold text-sky-900">Sàn Dẫn Đầu</span>
+            <span className="text-xs font-black text-sky-700 bg-white px-2.5 py-1 rounded-xl shadow-2xs border border-sky-200 flex items-center gap-1.5">
+              <span>🏆</span>
+              <span>{platformShare[0]?.name || "Shopee"} ({platformShare[0]?.pct || 0}%)</span>
+            </span>
           </div>
         </div>
 
@@ -328,7 +311,7 @@ export default async function AdminDashboardPage() {
               </div>
               <div>
                 <h2 className="text-base font-extrabold text-neutral-900 tracking-tight">Sức Khoẻ Đơn Hàng</h2>
-                <p className="text-xs text-neutral-500 font-medium">Tỷ lệ duyệt đơn quyết định dòng tiền hoàn khách</p>
+                <p className="text-xs text-neutral-500 font-medium">Tỷ lệ duyệt đơn quyết định dòng tiền hoàn</p>
               </div>
             </div>
 
@@ -358,6 +341,52 @@ export default async function AdminDashboardPage() {
             <span className="text-xl font-black text-emerald-700 tabular-nums">{Math.round((statusCounts.approved / statusTotal) * 100)}%</span>
           </div>
         </div>
+
+        {/* Bar: Khung gio san deal */}
+        <div className="rounded-3xl bg-white p-6 sm:p-8 shadow-sm border border-neutral-200/70 flex flex-col justify-between">
+          <div>
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 rounded-2xl bg-rose-50 flex items-center justify-center shadow-xs border border-rose-100 shrink-0 text-lg">
+                &#9889;
+              </div>
+              <div>
+                <h2 className="text-base font-extrabold text-neutral-900 tracking-tight">Khung Giờ Săn Deal</h2>
+                <p className="text-xs text-neutral-500 font-medium">Thời điểm người dùng chốt đơn nhiều nhất</p>
+              </div>
+            </div>
+
+            <div className="flex flex-col gap-3.5">
+              {peakRows.map((row) => (
+                <div key={row.slot} className="flex flex-col gap-1">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-extrabold text-neutral-800 flex items-center gap-1.5">
+                      <span>{row.emoji}</span>
+                      <span>{row.label}</span>
+                      <span className="text-[10px] text-neutral-400 font-medium">({row.slot})</span>
+                    </span>
+                    <span className="font-black text-neutral-900 tabular-nums">
+                      {row.count} đơn <span className="text-rose-600 font-extrabold">({row.pct}%)</span>
+                    </span>
+                  </div>
+                  <div className="h-2 w-full rounded-full bg-neutral-100 overflow-hidden">
+                    <div style={{ width: `${Math.max(row.pct, 3)}%` }} className={`h-full rounded-full ${row.color} transition-all duration-500`} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="mt-6 p-3.5 rounded-2xl bg-rose-50/70 border border-rose-200/70 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <TrendingUp size={16} className="text-rose-600 shrink-0" />
+              <span className="text-xs font-extrabold text-rose-900">Giờ Vàng Săn Deal</span>
+            </div>
+            <span className="text-xs font-black text-rose-600 bg-white px-2.5 py-1 rounded-xl shadow-2xs border border-rose-200">
+              {topPeak ? `${topPeak.emoji} ${topPeak.label}` : "18h - 24h"}
+            </span>
+          </div>
+        </div>
+
       </div>
 
       {/* ═══ 3. DOANH THU & LỢI NHUẬN HỆ THỐNG (FULL-WIDTH BANNER) ═══ */}

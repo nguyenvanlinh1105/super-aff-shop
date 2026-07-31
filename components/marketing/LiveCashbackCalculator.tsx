@@ -2,9 +2,16 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Calculator, Sparkles, TrendingUp, ArrowRight, ShieldCheck, HeartHandshake } from "lucide-react";
+import { Sparkles, TrendingUp, ArrowRight, ShieldCheck, HeartHandshake, Gift } from "lucide-react";
 import { ShopeeIcon, TiktokIcon } from "@/components/icons/PlatformIcons";
 
+/*
+ * Tỷ lệ hoa hồng trung bình mà sàn (Shopee/TikTok) trả cho affiliate
+ * theo từng ngành hàng. MeowBack sau đó chia lại 80% số hoa hồng sau thuế
+ * cho khách hàng (Admin giữ lại 20%).
+ *
+ * Công thức: Hoàn tiền = Hoa hồng sau thuế × 80%
+ */
 const CATEGORIES = [
   { id: "fashion", name: "Thời Trang & Giày Dép", avgRate: 0.12, emoji: "👗" },
   { id: "beauty", name: "Mỹ Phẩm & Skin Care", avgRate: 0.10, emoji: "💄" },
@@ -13,6 +20,10 @@ const CATEGORIES = [
   { id: "home", name: "Nhà Cửa & Đời Sống", avgRate: 0.07, emoji: "🏡" },
 ];
 
+/* Tỷ lệ MeowBack chia lại cho khách hàng (80% trên hoa hồng sau thuế) */
+const CASHBACK_SHARE_RATE = 0.8;
+const DEFAULT_TAX_RATE = 0.1098; // 10.98%
+
 export function LiveCashbackCalculator() {
   const [monthlySpend, setMonthlySpend] = useState<number>(3000000);
   const [platform, setPlatform] = useState<"shopee" | "tiktok">("shopee");
@@ -20,25 +31,35 @@ export function LiveCashbackCalculator() {
 
   const selectedCat = CATEGORIES.find((c) => c.id === selectedCatId) || CATEGORIES[0];
   const platformMultiplier = platform === "tiktok" ? 1.1 : 1.0;
-  
-  const monthlyCashback = Math.round(monthlySpend * selectedCat.avgRate * 0.8 * platformMultiplier);
+
+  // Hoa hồng sàn trả cho affiliate
+  const grossCommission = Math.round(monthlySpend * selectedCat.avgRate * platformMultiplier);
+  const afterTaxCommission = grossCommission * (1 - DEFAULT_TAX_RATE);
+  // MeowBack chia lại 80% hoa hồng sau thuế cho khách
+  const monthlyCashback = Math.round(afterTaxCommission * CASHBACK_SHARE_RATE);
   const yearlyCashback = monthlyCashback * 12;
 
   const formatCurrency = (val: number) =>
     new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(val);
 
-  // Cá nhân hóa thông điệp UX theo mức chi tiêu của người dùng
-  const getPersonalizedTip = (spend: number, yearly: number) => {
+  const formatShort = (val: number) => {
+    if (val >= 1000000) return `${(val / 1000000).toFixed(1).replace(/\.0$/, "")} triệu`;
+    if (val >= 1000) return `${(val / 1000).toFixed(0)}K`;
+    return val.toLocaleString("vi-VN");
+  };
+
+  // Cá nhân hóa thông điệp UX — phù hợp với mức hoàn thực tế (20% hoa hồng)
+  const getPersonalizedTip = (spend: number, monthly: number, yearly: number) => {
     if (spend <= 1500000) {
-      return `Mỗi tháng bạn dư ra ~${formatCurrency(monthlyCashback)} — đủ tiền thưởng cho mình 2 ly trà sữa thơm ngon mỗi tháng 🧋`;
+      return `Mỗi tháng bạn được hoàn ~${formatCurrency(monthly)} — tích góp dần, cuối năm có thêm ${formatCurrency(yearly)} tiêu vặt không mất đồng nào 🧋`;
     }
     if (spend <= 5000000) {
-      return `Một năm bạn tiết kiệm được ~${formatCurrency(yearly)} — dư sức tự thưởng 1 chuyến du lịch ngắn ngày cùng bạn bè ✈️`;
+      return `Tích lũy ~${formatCurrency(yearly)}/năm hoàn toàn tự động — đủ tiền đi ăn nhà hàng hay mua quà tặng bạn bè mỗi dịp lễ 🎁`;
     }
     if (spend <= 10000000) {
-      return `Tiết kiệm tới ~${formatCurrency(yearly)}/năm — bằng tiền nâng cấp chiếc iPhone hoặc Laptop mới tinh 📱`;
+      return `Bạn chi tiêu nhiều = hoàn nhiều! ~${formatCurrency(yearly)}/năm đủ nâng cấp phụ kiện yêu thích hoặc 1 chuyến đi chơi ngắn ngày ✈️`;
     }
-    return `Số tiền tích lũy khủng ~${formatCurrency(yearly)}/năm — bạn thực sự là một siêu thợ săn deal chính hiệu! 💰`;
+    return `Với mức chi tiêu của bạn, ~${formatCurrency(yearly)}/năm hoàn về ví là con số rất đáng kể — tiền "rơi" tự động mà không cần làm gì thêm 💰`;
   };
 
   return (
@@ -60,7 +81,7 @@ export function LiveCashbackCalculator() {
             </span>
           </h2>
           <p className="text-neutral-600 font-semibold max-w-xl mx-auto text-base">
-            Hãy kéo thử mức chi tiêu của bạn bên dưới. Tôi sẽ tính chính xác số tiền bạn sẽ nhận lại vào ví thay vì để sàn giữ mất.
+            Kéo thử mức chi tiêu bên dưới — tôi sẽ tính số tiền bạn được hoàn mỗi tháng, hoàn toàn tự động khi mua qua MeowBack.
           </p>
         </div>
 
@@ -161,15 +182,18 @@ export function LiveCashbackCalculator() {
                 <span className="text-xs font-black uppercase tracking-widest text-primary-100 flex items-center gap-1.5">
                   <Sparkles size={14} className="text-amber-300" /> Kết quả dành riêng cho bạn
                 </span>
-                <span className="bg-white/20 text-white text-[11px] font-black px-2.5 py-0.5 rounded-full backdrop-blur-md">
-                  Hoàn lại 80%
+                <span className="bg-white/20 text-white text-[11px] font-black px-2.5 py-0.5 rounded-full backdrop-blur-md flex items-center gap-1">
+                  <Gift size={12} /> Hoàn lại 80% sau thuế
                 </span>
               </div>
 
               <div>
-                <div className="text-xs font-extrabold text-primary-100 mb-1">Mỗi tháng MeowBack hoàn về ví bạn:</div>
+                <div className="text-xs font-extrabold text-primary-100 mb-1">Mỗi tháng bạn được hoàn về ví:</div>
                 <div className="text-3xl md:text-4xl font-black tracking-tight text-white drop-shadow-sm">
                   ~ {formatCurrency(monthlyCashback)}
+                </div>
+                <div className="text-[11px] font-semibold text-white/60 mt-1">
+                  Từ hoa hồng sau thuế {formatCurrency(Math.round(afterTaxCommission))} × 80% hoàn khách
                 </div>
               </div>
 
@@ -182,7 +206,7 @@ export function LiveCashbackCalculator() {
                   <span className="text-amber-200 font-extrabold">{formatCurrency(yearlyCashback)}</span>
                 </div>
                 <p className="text-[12px] font-bold text-white/90 leading-relaxed italic border-t border-white/10 pt-2">
-                  "{getPersonalizedTip(monthlySpend, yearlyCashback)}"
+                  &ldquo;{getPersonalizedTip(monthlySpend, monthlyCashback, yearlyCashback)}&rdquo;
                 </p>
               </div>
             </div>

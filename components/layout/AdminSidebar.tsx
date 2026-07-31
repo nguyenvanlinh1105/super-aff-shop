@@ -3,8 +3,9 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { LogOut, Menu, X, ShieldCheck, Sparkles } from "lucide-react";
+import { LogOut, Menu, X, ShieldCheck, Sparkles, Search, Command } from "lucide-react";
 import { LogoMeowBack, IconBow } from "@/components/icons/CatRibbonIcons";
+import { AdminCommandPalette } from "@/components/admin/AdminCommandPalette";
 
 export type AdminNavItem = {
   href: string;
@@ -29,10 +30,23 @@ export function AdminSidebar({
   const pathname = usePathname();
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
+  const [isCommandOpen, setIsCommandOpen] = useState(false);
 
   useEffect(() => {
     setIsOpen(false);
   }, [pathname]);
+
+  // Global Ctrl + K / Cmd + K listener
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if ((e.ctrlKey || e.metaKey) && e.key === "k") {
+        e.preventDefault();
+        setIsCommandOpen((prev) => !prev);
+      }
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, []);
 
   async function handleLogout() {
     await fetch("/api/auth/logout", { method: "POST" });
@@ -105,6 +119,21 @@ export function AdminSidebar({
                   <Sparkles size={10} /> HQ
                 </span>
               </div>
+
+              {/* Quick Command Search Button */}
+              <button
+                type="button"
+                onClick={() => setIsCommandOpen(true)}
+                className="mt-1 flex items-center justify-between gap-2 w-full px-3 py-2 rounded-2xl bg-neutral-100/80 hover:bg-rose-50/80 text-neutral-600 hover:text-rose-600 text-xs font-semibold border border-neutral-200/60 transition-all group"
+              >
+                <span className="flex items-center gap-2">
+                  <Search size={14} className="text-neutral-400 group-hover:text-rose-500" />
+                  <span>Tìm kiếm nhanh...</span>
+                </span>
+                <span className="flex items-center gap-0.5 text-[10px] font-black text-neutral-400 bg-white px-1.5 py-0.5 rounded-md border border-neutral-200 shadow-2xs">
+                  <Command size={10} /> K
+                </span>
+              </button>
             </div>
           </div>
 
@@ -174,10 +203,12 @@ export function AdminSidebar({
               strokeWidth={2.2}
               className="shrink-0 transition-transform duration-150 group-hover:-translate-x-0.5"
             />
-            <span>Đăng xuất hệ thống</span>
+            <span>Đăng xuất</span>
           </button>
         </div>
       </aside>
+
+      <AdminCommandPalette isOpen={isCommandOpen} onClose={() => setIsCommandOpen(false)} />
     </>
   );
 }
