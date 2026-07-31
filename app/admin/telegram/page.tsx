@@ -8,6 +8,8 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { TelegramAccountForm } from "@/components/admin/TelegramAccountForm";
 import { TelegramWebhookStatus } from "@/components/admin/TelegramWebhookStatus";
 
+import { TelegramIcon } from "@/components/icons/PlatformIcons";
+
 export default async function AdminTelegramPage() {
   const [account, logs] = await Promise.all([
     prisma.telegramAccount.findFirst({ orderBy: { createdAt: "desc" } }),
@@ -21,8 +23,8 @@ export default async function AdminTelegramPage() {
         <div className="pointer-events-none absolute -right-10 -top-10 h-48 w-48 rounded-full bg-gradient-to-br from-sky-200/30 to-indigo-300/20 blur-xl" />
         <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
           <div className="flex items-center gap-5">
-            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-3xl bg-gradient-to-br from-sky-400 via-indigo-500 to-sky-600 text-white flex items-center justify-center text-3xl shadow-md shadow-sky-500/20 shrink-0 border border-white/40">
-              ✈️
+            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-3xl bg-white p-2 flex items-center justify-center shadow-lg shadow-sky-500/15 shrink-0 border border-sky-100 overflow-hidden">
+              <TelegramIcon size={56} className="w-full h-full object-contain" />
             </div>
             <div>
               <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-white/80 border border-sky-200 text-[10px] font-black uppercase tracking-widest text-sky-700 shadow-xs mb-1.5">
