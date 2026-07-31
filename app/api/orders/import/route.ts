@@ -7,6 +7,7 @@ import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
 import { parseImportCsv } from "@/lib/csvImport";
 import { parseShopeeAffiliateCsv } from "@/lib/shopeeAffiliateCsv";
+import { parseTikTokAffiliateReport } from "@/lib/tiktokAffiliateCsv";
 import { getActiveCommissionRule, splitCommission, isWithinReferralWindow, isSettlementReady } from "@/lib/commission";
 import { notifyCustomerTelegram } from "@/lib/telegramNotify";
 import { buildOrderApprovedMessage, buildReferralBonusMessage } from "@/lib/telegramBot";
@@ -93,8 +94,53 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Thiếu file hoặc nền tảng" }, { status: 400 });
   }
 
-  const content = await file.text();
-  const rows = parseAnyCsv(content);
+  const arrayBuffer = await file.arrayBuffer();
+  const fileBuffer = Buffer.from(arrayBuffer);
+  const isExcel = file.name.endsWith(".xlsx") || file.name.endsWith(".xls");
+
+  let rows: NormRow[] = [];
+  if (isExcel) {
+    const ttRows = parseTikTokAffiliateReport(fileBuffer);
+    rows = ttRows.map((r, i) => ({
+      rowNumber: i + 1,
+      orderExternalId: r.externalOrderId,
+      trackingCode: r.subId2 || undefined,
+      subId2: r.subId2 || undefined,
+      orderedAt: r.orderedAt,
+      completedAt: r.completedAt,
+      shopName: r.shopName,
+      itemName: r.itemName,
+      commissionAmount: r.commissionAmount,
+      grossCommissionAmount: r.commissionAmount,
+      netCommissionAmount: r.commissionAmount,
+      orderAmount: r.orderAmount,
+      orderStatus: r.orderStatus,
+      rawData: r.rawRow,
+    }));
+  } else {
+    const content = fileBuffer.toString("utf-8");
+    if (content.toLowerCase().includes("id sku") || content.toLowerCase().includes("trạng thái quyết toán")) {
+      const ttRows = parseTikTokAffiliateReport(fileBuffer);
+      rows = ttRows.map((r, i) => ({
+        rowNumber: i + 1,
+        orderExternalId: r.externalOrderId,
+        trackingCode: r.subId2 || undefined,
+        subId2: r.subId2 || undefined,
+        orderedAt: r.orderedAt,
+        completedAt: r.completedAt,
+        shopName: r.shopName,
+        itemName: r.itemName,
+        commissionAmount: r.commissionAmount,
+        grossCommissionAmount: r.commissionAmount,
+        netCommissionAmount: r.commissionAmount,
+        orderAmount: r.orderAmount,
+        orderStatus: r.orderStatus,
+        rawData: r.rawRow,
+      }));
+    } else {
+      rows = parseAnyCsv(content);
+    }
+  }
 
   if (mode === "preview") {
     // Đối chiếu cả 5 sub_id (không chỉ sub_id2) — khớp với logic commit thật

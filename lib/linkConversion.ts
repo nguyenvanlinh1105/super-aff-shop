@@ -133,6 +133,20 @@ export async function buildAffiliateUrl(
   if (platformCode === "TIKTOK") {
     const accessTradeLink = await buildTikTokAffiliateUrlViaAccessTrade(normalizedUrl, trackingCode, subIds);
     if (accessTradeLink) return accessTradeLink;
+
+    const tiktokAffId = process.env.TIKTOK_AFFILIATE_ID;
+    if (tiktokAffId) {
+      try {
+        const url = new URL(normalizedUrl);
+        const effectiveSubIds = subIds ?? { subId2: trackingCode };
+        url.searchParams.set("creator_id", tiktokAffId);
+        url.searchParams.set("sub_id2", effectiveSubIds.subId2 ?? trackingCode);
+        if (effectiveSubIds.subId1) url.searchParams.set("sub_id1", effectiveSubIds.subId1);
+        return url.toString();
+      } catch {
+        // Fallback standard URL handling below
+      }
+    }
   }
 
   try {

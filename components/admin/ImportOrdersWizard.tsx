@@ -120,7 +120,7 @@ export function ImportOrdersWizard({ platforms }: { platforms: Option[] }) {
           <label className="flex cursor-pointer flex-col items-center justify-center gap-3 rounded-3xl border-2 border-dashed border-rose-200 bg-gradient-to-br from-rose-50/40 via-white to-pink-50/30 px-6 py-10 text-center transition-all duration-200 hover:border-rose-400 hover:bg-rose-50/60 shadow-xs">
             <input
               type="file"
-              accept=".csv"
+              accept=".csv,.xlsx,.xls"
               onChange={(e) => setFile(e.target.files?.[0] ?? null)}
               className="hidden"
             />

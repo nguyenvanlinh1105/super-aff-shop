@@ -1,0 +1,99 @@
+TOTAL ROWS: 15
+
+--- HEADER (Row 0) ---
+Col 0: ID đơn hàng
+Col 1: ID SKU
+Col 2: Tên sản phẩm
+Col 3: ID sản phẩm
+Col 4: Giá
+Col 5: Số món bán ra
+Col 6: Số món đã hoàn tiền
+Col 7: Tên cửa hàng
+Col 8: Mã cửa hàng
+Col 9: Đối tác liên kết
+Col 10: Agency
+Col 11: Đơn vị tiền tệ
+Col 12: Loại đơn hàng
+Col 13: Trạng thái quyết toán đơn hàng
+Col 14: Gián tiếp
+Col 15: Loại hoa hồng
+Col 16: Loại nội dung
+Col 17: Id nội dung
+Col 18: Tiêu chuẩn
+Col 19: Quảng cáo cửa hàng
+Col 20: TikTok thưởng
+Col 21: Đối tác thưởng
+Col 22: Phần chia doanh thu
+Col 23: GMV
+Col 24: Cơ sở hoa hồng ước tính
+Col 25: Hoa hồng tiêu chuẩn ước tính
+Col 26: Hoa hồng Quảng cáo cửa hàng ước tính
+Col 27: Thưởng ước tính
+Col 28: Thưởng ước tính của đối tác liên kết
+Col 29: IVA ước tính
+Col 30: ISR ước tính
+Col 31: Est. CedularTax
+Col 32: PIT ước tính
+Col 33: Ước tính phần chia doanh thu
+Col 34: Cơ sở hoa hồng thực tế
+Col 35: Hoa hồng tiêu chuẩn
+Col 36: Hoa hồng Quảng cáo cửa hàng
+Col 37: Thưởng
+Col 38: Thưởng của đối tác liên kết
+Col 39: Thuế - ISR
+Col 40: Thuế - IVA
+Col 41: cedular_tax
+Col 42: Thuế - PIT
+Col 43: Đã chia sẻ với đối tác
+Col 44: Tổng số tiền nhận được cuối cùng
+Col 45: Ngày đặt hàng
+Col 46: Ngày quyết toán hoa hồng
+
+--- ROW 1 (Sample Data) ---
+  Col 0 (ID đơn hàng): 585240273400202654
+  Col 1 (ID SKU): 1735305303689888833
+  Col 2 (Tên sản phẩm): Set Áo Croptop Trễ Vai Bèo Phối Chân Váy Dài Xoè Bồng Mặc Đi Chơi Đi Biển Sang Chảnh MS137
+  Col 3 (ID sản phẩm): 1734891790106592321
+  Col 4 (Giá): 189.000
+  Col 5 (Số món bán ra): 1
+  Col 6 (Số món đã hoàn tiền): 0
+  Col 7 (Tên cửa hàng): Mây Shop 89
+  Col 8 (Mã cửa hàng): VNLCHJW8KX
+  Col 9 (Đối tác liên kết): 
+  Col 10 (Agency): 
+  Col 11 (Đơn vị tiền tệ): VND
+  Col 12 (Loại đơn hàng): Đơn hàng quảng cáo cửa hàng
+  Col 13 (Trạng thái quyết toán đơn hàng): Chờ xử lý
+  Col 14 (Gián tiếp): 
+  Col 15 (Loại hoa hồng): Cùng một tỷ lệ cho tất cả đơn hàng
+  Col 16 (Loại nội dung): Video
+  Col 17 (Id nội dung): 7634049087230283028
+  Col 18 (Tiêu chuẩn): 10%
+  Col 19 (Quảng cáo cửa hàng): 
+  Col 20 (TikTok thưởng): 
+  Col 21 (Đối tác thưởng): 
+  Col 22 (Phần chia doanh thu): 
+  Col 23 (GMV): 189.000
+  Col 24 (Cơ sở hoa hồng ước tính): 189.000
+  Col 25 (Hoa hồng tiêu chuẩn ước tính): 18.900
+  Col 26 (Hoa hồng Quảng cáo cửa hàng ước tính): 
+  Col 27 (Thưởng ước tính): 
+  Col 28 (Thưởng ước tính của đối tác liên kết): 
+  Col 29 (IVA ước tính): 
+  Col 30 (ISR ước tính): 
+  Col 31 (Est. CedularTax): 
+  Col 32 (PIT ước tính): 0
+  Col 33 (Ước tính phần chia doanh thu): 
+  Col 34 (Cơ sở hoa hồng thực tế): 
+  Col 35 (Hoa hồng tiêu chuẩn): 
+  Col 36 (Hoa hồng Quảng cáo cửa hàng): 
+  Col 37 (Thưởng): 
+  Col 38 (Thưởng của đối tác liên kết): 
+  Col 39 (Thuế - ISR): 
+  Col 40 (Thuế - IVA): 
+  Col 41 (cedular_tax): 
+  Col 42 (Thuế - PIT): 
+  Col 43 (Đã chia sẻ với đối tác): 
+  Col 44 (Tổng số tiền nhận được cuối cùng): 
+  Col 45 (Ngày đặt hàng): 27/07/2026 23:12:31
+  Col 46 (Ngày quyết toán hoa hồng): /
