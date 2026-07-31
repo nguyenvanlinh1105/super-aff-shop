@@ -4,6 +4,7 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { CommissionRuleForm } from "@/components/admin/CommissionRuleForm";
 import { CategoryRateForm } from "@/components/admin/CategoryRateForm";
 import { ChangePasswordForm } from "@/components/account/ChangePasswordForm";
+import { AdminMfaSetupCard } from "@/components/admin/AdminMfaSetupCard";
 import { Settings, Code2, Info, Tags, ShieldCheck } from "lucide-react";
 
 export default async function AdminSettingsPage() {
@@ -102,6 +103,9 @@ export default async function AdminSettingsPage() {
           </div>
         </div>
       </div>
+
+      {/* Xác thực 2 bước Admin (2MFA) */}
+      <AdminMfaSetupCard />
 
       {/* Bảo mật tài khoản */}
       <div className="rounded-3xl bg-white shadow-sm border border-neutral-200/70 p-6 sm:p-8">

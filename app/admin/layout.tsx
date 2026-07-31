@@ -16,40 +16,47 @@ import {
 import { getSession } from "@/lib/auth";
 import { AdminSidebar } from "@/components/layout/AdminSidebar";
 
-// ─── Nav sections with emoji icons ───────────────────────────────────────────
-const sections = [
-  {
-    title: "Vận hành",
-    items: [
-      { href: "/admin",            label: "Tổng quan",           emoji: "🏠", icon: <LayoutDashboard size={16} strokeWidth={1.75} /> },
-      { href: "/admin/quick-link", label: "Tạo Link Aff Nhanh",  emoji: "⚡", icon: <Zap             size={16} strokeWidth={1.75} /> },
-      { href: "/admin/customers",  label: "Khách hàng",          emoji: "👥", icon: <Users           size={16} strokeWidth={1.75} /> },
-      { href: "/admin/links",      label: "Link Affiliate",       emoji: "🔗", icon: <Link2           size={16} strokeWidth={1.75} /> },
-      { href: "/admin/deals",      label: "Deals Hot",            emoji: "🔥", icon: <Flame           size={16} strokeWidth={1.75} /> },
-      { href: "/admin/community",  label: "Cộng đồng",            emoji: "💬", icon: <MessagesSquare  size={16} strokeWidth={1.75} /> },
-    ],
-  },
-  {
-    title: "Đối soát & Thanh toán",
-    items: [
-      { href: "/admin/orders",        label: "Đơn hàng",       emoji: "📦", icon: <Package  size={16} strokeWidth={1.75} /> },
-      { href: "/admin/orders/import", label: "Import đối soát", emoji: "📥", icon: <Download size={16} strokeWidth={1.75} /> },
-      { href: "/admin/payments",      label: "Thanh toán",      emoji: "💳", icon: <Wallet   size={16} strokeWidth={1.75} /> },
-      { href: "/admin/reports",       label: "Báo cáo",         emoji: "📊", icon: <BarChart3 size={16} strokeWidth={1.75} /> },
-    ],
-  },
-  {
-    title: "Tích hợp & Cài đặt",
-    items: [
-      { href: "/admin/telegram", label: "Telegram Bot",  emoji: "✈️", icon: <Send          size={16} strokeWidth={1.75} /> },
-      { href: "/admin/settings", label: "Cài đặt",       emoji: "⚙️", icon: <Settings      size={16} strokeWidth={1.75} /> },
-    ],
-  },
-];
+import { prisma } from "@/lib/prisma";
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const session = await getSession();
   if (!session || session.role !== "admin") redirect("/login");
+
+  // Query đếm số công việc tồn đọng để hiển thị Badge cảnh báo realtime trên menu
+  const [unmappedOrdersCount, pendingPaymentsCount] = await Promise.all([
+    prisma.order.count({ where: { OR: [{ customerId: null }, { trackingLinkId: null }] } }),
+    prisma.order.count({ where: { payoutStatus: "pending", customerRewardAmount: { gt: 0 } } }),
+  ]);
+
+  const sections = [
+    {
+      title: "Vận hành",
+      items: [
+        { href: "/admin",            label: "Tổng quan",           emoji: "🏠", icon: <LayoutDashboard size={16} strokeWidth={1.75} /> },
+        { href: "/admin/quick-link", label: "Tạo Link Aff Nhanh",  emoji: "⚡", icon: <Zap             size={16} strokeWidth={1.75} /> },
+        { href: "/admin/customers",  label: "Khách hàng",          emoji: "👥", icon: <Users           size={16} strokeWidth={1.75} /> },
+        { href: "/admin/links",      label: "Link Affiliate",       emoji: "🔗", icon: <Link2           size={16} strokeWidth={1.75} /> },
+        { href: "/admin/deals",      label: "Deals Hot",            emoji: "🔥", icon: <Flame           size={16} strokeWidth={1.75} /> },
+        { href: "/admin/community",  label: "Cộng đồng",            emoji: "💬", icon: <MessagesSquare  size={16} strokeWidth={1.75} /> },
+      ],
+    },
+    {
+      title: "Đối soát & Thanh toán",
+      items: [
+        { href: "/admin/orders",        label: "Đơn hàng",       emoji: "📦", icon: <Package  size={16} strokeWidth={1.75} />, badge: unmappedOrdersCount },
+        { href: "/admin/orders/import", label: "Import đối soát", emoji: "📥", icon: <Download size={16} strokeWidth={1.75} /> },
+        { href: "/admin/payments",      label: "Thanh toán",      emoji: "💳", icon: <Wallet   size={16} strokeWidth={1.75} />, badge: pendingPaymentsCount },
+        { href: "/admin/reports",       label: "Báo cáo",         emoji: "📊", icon: <BarChart3 size={16} strokeWidth={1.75} /> },
+      ],
+    },
+    {
+      title: "Tích hợp & Cài đặt",
+      items: [
+        { href: "/admin/telegram", label: "Telegram Bot",  emoji: "✈️", icon: <Send          size={16} strokeWidth={1.75} /> },
+        { href: "/admin/settings", label: "Cài đặt",       emoji: "⚙️", icon: <Settings      size={16} strokeWidth={1.75} /> },
+      ],
+    },
+  ];
 
   return (
     <div

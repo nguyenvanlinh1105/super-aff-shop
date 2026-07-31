@@ -1,8 +1,23 @@
 "use client";
 
 import { useState } from "react";
-import { Megaphone } from "lucide-react";
+import { Megaphone, Send, Sparkles, Smartphone, Bell, CheckCircle2 } from "lucide-react";
 import { useModal } from "@/components/ui/ModalProvider";
+
+const PRESET_TEMPLATES = [
+  {
+    title: "⚡ Siêu Flash Sale Hoàn Tiền X2",
+    message: "Duy nhất hôm nay! Mua sắm mọi đơn Shopee & TikTok Shop qua MeowBack để nhận gấp đôi hoa hồng hoàn về ví. Số lượng có hạn, chốt đơn ngay!",
+  },
+  {
+    title: "🔧 Thông Báo Bảo Trì Hệ Thống",
+    message: "MeowBack sẽ tiến hành nâng cấp hạ tầng đối soát vào 02:00 sáng mai (dự kiến 30 phút). Các giao dịch chốt đơn trong thời gian này vẫn được tự động ghi nhận bình thường.",
+  },
+  {
+    title: "🎁 Thưởng Thành Viên Mới 50.000đ",
+    message: "Chúc mừng bạn gia nhập MeowBack! Hoàn thành đơn hàng đầu tiên ngay hôm nay để nhận thêm voucher thưởng 50k rút trực tiếp về ngân hàng.",
+  },
+];
 
 export function BroadcastForm() {
   const modal = useModal();
@@ -10,14 +25,19 @@ export function BroadcastForm() {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
+  function applyPreset(preset: typeof PRESET_TEMPLATES[0]) {
+    setTitle(preset.title);
+    setMessage(preset.message);
+  }
+
   async function send() {
     if (!title.trim() || !message.trim()) return;
 
     const confirmed = await modal.confirm({
       title: "Gửi thông báo cho toàn bộ khách hàng?",
-      message: `Tiêu đề: "${title}". Thông báo này sẽ hiện trong mục Thông báo của tất cả khách hàng đang có tài khoản.`,
-      confirmText: "Gửi thông báo",
-      cancelText: "Huỷ",
+      message: `Tiêu đề: "${title}". Thông báo này sẽ xuất hiện ngay lập tức trong mục Thông Báo của tất cả khách hàng đang có tài khoản.`,
+      confirmText: "Gửi thông báo ngay",
+      cancelText: "Hủy",
       iconType: "warning",
     });
     if (!confirmed) return;
@@ -35,8 +55,8 @@ export function BroadcastForm() {
       setTitle("");
       setMessage("");
       await modal.alert({
-        title: "Đã gửi thông báo",
-        message: `Đã gửi tới ${data.sentCount} khách hàng.`,
+        title: "Thành công!",
+        message: `Đã phát thông báo thành công tới ${data.sentCount} khách hàng.`,
         iconType: "success",
       });
     } else {
@@ -50,41 +70,109 @@ export function BroadcastForm() {
   }
 
   return (
-    <div className="rounded-3xl bg-white p-xl shadow-sm ring-1 ring-black/5 flex flex-col gap-md">
-      <div className="flex items-center gap-sm">
-        <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#fff0e6] text-[#e86a33]">
-          <Megaphone size={18} strokeWidth={2} />
+    <div className="rounded-3xl bg-white p-6 sm:p-8 shadow-sm border border-neutral-200/70 flex flex-col gap-6">
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-2xl bg-rose-50 flex items-center justify-center shadow-xs border border-rose-100 shrink-0 text-rose-600">
+            <Megaphone size={20} strokeWidth={2} />
+          </div>
+          <div>
+            <h2 className="text-base sm:text-lg font-extrabold text-neutral-900 tracking-tight">Phát Thông Báo Toàn Hệ Thống</h2>
+            <p className="text-xs text-neutral-500 font-medium">Gửi thông báo tức thì tới tất cả người dùng MeowBack</p>
+          </div>
         </div>
-        <div>
-          <h2 className="text-[15px] font-bold text-gray-900">Gửi thông báo hệ thống</h2>
-          <p className="text-[12px] text-gray-400">Hiện ngay trong mục Thông báo của toàn bộ khách hàng</p>
+
+        <span className="text-[10px] font-black uppercase tracking-wider text-rose-600 bg-rose-50 px-2.5 py-1 rounded-xl border border-rose-200/80 shrink-0">
+          Broadcast Center
+        </span>
+      </div>
+
+      {/* Preset Quick Selectors */}
+      <div className="flex flex-col gap-2 p-3.5 rounded-2xl bg-rose-50/50 border border-rose-100/80">
+        <div className="text-xs font-extrabold text-rose-900 flex items-center gap-1.5">
+          <Sparkles size={14} className="text-rose-500" />
+          <span>Mẫu thông báo sẵn có (Click để điền nhanh):</span>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {PRESET_TEMPLATES.map((p) => (
+            <button
+              key={p.title}
+              onClick={() => applyPreset(p)}
+              className="text-xs font-extrabold bg-white hover:bg-rose-50 text-neutral-800 px-3 py-1.5 rounded-xl border border-rose-200 shadow-2xs transition-colors"
+            >
+              {p.title}
+            </button>
+          ))}
         </div>
       </div>
 
-      <input
-        type="text"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-        placeholder="Tiêu đề thông báo..."
-        maxLength={120}
-        className="h-11 w-full rounded-xl bg-gray-50 px-md text-[14px] font-medium text-gray-900 ring-1 ring-gray-100 focus:outline-none focus:ring-2 focus:ring-[#e86a33]/30 transition-all"
-      />
-      <textarea
-        value={message}
-        onChange={(e) => setMessage(e.target.value)}
-        placeholder="Nội dung thông báo..."
-        maxLength={500}
-        rows={3}
-        className="w-full rounded-xl bg-gray-50 p-md text-[14px] font-medium text-gray-900 ring-1 ring-gray-100 focus:outline-none focus:ring-2 focus:ring-[#e86a33]/30 transition-all resize-none"
-      />
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+        {/* Left 3 cols: Input Form */}
+        <div className="lg:col-span-3 flex flex-col gap-4">
+          <div>
+            <label className="text-xs font-extrabold text-neutral-700 block mb-1">Tiêu đề thông báo:</label>
+            <input
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="VD: ⚡ Siêu Flash Sale Hoàn Tiền X2 Hôm Nay..."
+              maxLength={120}
+              className="h-11 w-full rounded-2xl bg-neutral-50 px-4 text-xs font-extrabold text-neutral-900 border border-neutral-200 focus:outline-none focus:ring-2 focus:ring-rose-500/20 transition-all"
+            />
+          </div>
 
-      <button
-        onClick={send}
-        disabled={loading || !title.trim() || !message.trim()}
-        className="w-fit rounded-xl bg-[#e86a33] px-lg py-[10px] text-[13px] font-bold text-white shadow-md shadow-[#e86a33]/25 transition-all hover:bg-[#d65d2a] active:scale-[0.97] disabled:opacity-40 disabled:cursor-not-allowed"
-      >
-        {loading ? "Đang gửi..." : "Gửi cho tất cả khách hàng"}
-      </button>
+          <div>
+            <label className="text-xs font-extrabold text-neutral-700 block mb-1">Nội dung chi tiết:</label>
+            <textarea
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              placeholder="Nhập nội dung thông báo muốn truyền tải tới người dùng..."
+              maxLength={500}
+              rows={5}
+              className="w-full rounded-2xl bg-neutral-50 p-4 text-xs font-medium text-neutral-900 border border-neutral-200 focus:outline-none focus:ring-2 focus:ring-rose-500/20 transition-all resize-none"
+            />
+          </div>
+
+          <button
+            onClick={send}
+            disabled={loading || !title.trim() || !message.trim()}
+            className="w-full sm:w-fit inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-rose-500 to-pink-600 px-6 py-3 text-xs font-black text-white shadow-lg shadow-rose-500/25 transition-all hover:from-rose-600 hover:to-pink-700 active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            <Send size={15} strokeWidth={2.5} />
+            <span>{loading ? "Đang gửi thông báo..." : "Phát thông báo cho tất cả khách hàng"}</span>
+          </button>
+        </div>
+
+        {/* Right 2 cols: Live Mobile Notification Preview */}
+        <div className="lg:col-span-2 flex flex-col gap-2 p-4 rounded-3xl bg-neutral-900 text-white shadow-inner relative overflow-hidden min-h-[220px]">
+          <div className="flex items-center justify-between border-b border-neutral-800 pb-2 text-[11px] font-extrabold text-neutral-400">
+            <span className="flex items-center gap-1.5 text-rose-400">
+              <Smartphone size={14} /> Live Phone Preview
+            </span>
+            <span>MeowBack App Notification</span>
+          </div>
+
+          <div className="mt-2 p-3.5 rounded-2xl bg-neutral-800/90 border border-neutral-700/60 shadow-lg flex items-start gap-3 animate-in fade-in">
+            <div className="w-8 h-8 rounded-xl bg-rose-500 flex items-center justify-center text-white shrink-0 shadow-md">
+              <Bell size={16} />
+            </div>
+            <div className="flex flex-col gap-1 min-w-0">
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-xs font-black text-white truncate">{title.trim() || "Tiêu đề thông báo..."}</span>
+                <span className="text-[9px] font-bold text-neutral-400 shrink-0">Bây giờ</span>
+              </div>
+              <p className="text-[11px] text-neutral-300 leading-relaxed font-medium line-clamp-4">
+                {message.trim() || "Nội dung tin nhắn thông báo sẽ hiển thị trực quan ở đây..."}
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-auto pt-2 text-center text-[10px] text-neutral-500 font-semibold flex items-center justify-center gap-1">
+            <CheckCircle2 size={12} className="text-emerald-500" />
+            <span>Mô phỏng tin nhắn hiển thị trên App khách hàng</span>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
