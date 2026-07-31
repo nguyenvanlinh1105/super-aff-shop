@@ -1,3 +1,4 @@
+import { Send } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { formatDate } from "@/lib/format";
 import { Card } from "@/components/ui/Card";
@@ -7,6 +8,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { TelegramAccountForm } from "@/components/admin/TelegramAccountForm";
 import { TelegramWebhookStatus } from "@/components/admin/TelegramWebhookStatus";
+import { TelegramCommandManager } from "@/components/admin/TelegramCommandManager";
 
 import { TelegramIcon } from "@/components/icons/PlatformIcons";
 
@@ -43,6 +45,9 @@ export default async function AdminTelegramPage() {
 
       <TelegramWebhookStatus />
 
+      {/* Dynamic Telegram Bot Custom Commands Manager */}
+      <TelegramCommandManager />
+
       <div className="rounded-3xl bg-white shadow-sm border border-neutral-200/70 p-6 sm:p-8">
         <h2 className="text-base font-extrabold text-neutral-900 mb-4 tracking-tight">Cấu Hình Telegram Bot Token</h2>
         <TelegramAccountForm account={account} />
@@ -74,7 +79,11 @@ export default async function AdminTelegramPage() {
       <div className="rounded-3xl bg-white shadow-sm border border-neutral-200/70 p-6 sm:p-8">
         <h2 className="text-base font-extrabold text-neutral-900 mb-4 tracking-tight">Nhật Ký Hoạt Động Telegram Bot (Logs)</h2>
         {logs.length === 0 ? (
-          <EmptyState title="Chưa có nhật ký tin nhắn" description="Log sẽ xuất hiện tự động khi có tương tác thực tế từ người dùng với bot." />
+          <EmptyState
+            icon={Send}
+            title="Chưa có nhật ký tin nhắn"
+            description="Log sẽ xuất hiện tự động khi có tương tác thực tế từ người dùng với Telegram Bot."
+          />
         ) : (
           <Table>
             <Thead>

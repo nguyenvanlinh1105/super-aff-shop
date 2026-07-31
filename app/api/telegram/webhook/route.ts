@@ -328,10 +328,24 @@ export async function POST(req: NextRequest) {
 
     replyText = buildDealsListMessage(dealsWithPersonalLinks);
     processingStatus = "processed_deals";
-  } else if (!originalUrl) {
-    replyText = buildTelegramHelpMessage();
-    processingStatus = "processed_no_url";
   } else {
+    // Kiểm tra câu lệnh tùy chỉnh được Admin cấu hình trong Database
+    const customCmd = command.startsWith("/")
+      ? await (prisma as any).telegramBotCommand.findUnique({ where: { command } })
+      : null;
+
+    if (customCmd && customCmd.isActive) {
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://meowback.vn";
+      replyText = customCmd.replyText
+        .replace(/\{fullName\}/g, customer.fullName || "")
+        .replace(/\{customerCode\}/g, customer.customerCode || "")
+        .replace(/\{appUrl\}/g, appUrl)
+        .replace(/\{inviteUrl\}/g, `${appUrl}/register?ref=${customer.customerCode}`);
+      processingStatus = `processed_custom_command_${customCmd.command.replace('/', '')}`;
+    } else if (!originalUrl) {
+      replyText = buildTelegramHelpMessage();
+      processingStatus = "processed_no_url";
+    } else {
     const platformCode = mapDetectedPlatformToCode(originalUrl);
 
     if (!platformCode) {
