@@ -46,9 +46,11 @@ export function AdminCustomersClient({ customers, totalPages, currentPage, count
   const currentTab = searchParams.get("tab") || "all";
   const [confirmingAction, setConfirmingAction] = useState<{ id: string; type: "soft_delete" | "force_delete" } | null>(null);
   const [loadingId, setLoadingId] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   async function handleToggleStatus(id: string, newStatus: string) {
     setLoadingId(id);
+    setError(null);
     const res = await fetch(`/api/customers/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -59,12 +61,13 @@ export function AdminCustomersClient({ customers, totalPages, currentPage, count
       router.refresh();
     } else {
       const data = await res.json().catch(() => ({}));
-      alert(data.error || "Không thể cập nhật trạng thái");
+      setError(data.error || "Không thể cập nhật trạng thái");
     }
   }
 
   async function handleSoftDelete(id: string) {
     setLoadingId(id);
+    setError(null);
     const res = await fetch(`/api/customers/${id}`, { method: "DELETE" });
     setLoadingId(null);
     setConfirmingAction(null);
@@ -72,12 +75,13 @@ export function AdminCustomersClient({ customers, totalPages, currentPage, count
       router.refresh();
     } else {
       const data = await res.json().catch(() => ({}));
-      alert(data.error || "Không xoá mềm được khách hàng");
+      setError(data.error || "Không xoá mềm được khách hàng");
     }
   }
 
   async function handleForceDelete(id: string) {
     setLoadingId(id);
+    setError(null);
     const res = await fetch(`/api/customers/${id}?force=true`, { method: "DELETE" });
     setLoadingId(null);
     setConfirmingAction(null);
@@ -85,7 +89,7 @@ export function AdminCustomersClient({ customers, totalPages, currentPage, count
       router.refresh();
     } else {
       const data = await res.json().catch(() => ({}));
-      alert(data.error || "Không xoá vĩnh viễn được khách hàng");
+      setError(data.error || "Không xoá vĩnh viễn được khách hàng");
     }
   }
 
@@ -110,6 +114,16 @@ export function AdminCustomersClient({ customers, totalPages, currentPage, count
 
   return (
     <div className="flex flex-col gap-6">
+      {error && (
+        <div className="rounded-2xl bg-rose-50 border border-rose-200 p-4 text-xs text-rose-700 font-extrabold flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span>⚠️</span>
+            <span>{error}</span>
+          </div>
+          <button onClick={() => setError(null)} className="text-rose-400 hover:text-rose-700 font-black text-sm">✕</button>
+        </div>
+      )}
+
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0 custom-scrollbar">
           {tabs.map((tab) => (

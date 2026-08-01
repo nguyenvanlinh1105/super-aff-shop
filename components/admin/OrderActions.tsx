@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
-import { CheckCircle, UserPlus, AlertTriangle, XCircle, Pencil, X } from "lucide-react";
+import { CheckCircle, UserPlus, AlertTriangle, XCircle, Pencil, X, AlertCircle } from "lucide-react";
 
 type Option = { id: string; label: string };
 
@@ -26,6 +26,7 @@ export function OrderActions({
   const [loading, setLoading] = useState(false);
   const [showClawbackConfirm, setShowClawbackConfirm] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Đổi/bỏ gán khách chỉ an toàn khi đơn CHƯA duyệt — sau khi approved, tiền
   // và hoa hồng giới thiệu (nếu có) đã tính theo đúng khách, đổi lúc này sẽ
@@ -34,6 +35,7 @@ export function OrderActions({
 
   async function patch(body: Record<string, unknown>) {
     setLoading(true);
+    setError(null);
     const res = await fetch(`/api/orders/${orderId}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -44,7 +46,7 @@ export function OrderActions({
       router.refresh();
     } else {
       const data = await res.json().catch(() => ({}));
-      alert(data.error || "Có lỗi xảy ra");
+      setError(data.error || "Có lỗi xảy ra");
     }
   }
 
@@ -205,6 +207,20 @@ export function OrderActions({
           <span className="text-[11px] font-bold text-gray-400">Đã huỷ</span>
         )}
       </div>
+
+      {error && (
+        <div className="flex items-center gap-1.5 rounded-xl bg-rose-50 border border-rose-200 px-2.5 py-1.5 text-[11px] font-bold text-rose-700 mt-1 max-w-[280px]">
+          <AlertCircle size={14} className="shrink-0 text-rose-500" />
+          <span className="flex-1 leading-tight">{error}</span>
+          <button
+            type="button"
+            onClick={() => setError(null)}
+            className="text-rose-400 hover:text-rose-700 font-bold ml-1 shrink-0"
+          >
+            ✕
+          </button>
+        </div>
+      )}
     </div>
   );
 }
