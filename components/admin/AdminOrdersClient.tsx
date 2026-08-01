@@ -104,35 +104,103 @@ export function AdminOrdersClient({ orders, customers, totalPages, currentPage, 
 
   return (
     <div className="flex flex-col gap-6 fade-in pb-8">
-      {/* TOOLBAR */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
-        <div className="relative flex-1">
-          <ServerSearchInput placeholder="Tìm theo mã đơn, sản phẩm, tên khách hoặc tracking code..." />
-        </div>
-      </div>
+      {/* REDESIGNED FILTER PANEL */}
+      <div className="flex flex-col gap-4 rounded-3xl bg-white border border-neutral-200/80 p-5 shadow-xs">
+        
+        {/* HÀNG 1: Phân Loại Gán Khách & Tìm Kiếm */}
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          
+          {/* Nhóm Gán Khách - Segmented Control Responsive Grid */}
+          <div className="w-full lg:w-auto">
+            <div className="grid grid-cols-3 gap-1 p-1 bg-neutral-100/90 rounded-2xl border border-neutral-200/60 w-full">
+              <button
+                type="button"
+                onClick={() => handleTabChange("all")}
+                className={`flex items-center justify-center gap-1 sm:gap-1.5 px-2 py-2 sm:px-3.5 sm:py-1.5 rounded-xl text-[11px] sm:text-xs font-black transition-all leading-tight ${
+                  currentTab === "all"
+                    ? "bg-white text-neutral-900 shadow-xs scale-[1.02]"
+                    : "text-neutral-600 hover:text-neutral-900"
+                }`}
+              >
+                <LayoutGrid size={13} className={currentTab === "all" ? "text-neutral-900 shrink-0" : "text-neutral-400 shrink-0"} />
+                <span className="truncate">Tất cả</span>
+                <span className={`rounded-full px-1.5 py-0.2 text-[9px] sm:text-[10px] font-black shrink-0 ${
+                  currentTab === "all" ? "bg-neutral-900 text-white" : "bg-neutral-200/80 text-neutral-600"
+                }`}>
+                  {counts.all}
+                </span>
+              </button>
 
-      {/* TABS — Capsule Bar */}
-      <div className="flex flex-nowrap md:flex-wrap items-center gap-2 overflow-x-auto pb-1 custom-scrollbar w-full">
-        <TabButton active={currentTab === "all"} onClick={() => handleTabChange("all")} label="Tất cả" count={counts.all} icon={LayoutGrid} />
-        <TabButton active={currentTab === "unassigned"} onClick={() => handleTabChange("unassigned")} label="Chưa map khách" count={counts.unassigned} icon={UserRoundX} />
-        <TabButton active={currentTab === "assigned"} onClick={() => handleTabChange("assigned")} label="Đã map khách" count={counts.assigned} icon={UserRoundCheck} />
-        <TabButton active={currentTab === "pending"} onClick={() => handleTabChange("pending")} label="Chờ xác nhận" count={counts.pending} icon={Hourglass} />
-        {counts.processing > 0 && (
-          <TabButton active={currentTab === "processing"} onClick={() => handleTabChange("processing")} label="Đang đối soát" count={counts.processing} icon={ScanSearch} highlight />
-        )}
-        <TabButton active={currentTab === "money_in"} onClick={() => handleTabChange("money_in")} label="Tiền đã về" count={counts.moneyIn} icon={PiggyBank} />
-        <TabButton active={currentTab === "unpaid"} onClick={() => handleTabChange("unpaid")} label="Chưa trả khách" count={counts.unpaid} icon={Clock3} />
-        <TabButton active={currentTab === "paid"} onClick={() => handleTabChange("paid")} label="Đã trả khách" count={counts.paid} icon={CircleCheckBig} />
-        <TabButton active={currentTab === "cancelled"} onClick={() => handleTabChange("cancelled")} label="Đã huỷ" count={counts.cancelled} icon={Ban} />
-        {counts.completed > 0 && (
-          <TabButton active={currentTab === "completed"} onClick={() => handleTabChange("completed")} label="Dữ liệu cũ" count={counts.completed} icon={Archive} highlight />
-        )}
-        {counts.clawback > 0 && (
-          <TabButton active={currentTab === "clawback"} onClick={() => handleTabChange("clawback")} label="Clawback" count={counts.clawback} icon={AlertTriangle} highlight />
-        )}
-        {counts.referral > 0 && (
-          <TabButton active={currentTab === "referral"} onClick={() => handleTabChange("referral")} label="🎁 Giới thiệu" count={counts.referral} icon={Gift} />
-        )}
+              <button
+                type="button"
+                onClick={() => handleTabChange("assigned")}
+                className={`flex items-center justify-center gap-1 sm:gap-1.5 px-2 py-2 sm:px-3.5 sm:py-1.5 rounded-xl text-[11px] sm:text-xs font-black transition-all leading-tight ${
+                  currentTab === "assigned"
+                    ? "bg-emerald-600 text-white shadow-xs shadow-emerald-600/20 scale-[1.02]"
+                    : "text-neutral-600 hover:text-emerald-700 hover:bg-emerald-50/60"
+                }`}
+              >
+                <UserRoundCheck size={13} className={currentTab === "assigned" ? "text-white shrink-0" : "text-emerald-500 shrink-0"} />
+                <span className="truncate">Đã map</span>
+                <span className={`rounded-full px-1.5 py-0.2 text-[9px] sm:text-[10px] font-black shrink-0 ${
+                  currentTab === "assigned" ? "bg-white/20 text-white" : "bg-emerald-100 text-emerald-800"
+                }`}>
+                  {counts.assigned}
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleTabChange("unassigned")}
+                className={`flex items-center justify-center gap-1 sm:gap-1.5 px-2 py-2 sm:px-3.5 sm:py-1.5 rounded-xl text-[11px] sm:text-xs font-black transition-all leading-tight ${
+                  currentTab === "unassigned"
+                    ? "bg-rose-500 text-white shadow-xs shadow-rose-500/20 scale-[1.02]"
+                    : counts.unassigned > 0
+                    ? "text-rose-700 bg-rose-50 border border-rose-200/60 hover:bg-rose-100/70"
+                    : "text-neutral-600 hover:text-rose-600"
+                }`}
+              >
+                <UserRoundX size={13} className={currentTab === "unassigned" ? "text-white shrink-0" : "text-rose-500 shrink-0"} />
+                <span className="truncate">Chưa map</span>
+                <span className={`rounded-full px-1.5 py-0.2 text-[9px] sm:text-[10px] font-black shrink-0 ${
+                  currentTab === "unassigned" ? "bg-white/20 text-white" : "bg-rose-200/80 text-rose-900"
+                }`}>
+                  {counts.unassigned}
+                </span>
+              </button>
+            </div>
+          </div>
+
+          {/* Ô Tìm Kiếm Nhanh */}
+          <div className="w-full lg:w-96">
+            <ServerSearchInput placeholder="Tìm mã đơn, sản phẩm, tên khách hoặc tracking..." />
+          </div>
+        </div>
+
+        {/* Đường phân cách nhẹ */}
+        <div className="h-px w-full bg-neutral-100" />
+
+        {/* HÀNG 2: Bố Cục Lưới 2 Cột Trên Mobile (Không Cần Lướt Ngang) */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:flex md:flex-wrap items-center gap-2 w-full">
+          <TabButton active={currentTab === "all"} onClick={() => handleTabChange("all")} label="Tất cả đơn" count={counts.all} icon={LayoutGrid} />
+          <TabButton active={currentTab === "pending"} onClick={() => handleTabChange("pending")} label="Chờ xác nhận" count={counts.pending} icon={Hourglass} />
+          {counts.processing > 0 && (
+            <TabButton active={currentTab === "processing"} onClick={() => handleTabChange("processing")} label="Đang đối soát" count={counts.processing} icon={ScanSearch} highlight />
+          )}
+          <TabButton active={currentTab === "money_in"} onClick={() => handleTabChange("money_in")} label="Tiền đã về" count={counts.moneyIn} icon={PiggyBank} />
+          <TabButton active={currentTab === "unpaid"} onClick={() => handleTabChange("unpaid")} label="Chưa trả khách" count={counts.unpaid} icon={Clock3} />
+          <TabButton active={currentTab === "paid"} onClick={() => handleTabChange("paid")} label="Đã trả khách" count={counts.paid} icon={CircleCheckBig} />
+          <TabButton active={currentTab === "cancelled"} onClick={() => handleTabChange("cancelled")} label="Đã huỷ" count={counts.cancelled} icon={Ban} />
+          {counts.completed > 0 && (
+            <TabButton active={currentTab === "completed"} onClick={() => handleTabChange("completed")} label="Dữ liệu cũ" count={counts.completed} icon={Archive} highlight />
+          )}
+          {counts.clawback > 0 && (
+            <TabButton active={currentTab === "clawback"} onClick={() => handleTabChange("clawback")} label="Clawback" count={counts.clawback} icon={AlertTriangle} highlight />
+          )}
+          {counts.referral > 0 && (
+            <TabButton active={currentTab === "referral"} onClick={() => handleTabChange("referral")} label="🎁 Giới thiệu" count={counts.referral} icon={Gift} />
+          )}
+        </div>
       </div>
 
       {/* INFO BANNER PER TAB */}
@@ -270,28 +338,30 @@ export function AdminOrdersClient({ orders, customers, totalPages, currentPage, 
                   <tr key={o.id} className={`border-b border-neutral-100 transition-colors ${o.orderStatus === "clawback" ? "bg-rose-50/50" : o.sourceType === "referral" ? "bg-purple-50/40" : o.clawbackWarning ? "bg-amber-50/40" : "hover:bg-rose-50/20"}`}>
                     {/* Order Info */}
                     <td className="px-4 py-3" data-label="Đơn hàng / Tracking">
-                      <div className="font-mono font-bold text-neutral-900 flex items-center gap-1.5 text-xs">
-                        {o.clawbackWarning && (
-                          <span title="Quá 15 ngày — kiểm tra Shopee đã thanh toán chưa">
-                            <img src="/heothongbao.png" alt="" className="h-4 w-4 object-contain shrink-0" />
-                          </span>
-                        )}
-                        {o.orderExternalId}
-                      </div>
-                      {o.itemName && (
-                        <div className="mt-0.5 max-w-[260px] truncate text-[11px] font-medium text-neutral-600" title={o.itemName}>
-                          {o.itemName}
+                      <div className="flex flex-col items-end sm:items-start text-right sm:text-left min-w-0 flex-1 overflow-hidden">
+                        <div className="font-mono font-bold text-neutral-900 flex items-center justify-end sm:justify-start gap-1.5 text-xs truncate max-w-full">
+                          {o.clawbackWarning && (
+                            <span title="Quá 15 ngày — kiểm tra Shopee đã thanh toán chưa">
+                              <AlertTriangle size={14} className="text-amber-500 shrink-0" />
+                            </span>
+                          )}
+                          <span className="truncate">{o.orderExternalId}</span>
                         </div>
-                      )}
-                      <div className="mt-1 flex items-center gap-1.5 flex-wrap">
-                        {o.sourceType === "referral" ? (
-                          <span className="inline-flex items-center gap-1 rounded-md bg-purple-100 px-1.5 py-0.5 text-[9px] font-black text-purple-700">
-                            🎁 Hoa hồng GT
-                          </span>
-                        ) : (
-                          <span className="rounded-md bg-neutral-100 px-1.5 py-0.5 text-[9px] font-black text-neutral-600 uppercase">{o.platformName}</span>
+                        {o.itemName && (
+                          <div className="mt-0.5 max-w-[180px] sm:max-w-[260px] truncate text-[11px] font-medium text-neutral-600" title={o.itemName}>
+                            {o.itemName}
+                          </div>
                         )}
-                        <span className="font-mono text-[10px] text-neutral-400">{o.trackingCode || "No tracking"}</span>
+                        <div className="mt-1 flex items-center justify-end sm:justify-start gap-1.5 flex-wrap max-w-full">
+                          {o.sourceType === "referral" ? (
+                            <span className="inline-flex items-center gap-1 rounded-md bg-purple-100 px-1.5 py-0.5 text-[9px] font-black text-purple-700 shrink-0">
+                              🎁 Hoa hồng GT
+                            </span>
+                          ) : (
+                            <span className="rounded-md bg-neutral-100 px-1.5 py-0.5 text-[9px] font-black text-neutral-600 uppercase shrink-0">{o.platformName}</span>
+                          )}
+                          <span className="font-mono text-[10px] text-neutral-400 truncate max-w-[120px] sm:max-w-none">{o.trackingCode || "No tracking"}</span>
+                        </div>
                       </div>
                     </td>
 
@@ -381,7 +451,7 @@ function TabButton({ active, onClick, label, count, icon: Icon, highlight }: { a
   return (
     <button
       onClick={onClick}
-      className={`flex h-9 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-2xl px-3.5 text-xs font-extrabold transition-all ${
+      className={`flex h-10 md:h-9 w-full md:w-auto shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-2xl px-2.5 sm:px-3.5 text-[11px] sm:text-xs font-extrabold transition-all ${
         active
           ? "bg-gradient-to-r from-neutral-900 to-neutral-800 text-white shadow-sm scale-[1.02]"
           : highlight
@@ -390,8 +460,8 @@ function TabButton({ active, onClick, label, count, icon: Icon, highlight }: { a
       }`}
     >
       {Icon && <Icon size={14} strokeWidth={2.2} className="shrink-0" />}
-      <span>{label}</span>
-      <span className={`flex h-5 min-w-[20px] items-center justify-center rounded-full px-1 text-[10px] font-black ${
+      <span className="truncate">{label}</span>
+      <span className={`flex h-5 min-w-[20px] items-center justify-center rounded-full px-1 text-[10px] font-black shrink-0 ${
         active ? "bg-white/20 text-white" : highlight ? "bg-amber-200 text-amber-900" : "bg-neutral-100 text-neutral-600"
       }`}>
         {count}
