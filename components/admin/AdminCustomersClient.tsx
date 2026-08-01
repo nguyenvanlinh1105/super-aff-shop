@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Users, Trash2, Handshake } from "lucide-react";
+import { Users, Trash2, Handshake, RotateCcw, ShieldAlert } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { Table, Thead, Tr, Th, Td } from "@/components/ui/Table";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -44,19 +44,48 @@ export function AdminCustomersClient({ customers, totalPages, currentPage, count
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const currentTab = searchParams.get("tab") || "all";
-  const [confirmingId, setConfirmingId] = useState<string | null>(null);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [confirmingAction, setConfirmingAction] = useState<{ id: string; type: "soft_delete" | "force_delete" } | null>(null);
+  const [loadingId, setLoadingId] = useState<string | null>(null);
 
-  async function handleDelete(id: string) {
-    setDeletingId(id);
-    const res = await fetch(`/api/customers/${id}`, { method: "DELETE" });
-    setDeletingId(null);
-    setConfirmingId(null);
+  async function handleToggleStatus(id: string, newStatus: string) {
+    setLoadingId(id);
+    const res = await fetch(`/api/customers/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status: newStatus }),
+    });
+    setLoadingId(null);
     if (res.ok) {
       router.refresh();
     } else {
       const data = await res.json().catch(() => ({}));
-      alert(data.error || "Không xoá được khách hàng");
+      alert(data.error || "Không thể cập nhật trạng thái");
+    }
+  }
+
+  async function handleSoftDelete(id: string) {
+    setLoadingId(id);
+    const res = await fetch(`/api/customers/${id}`, { method: "DELETE" });
+    setLoadingId(null);
+    setConfirmingAction(null);
+    if (res.ok) {
+      router.refresh();
+    } else {
+      const data = await res.json().catch(() => ({}));
+      alert(data.error || "Không xoá mềm được khách hàng");
+    }
+  }
+
+  async function handleForceDelete(id: string) {
+    setLoadingId(id);
+    const res = await fetch(`/api/customers/${id}?force=true`, { method: "DELETE" });
+    setLoadingId(null);
+    setConfirmingAction(null);
+    if (res.ok) {
+      router.refresh();
+    } else {
+      const data = await res.json().catch(() => ({}));
+      alert(data.error || "Không xoá vĩnh viễn được khách hàng");
     }
   }
 
@@ -76,7 +105,7 @@ export function AdminCustomersClient({ customers, totalPages, currentPage, count
     { id: "active", label: "Đang hoạt động", count: counts.active },
     { id: "debt", label: "Có công nợ", count: counts.debt },
     { id: "partner", label: "🤝 Đối tác", count: counts.partner },
-    { id: "locked", label: "Bị khoá", count: counts.locked },
+    { id: "locked", label: "Bị khoá / Đã xoá", count: counts.locked },
   ];
 
   return (
@@ -183,36 +212,77 @@ export function AdminCustomersClient({ customers, totalPages, currentPage, count
                     </Td>
                     <Td align="center">
                       <Badge tone={c.status === "active" ? "positive" : "negative"}>
-                        {c.status === "active" ? "Hoạt động" : "Bị khoá"}
+                        {c.status === "active" ? "Hoạt động" : "Bị khoá / Đã xoá"}
                       </Badge>
                     </Td>
                     <Td align="center">
-                      {confirmingId === c.id ? (
-                        <div className="flex items-center justify-center gap-1 bg-rose-50 p-1 rounded-xl border border-rose-200">
-                          <span className="text-[10px] font-black text-rose-700 px-1">Xoá hẳn?</span>
+                      {c.status === "active" ? (
+                        confirmingAction?.id === c.id && confirmingAction.type === "soft_delete" ? (
+                          <div className="flex items-center justify-center gap-1 bg-amber-50 p-1.5 rounded-xl border border-amber-200">
+                            <span className="text-[10px] font-black text-amber-800 px-1">Xoá mềm?</span>
+                            <button
+                              onClick={() => handleSoftDelete(c.id)}
+                              disabled={loadingId === c.id}
+                              className="rounded-lg bg-amber-600 px-2.5 py-1 text-[10px] font-black text-white hover:bg-amber-700 disabled:opacity-50 transition-colors shadow-xs"
+                            >
+                              {loadingId === c.id ? "..." : "Khoá TK"}
+                            </button>
+                            <button
+                              onClick={() => setConfirmingAction(null)}
+                              disabled={loadingId === c.id}
+                              className="rounded-lg bg-white px-2 py-1 text-[10px] font-bold text-neutral-600 hover:bg-neutral-100 transition-colors border border-neutral-200"
+                            >
+                              Hủy
+                            </button>
+                          </div>
+                        ) : (
                           <button
-                            onClick={() => handleDelete(c.id)}
-                            disabled={deletingId === c.id}
-                            className="rounded-lg bg-rose-600 px-2 py-1 text-[10px] font-black text-white hover:bg-rose-700 disabled:opacity-50 transition-colors shadow-xs"
+                            onClick={() => setConfirmingAction({ id: c.id, type: "soft_delete" })}
+                            title="Xoá mềm (chuyển trạng thái bị khoá, có thể kích hoạt lại)"
+                            className="inline-flex h-8 w-8 items-center justify-center rounded-xl text-neutral-400 hover:bg-amber-50 hover:text-amber-600 transition-colors"
                           >
-                            {deletingId === c.id ? "..." : "Xác nhận"}
+                            <Trash2 size={16} strokeWidth={2} />
                           </button>
-                          <button
-                            onClick={() => setConfirmingId(null)}
-                            disabled={deletingId === c.id}
-                            className="rounded-lg bg-white px-2 py-1 text-[10px] font-bold text-neutral-600 hover:bg-neutral-100 transition-colors border border-neutral-200"
-                          >
-                            Huỷ
-                          </button>
-                        </div>
+                        )
                       ) : (
-                        <button
-                          onClick={() => setConfirmingId(c.id)}
-                          title="Xoá cứng tài khoản — không thể khôi phục"
-                          className="inline-flex h-8 w-8 items-center justify-center rounded-xl text-neutral-400 hover:bg-rose-50 hover:text-rose-600 transition-colors"
-                        >
-                          <Trash2 size={16} strokeWidth={2} />
-                        </button>
+                        confirmingAction?.id === c.id && confirmingAction.type === "force_delete" ? (
+                          <div className="flex items-center justify-center gap-1 bg-rose-50 p-1.5 rounded-xl border border-rose-200">
+                            <span className="text-[10px] font-black text-rose-700 px-1">Xoá vĩnh viễn DB?</span>
+                            <button
+                              onClick={() => handleForceDelete(c.id)}
+                              disabled={loadingId === c.id}
+                              className="rounded-lg bg-rose-600 px-2.5 py-1 text-[10px] font-black text-white hover:bg-rose-700 disabled:opacity-50 transition-colors shadow-xs"
+                            >
+                              {loadingId === c.id ? "..." : "Xoá hẳn"}
+                            </button>
+                            <button
+                              onClick={() => setConfirmingAction(null)}
+                              disabled={loadingId === c.id}
+                              className="rounded-lg bg-white px-2 py-1 text-[10px] font-bold text-neutral-600 hover:bg-neutral-100 transition-colors border border-neutral-200"
+                            >
+                              Hủy
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="flex items-center justify-center gap-2">
+                            <button
+                              onClick={() => handleToggleStatus(c.id, "active")}
+                              disabled={loadingId === c.id}
+                              title="Kích hoạt lại tài khoản khách hàng này"
+                              className="inline-flex items-center gap-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-700 px-2.5 py-1 text-xs font-black transition-all active:scale-95 shadow-xs"
+                            >
+                              <RotateCcw size={13} className={loadingId === c.id ? "animate-spin" : ""} />
+                              <span>Kích hoạt lại</span>
+                            </button>
+                            <button
+                              onClick={() => setConfirmingAction({ id: c.id, type: "force_delete" })}
+                              title="Xoá vĩnh viễn khỏi CSDL"
+                              className="inline-flex h-8 w-8 items-center justify-center rounded-xl text-neutral-400 hover:bg-rose-50 hover:text-rose-600 transition-colors"
+                            >
+                              <Trash2 size={15} strokeWidth={2} />
+                            </button>
+                          </div>
+                        )
                       )}
                     </Td>
                   </Tr>
