@@ -44,14 +44,14 @@ export function InviteSection({
   return (
     <div className="rounded-3xl bg-white p-6 shadow-cute border border-primary-100/80 flex-1 min-w-0 overflow-hidden">
       {/* Header */}
-      <div className="mb-3 flex items-center justify-between gap-3">
+      <div className="mb-3 flex flex-wrap sm:flex-nowrap items-center justify-between gap-3">
         <div className="flex items-center gap-2 min-w-0">
-          <IconBow className="w-5 h-5 text-accent-bow" />
-          <h2 className="text-[15px] font-extrabold text-neutral-900">Mời bạn bè 🎀</h2>
+          <IconBow className="w-5 h-5 text-accent-bow shrink-0" />
+          <h2 className="text-[15px] font-extrabold text-neutral-900 whitespace-nowrap">Mời bạn bè 🎀</h2>
         </div>
         <Link
           href="/app/referral"
-          className="flex shrink-0 items-center gap-0.5 text-[12px] font-bold text-primary-500 hover:text-primary-600 transition-colors"
+          className="flex shrink-0 items-center gap-0.5 text-[12px] font-bold text-primary-500 hover:text-primary-600 transition-colors whitespace-nowrap"
         >
           Xem chi tiết
           <ChevronRight size={14} strokeWidth={2.5} />
@@ -94,10 +94,10 @@ export function InviteSection({
       )}
 
       {/* Action buttons */}
-      <div className="flex gap-2">
+      <div className="flex flex-wrap sm:flex-nowrap gap-2">
         <button
           onClick={handleCopy}
-          className={`flex flex-1 items-center justify-center gap-1.5 rounded-full py-2.5 text-[13px] font-bold transition-all ${
+          className={`flex flex-1 items-center justify-center gap-1.5 rounded-full py-2.5 px-4 text-[13px] font-bold whitespace-nowrap transition-all ${
             copied
               ? "bg-[#2D8A56] text-white shadow-sm"
               : "bg-gradient-to-r from-primary-400 to-primary-500 text-white shadow-cute hover:shadow-cute-lg"
@@ -105,12 +105,12 @@ export function InviteSection({
         >
           {copied ? (
             <>
-              <Check size={15} strokeWidth={2.5} />
+              <Check size={15} strokeWidth={2.5} className="shrink-0" />
               Đã sao chép 🎀
             </>
           ) : (
             <>
-              <Copy size={15} strokeWidth={2} />
+              <Copy size={15} strokeWidth={2} className="shrink-0" />
               Copy link 🐾
             </>
           )}
@@ -118,10 +118,10 @@ export function InviteSection({
 
         <button
           onClick={() => setShowQR(true)}
-          className="flex items-center justify-center gap-1 rounded-full bg-primary-100 px-5 py-2.5 text-[13px] font-bold text-primary-600 hover:bg-primary-200 transition-all"
+          className="flex items-center justify-center gap-1 rounded-full bg-primary-100 px-5 py-2.5 text-[13px] font-bold text-primary-600 hover:bg-primary-200 whitespace-nowrap transition-all shrink-0"
           title="Xem mã QR"
         >
-          <QrCode size={16} strokeWidth={2} />
+          <QrCode size={16} strokeWidth={2} className="shrink-0" />
           QR
         </button>
       </div>

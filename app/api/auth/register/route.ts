@@ -42,12 +42,20 @@ export async function POST(req: NextRequest) {
 
   const { email, password, fullName, phone } = await req.json();
 
-  if (!email || !password || !fullName) {
-    return NextResponse.json({ error: "Thiếu email, mật khẩu hoặc họ tên" }, { status: 400 });
+  if (!email || typeof email !== "string" || !/^\S+@\S+\.\S+$/.test(email) || email.length > 255) {
+    return NextResponse.json({ error: "Email không hợp lệ" }, { status: 400 });
   }
 
-  if (typeof password !== "string" || password.length < 6) {
-    return NextResponse.json({ error: "Mật khẩu phải có ít nhất 6 ký tự" }, { status: 400 });
+  if (!fullName || typeof fullName !== "string" || fullName.length > 100) {
+    return NextResponse.json({ error: "Họ tên không hợp lệ hoặc quá dài" }, { status: 400 });
+  }
+
+  if (typeof password !== "string" || password.length < 6 || password.length > 255) {
+    return NextResponse.json({ error: "Mật khẩu phải có từ 6 đến 255 ký tự" }, { status: 400 });
+  }
+
+  if (phone && (typeof phone !== "string" || phone.length > 20 || !/^[0-9+\s()-]+$/.test(phone))) {
+    return NextResponse.json({ error: "Số điện thoại không hợp lệ" }, { status: 400 });
   }
 
   const existing = await prisma.user.findUnique({ where: { email } });

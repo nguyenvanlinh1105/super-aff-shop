@@ -2,12 +2,14 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
 import { Store, Check, Copy, ExternalLink, Link2, Plus, Package, Sparkles, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { TextInput } from "@/components/ui/TextInput";
 import { ShopeeIcon, TiktokIcon } from "@/components/icons/PlatformIcons";
 import { IconBow } from "@/components/icons/CatRibbonIcons";
 import { formatCurrency } from "@/lib/format";
+import { useModal } from "@/components/ui/ModalProvider";
 
 type Option = { id: string; code: string; label: string };
 type LinkResult = {
@@ -32,11 +34,10 @@ function platformStyle(code: string) {
 
 export function CustomerLinkForm({ platforms }: { platforms: Option[] }) {
   const router = useRouter();
+  const modal = useModal();
   const [platformId, setPlatformId] = useState(platforms[0]?.id ?? "");
   const [originalUrl, setOriginalUrl] = useState("");
-  const [productPrice, setProductPrice] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<LinkResult | null>(null);
   const [copied, setCopied] = useState(false);
   const [imgBroken, setImgBroken] = useState(false);
@@ -46,7 +47,6 @@ export function CustomerLinkForm({ platforms }: { platforms: Option[] }) {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
-    setError(null);
     setResult(null);
     setImgBroken(false);
 
@@ -57,7 +57,6 @@ export function CustomerLinkForm({ platforms }: { platforms: Option[] }) {
         originalUrl,
         platformId,
         channelSource: "web",
-        productPrice: productPrice ? Number(productPrice) : undefined,
       }),
     });
 
@@ -65,7 +64,7 @@ export function CustomerLinkForm({ platforms }: { platforms: Option[] }) {
 
     if (!res.ok) {
       const data = await res.json().catch(() => ({}));
-      setError(data.error ?? "Không tạo được link");
+      modal.alert({ title: "Lỗi tạo link", message: data.error ?? "Không tạo được link", iconType: "danger" });
       return;
     }
 
@@ -81,7 +80,6 @@ export function CustomerLinkForm({ platforms }: { platforms: Option[] }) {
       estimatedCashback: data.link.estimatedCashback ?? null,
     });
     setOriginalUrl("");
-    setProductPrice("");
     router.refresh();
   }
 
@@ -104,40 +102,34 @@ export function CustomerLinkForm({ platforms }: { platforms: Option[] }) {
         </div>
         
         <div className="flex flex-wrap gap-3">
-          {platforms.map((p) => {
+          {platforms.filter(p => p.code.toUpperCase() !== "TIKTOK").map((p) => {
             const style = platformStyle(p.code);
             const Icon = style.icon;
             const active = p.id === platformId;
-            const isTiktok = p.code.toUpperCase() === "TIKTOK";
             return (
               <div key={p.id} className="relative">
-                <button
+                <motion.button
                   type="button"
-                  onClick={() => !isTiktok && setPlatformId(p.id)}
-                  disabled={isTiktok}
-                  className={`group flex h-[88px] w-[100px] flex-col items-center justify-center gap-1 rounded-3xl border transition-all duration-200 ${
-                    isTiktok
-                      ? "border-primary-100 bg-neutral-100/50 opacity-40 cursor-not-allowed"
-                      : active
-                      ? "border-primary-400 bg-white shadow-cute scale-105"
-                      : "border-primary-100/80 bg-white hover:border-primary-300 hover:bg-primary-50/50 hover:-translate-y-0.5"
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 17 }}
+                  onClick={() => setPlatformId(p.id)}
+                  className={`group flex h-[88px] w-[100px] flex-col items-center justify-center gap-1 rounded-3xl border transition-colors duration-200 ${
+                    active
+                      ? "border-primary-400 bg-white shadow-xl shadow-primary-500/10"
+                      : "border-primary-100/80 bg-white hover:border-primary-300 hover:bg-primary-50/50"
                   }`}
                 >
                   <div
-                    className={`flex h-10 w-10 items-center justify-center rounded-2xl transition-transform duration-200 ${active && !isTiktok ? "scale-110" : "group-hover:scale-110"}`}
+                    className="flex h-10 w-10 items-center justify-center rounded-2xl"
                     style={{ color: style.color, backgroundColor: `${style.color}15` }}
                   >
                     <Icon size={22} />
                   </div>
-                  <span className={`text-[12px] font-bold ${active && !isTiktok ? "text-neutral-900" : "text-neutral-500"}`}>
+                  <span className={`text-[12px] font-bold ${active ? "text-neutral-900" : "text-neutral-500"}`}>
                     {p.label}
                   </span>
-                </button>
-                {isTiktok && (
-                  <span className="absolute -top-1 -right-1 rounded-full bg-neutral-400 px-1.5 py-0.5 text-[9px] font-bold text-white leading-tight">
-                    Tạm tắt
-                  </span>
-                )}
+                </motion.button>
               </div>
             );
           })}
@@ -154,48 +146,28 @@ export function CustomerLinkForm({ platforms }: { platforms: Option[] }) {
             Dán link {selectedPlatform?.label ?? "sản phẩm"}
           </span>
         </div>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
-            <div className="flex-1">
-              <TextInput
-                placeholder={`Dán link ${selectedPlatform?.label ?? "sản phẩm"} muốn tích nơ hoàn tiền vào đây...`}
-                required
-                value={originalUrl}
-                onChange={(e) => setOriginalUrl(e.target.value)}
-                className="h-12 bg-primary-50/40 border-primary-200 focus:border-primary-500 focus:ring-primary-200"
-              />
-            </div>
+        <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
+          <div className="flex flex-col gap-2">
+            <label htmlFor="url-input" className="text-[13px] font-bold text-neutral-600 ml-1">
+              Dán link {selectedPlatform?.label ?? "sản phẩm"} muốn tích hoàn tiền vào ô bên dưới
+            </label>
+            <TextInput
+              id="url-input"
+              placeholder="https://..."
+              required
+              value={originalUrl}
+              onChange={(e) => setOriginalUrl(e.target.value)}
+              className="h-12 bg-primary-50/40 border-primary-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20"
+            />
           </div>
 
-          <div className="flex items-center gap-3 rounded-2xl bg-primary-50 border border-primary-200 px-4 py-3">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-primary-200 text-accent-bow">
-              <Wallet size={16} strokeWidth={2.5} />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-[12px] font-extrabold text-neutral-900 mb-1">Nhập giá để tính hoàn tiền ước tính 🎀</p>
-              <input
-                type="number"
-                min={0}
-                placeholder="VD: 183000"
-                value={productPrice}
-                onChange={(e) => setProductPrice(e.target.value)}
-                className="w-full bg-white rounded-xl border border-primary-200 px-3 py-1.5 text-[14px] font-bold text-neutral-900 focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-200 placeholder:font-normal placeholder:text-neutral-400"
-              />
-            </div>
-            {productPrice && Number(productPrice) > 0 && (
-              <div className="shrink-0 text-right">
-                <p className="text-[10px] text-neutral-500 font-bold uppercase">Giá nhập</p>
-                <p className="text-[14px] font-extrabold text-primary-600">{formatCurrency(Number(productPrice))}</p>
-              </div>
-            )}
-          </div>
-          <p className="text-[11px] text-neutral-500 font-medium -mt-1">
-            Shopee không cho phép lấy giá tự động — nhập giá sản phẩm để xem ước tính số tiền hoàn về ví!
-          </p>
-          <Button
+          <motion.button
             type="submit"
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            transition={{ type: "spring", stiffness: 400, damping: 17 }}
             disabled={loading || !platformId}
-            className="h-12 w-fit rounded-full bg-gradient-to-r from-primary-400 to-primary-500 text-white shadow-cute hover:shadow-cute-lg px-6 font-bold"
+            className="flex items-center gap-2 h-12 w-fit rounded-full bg-gradient-to-r from-primary-400 to-primary-500 text-white shadow-lg shadow-primary-500/20 px-6 font-bold disabled:opacity-70 disabled:cursor-not-allowed"
           >
             {loading ? "Đang tạo..." : (
               <>
@@ -203,9 +175,8 @@ export function CustomerLinkForm({ platforms }: { platforms: Option[] }) {
                 Tạo link hoàn tiền 🧶
               </>
             )}
-          </Button>
+          </motion.button>
         </form>
-        {error && <div className="mt-2 text-[13px] font-bold text-negative">{error}</div>}
       </div>
 
       {/* Result Card */}
@@ -243,29 +214,7 @@ export function CustomerLinkForm({ platforms }: { platforms: Option[] }) {
               </div>
             </div>
 
-            {(result.productPrice != null || (result.estimatedCashback != null && Number(result.estimatedCashback) > 0)) && (
-              <div className="mt-4 flex items-center gap-4 rounded-2xl bg-primary-50/60 p-3 border border-primary-100">
-                {result.productPrice != null && (
-                  <div className="flex flex-col">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">Giá sản phẩm</span>
-                    <span className="text-[15px] font-extrabold text-neutral-900 tabular-nums">
-                      {formatCurrency(result.productPrice)}
-                    </span>
-                  </div>
-                )}
-                {result.productPrice != null && result.estimatedCashback != null && Number(result.estimatedCashback) > 0 && (
-                  <div className="h-8 w-px bg-primary-200 shrink-0" />
-                )}
-                {result.estimatedCashback != null && Number(result.estimatedCashback) > 0 && (
-                  <div className="flex flex-col">
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-[#2D8A56]">Hoàn tiền ước tính</span>
-                    <span className="text-[15px] font-extrabold text-[#2D8A56] tabular-nums">
-                      {formatCurrency(result.estimatedCashback)} 🎀
-                    </span>
-                  </div>
-                )}
-              </div>
-            )}
+
           </div>
 
           {/* Panel right: GENERATED LINK */}

@@ -58,7 +58,7 @@ export function MarketingFooter() {
           <LogoMeowBack />
           <p className="text-neutral-600 text-[14px] leading-relaxed font-medium">
             MeowBack 🎀 Nơ Mèo Hoàn Tiền — Hoàn tiền dễ như mèo vờn cuộn len 🧶.
-            Nền tảng hoàn tiền affiliate mua sắm Shopee & TikTok Shop.
+            Nền tảng hoàn tiền affiliate mua sắm Shopee hàng đầu Việt Nam.
           </p>
           <div className="space-y-2">
             <h5 className="font-extrabold text-[14px] text-neutral-900">

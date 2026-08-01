@@ -15,13 +15,28 @@ export default async function CustomerRefundsPage({ searchParams }: { searchPara
   const skip = (page - 1) * limit;
   const q = searchParams.q || "";
   const tab = searchParams.tab || "all";
+  const period = searchParams.period || "all";
 
   const where: any = { customerId: session.customerId };
   if (q) {
-    where.shortCode = { contains: q };
+    where.OR = [
+      { shortCode: { contains: q } },
+      { productTitle: { contains: q } }
+    ];
   }
   if (tab === "favorite") {
     where.isFavorite = true;
+  }
+  if (period !== "all") {
+    const now = new Date();
+    if (period === "this_month") {
+      const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+      where.createdAt = { gte: firstDay };
+    } else if (period === "last_month") {
+      const firstDay = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      const lastDay = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59, 999);
+      where.createdAt = { gte: firstDay, lte: lastDay };
+    }
   }
 
   const [platforms, links, totalCount, allCount, favoriteCount] = await Promise.all([
