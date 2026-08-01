@@ -11,16 +11,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "/login" },
 };
 
-const FLOATING_BADGES = [
-  { text: "🔒 Bảo mật SSL", pos: "top-[18%] left-[27%]", rotate: "-rotate-6", delay: "0s" },
-  { text: "⚡ Hoàn tiền tự động", pos: "top-[14%] right-[27%]", rotate: "rotate-3", delay: "0.8s" },
-  { text: "💸 Rút từ 10.000đ", pos: "top-[42%] left-[22%]", rotate: "-rotate-3", delay: "1.6s" },
-  { text: "🎁 Hoa hồng 5%", pos: "top-[38%] right-[25%]", rotate: "rotate-5", delay: "2.4s" },
-  { text: "🛡️ Shopee & TikTok", pos: "bottom-[38%] left-[25%]", rotate: "rotate-2", delay: "0.4s" },
-  { text: "🐱 2.450+ thành viên", pos: "bottom-[34%] right-[25%]", rotate: "-rotate-4", delay: "1.2s" },
-  { text: "💳 ATM & Momo 0đ phí", pos: "bottom-[20%] left-[20%]", rotate: "rotate-3", delay: "2s" },
-  { text: "✨ Ghi nhận 1 giây", pos: "bottom-[16%] right-[25%]", rotate: "-rotate-2", delay: "2.8s" },
-];
+
 
 export default function LoginPage({
   searchParams,
@@ -38,16 +29,7 @@ export default function LoginPage({
         Trang chủ
       </Link>
 
-      {/* Floating scattered trust badges with animation — desktop only */}
-      {FLOATING_BADGES.map((badge) => (
-        <span
-          key={badge.text}
-          style={{ animationDelay: badge.delay }}
-          className={`absolute ${badge.pos} ${badge.rotate} hidden xl:inline-flex items-center px-3 py-1.5 rounded-full bg-white/60 backdrop-blur-sm border border-primary-100/50 text-[11px] font-semibold text-neutral-400 shadow-sm select-none pointer-events-none float`}
-        >
-          {badge.text}
-        </span>
-      ))}
+
 
       {/* Centered Container */}
       <div className="w-full max-w-[400px] mx-auto relative z-10">

@@ -49,6 +49,7 @@ model Customer {
   customerCode     String   @unique @map("customer_code")
   fullName         String   @map("full_name")
   phone            String?
+  address          String?
   zaloUserId       String?  @map("zalo_user_id")
   zaloDisplayName  String?  @map("zalo_display_name")
   telegramUserId   String?  @map("telegram_user_id")

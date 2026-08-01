@@ -69,7 +69,7 @@ export function FloatingQuickAccess({ unreadCount }: { unreadCount: number }) {
     >
       {/* Speed Dial Menu Stack — Nổi phía trên nút hỗ trợ giống UI Home */}
       {isOpen && (
-        <div className="mb-3 flex flex-col items-end gap-3 animate-in fade-in slide-in-from-bottom-4 duration-200">
+        <div className="mb-3 flex flex-col items-end gap-3 animate-in fade-in slide-in-from-bottom-4 duration-200 max-h-[calc(100vh-200px)] overflow-y-auto">
           {enabledChannels.map((c, index) => {
             if (c.key === "hotline") {
               const rawPhone = c.handle.replace(/\D/g, "");

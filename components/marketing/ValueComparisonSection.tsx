@@ -6,15 +6,15 @@ import Link from "next/link";
 const COMPARISON_ROWS = [
   {
     feature: "Hoàn tiền hoa hồng đơn hàng",
-    subtext: "Phần hoa hồng tiếp thị từ Shopee & TikTok",
+    subtext: "Phần hoa hồng tiếp thị từ Shopee",
     direct: "0đ (Bị giữ 100% hoa hồng)",
-    meowback: "Hoàn tới 80% hoa hồng ròng về ví",
+    meowback: "Hoàn tới 70% hoa hồng ròng về ví",
   },
   {
     feature: "Rút tiền về Ngân hàng Việt Nam",
     subtext: "Chuyển khoản linh hoạt về mọi ngân hàng",
     direct: "Không hỗ trợ",
-    meowback: "Rút từ 10.000đ (Chi trả thứ 3 & 5)",
+    meowback: "Rút từ 10.000đ (Duyệt lệnh siêu tốc)",
   },
   {
     feature: "Voucher & Mã giảm giá sàn",
@@ -26,7 +26,7 @@ const COMPARISON_ROWS = [
     feature: "Thưởng giới thiệu bạn bè (F1)",
     subtext: "Thu nhập thụ động từ bạn bè mua sắm",
     direct: "Không có",
-    meowback: "Thưởng 5% doanh số giới thiệu trọn đời",
+    meowback: "Thưởng 5% doanh số giới thiệu các đơn đầu",
   },
   {
     feature: "Tạo link tự động qua Bot 24/7",
@@ -56,7 +56,7 @@ export function ValueComparisonSection() {
             </span>
           </h2>
           <p className="text-neutral-600 font-semibold max-w-lg mx-auto text-base">
-            Tại sao phải trả nguyên giá khi bạn có thể nhận lại tới 80% hoa hồng trên từng đơn hàng?
+            Tại sao phải trả nguyên giá khi bạn có thể nhận lại tới 70% hoa hồng trên từng đơn hàng?
           </p>
         </div>
 

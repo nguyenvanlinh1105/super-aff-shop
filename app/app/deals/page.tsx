@@ -67,48 +67,27 @@ export default async function CustomerDealsPage({ searchParams }: { searchParams
   const totalPages = Math.ceil(totalCount / limit);
 
   return (
-    <div className="flex flex-col gap-xl fade-in">
+    <div className="mx-auto flex max-w-5xl flex-col gap-6 fade-in pb-12">
       {/* Banner Header */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#ff4500] via-[#e86a33] to-[#ff8c42] p-xl sm:p-2xl">
-        <div
-          className="absolute inset-0 opacity-10"
-          style={{ backgroundImage: "radial-gradient(circle, #fff 1px, transparent 1px)", backgroundSize: "20px 20px" }}
-        />
-        <svg className="pointer-events-none absolute inset-0 h-full w-full" aria-hidden="true">
-          <circle cx="90%" cy="20%" r="120" fill="white" fillOpacity="0.06">
-            <animate attributeName="cx" values="90%;85%;90%" dur="8s" repeatCount="indefinite" />
-          </circle>
-          <circle cx="10%" cy="75%" r="80" fill="white" fillOpacity="0.08">
-            <animate attributeName="cy" values="75%;65%;75%" dur="10s" repeatCount="indefinite" />
-          </circle>
-        </svg>
+      <div className="relative overflow-hidden rounded-3xl p-6 sm:p-8 border border-primary-200/60 shadow-xl shadow-primary-500/5 bg-gradient-to-br from-white via-[#FFF5F8] to-[#FFE8F0]">
+        <div className="pointer-events-none absolute -right-12 -top-12 h-64 w-64 rounded-full bg-gradient-to-br from-primary-200/40 to-pink-300/20 blur-2xl" />
+        <div className="pointer-events-none absolute -bottom-10 right-40 h-48 w-48 rounded-full bg-gradient-to-tr from-accent-bow/20 to-primary-100/30 blur-xl" />
 
-        <div className="relative z-10">
-          <div className="flex items-center gap-sm mb-sm">
-            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-white/20">
-              <Flame size={16} className="text-white" strokeWidth={2} />
+        <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+          <div className="flex items-center gap-5">
+            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-3xl bg-gradient-to-br from-primary-400 via-primary-500 to-pink-600 text-white flex items-center justify-center shadow-lg shadow-primary-500/25 shrink-0 border border-white/40 overflow-hidden p-1">
+              <img src="/meow-back-deals.png" alt="Deals" className="w-full h-full object-contain rounded-2xl" />
             </div>
-            <span className="text-[12px] font-bold uppercase tracking-[0.12em] text-white/70">Deals Độc Quyền</span>
-          </div>
-          <h1 className="text-[28px] sm:text-[36px] font-black text-white leading-tight">
-            🔥 Deal Sập Sàn Hôm Nay
-          </h1>
-          <p className="mt-xs text-[14px] text-white/70 max-w-[400px]">
-            Những deal giảm giá được admin tuyển chọn kỹ — bấm vào mua ngay để nhận hoàn tiền!
-          </p>
-          <div className="mt-lg flex items-center gap-md">
-            <div className="flex items-center gap-xs bg-white/15 rounded-xl px-md py-xs">
-              <span className="h-2 w-2 rounded-full bg-green-400 animate-pulse" />
-              <span className="text-[13px] font-bold text-white">{activeDealsCount} deals đang có</span>
+            <div>
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold leading-tight text-neutral-900 tracking-tight">
+                Deal Sập Sàn Hôm Nay
+              </h1>
+              <p className="mt-1 text-xs sm:text-sm text-neutral-600 font-medium leading-relaxed max-w-xl">
+                Những ưu đãi giảm giá độc quyền được hệ thống tuyển chọn. Bấm vào link và mua ngay để tự động nhận thêm hoàn tiền vào ví!
+              </p>
             </div>
           </div>
         </div>
-
-        <img
-          src="/meow-back-voucher.png"
-          alt=""
-          className="pointer-events-none absolute -right-2 bottom-0 z-10 hidden h-[140px] w-[140px] object-contain drop-shadow-xl sm:block"
-        />
       </div>
 
       <div className="mb-md">

@@ -6,6 +6,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Pagination } from "@/components/ui/Pagination";
 import { ServerSearchInput } from "@/components/ui/ServerSearchInput";
 import { useModal } from "@/components/ui/ModalProvider";
+import { Select } from "@/components/ui/Select";
 
 const PLATFORM_STYLE: Record<string, { icon: typeof ShoppingBag; color: string }> = {
   SHOPEE: { icon: ShoppingBag, color: "#ee4d2d" },
@@ -104,6 +105,19 @@ export function RefundHistoryClient({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const currentTab = searchParams.get("tab") || "all";
+  const currentPeriod = searchParams.get("period") || "all";
+
+  const handlePeriodChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const val = e.target.value;
+    const params = new URLSearchParams(searchParams.toString());
+    if (val === "all") {
+      params.delete("period");
+    } else {
+      params.set("period", val);
+    }
+    params.delete("page");
+    router.replace(`${pathname}?${params.toString()}`);
+  };
 
   const handleTabChange = (tab: string) => {
     const params = new URLSearchParams(searchParams);
@@ -132,7 +146,7 @@ export function RefundHistoryClient({
         <span className="text-[13px] font-medium text-gray-400">{totalCount} link</span>
       </div>
 
-      <div className="mb-md flex flex-col gap-sm sm:flex-row sm:items-center sm:justify-between">
+      <div className="mb-md flex flex-col gap-sm">
         <div className="flex items-center gap-sm">
           <button
             type="button"
@@ -160,7 +174,18 @@ export function RefundHistoryClient({
             </span>
           </button>
         </div>
-        <ServerSearchInput placeholder="Tìm kiếm theo mã link (shortCode)..." className="sm:max-w-[240px]" />
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-sm">
+          <Select
+            value={currentPeriod}
+            onChange={handlePeriodChange}
+            className="sm:w-[180px] h-10 py-0 text-[13px]"
+          >
+            <option value="all">Tất cả thời gian</option>
+            <option value="this_month">Tháng này</option>
+            <option value="last_month">Tháng trước</option>
+          </Select>
+          <ServerSearchInput placeholder="Tìm tên sản phẩm hoặc mã..." className="sm:max-w-[300px]" />
+        </div>
       </div>
 
       {currentTab === "favorite" && counts.favorite === 0 && links.length === 0 && (
@@ -205,13 +230,13 @@ export function RefundHistoryClient({
                   <FavoriteButton linkId={l.id} isFavorite={l.isFavorite} />
                   <button
                     onClick={() => handleCopy(l.shortUrl ?? "")}
-                    className="flex h-9 items-center gap-xs rounded-lg bg-gray-100 px-sm text-[13px] font-bold text-gray-600 transition-colors hover:bg-gray-200 hover:text-gray-900"
+                    className="flex h-10 items-center gap-xs rounded-lg bg-gray-100 px-sm text-[13px] font-bold text-gray-600 transition-colors hover:bg-gray-200 hover:text-gray-900"
                   >
                     <Copy size={14} strokeWidth={2.5} />
                     <span className="inline">Copy</span>
                   </button>
                   <a href={l.shortUrl ?? "#"} target="_blank" rel="noreferrer">
-                    <button className="flex h-9 items-center gap-xs rounded-lg bg-[#2bc48a] px-sm text-[13px] font-bold text-white transition-colors hover:bg-[#25ad7a] hover:shadow-md hover:shadow-[#2bc48a]/20">
+                    <button className="flex h-10 items-center gap-xs rounded-lg bg-primary px-sm text-[13px] font-bold text-white transition-colors hover:bg-primary-active hover:shadow-md hover:shadow-primary/20">
                       <ExternalLink size={14} strokeWidth={2.5} />
                       <span className="inline">Mở</span>
                     </button>

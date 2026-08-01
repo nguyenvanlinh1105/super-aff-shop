@@ -14,7 +14,7 @@ const GALLERY_SLIDES = [
     id: 2,
     image: "/meowback_gallery_2.png",
     alt: "MeowBack Mobile App Mockup",
-    caption: "Dán Link Nhận Tiền Shopee & TikTok",
+    caption: "Dán Link Shopee — Nhận Tiền Hoàn",
   },
   {
     id: 3,
@@ -86,11 +86,11 @@ export function HeroGallerySlider() {
       {/* Floating Badge Overlay (Generous Padding & Positioned cleanly at bottom left) */}
       <div className="absolute -bottom-4 left-3 md:left-6 bg-white/95 backdrop-blur-md px-6 md:px-7 py-3 rounded-full md:rounded-2xl border-2 border-primary-200/90 shadow-cute-lg flex items-center gap-3 z-30">
         <span className="flex h-7 w-7 items-center justify-center rounded-full bg-primary-100 text-primary-600 font-black text-xs shrink-0">
-          80%
+          70%
         </span>
         <div className="flex flex-col">
           <span className="text-[13px] font-black text-neutral-950 leading-tight">
-            Tự động nhận hoa hồng 80%
+            Tự động nhận hoa hồng 70%
           </span>
           <span className="text-[11px] font-bold text-primary-600 flex items-center gap-1 mt-0.5">
             <Sparkles size={11} /> {GALLERY_SLIDES[currentIndex].caption}

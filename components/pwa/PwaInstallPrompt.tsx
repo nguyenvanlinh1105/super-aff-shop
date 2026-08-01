@@ -44,7 +44,7 @@ function IosStepsModal({ onClose }: { onClose: () => void }) {
         onClick={(e) => e.stopPropagation()}
       >
         <div className="p-xl text-center" style={{ background: "linear-gradient(135deg,#FFF5F8,#FFE4EC)" }}>
-          <img src={versionedAsset("/icontitle.png")} alt="" className="mx-auto mb-sm h-14 w-14 rounded-full object-cover" />
+          <img src={versionedAsset("/meowback_lucky_cat_logo.png")} alt="" className="mx-auto mb-sm h-14 w-14 rounded-full object-cover" />
           <h3 className="text-[17px] font-black text-gray-900">Thêm vào Màn hình chính</h3>
           <p className="mt-1 text-[12px] text-gray-500">3 bước để dùng MeowBack như một app thật trên iPhone</p>
         </div>
@@ -146,22 +146,31 @@ export function PwaInstallBanner() {
 
   return (
     <>
-      <div className="mb-lg flex items-center gap-sm rounded-2xl bg-white p-md shadow-sm ring-1 ring-black/5 fade-in">
-        <img src={versionedAsset("/icontitle.png")} alt="" className="h-10 w-10 shrink-0 rounded-full object-cover" />
-        <div className="min-w-0 flex-1">
-          <div className="text-[13px] font-bold text-gray-900">Cài đặt MeowBack vào máy</div>
-          <div className="text-[11px] text-gray-500">Mở nhanh hơn, trải nghiệm mượt như app thật</div>
+      <div className="mb-lg flex items-center justify-between gap-md rounded-2xl border border-primary-200 bg-primary-50 p-md shadow-sm sm:p-lg">
+        <div className="flex items-center gap-md">
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white shadow-sm ring-1 ring-black/5">
+            <img src={versionedAsset("/meowback_lucky_cat_logo.png")} alt="MeowBack" className="h-8 w-8 object-cover rounded-md" />
+          </div>
+          <div>
+            <h3 className="text-[14px] font-bold text-gray-900 sm:text-[15px]">Cài đặt ứng dụng</h3>
+            <p className="mt-0.5 text-[12px] text-gray-600 sm:text-[13px]">
+              Cài MeowBack lên điện thoại để mở nhanh hơn, dùng như một ứng dụng thật.
+            </p>
+          </div>
         </div>
-        <button
-          onClick={handleInstallClick}
-          className="shrink-0 rounded-xl bg-primary-500 px-md py-[8px] text-[12px] font-bold text-white shadow-md shadow-primary-500/30 transition-transform active:scale-[0.97]"
-        >
-          Cài đặt
-        </button>
-        <button onClick={dismiss} className="shrink-0 rounded-full p-1 text-gray-300 hover:text-gray-500" aria-label="Đóng">
-          <X size={16} />
-        </button>
+        <div className="flex shrink-0 items-center gap-sm">
+          <button
+            onClick={handleInstallClick}
+            className="rounded-xl bg-primary px-4 py-2 text-[13px] font-bold text-white shadow-sm hover:bg-primary-600"
+          >
+            Cài đặt ngay
+          </button>
+          <button onClick={dismiss} className="rounded-full p-2 text-gray-400 hover:bg-black/5 hover:text-gray-600">
+            <X size={18} />
+          </button>
+        </div>
       </div>
+
       {showIosSteps && (
         <IosStepsModal
           onClose={() => {
@@ -211,7 +220,7 @@ export function PwaInstallSettingsCard() {
   return (
     <div className="rounded-3xl bg-white p-xl shadow-sm ring-1 ring-black/[0.06]">
       <div className="mb-md flex items-center gap-sm">
-        <img src={versionedAsset("/icontitle.png")} alt="" className="h-9 w-9 rounded-full object-cover" />
+        <img src={versionedAsset("/meowback_lucky_cat_logo.png")} alt="" className="h-9 w-9 rounded-full object-cover" />
         <h2 className="text-[15px] font-bold text-gray-900">Cài đặt ứng dụng</h2>
       </div>
       {installed ? (
@@ -231,5 +240,73 @@ export function PwaInstallSettingsCard() {
       )}
       {showIosSteps && <IosStepsModal onClose={() => setShowIosSteps(false)} />}
     </div>
+  );
+}
+
+/**
+ * Thẻ ngang cố định dùng cho màn hình Trang chủ (Dashboard) nằm ngay dưới banner Xin chào.
+ */
+export function PwaInstallHorizontalCard() {
+  const [platform, setPlatform] = useState<Platform>("other");
+  const [installed, setInstalled] = useState(false);
+  const [showIosSteps, setShowIosSteps] = useState(false);
+  const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
+
+  useEffect(() => {
+    setInstalled(isStandalone());
+    setPlatform(detectPlatform());
+
+    const handler = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+    window.addEventListener("beforeinstallprompt", handler);
+    return () => window.removeEventListener("beforeinstallprompt", handler);
+  }, []);
+
+  if (installed) return null;
+
+  async function handleInstallClick() {
+    if (platform === "ios") {
+      setShowIosSteps(true);
+      return;
+    }
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      await deferredPrompt.userChoice;
+      setDeferredPrompt(null);
+    }
+  }
+
+  return (
+    <>
+      <div className="flex items-center justify-between gap-md rounded-3xl border border-primary-200 bg-white p-4 shadow-sm sm:p-5 ring-1 ring-black/5 hover:border-primary-300 transition-colors">
+        <div className="flex items-center gap-md">
+          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-primary-400 to-primary-500 shadow-cute ring-2 ring-white p-1">
+            <img src={versionedAsset("/meowback_lucky_cat_logo.png")} alt="MeowBack" className="h-full w-full object-cover rounded-xl" />
+          </div>
+          <div>
+            <h3 className="text-[15px] font-extrabold text-gray-900 tracking-tight">Cài đặt ứng dụng</h3>
+            <p className="mt-0.5 text-[13px] text-gray-500 font-medium">
+              Cài MeowBack lên {platform === "ios" ? "iPhone" : "điện thoại"} để mở nhanh hơn, dùng như một ứng dụng thật.
+            </p>
+          </div>
+        </div>
+        <div className="flex shrink-0 items-center gap-sm">
+          <button
+            onClick={handleInstallClick}
+            className="rounded-2xl bg-gradient-to-r from-primary to-primary-active px-5 py-2.5 text-[14px] font-bold text-white shadow-md shadow-primary/20 hover:scale-105 transition-transform"
+          >
+            {platform === "ios" ? "Hướng dẫn" : "Cài đặt ngay"}
+          </button>
+        </div>
+      </div>
+
+      {showIosSteps && (
+        <IosStepsModal
+          onClose={() => setShowIosSteps(false)}
+        />
+      )}
+    </>
   );
 }
