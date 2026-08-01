@@ -260,7 +260,7 @@ export function AdminOrdersClient({ orders, customers, totalPages, currentPage, 
                 <tr>
                   <td colSpan={8} className="py-12 text-center">
                     <div className="flex flex-col items-center gap-2">
-                      <img src="/heochodoi.png" alt="" className="h-14 w-14 object-contain opacity-70" />
+                      <img src="/meow-back-orders.png" alt="MeowBack Orders" className="h-16 w-16 object-contain" />
                       <span className="text-xs font-bold text-neutral-400">Không tìm thấy đơn hàng nào phù hợp</span>
                     </div>
                   </td>

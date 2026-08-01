@@ -85,7 +85,7 @@ function CopyInfoBtn({ c }: { c: CustomerPending }) {
 function BatchDetailModal({ batchId, onClose }: { batchId: string; onClose: () => void }) {
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-  const [showBill, setShowBill] = useState(false);
+  const [showBill, setShowBill] = useState(true);
 
   useEffect(() => {
     fetch(`/api/payments/${batchId}`)
@@ -97,170 +97,192 @@ function BatchDetailModal({ batchId, onClose }: { batchId: string; onClose: () =
   const billUrl = batch?.billStorageKey ? `/api/bills/${batch.billStorageKey}` : null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-md" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6" onClick={onClose}>
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
       <div
-        className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl bg-white shadow-2xl fade-in"
+        className="relative w-full max-w-4xl lg:max-w-5xl max-h-[90vh] overflow-y-auto rounded-3xl bg-white shadow-2xl fade-in custom-scrollbar"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="sticky top-0 z-10 flex items-center justify-between px-xl py-lg border-b border-gray-100 bg-white rounded-t-3xl"
-          style={{ background: "linear-gradient(135deg,#fff3ee,#fde8d8)" }}>
-          <div className="flex items-center gap-sm">
-            <img src="/heovitien.png" alt="" className="h-10 w-10 object-contain" />
+        <div className="sticky top-0 z-10 flex items-center justify-between px-6 py-4 border-b border-rose-100 bg-gradient-to-r from-rose-50/90 via-pink-50/80 to-amber-50/60 rounded-t-3xl backdrop-blur-md">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-2xl bg-white border border-rose-200/80 p-1 flex items-center justify-center shadow-xs shrink-0">
+              <img src="/meow-back-payments.png" alt="MeowBack" className="w-full h-full object-contain rounded-xl" />
+            </div>
             <div>
-              <h3 className="text-[16px] font-black text-gray-900">Chi tiết phiếu thanh toán</h3>
-              {batch && <p className="text-[12px] font-mono text-gray-500">{batch.paymentCode}</p>}
+              <h3 className="text-base font-extrabold text-neutral-900 tracking-tight">Chi tiết phiếu thanh toán</h3>
+              {batch && <p className="text-xs font-mono font-bold text-rose-600">{batch.paymentCode}</p>}
             </div>
           </div>
           <button onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-full bg-white/70 text-gray-500 hover:bg-white hover:text-gray-900 transition-colors">
+            className="flex h-8 w-8 items-center justify-center rounded-full bg-white/80 text-neutral-500 hover:bg-white hover:text-neutral-900 shadow-xs transition-all active:scale-95 border border-neutral-200/60">
             <X size={16} strokeWidth={2.5} />
           </button>
         </div>
 
-        <div className="p-xl flex flex-col gap-lg">
+        <div className="p-6 flex flex-col gap-6">
           {loading ? (
-            <div className="flex flex-col items-center py-2xl gap-md">
-              <img src="/heochodoi.png" alt="" className="h-16 w-16 object-contain animate-bounce" />
-              <p className="text-[13px] text-gray-400 font-medium">Đang tải dữ liệu...</p>
+            <div className="flex flex-col items-center py-16 gap-3">
+              <img src="/meow-back-mascot.png" alt="MeowBack Mascot" className="h-16 w-16 object-contain animate-bounce" />
+              <p className="text-xs text-neutral-500 font-bold">Đang tải dữ liệu phiếu thanh toán...</p>
             </div>
           ) : !batch ? (
-            <div className="flex flex-col items-center py-2xl gap-sm">
-              <AlertCircle size={32} className="text-red-400" />
-              <p className="text-[13px] font-bold text-red-500">Không tìm thấy phiếu</p>
+            <div className="flex flex-col items-center py-16 gap-2">
+              <AlertCircle size={32} className="text-rose-400" />
+              <p className="text-xs font-bold text-rose-500">Không tìm thấy phiếu thanh toán</p>
             </div>
           ) : (
             <>
-              {/* Status bar */}
-              <div className={`flex items-center gap-sm rounded-2xl p-md ${
-                batch.status === "paid" ? "bg-emerald-50 border border-emerald-100" : "bg-amber-50 border border-amber-100"
+              {/* Full Width Top Status Bar */}
+              <div className={`flex items-center gap-3 rounded-2xl p-4 border ${
+                batch.status === "paid" ? "bg-emerald-50/80 border-emerald-200/80" : "bg-amber-50/80 border-amber-200/80"
               }`}>
                 {batch.status === "paid"
-                  ? <CheckCircle2 size={20} className="text-emerald-500 shrink-0" />
-                  : <Clock size={20} className="text-amber-500 shrink-0" />}
+                  ? <CheckCircle2 size={22} className="text-emerald-500 shrink-0" />
+                  : <Clock size={22} className="text-amber-500 shrink-0" />}
                 <div>
-                  <p className={`text-[13px] font-black ${batch.status === "paid" ? "text-emerald-700" : "text-amber-700"}`}>
+                  <p className={`text-xs font-black ${batch.status === "paid" ? "text-emerald-800" : "text-amber-800"}`}>
                     {batch.status === "paid" ? "Đã thanh toán thành công" : "Đang chờ xử lý"}
                   </p>
                   {batch.paidAt && (
-                    <p className="text-[11px] text-emerald-500">{formatDate(new Date(batch.paidAt))}</p>
+                    <p className="text-[11px] font-semibold text-emerald-600 mt-0.5">{formatDate(new Date(batch.paidAt))}</p>
                   )}
                 </div>
                 <div className="ml-auto text-right">
-                  <p className="text-[11px] text-gray-400">Tổng tiền</p>
-                  <p className="text-[18px] font-black text-[#e86a33]">{formatCurrency(Number(batch.totalAmount))}</p>
+                  <p className="text-[10px] font-extrabold uppercase tracking-wider text-neutral-400">Tổng tiền</p>
+                  <p className="text-lg font-black text-rose-600 tabular-nums">{formatCurrency(Number(batch.totalAmount))}</p>
                 </div>
               </div>
 
-              {/* Customer info */}
-              <div className="rounded-2xl bg-gray-50 border border-gray-100 p-lg">
-                <p className="text-[11px] font-bold uppercase tracking-wider text-gray-400 mb-md">Thông tin khách hàng</p>
-                <div className="flex items-center gap-md mb-md">
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#e86a33] to-[#d65d2a] text-white font-black text-[15px]">
-                    {batch.customer.fullName.charAt(0).toUpperCase()}
-                  </div>
-                  <div>
-                    <p className="font-bold text-gray-900">{batch.customer.fullName}</p>
-                    <p className="font-mono text-[11px] text-gray-400">{batch.customer.customerCode}</p>
-                  </div>
-                </div>
-                <div className="flex flex-col gap-2">
-                  {batch.customer.bankAccountNumber && (
-                    <div className="flex items-center gap-sm rounded-xl bg-white p-sm ring-1 ring-gray-100">
-                      <CreditCard size={14} className="text-[#e86a33] shrink-0" />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-[11px] font-bold text-gray-800">{batch.customer.bankName}</p>
-                        <p className="font-mono text-[11px] text-gray-500">{batch.customer.bankAccountNumber} — {batch.customer.bankAccountName}</p>
-                      </div>
-                      <CopyBtn value={batch.customer.bankAccountNumber} />
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Transfer info */}
-              {(batch.transferReference || batch.transferNote) && (
-                <div className="rounded-2xl bg-emerald-50 border border-emerald-100 p-lg">
-                  <p className="text-[11px] font-bold uppercase tracking-wider text-emerald-600 mb-sm">Thông tin chuyển khoản</p>
-                  {batch.transferReference && (
-                    <div className="flex items-center gap-sm mb-xs">
-                      <span className="text-[12px] text-gray-500 w-24 shrink-0">Mã giao dịch:</span>
-                      <span className="font-mono font-bold text-[13px] text-gray-900 flex-1">{batch.transferReference}</span>
-                      <CopyBtn value={batch.transferReference} />
-                    </div>
-                  )}
-                  {batch.transferNote && (
-                    <div className="flex items-start gap-sm">
-                      <span className="text-[12px] text-gray-500 w-24 shrink-0">Ghi chú:</span>
-                      <span className="text-[13px] text-gray-700">{batch.transferNote}</span>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Bill image */}
-              {billUrl && (
-                <div className="rounded-2xl bg-sky-50 border border-sky-100 p-lg">
-                  <div className="flex items-center justify-between mb-sm">
-                    <p className="text-[11px] font-bold uppercase tracking-wider text-sky-600 flex items-center gap-xs">
-                      <ImageIcon size={12} /> Ảnh bill chuyển khoản
-                    </p>
-                    <div className="flex gap-sm">
-                      <button onClick={() => setShowBill(!showBill)}
-                        className="flex items-center gap-xs rounded-lg bg-white px-sm py-[4px] text-[12px] font-bold text-sky-600 hover:bg-sky-100 transition-colors">
-                        <Eye size={12} strokeWidth={2.5} />
-                        {showBill ? "Ẩn" : "Xem bill"}
-                      </button>
-                      <a href={billUrl} target="_blank" rel="noopener noreferrer"
-                        className="flex items-center gap-xs rounded-lg bg-white px-sm py-[4px] text-[12px] font-bold text-gray-600 hover:bg-gray-100 transition-colors">
-                        <ExternalLink size={12} strokeWidth={2.5} />
-                        Mở tab mới
-                      </a>
-                    </div>
-                  </div>
-                  {showBill && (
-                    <div className="mt-sm rounded-xl overflow-hidden ring-1 ring-sky-200">
-                      <img src={billUrl} alt="Bill thanh toán" className="w-full object-contain max-h-[400px]" />
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Order items */}
-              <div>
-                <p className="text-[11px] font-bold uppercase tracking-wider text-gray-400 mb-md">
-                  Đơn hàng trong phiếu ({batch.items?.length ?? 0} đơn)
-                </p>
-                <div className="flex flex-col gap-sm">
-                  {batch.items?.map((item: any) => {
-                    const o = item.order;
-                    const img = o?.trackingLink?.productImage;
-                    const title = o?.trackingLink?.productTitle ?? o?.itemName ?? o?.orderExternalId;
-                    return (
-                      <div key={item.id} className="flex items-center gap-md rounded-xl bg-gray-50 border border-gray-100 p-sm">
-                        {img ? (
-                          <img src={img} alt="" className="h-10 w-10 rounded-lg object-cover ring-1 ring-black/5 shrink-0" />
-                        ) : (
-                          <div className="h-10 w-10 rounded-lg bg-gray-200 flex items-center justify-center shrink-0">
-                            <Receipt size={14} className="text-gray-400" />
-                          </div>
-                        )}
-                        <div className="flex-1 min-w-0">
-                          <p className="truncate text-[12px] font-semibold text-gray-800">{title}</p>
-                          <div className="flex items-center gap-xs mt-[2px]">
-                            <span className="text-[10px] font-bold text-gray-400 uppercase">{o?.platform?.name}</span>
-                            <span className="text-gray-200">•</span>
-                            <span className="font-mono text-[10px] text-gray-400">{o?.orderExternalId}</span>
-                          </div>
+              {/* 2-COLUMN GRID LAYOUT */}
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                
+                {/* ── CỘT TRÁI: Khách hàng + Chuyển khoản + Bill ── */}
+                <div className="lg:col-span-6 flex flex-col gap-4">
+                  
+                  {/* Thông tin khách hàng */}
+                  <div className="rounded-2xl bg-neutral-50/80 border border-neutral-200/70 p-5">
+                    <p className="text-[10px] font-black uppercase tracking-wider text-neutral-400 mb-3">THÔNG TIN KHÁCH HÀNG</p>
+                    <div className="flex items-center gap-3.5 mb-3">
+                      {batch.customer.avatar ? (
+                        <img src={batch.customer.avatar} alt={batch.customer.fullName} className="w-11 h-11 rounded-full object-cover ring-2 ring-rose-200 shrink-0" />
+                      ) : (
+                        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-rose-500 to-pink-600 text-white font-black text-base shadow-sm">
+                          {batch.customer.fullName.charAt(0).toUpperCase()}
                         </div>
-                        <span className="text-[13px] font-black text-emerald-600 shrink-0">
-                          +{formatCurrency(Number(item.amount))}
+                      )}
+                      <div>
+                        <p className="font-extrabold text-neutral-900 text-sm">{batch.customer.fullName}</p>
+                        <span className="inline-block font-mono text-[10px] font-bold text-neutral-500 bg-neutral-200/60 px-2 py-0.5 rounded-md mt-0.5">
+                          {batch.customer.customerCode}
                         </span>
                       </div>
-                    );
-                  })}
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      {batch.customer.bankAccountNumber && (
+                        <div className="flex items-center gap-3 rounded-xl bg-white p-3 border border-neutral-200/70 shadow-xs">
+                          <CreditCard size={16} className="text-rose-500 shrink-0" />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-black text-neutral-800">{batch.customer.bankName}</p>
+                            <p className="font-mono text-xs font-semibold text-neutral-600 mt-0.5">{batch.customer.bankAccountNumber} — {batch.customer.bankAccountName}</p>
+                          </div>
+                          <CopyBtn value={batch.customer.bankAccountNumber} />
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Thông tin chuyển khoản */}
+                  {(batch.transferReference || batch.transferNote) && (
+                    <div className="rounded-2xl bg-emerald-50/70 border border-emerald-200/70 p-4">
+                      <p className="text-[10px] font-black uppercase tracking-wider text-emerald-700 mb-2.5">THÔNG TIN CHUYỂN KHOẢN</p>
+                      {batch.transferReference && (
+                        <div className="flex items-center gap-2 mb-1.5">
+                          <span className="text-xs font-medium text-neutral-500 w-24 shrink-0">Mã giao dịch:</span>
+                          <span className="font-mono font-extrabold text-xs text-neutral-900 flex-1">{batch.transferReference}</span>
+                          <CopyBtn value={batch.transferReference} />
+                        </div>
+                      )}
+                      {batch.transferNote && (
+                        <div className="flex items-start gap-2">
+                          <span className="text-xs font-medium text-neutral-500 w-24 shrink-0">Ghi chú:</span>
+                          <span className="text-xs font-semibold text-neutral-700">{batch.transferNote}</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Ảnh bill chuyển khoản */}
+                  {billUrl && (
+                    <div className="rounded-2xl bg-sky-50/70 border border-sky-200/70 p-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <p className="text-[10px] font-black uppercase tracking-wider text-sky-700 flex items-center gap-1.5">
+                          <ImageIcon size={14} /> Ảnh bill chuyển khoản
+                        </p>
+                        <div className="flex gap-2">
+                          <button onClick={() => setShowBill(!showBill)}
+                            className="flex items-center gap-1 rounded-xl bg-white px-3 py-1 text-xs font-extrabold text-sky-600 hover:bg-sky-100 transition-colors shadow-2xs">
+                            <Eye size={13} strokeWidth={2.5} />
+                            {showBill ? "Ẩn" : "Xem bill"}
+                          </button>
+                          <a href={billUrl} target="_blank" rel="noopener noreferrer"
+                            className="flex items-center gap-1 rounded-xl bg-white px-3 py-1 text-xs font-extrabold text-neutral-600 hover:bg-neutral-100 transition-colors shadow-2xs">
+                            <ExternalLink size={13} strokeWidth={2.5} />
+                            Mở tab mới
+                          </a>
+                        </div>
+                      </div>
+                      {showBill && (
+                        <div className="mt-2 rounded-2xl overflow-hidden border border-sky-200 shadow-sm bg-white p-2 flex items-center justify-center">
+                          <img src={billUrl} alt="Bill thanh toán" className="w-full object-contain max-h-[360px] rounded-xl" />
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
+
+                {/* ── CỘT PHẢI: Đơn hàng trong phiếu ── */}
+                <div className="lg:col-span-6 flex flex-col h-full rounded-2xl bg-neutral-50/80 border border-neutral-200/70 p-5">
+                  <div className="flex items-center justify-between mb-3">
+                    <p className="text-[10px] font-black uppercase tracking-wider text-neutral-400">
+                      ĐƠN HÀNG TRONG PHIẾU ({batch.items?.length ?? 0} ĐƠN)
+                    </p>
+                    <span className="text-xs font-mono font-bold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-md border border-rose-100">
+                      {formatCurrency(Number(batch.totalAmount))}
+                    </span>
+                  </div>
+
+                  <div className="flex flex-col gap-2.5 max-h-[520px] overflow-y-auto pr-1 custom-scrollbar">
+                    {batch.items?.map((item: any) => {
+                      const o = item.order;
+                      const img = o?.trackingLink?.productImage;
+                      const title = o?.trackingLink?.productTitle ?? o?.itemName ?? o?.orderExternalId;
+                      return (
+                        <div key={item.id} className="flex items-center gap-3 rounded-2xl bg-white border border-neutral-200/70 p-3 shadow-2xs hover:border-rose-200 transition-colors">
+                          {img ? (
+                            <img src={img} alt="" className="h-11 w-11 rounded-xl object-cover ring-1 ring-black/5 shrink-0" />
+                          ) : (
+                            <div className="h-11 w-11 rounded-xl bg-rose-50 border border-rose-100 flex items-center justify-center shrink-0">
+                              <Receipt size={16} className="text-rose-500" />
+                            </div>
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <p className="truncate text-xs font-bold text-neutral-800" title={title}>{title}</p>
+                            <div className="flex items-center gap-1.5 mt-0.5">
+                              <span className="text-[10px] font-black text-rose-600 uppercase bg-rose-50 border border-rose-200 px-1.5 py-0.2 rounded">{o?.platform?.name}</span>
+                              <span className="text-neutral-300">•</span>
+                              <span className="font-mono text-[10px] font-bold text-neutral-500">{o?.orderExternalId}</span>
+                            </div>
+                          </div>
+                          <span className="text-xs font-black text-emerald-600 shrink-0 tabular-nums">
+                            +{formatCurrency(Number(item.amount))}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
               </div>
             </>
           )}
@@ -372,7 +394,7 @@ export function AdminPaymentsClient({ pendingList, batches, waitingList, custome
       {activeTab === "pending" && (
         filteredPending.length === 0 ? (
           <div className="flex flex-col items-center gap-2 rounded-3xl bg-white py-16 shadow-sm border border-neutral-200/70">
-            <img src="/heochodoi.png" alt="" className="h-14 w-14 object-contain opacity-70" />
+            <img src="/meow-back-mascot.png" alt="MeowBack Mascot" className="h-16 w-16 object-contain" />
             <span className="text-xs font-bold text-neutral-400">Chưa có khách nào yêu cầu rút tiền 🎉</span>
           </div>
         ) : (
@@ -468,7 +490,7 @@ export function AdminPaymentsClient({ pendingList, batches, waitingList, custome
       {activeTab === "waiting" && (
         filteredWaiting.length === 0 ? (
           <div className="flex flex-col items-center gap-2 rounded-3xl bg-white py-16 shadow-sm border border-neutral-200/70">
-            <img src="/heochaomung.png" alt="" className="h-14 w-14 object-contain opacity-70" />
+            <img src="/meow-back-mascot.png" alt="MeowBack Mascot" className="h-16 w-16 object-contain" />
             <span className="text-xs font-bold text-neutral-400">Không có đơn nào đang chờ Shopee duyệt 🎉</span>
           </div>
         ) : (
@@ -540,7 +562,7 @@ export function AdminPaymentsClient({ pendingList, batches, waitingList, custome
       {activeTab === "history" && (
         filteredBatches.length === 0 ? (
           <div className="flex flex-col items-center gap-2 rounded-3xl bg-white py-16 shadow-sm border border-neutral-200/70">
-            <img src="/10_empty.png" alt="" className="h-14 w-14 object-contain opacity-60" />
+            <img src="/meow-back-payments.png" alt="MeowBack Payments" className="h-16 w-16 object-contain opacity-80" />
             <span className="text-xs font-bold text-neutral-400">Không có phiếu nào</span>
           </div>
         ) : (
