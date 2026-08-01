@@ -4,16 +4,23 @@ import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { CheckCircle2, X, Upload, FileImage, Loader2 } from "lucide-react";
 
-export function MarkPaidForm({ batchId }: { batchId: string }) {
+export function MarkPaidForm({ batchId, paymentCode }: { batchId: string; paymentCode?: string }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [transferReference, setTransferReference] = useState("");
-  const [transferNote, setTransferNote] = useState("");
+  const [transferNote, setTransferNote] = useState(paymentCode || "");
   const [bill, setBill] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const [error, setError] = useState<string | null>(null);
+
+  const handleOpen = () => {
+    if (paymentCode && !transferNote) {
+      setTransferNote(paymentCode);
+    }
+    setOpen(true);
+  };
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -60,7 +67,7 @@ export function MarkPaidForm({ batchId }: { batchId: string }) {
     <>
       {/* Trigger button */}
       <button
-        onClick={() => setOpen(true)}
+        onClick={handleOpen}
         className="flex h-8 items-center gap-xs rounded-xl bg-emerald-500 px-sm text-[12px] font-bold text-white hover:bg-emerald-600 transition-colors shadow-sm shadow-emerald-200"
       >
         <CheckCircle2 size={13} strokeWidth={2.5} />
