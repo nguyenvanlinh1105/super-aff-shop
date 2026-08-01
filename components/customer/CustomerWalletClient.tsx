@@ -153,7 +153,7 @@ export function CustomerWalletClient({
       setIsModalOpen(false);
       router.refresh();
     } catch (err) {
-      alert("Đã có lỗi xảy ra khi lưu thông tin.");
+      setError("Đã có lỗi xảy ra khi lưu thông tin.");
     } finally {
       setIsSaving(false);
     }
