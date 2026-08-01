@@ -45,6 +45,7 @@ export function AdminCustomersClient({ customers, totalPages, currentPage, count
   const searchParams = useSearchParams();
   const currentTab = searchParams.get("tab") || "all";
   const [confirmingAction, setConfirmingAction] = useState<{ id: string; type: "soft_delete" | "force_delete" } | null>(null);
+  const [loadingId, setLoadingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   async function handleToggleStatus(id: string, newStatus: string) {

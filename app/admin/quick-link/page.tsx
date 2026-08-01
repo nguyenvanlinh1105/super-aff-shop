@@ -115,8 +115,6 @@ export default async function AdminQuickLinkPage() {
                   <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-rose-100 to-pink-50 border border-rose-200/60 flex items-center justify-center shrink-0 overflow-hidden">
                     {link.productImage ? (
                       <img src={link.productImage} alt={link.productTitle || ""} className="w-full h-full object-cover" />
-                    ) : link.customer.avatar ? (
-                      <img src={link.customer.avatar} alt={link.customer.fullName} className="w-full h-full object-cover" />
                     ) : (
                       <img src="/meow-back-quick-link.png" alt="" className="w-6 h-6 object-contain" />
                     )}
