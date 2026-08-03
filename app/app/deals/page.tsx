@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { Flame } from "lucide-react";
 import { DealGrid } from "@/components/customer/DealGrid";
 import { ServerSearchInput } from "@/components/ui/ServerSearchInput";
+import { FloatingElement } from "@/components/ui/FloatingElement";
 
 export default async function CustomerDealsPage({ searchParams }: { searchParams: { q?: string; page?: string; platform?: string; category?: string; sort?: string; linkType?: string } }) {
   const session = await getSession();
@@ -67,17 +68,19 @@ export default async function CustomerDealsPage({ searchParams }: { searchParams
   const totalPages = Math.ceil(totalCount / limit);
 
   return (
-    <div className="mx-auto flex max-w-5xl flex-col gap-6 fade-in pb-12">
+    <div className="flex w-full flex-col gap-6 fade-in pb-12">
       {/* Banner Header */}
-      <div className="relative overflow-hidden rounded-3xl p-6 sm:p-8 border border-primary-200/60 shadow-xl shadow-primary-500/5 bg-gradient-to-br from-white via-[#FFF5F8] to-[#FFE8F0]">
-        <div className="pointer-events-none absolute -right-12 -top-12 h-64 w-64 rounded-full bg-gradient-to-br from-primary-200/40 to-pink-300/20 blur-2xl" />
-        <div className="pointer-events-none absolute -bottom-10 right-40 h-48 w-48 rounded-full bg-gradient-to-tr from-accent-bow/20 to-primary-100/30 blur-xl" />
+      <div className="relative overflow-hidden rounded-3xl p-6 sm:p-8 border border-primary-200/60 shadow-xl shadow-primary-500/5 bg-white">
+        <img src="/deals-bg.png" alt="" className="absolute inset-0 w-full h-full object-cover opacity-80" />
+        <div className="absolute inset-0 bg-white/40 backdrop-blur-[2px]" />
 
         <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
           <div className="flex items-center gap-5">
-            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-3xl bg-gradient-to-br from-primary-400 via-primary-500 to-pink-600 text-white flex items-center justify-center shadow-lg shadow-primary-500/25 shrink-0 border border-white/40 overflow-hidden p-1">
-              <img src="/meow-back-deals.png" alt="Deals" className="w-full h-full object-contain rounded-2xl" />
-            </div>
+            <FloatingElement duration={4}>
+              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-3xl bg-gradient-to-br from-primary-400 via-primary-500 to-pink-600 text-white flex items-center justify-center shadow-lg shadow-primary-500/25 shrink-0 border border-white/40 overflow-hidden p-1">
+                <img src="/meowback_lucky_cat_logo.png" alt="MeowBack" className="w-full h-full object-contain rounded-2xl" />
+              </div>
+            </FloatingElement>
             <div>
               <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold leading-tight text-neutral-900 tracking-tight">
                 Deal Sập Sàn Hôm Nay

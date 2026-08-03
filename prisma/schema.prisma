@@ -72,6 +72,15 @@ model Customer {
   // hiện tại; null nghĩa là khách không đang ở giữa hội thoại nào.
   telegramFlowStep String?  @map("telegram_flow_step")
   telegramFlowData String?  @map("telegram_flow_data")
+
+  // ─── Payment PIN (Mã PIN rút tiền) ─────────────────────────────
+  // Hash bcrypt của mã PIN 6 số; null = chưa thiết lập.
+  paymentPin        String?   @map("payment_pin")
+  // Số lần nhập sai liên tiếp — reset về 0 sau khi nhập đúng.
+  pinFailedAttempts Int       @default(0) @map("pin_failed_attempts")
+  // Nếu nhập sai ≥ 5 lần, khoá đến thời điểm này (null = không khoá).
+  pinLockUntil      DateTime? @map("pin_lock_until")
+
   createdAt        DateTime @default(now()) @map("created_at")
   updatedAt        DateTime @default(now()) @updatedAt @map("updated_at")
 

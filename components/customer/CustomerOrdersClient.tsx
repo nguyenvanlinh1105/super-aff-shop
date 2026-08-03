@@ -1,7 +1,9 @@
 "use client";
 
-import { CalendarDays, ExternalLink, Package, Gift } from "lucide-react";
+import { useState } from "react";
+import { CalendarDays, ExternalLink, Package, Gift, ChevronDown, CheckCircle2, Clock, Truck, Wallet } from "lucide-react";
 import { Pagination } from "@/components/ui/Pagination";
+import { FloatingElement } from "@/components/ui/FloatingElement";
 import { ServerSearchInput } from "@/components/ui/ServerSearchInput";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
@@ -28,11 +30,36 @@ type Props = {
   counts: { all: number; completed: number; pending: number; reconciling: number; processing: number; cancelled: number };
 };
 
+function getOrderTimeline(order: Order) {
+  const isDone = (s: string) => order.orderStatus === s || (s === "processing" && ["approved"].includes(order.orderStatus));
+  const steps = [
+    { label: "Shopee ghi nhận", icon: Package, done: true },
+    { label: "Shopee xác nhận hoàn thành", icon: CheckCircle2, done: order.orderStatus !== "pending" },
+    { label: "Đang đối soát (15 ngày)", icon: Clock, done: order.orderStatus === "approved" || order.orderStatus === "processing" },
+    { label: "Tiền vào ví", icon: Wallet, done: order.orderStatus === "approved" && order.payoutStatus === "paid" },
+  ];
+  return steps;
+}
+
 export function CustomerOrdersClient({ orders, totalPages, currentPage, counts }: Props) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const [expandedId, setExpandedId] = useState<string | null>(null);
   const currentTab = searchParams.get("tab") || "all";
+  const currentPeriod = searchParams.get("period") || "all";
+
+  const handlePeriodChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const val = e.target.value;
+    const params = new URLSearchParams(searchParams.toString());
+    if (val === "all") {
+      params.delete("period");
+    } else {
+      params.set("period", val);
+    }
+    params.delete("page");
+    router.replace(`${pathname}?${params.toString()}`);
+  };
 
   const handleTabChange = (tab: string) => {
     const params = new URLSearchParams(searchParams);
@@ -75,17 +102,19 @@ export function CustomerOrdersClient({ orders, totalPages, currentPage, counts }
   };
 
   return (
-    <div className="mx-auto flex max-w-5xl flex-col gap-lg fade-in pb-2xl">
+    <div className="flex w-full flex-col gap-lg fade-in pb-2xl">
       {/* HEADER */}
-      <div className="relative overflow-hidden rounded-3xl p-6 sm:p-8 border border-primary-200/60 shadow-xl shadow-primary-500/5 bg-gradient-to-br from-white via-[#FFF5F8] to-[#FFE8F0]">
-        <div className="pointer-events-none absolute -right-12 -top-12 h-64 w-64 rounded-full bg-gradient-to-br from-primary-200/40 to-pink-300/20 blur-2xl" />
-        <div className="pointer-events-none absolute -bottom-10 right-40 h-48 w-48 rounded-full bg-gradient-to-tr from-primary-100/30 to-pink-100/30 blur-xl" />
+      <div className="relative overflow-hidden rounded-3xl p-6 sm:p-8 border border-primary-200/60 shadow-xl shadow-primary-500/5 bg-white">
+        <img src="/deals-bg.png" alt="" className="absolute inset-0 w-full h-full object-cover opacity-80" />
+        <div className="absolute inset-0 bg-white/40 backdrop-blur-[2px]" />
 
         <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
           <div className="flex items-center gap-5">
-            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-3xl bg-gradient-to-br from-primary-400 via-primary-500 to-pink-600 text-white flex items-center justify-center shadow-lg shadow-primary-500/25 shrink-0 border border-white/40 overflow-hidden p-1">
-              <img src="/meow-back-orders.png" alt="Orders" className="w-full h-full object-contain rounded-2xl" />
-            </div>
+            <FloatingElement duration={4}>
+              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-3xl bg-gradient-to-br from-primary-400 via-primary-500 to-pink-600 text-white flex items-center justify-center shadow-lg shadow-primary-500/25 shrink-0 border border-white/40 overflow-hidden p-1">
+                <img src="/meow-back-orders.png" alt="Orders" className="w-full h-full object-contain rounded-2xl" />
+              </div>
+            </FloatingElement>
             <div>
               <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold leading-tight text-neutral-900 tracking-tight">
                 Đơn hàng ghi nhận
@@ -100,8 +129,19 @@ export function CustomerOrdersClient({ orders, totalPages, currentPage, counts }
 
       {/* TOOLBAR */}
       <div className="flex flex-col gap-sm sm:flex-row sm:items-center">
+        <select
+          value={currentPeriod}
+          onChange={handlePeriodChange}
+          className="h-11 rounded-2xl border border-neutral-200 bg-white px-4 py-0 text-[14px] font-semibold text-neutral-700 outline-none transition-all hover:border-neutral-300 focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10 sm:w-[200px]"
+        >
+          <option value="all">Tất cả thời gian</option>
+          <option value="today">Hôm nay</option>
+          <option value="last_7_days">7 ngày qua</option>
+          <option value="this_month">Tháng này</option>
+          <option value="last_month">Tháng trước</option>
+        </select>
         <div className="relative flex-1">
-          <ServerSearchInput placeholder="Tìm mã đơn hoặc tên sản phẩm..." />
+          <ServerSearchInput placeholder="Tìm mã đơn hàng..." />
         </div>
       </div>
 
@@ -225,10 +265,52 @@ export function CustomerOrdersClient({ orders, totalPages, currentPage, counts }
                       </div>
                       <div className={`text-[15px] font-black ${o.sourceType === "referral" ? "text-purple-600" : "text-[#e86a33]"}`}>{o.customerRewardAmount}</div>
                     </div>
-                    <button className="hidden sm:flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gray-50 text-gray-400 transition-colors hover:bg-[#e86a33] hover:text-white">
-                      <ExternalLink size={16} strokeWidth={2.5} />
+                    <button
+                      onClick={() => setExpandedId(expandedId === o.id ? null : o.id)}
+                      className="hidden sm:flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gray-50 text-gray-400 transition-colors hover:bg-primary-100 hover:text-primary-600"
+                    >
+                      <motion.div animate={{ rotate: expandedId === o.id ? 180 : 0 }} transition={{ duration: 0.2 }}>
+                        <ChevronDown size={16} strokeWidth={2.5} />
+                      </motion.div>
                     </button>
                   </div>
+
+                  {/* Status Timeline */}
+                  <AnimatePresence>
+                    {expandedId === o.id && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.25 }}
+                        className="overflow-hidden"
+                      >
+                        <div className="mt-3 pt-3 border-t border-gray-100">
+                          <div className="flex items-center gap-2 mb-3">
+                            <span className="text-[11px] font-black uppercase tracking-widest text-neutral-400">Hành trình đơn hàng</span>
+                          </div>
+                          <div className="flex gap-0 items-start">
+                            {getOrderTimeline(o).map((step, idx) => {
+                              const StepIcon = step.icon;
+                              return (
+                                <div key={idx} className="flex flex-col items-center flex-1">
+                                  <div className="flex items-center w-full">
+                                    <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 border-2 transition-colors ${
+                                      step.done ? "bg-primary-500 border-primary-500 text-white" : "bg-white border-gray-200 text-gray-300"
+                                    }`}>
+                                      <StepIcon size={13} strokeWidth={2.5} />
+                                    </div>
+                                    {idx < 3 && <div className={`flex-1 h-[2px] ${ step.done && getOrderTimeline(o)[idx+1]?.done ? "bg-primary-400" : "bg-gray-100"}`} />}
+                                  </div>
+                                  <span className="mt-1.5 text-[10px] font-semibold text-center leading-tight text-neutral-500 max-w-[70px]">{step.label}</span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </motion.div>
               ))}
             </AnimatePresence>

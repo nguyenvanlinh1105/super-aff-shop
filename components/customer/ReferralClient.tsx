@@ -6,6 +6,7 @@ import { Users, TrendingUp, CheckCircle2 } from "lucide-react";
 import { useModal } from "@/components/ui/ModalProvider";
 import { Button } from "@/components/ui/Button";
 import { IconBow } from "@/components/icons/CatRibbonIcons";
+import { FloatingElement } from "@/components/ui/FloatingElement";
 
 type Friend = {
   id: string;
@@ -75,17 +76,19 @@ export function ReferralClient({ customerCode, totalFriends, totalCommission, re
   };
 
   return (
-    <div className="flex flex-col gap-6 fade-in max-w-4xl mx-auto">
+    <div className="flex w-full flex-col gap-6 fade-in pb-12">
       {/* HEADER */}
-      <div className="relative overflow-hidden rounded-3xl p-6 sm:p-8 border border-primary-200/60 shadow-xl shadow-primary-500/5 bg-gradient-to-br from-white via-[#FFF5F8] to-[#FFE8F0]">
-        <div className="pointer-events-none absolute -right-12 -top-12 h-64 w-64 rounded-full bg-gradient-to-br from-primary-200/40 to-pink-300/20 blur-2xl" />
-        <div className="pointer-events-none absolute -bottom-10 right-40 h-48 w-48 rounded-full bg-gradient-to-tr from-primary-100/30 to-pink-100/30 blur-xl" />
+      <div className="relative overflow-hidden rounded-3xl p-6 sm:p-8 border border-primary-200/60 shadow-xl shadow-primary-500/5 bg-white">
+        <img src="/welcome-bg.png" alt="" className="absolute inset-0 w-full h-full object-cover opacity-80" />
+        <div className="absolute inset-0 bg-white/40 backdrop-blur-[2px]" />
 
         <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
           <div className="flex items-center gap-5">
-            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-3xl bg-gradient-to-br from-primary-400 via-primary-500 to-pink-600 text-white flex items-center justify-center shadow-lg shadow-primary-500/25 shrink-0 border border-white/40 overflow-hidden p-1">
-              <img src="/meow-back-community.png" alt="Referral" className="w-full h-full object-contain rounded-2xl" />
-            </div>
+            <FloatingElement duration={4}>
+              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-3xl bg-gradient-to-br from-primary-400 via-primary-500 to-pink-600 text-white flex items-center justify-center shadow-lg shadow-primary-500/25 shrink-0 border border-white/40 overflow-hidden p-1">
+                <img src="/meow-back-community.png" alt="Referral" className="w-full h-full object-contain rounded-2xl" />
+              </div>
+            </FloatingElement>
             <div>
               <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold leading-tight text-neutral-900 tracking-tight">
                 Mời bạn bè 🎀

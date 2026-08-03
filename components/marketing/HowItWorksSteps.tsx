@@ -1,4 +1,5 @@
 import { UserPlus, Wand2, ShoppingBag } from "lucide-react";
+import { StickyStack } from "@/components/ui/StickyStack";
 
 const STEPS = [
   {
@@ -31,46 +32,50 @@ const STEPS = [
 ];
 
 export function HowItWorksSteps() {
-  return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
-      {STEPS.map((step, index) => {
-        const StepIcon = step.icon;
-        return (
-          <div
-            key={index}
-            className="group relative flex flex-col justify-between p-7 bg-white border-2 border-primary-100/90 rounded-3xl hover:border-primary-400 hover:shadow-cute-lg hover:-translate-y-2 transition-all duration-300 overflow-hidden shadow-cute"
-          >
-            {/* Top Step Header: Icon + Step Badge */}
-            <div>
-              <div className="flex items-center justify-between mb-5">
-                <div
-                  className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${step.gradient} text-white flex items-center justify-center shadow-cute group-hover:scale-110 transition-transform duration-300`}
-                >
-                  <StepIcon size={26} strokeWidth={2.2} />
-                </div>
-                <span className="text-[12px] font-black px-3.5 py-1 rounded-full bg-primary-100 text-primary-800 border border-primary-200/90 shadow-sm">
-                  {step.badge}
-                </span>
-              </div>
+  const cards = STEPS.map((step, index) => {
+    const StepIcon = step.icon;
+    return (
+      <div
+        key={index}
+        className="w-full max-w-4xl mx-auto flex flex-col md:flex-row gap-8 p-8 md:p-12 bg-white border border-primary-200/90 rounded-[3rem] shadow-cute-lg overflow-hidden relative"
+      >
+        {/* Step Number Background */}
+        <div className="absolute -top-10 -right-10 text-[200px] font-black text-primary-50/50 leading-none pointer-events-none select-none z-0">
+          {step.stepNum}
+        </div>
 
-              <h3 className="font-black text-[21px] text-neutral-950 mb-3 leading-snug">
-                {step.title}
-              </h3>
-              <p className="text-neutral-700 text-[14.5px] font-semibold leading-relaxed">
-                {step.description}
-              </p>
+        <div className="relative z-10 flex flex-col justify-center flex-1">
+          <div className="flex items-center gap-4 mb-6">
+            <div
+              className={`w-16 h-16 rounded-3xl bg-gradient-to-br ${step.gradient} text-white flex items-center justify-center shadow-lg shadow-primary-500/25`}
+            >
+              <StepIcon size={32} strokeWidth={2.2} />
             </div>
-
-            {/* Bottom Step Indicator Bar */}
-            <div className="mt-8 pt-4 border-t border-primary-100 flex items-center justify-between">
-              <span className="text-xs font-black text-primary-600 uppercase tracking-widest">
-                Bước {step.stepNum}
-              </span>
-              <div className="w-8 h-1 rounded-full bg-primary-300 group-hover:w-16 group-hover:bg-primary-500 transition-all duration-300" />
-            </div>
+            <span className="text-[14px] font-black px-4 py-1.5 rounded-full bg-primary-100 text-primary-800 border border-primary-200/90 shadow-sm uppercase tracking-widest">
+              {step.badge}
+            </span>
           </div>
-        );
-      })}
+
+          <h3 className="font-black text-[32px] md:text-[40px] text-neutral-950 mb-4 leading-tight">
+            {step.title}
+          </h3>
+          <p className="text-neutral-700 text-[18px] md:text-[20px] font-semibold leading-relaxed">
+            {step.description}
+          </p>
+        </div>
+      </div>
+    );
+  });
+
+  return (
+    <div className="relative w-full">
+      {/* On mobile, fallback to simple stack. On desktop, use GSAP StickyStack */}
+      <div className="block md:hidden space-y-6">
+        {cards}
+      </div>
+      <div className="hidden md:block">
+        <StickyStack cards={cards} />
+      </div>
     </div>
   );
 }

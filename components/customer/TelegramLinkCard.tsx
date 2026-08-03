@@ -2,9 +2,8 @@
 
 import { useEffect, useState } from "react";
 import QRCode from "qrcode";
-import { Send, CheckCircle2, ExternalLink, Unlink } from "lucide-react";
+import { Send, CheckCircle2, ExternalLink, Unlink, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/Button";
-import { Card } from "@/components/ui/Card";
 
 type LinkStatus = { linked: boolean; telegramUsername: string | null };
 type LinkCodeResult = { code: string; expiresInMinutes: number; deepLink: string };
@@ -32,15 +31,10 @@ export function TelegramLinkCard() {
     }
   }
 
-  useEffect(() => {
-    loadStatus();
-  }, []);
+  useEffect(() => { loadStatus(); }, []);
 
   useEffect(() => {
-    if (!linkResult) {
-      setQrDataUrl(null);
-      return;
-    }
+    if (!linkResult) { setQrDataUrl(null); return; }
     QRCode.toDataURL(linkResult.deepLink, { width: 200, margin: 1 })
       .then(setQrDataUrl)
       .catch(() => setQrDataUrl(null));
@@ -52,12 +46,7 @@ export function TelegramLinkCard() {
     const res = await fetch("/api/telegram/link-code", { method: "POST" });
     const data = await res.json().catch(() => ({}));
     setLoading(false);
-
-    if (!res.ok) {
-      setError(data.error ?? "Không tạo được mã liên kết");
-      return;
-    }
-
+    if (!res.ok) { setError(data.error ?? "Không tạo được mã liên kết"); return; }
     setLinkResult(data);
   }
 
@@ -70,82 +59,99 @@ export function TelegramLinkCard() {
   }
 
   return (
-    <Card variant="soft">
-      <div className="flex items-center gap-sm">
-        <Send size={20} strokeWidth={1.75} className="text-ink-deep" />
-        <h2 className="display-xs">Liên kết Telegram</h2>
-      </div>
-
+    <div className="flex flex-col gap-4">
+      {/* Loading */}
       {!status && !statusError && (
-        <p className="mt-lg text-[14px] text-mute">Đang tải trạng thái liên kết...</p>
+        <p className="text-[14px] text-neutral-500 animate-pulse">Đang tải trạng thái liên kết...</p>
       )}
 
+      {/* Error */}
       {statusError && (
-        <div className="mt-lg flex items-center justify-between gap-md text-[14px] text-negative-darkest">
-          {statusError}
-          <Button variant="tertiary" onClick={loadStatus} className="px-md py-xs text-[13px]">
+        <div className="flex items-center justify-between gap-4 rounded-2xl bg-red-50 border border-red-100 px-4 py-3 text-[14px] text-red-700">
+          <span className="flex items-center gap-2"><AlertCircle size={16} /> {statusError}</span>
+          <Button variant="tertiary" onClick={loadStatus} className="px-3 py-1 text-[13px] shrink-0">
             Thử lại
           </Button>
         </div>
       )}
 
+      {/* Linked */}
       {status && status.linked ? (
-        <div className="mt-lg flex flex-wrap items-center justify-between gap-md">
-          <div className="flex items-center gap-sm text-[14px] text-ink">
-            <CheckCircle2 size={18} strokeWidth={1.75} className="text-positive" />
-            Đã liên kết {status.telegramUsername ? `@${status.telegramUsername}` : "Telegram"} — bot sẽ đồng bộ
-            đúng tài khoản này khi bạn nhắn tin.
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl bg-emerald-50 border border-emerald-200 px-4 py-4">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-emerald-100 flex items-center justify-center shrink-0">
+              <CheckCircle2 size={18} className="text-emerald-600" strokeWidth={2} />
+            </div>
+            <div>
+              <div className="text-[14px] font-bold text-emerald-800">
+                Đã liên kết {status.telegramUsername ? `@${status.telegramUsername}` : "Telegram"} ✅
+              </div>
+              <div className="text-[12px] text-emerald-700">
+                Bot sẽ đồng bộ đúng tài khoản này khi bạn nhắn tin.
+              </div>
+            </div>
           </div>
-          <Button variant="tertiary" onClick={unlink} disabled={loading} className="gap-sm px-md py-xs text-[13px]">
+          <button
+            onClick={unlink}
+            disabled={loading}
+            className="flex items-center gap-1.5 rounded-xl border border-red-200 bg-white px-4 py-2 text-[13px] font-bold text-red-600 hover:bg-red-50 transition-colors disabled:opacity-50 shrink-0"
+          >
             <Unlink size={14} strokeWidth={1.75} />
             Huỷ liên kết
-          </Button>
+          </button>
         </div>
-      ) : status ? (
-        <div className="mt-lg flex flex-col gap-md">
-          <p className="text-[14px] text-body">
-            Liên kết để bot Telegram luôn hiển thị đúng số dư, đơn hàng của tài khoản này — tránh bị tạo hồ sơ
-            Telegram rời rạc không đồng bộ.
-          </p>
 
+      ) : status ? (
+        <div className="flex flex-col gap-4">
+          {/* Info banner */}
+          <div className="rounded-2xl bg-[#EBF5FF] border border-blue-100 px-4 py-3">
+            <p className="text-[13px] font-medium text-blue-800 leading-relaxed">
+              Liên kết để bot Telegram luôn hiển thị đúng số dư, đơn hàng của tài khoản này —
+              tránh bị tạo hồ sơ Telegram rời rạc không đồng bộ.
+            </p>
+          </div>
+
+          {/* QR code after generating */}
           {linkResult ? (
-            <div className="flex flex-col gap-md rounded-md bg-canvas p-lg sm:flex-row sm:items-start">
+            <div className="flex flex-col sm:flex-row sm:items-start gap-5 rounded-2xl bg-neutral-50 border border-neutral-200 p-5">
               {qrDataUrl && (
                 <img
                   src={qrDataUrl}
                   alt="QR liên kết Telegram"
-                  className="h-[140px] w-[140px] shrink-0 rounded-md border border-canvas-soft"
+                  className="h-[140px] w-[140px] shrink-0 rounded-xl border border-neutral-200 shadow-sm"
                 />
               )}
-              <div className="flex flex-col gap-sm">
-                <div className="text-[12px] text-mute">
-                  Quét mã QR bằng camera điện thoại để tự động liên kết — mã hết hạn sau{" "}
-                  {linkResult.expiresInMinutes} phút:
+              <div className="flex flex-col gap-3">
+                <div className="text-[12px] font-semibold text-neutral-500">
+                  Quét mã QR bằng camera điện thoại — mã hết hạn sau {linkResult.expiresInMinutes} phút:
                 </div>
-                <code className="w-fit rounded-sm bg-canvas-soft px-md py-xs text-[16px] font-bold tracking-wider text-ink-deep">
+                <code className="w-fit rounded-xl bg-white border border-neutral-200 px-4 py-2 text-[20px] font-black tracking-[0.35em] text-neutral-900 shadow-sm">
                   {linkResult.code}
                 </code>
                 <a href={linkResult.deepLink} target="_blank" rel="noreferrer">
-                  <Button className="gap-sm">
+                  <Button className="gap-2">
                     <ExternalLink size={16} strokeWidth={1.75} />
                     Mở Telegram để liên kết
                   </Button>
                 </a>
-                <p className="text-[12px] text-mute">
-                  Hoặc mở Telegram, tìm bot và gửi lệnh: <code>/start {linkResult.code}</code>
+                <p className="text-[12px] text-neutral-500">
+                  Hoặc mở Telegram, tìm bot và gửi lệnh:{" "}
+                  <code className="font-bold text-neutral-800">/start {linkResult.code}</code>
                 </p>
               </div>
             </div>
           ) : (
-            <Button onClick={generateCode} disabled={loading} className="w-fit gap-sm">
+            <Button onClick={generateCode} disabled={loading} className="w-fit gap-2">
               <Send size={16} strokeWidth={1.75} />
               {loading ? "Đang tạo mã..." : "Tạo mã liên kết"}
             </Button>
           )}
 
-          {error && <div className="text-[13px] text-negative-darkest">{error}</div>}
+          {error && (
+            <div className="text-[13px] text-red-600 font-medium">{error}</div>
+          )}
         </div>
       ) : null}
-    </Card>
+    </div>
   );
 }

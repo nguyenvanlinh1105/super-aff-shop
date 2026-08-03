@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Home, RotateCcw, Gift, Wallet, ShoppingBag } from "lucide-react";
+import { motion } from "framer-motion";
 
 const TABS = [
   { href: "/app", label: "Trang chủ", icon: Home },
@@ -32,18 +33,31 @@ export function MobileBottomNav() {
           <Link
             key={tab.href}
             href={tab.href}
-            className={`relative flex flex-1 flex-col items-center justify-center gap-[3px] py-1.5 min-h-[60px] transition-all ${
+            className={`relative flex flex-1 flex-col items-center justify-center gap-[3px] py-1.5 min-h-[60px] transition-colors ${
               active ? "bg-primary-50/60" : "active:bg-primary-50/30"
             }`}
           >
             {active && (
-              <span className="absolute top-0 h-[3.5px] w-9 rounded-full bg-gradient-to-r from-primary-400 to-primary-500 shadow-sm" />
+              <motion.span
+                layoutId="mobile-nav-indicator"
+                className="absolute top-0 h-[3.5px] w-9 rounded-full bg-gradient-to-r from-primary-400 to-primary-500 shadow-sm"
+                transition={{ type: "spring", stiffness: 380, damping: 30 }}
+              />
             )}
-            <Icon
-              size={22}
-              strokeWidth={active ? 2.5 : 2}
-              className={active ? "text-primary-500" : "text-neutral-500"}
-            />
+            <motion.div
+              animate={active ? { scale: [1, 1.25, 1], y: [0, -4, 0] } : { scale: 1, y: 0 }}
+              transition={
+                active
+                  ? { duration: 0.35, ease: [0.34, 1.56, 0.64, 1] }
+                  : { duration: 0.2 }
+              }
+            >
+              <Icon
+                size={22}
+                strokeWidth={active ? 2.5 : 2}
+                className={active ? "text-primary-500" : "text-neutral-500"}
+              />
+            </motion.div>
             <span
               className={`text-[10px] leading-none ${
                 active ? "font-extrabold text-primary-600" : "font-medium text-neutral-500"
@@ -57,4 +71,3 @@ export function MobileBottomNav() {
     </nav>
   );
 }
-
