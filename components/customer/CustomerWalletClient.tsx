@@ -1,12 +1,17 @@
 "use client";
 
-import { useState } from "react";
-import { Wallet, Clock, CheckCircle2, Building2, Edit2, AlertCircle, X, Loader2, BellRing } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Wallet, Clock, CheckCircle2, Building2, Edit2, AlertCircle, X, Loader2, BellRing, Link as LinkIcon } from "lucide-react";
+import { FloatingElement } from "@/components/ui/FloatingElement";
+import { ServerSearchInput } from "@/components/ui/ServerSearchInput";
 import { formatCurrency } from "@/lib/format";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { Pagination } from "@/components/ui/Pagination";
 import { IconBow } from "@/components/icons/CatRibbonIcons";
 import { useModal } from "@/components/ui/ModalProvider";
+import { PaymentPinModal } from "@/components/customer/PaymentPinModal";
+import { motion, AnimatePresence } from "framer-motion";
+import Link from "next/link";
 
 export const VIETNAM_BANKS = [
   "Vietcombank (Ngân hàng TMCP Ngoại thương VN)",
@@ -85,6 +90,7 @@ type Props = {
   currentPage: number;
   paymentInfo: PaymentInfo;
   pendingRequest: PendingRequest;
+  hasPaymentPin: boolean;
 };
 
 const MIN_WITHDRAW_AMOUNT = 10000;
@@ -96,8 +102,11 @@ export function CustomerWalletClient({
   currentPage,
   paymentInfo: initialPaymentInfo,
   pendingRequest: initialPendingRequest,
+  hasPaymentPin,
 }: Props) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
   const modal = useModal();
   const [submitting, setSubmitting] = useState(false);
   const [pendingRequest, setPendingRequest] = useState<PendingRequest>(initialPendingRequest);
@@ -105,6 +114,7 @@ export function CustomerWalletClient({
   const [paymentInfo, setPaymentInfo] = useState<PaymentInfo>(initialPaymentInfo);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isPinModalOpen, setIsPinModalOpen] = useState(false);
 
   const [formBankName, setFormBankName] = useState(initialPaymentInfo.bankName || "");
   const [formBankAccountNumber, setFormBankAccountNumber] = useState(initialPaymentInfo.bankAccountNumber || "");
@@ -113,20 +123,51 @@ export function CustomerWalletClient({
   const [showBankOptions, setShowBankOptions] = useState(false);
   const filteredBanks = VIETNAM_BANKS.filter((b) => b.toLowerCase().includes(bankSearch.trim().toLowerCase()));
 
+  const currentPeriod = searchParams.get("period") || "all";
+
+  const handlePeriodChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("period", e.target.value);
+    params.delete("page"); // Reset về trang 1
+    router.push(`${pathname}?${params.toString()}`);
+  };
+
   const hasBankInfo = !!(paymentInfo.bankName && paymentInfo.bankAccountNumber && paymentInfo.bankAccountName);
   const canRequest = stats.available >= MIN_WITHDRAW_AMOUNT && hasBankInfo && !pendingRequest;
 
-  const handleSubmitRequest = async () => {
+  // Bước 1: Bấm nút rút tiền -> mở PIN modal
+  const handleWithdrawClick = () => {
+    setIsPinModalOpen(true);
+  };
+
+  // Bước 2: PIN đã xác nhận -> gọi API rút tiền kèm PIN
+  const handlePinVerified = async (pin: string) => {
+    setIsPinModalOpen(false);
     setSubmitting(true);
     try {
-      const res = await fetch("/api/withdraw-requests", { method: "POST" });
+      const res = await fetch("/api/withdraw-requests", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ pin }),
+      });
       const data = await res.json();
       if (!res.ok) {
+        if (data.pinError) {
+          // PIN error — reopen modal
+          modal.alert({ title: "Lỗi mã PIN", message: data.error, iconType: "danger" });
+          return;
+        }
         modal.alert({ title: "Lỗi rút tiền", message: data.error ?? "Không thể gửi yêu cầu, vui lòng thử lại", iconType: "danger" });
         return;
       }
       setPendingRequest(data.request);
       modal.alert({ title: "Thành công", message: "Yêu cầu rút tiền của bạn đã được gửi và đang chờ xử lý.", iconType: "success" });
+      // Trigger confetti on success
+      if (typeof window !== "undefined") {
+        import("canvas-confetti").then((mod) => {
+          mod.default({ particleCount: 120, spread: 80, origin: { y: 0.6 }, colors: ["#FF6D9E", "#FF3B7B", "#10B981", "#fff"] });
+        }).catch(() => {});
+      }
       router.refresh();
     } catch {
       modal.alert({ title: "Lỗi hệ thống", message: "Đã có lỗi xảy ra, vui lòng thử lại", iconType: "danger" });
@@ -206,17 +247,19 @@ export function CustomerWalletClient({
 
   return (
     <>
-      <div className="mx-auto flex max-w-5xl flex-col gap-6 fade-in pb-12">
+      <div className="flex w-full flex-col gap-6 fade-in pb-12">
         {/* HEADER */}
-        <div className="relative overflow-hidden rounded-3xl p-6 sm:p-8 border border-primary-200/60 shadow-xl shadow-primary-500/5 bg-gradient-to-br from-white via-[#FFF5F8] to-[#FFE8F0] mb-2">
-          <div className="pointer-events-none absolute -right-12 -top-12 h-64 w-64 rounded-full bg-gradient-to-br from-primary-200/40 to-pink-300/20 blur-2xl" />
-          <div className="pointer-events-none absolute -bottom-10 right-40 h-48 w-48 rounded-full bg-gradient-to-tr from-primary-100/30 to-pink-100/30 blur-xl" />
+        <div className="relative overflow-hidden rounded-3xl p-6 sm:p-8 border border-primary-200/60 shadow-xl shadow-primary-500/5 bg-white mb-2">
+          <img src="/welcome-bg.png" alt="" className="absolute inset-0 w-full h-full object-cover opacity-80" />
+          <div className="absolute inset-0 bg-white/40 backdrop-blur-[2px]" />
 
           <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
             <div className="flex items-center gap-5">
-              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-3xl bg-gradient-to-br from-primary-400 via-primary-500 to-pink-600 text-white flex items-center justify-center shadow-lg shadow-primary-500/25 shrink-0 border border-white/40 overflow-hidden p-1">
-                <img src="/meow-back-payments.png" alt="Wallet" className="w-full h-full object-contain rounded-2xl" />
-              </div>
+              <FloatingElement duration={4}>
+                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-3xl bg-gradient-to-br from-primary-400 via-primary-500 to-pink-600 text-white flex items-center justify-center shadow-lg shadow-primary-500/25 shrink-0 border border-white/40 overflow-hidden p-1">
+                  <img src="/meowback_lucky_cat_logo.png" alt="Wallet" className="w-full h-full object-contain rounded-2xl" />
+                </div>
+              </FloatingElement>
               <div>
                 <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold leading-tight text-neutral-900 tracking-tight">
                   Ví Hoàn Tiền MeowBack 🎀
@@ -320,7 +363,7 @@ export function CustomerWalletClient({
               ) : (
                 <button
                   type="button"
-                  onClick={handleSubmitRequest}
+                  onClick={handleWithdrawClick}
                   disabled={!canRequest || submitting}
                   className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-primary-400 to-primary-500 text-[15px] font-bold text-white shadow-cute hover:shadow-cute-lg transition-all active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-none disabled:bg-neutral-200 disabled:text-neutral-400 disabled:shadow-none"
                 >
@@ -341,9 +384,27 @@ export function CustomerWalletClient({
 
           {/* RIGHT COLUMN: TRANSACTION HISTORY */}
           <div className="rounded-3xl bg-white p-6 shadow-cute border border-primary-100/80 overflow-hidden">
-            <div className="mb-4 flex items-center justify-between border-b border-primary-100 pb-3">
-              <h2 className="text-[16px] font-extrabold text-neutral-900">Lịch sử rút tiền</h2>
-              <span className="text-[13px] font-bold text-neutral-500">{history.length} giao dịch</span>
+            <div className="mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-primary-100 pb-4">
+              <div className="flex items-center gap-3">
+                <h2 className="text-[16px] font-extrabold text-neutral-900">Lịch sử rút tiền</h2>
+                <span className="text-[13px] font-bold text-neutral-500 bg-neutral-100 px-2 py-0.5 rounded-full">{history.length} giao dịch</span>
+              </div>
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
+                <select
+                  value={currentPeriod}
+                  onChange={handlePeriodChange}
+                  className="h-11 rounded-2xl border border-neutral-200 bg-white px-4 py-0 text-[14px] font-semibold text-neutral-700 outline-none transition-all hover:border-neutral-300 focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10 sm:w-[180px]"
+                >
+                  <option value="all">Tất cả thời gian</option>
+                  <option value="today">Hôm nay</option>
+                  <option value="last_7_days">7 ngày qua</option>
+                  <option value="this_month">Tháng này</option>
+                  <option value="last_month">Tháng trước</option>
+                </select>
+                <div className="w-full sm:w-[250px]">
+                  <ServerSearchInput placeholder="Tìm kiếm mã phiếu..." />
+                </div>
+              </div>
             </div>
 
             {/* Desktop Table */}
@@ -361,7 +422,13 @@ export function CustomerWalletClient({
                   {history.length === 0 ? (
                     <tr>
                       <td colSpan={4} className="py-12 text-center">
-                        <span className="text-[14px] font-bold text-neutral-400">Chưa có giao dịch nào</span>
+                        <div className="flex flex-col items-center gap-3">
+                          <img src="/meowback_lucky_cat_logo.png" alt="" className="h-16 w-16 object-contain opacity-60" />
+                          <span className="text-[14px] font-bold text-neutral-400">Ví chưa có giao dịch nào</span>
+                          <Link href="/app/refunds" className="mt-1 inline-flex items-center gap-1.5 rounded-full bg-primary-500 px-5 py-2 text-[13px] font-bold text-white hover:bg-primary-600 transition-colors">
+                            <LinkIcon size={13} /> Tạo link hoàn tiền đầu tiên
+                          </Link>
+                        </div>
                       </td>
                     </tr>
                   ) : (
@@ -518,6 +585,12 @@ export function CustomerWalletClient({
           </div>
         </div>
       )}
+      <PaymentPinModal
+        isOpen={isPinModalOpen}
+        onClose={() => setIsPinModalOpen(false)}
+        hasPin={hasPaymentPin}
+        onPinVerified={handlePinVerified}
+      />
     </>
   );
 }

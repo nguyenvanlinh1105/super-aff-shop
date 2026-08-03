@@ -83,14 +83,14 @@ export function Sidebar({
       {/* Sidebar Container (Fluid Island Glassmorphism) */}
       <aside 
         className={cn(
-          "fixed inset-y-0 left-0 z-50 w-[260px] shrink-0 flex-col justify-between bg-white/70 backdrop-blur-3xl shadow-[0_0_40px_rgba(0,0,0,0.03)] border-r border-white/60 transition-transform duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] flex",
-          "md:relative md:translate-x-0 md:m-4 md:h-[calc(100vh-2rem)] md:rounded-[2rem] md:border",
+          "fixed inset-y-0 left-0 z-50 w-[275px] shrink-0 flex-col justify-between bg-white/95 backdrop-blur-xl border-r border-primary-100/70 shadow-xl md:shadow-none transition-transform duration-300 md:relative md:translate-x-0 flex",
+          "md:m-4 md:h-[calc(100vh-2rem)] md:rounded-[2rem] md:border",
           isOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
-        <div className="relative flex-1 overflow-y-auto hide-scrollbar">
+        <div className="relative flex-1 overflow-y-auto custom-scrollbar">
           {/* Brand header */}
-          <div className="px-6 pt-8 pb-6 mb-2 relative">
+          <div className="px-5 pt-6 pb-5 border-b border-primary-100/60 mb-3 relative bg-gradient-to-b from-primary-50/50 to-transparent">
             <button 
               className="absolute top-6 right-4 p-2 text-neutral-400 hover:text-neutral-900 md:hidden rounded-full hover:bg-neutral-100/50 transition-colors"
               onClick={() => setIsOpen(false)}
@@ -98,22 +98,22 @@ export function Sidebar({
               <X size={20} />
             </button>
             <div className="flex items-center gap-3">
-              <Link href="/" title="MeoTrở lại">
+              <Link href="/" title="Trang chủ">
                 <LogoMeowBack />
               </Link>
             </div>
           </div>
 
           {/* Navigation */}
-          <nav className="flex flex-col gap-2 px-4 pb-6">
+          <nav className="flex flex-col gap-3 px-3 pb-6">
             {sections.map((section, i) => (
-              <div key={i} className={i > 0 ? "mt-6" : ""}>
+              <div key={i} className={i > 0 ? "mt-2" : ""}>
                 {section.title && (
-                  <div className="mb-3 px-4 py-1 text-[10px] font-extrabold uppercase tracking-[0.15em] text-neutral-400">
+                  <div className="mb-2 px-3 py-1 text-[10px] font-black uppercase tracking-widest text-primary-900/40">
                     {section.title}
                   </div>
                 )}
-                <div className="flex flex-col gap-1.5">
+                <div className="flex flex-col gap-1">
                   {section.items.map((item) => {
                     const active = isActive(item.href);
                     return (
@@ -122,27 +122,30 @@ export function Sidebar({
                         href={item.href}
                         title={item.label}
                         className={cn(
-                          "group relative flex items-center gap-4 rounded-2xl px-4 py-3 text-[14px] font-bold transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] hover:scale-[0.98]",
+                          "group relative flex items-center gap-3 rounded-2xl px-3.5 py-2.5 text-[13.5px] font-bold transition-all duration-200",
                           active
-                            ? "bg-primary-100/80 text-primary-600 shadow-sm ring-1 ring-primary-200/50"
-                            : "text-neutral-500 hover:bg-white/60 hover:text-neutral-900 hover:shadow-sm"
+                            ? "bg-gradient-to-r from-primary-500 to-rose-500 text-white shadow-md shadow-primary-500/20"
+                            : "text-neutral-600 hover:bg-primary-50/80 hover:text-neutral-900"
                         )}
                       >
                         <span className={cn(
-                          "shrink-0 transition-transform duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:scale-110",
-                          active ? "text-primary-500" : "text-neutral-400"
+                          "shrink-0 transition-transform duration-200 group-hover:scale-110",
+                          active ? "text-white" : "text-neutral-400 group-hover:text-primary-500"
                         )}>
                           {item.icon}
                         </span>
                         <span className="truncate">{item.label}</span>
                         {!!item.badge && item.badge > 0 && (
-                          <span className="ml-auto flex h-5 min-w-[20px] items-center justify-center rounded-full bg-primary-500 px-1.5 text-[11px] font-bold text-white shadow-sm">
+                          <span className={cn(
+                            "ml-auto flex h-5 min-w-[20px] items-center justify-center rounded-full px-1.5 text-[10px] font-black shadow-xs",
+                            active ? "bg-white text-primary-600" : "bg-primary-500 text-white"
+                          )}>
                             {item.badge > 99 ? "99+" : item.badge}
                           </span>
                         )}
                         {!item.badge && active && (
-                          <span className="ml-auto transition-transform duration-500 group-hover:rotate-12 group-hover:scale-110">
-                            <IconBow className="w-5 h-5 text-primary-400" />
+                          <span className="ml-auto opacity-90">
+                            <IconBow className="w-3.5 h-3.5 text-white" />
                           </span>
                         )}
                       </Link>
@@ -151,25 +154,36 @@ export function Sidebar({
                 </div>
               </div>
             ))}
-
-            {/* Logout button integrated into navigation */}
-            <div className="mt-6">
-              <div className="mb-3 px-4 py-1 text-[10px] font-extrabold uppercase tracking-[0.15em] text-neutral-400">
-                Tài khoản
-              </div>
-              <div className="flex flex-col gap-1.5">
-                <button
-                  onClick={handleLogout}
-                  className="group relative flex w-full items-center gap-4 rounded-2xl px-4 py-3 text-left text-[14px] font-bold text-neutral-500 transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] hover:scale-[0.98] hover:bg-negative-bg hover:text-negative hover:shadow-sm"
-                >
-                  <span className="shrink-0 transition-transform duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] group-hover:scale-110 text-neutral-400 group-hover:text-negative">
-                    <LogOut size={20} strokeWidth={2.25} />
-                  </span>
-                  <span className="truncate">Đăng xuất</span>
-                </button>
-              </div>
+            
+            <div className="mt-4 px-3">
+              <button
+                onClick={() => {
+                  document.dispatchEvent(new Event("open-quick-link"));
+                  if (window.innerWidth < 768) setIsOpen(false); // Đóng sidebar trên mobile
+                }}
+                className="group relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-2xl bg-neutral-900 px-4 py-3.5 text-[14px] font-bold text-white shadow-xl transition-all hover:scale-[1.02] active:scale-[0.98]"
+              >
+                <div className="absolute inset-0 bg-gradient-to-r from-primary-500 to-rose-500 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+                <Sparkles className="relative z-10" size={18} />
+                <span className="relative z-10">Tạo Link Nhanh 🪄</span>
+              </button>
             </div>
           </nav>
+        </div>
+
+        {/* Footer: logout */}
+        <div className="px-3 py-4 border-t border-primary-100/60 bg-gradient-to-b from-transparent to-primary-50/50 md:rounded-b-[2rem]">
+          <button
+            onClick={handleLogout}
+            className="flex w-full items-center gap-2.5 rounded-2xl px-3.5 py-2.5 text-left text-[13px] font-bold text-negative transition-all duration-150 hover:bg-rose-50 group"
+          >
+            <LogOut
+              size={17}
+              strokeWidth={2.2}
+              className="shrink-0 transition-transform duration-150 group-hover:-translate-x-0.5"
+            />
+            <span>Đăng xuất</span>
+          </button>
         </div>
       </aside>
     </>

@@ -16,7 +16,8 @@ export function FadeUp({ children, className, delay = 0, duration = 0.8, y = 40 
   return (
     <motion.div
       initial={{ opacity: 0, y, filter: "blur(8px)" }}
-      animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+      whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+      viewport={{ once: true, margin: "-40px" }}
       transition={{
         duration,
         delay,

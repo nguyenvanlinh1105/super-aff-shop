@@ -175,15 +175,17 @@ export function RefundHistoryClient({
           </button>
         </div>
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-sm">
-          <Select
+          <select
             value={currentPeriod}
             onChange={handlePeriodChange}
-            className="sm:w-[180px] h-10 py-0 text-[13px]"
+            className="h-11 rounded-2xl border border-neutral-200 bg-white px-4 py-0 text-[14px] font-semibold text-neutral-700 outline-none transition-all hover:border-neutral-300 focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10 sm:w-[200px]"
           >
             <option value="all">Tất cả thời gian</option>
+            <option value="today">Hôm nay</option>
+            <option value="last_7_days">7 ngày qua</option>
             <option value="this_month">Tháng này</option>
             <option value="last_month">Tháng trước</option>
-          </Select>
+          </select>
           <ServerSearchInput placeholder="Tìm tên sản phẩm hoặc mã..." className="sm:max-w-[300px]" />
         </div>
       </div>

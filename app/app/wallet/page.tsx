@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { formatCurrency, formatDate } from "@/lib/format";
 import { CustomerWalletClient } from "@/components/customer/CustomerWalletClient";
 
-export default async function CustomerWalletPage({ searchParams }: { searchParams: { page?: string; q?: string } }) {
+export default async function CustomerWalletPage({ searchParams }: { searchParams: { page?: string; q?: string; period?: string } }) {
   const session = await getSession();
   if (!session?.customerId) redirect("/admin");
 
@@ -12,10 +12,29 @@ export default async function CustomerWalletPage({ searchParams }: { searchParam
   const limit = 10;
   const skip = (page - 1) * limit;
   const q = searchParams.q || "";
+  const period = searchParams.period || "all";
 
   const where: any = { customerId: session.customerId };
   if (q) {
     where.paymentCode = { contains: q };
+  }
+  
+  if (period !== "all") {
+    const now = new Date();
+    if (period === "today") {
+      const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      where.createdAt = { gte: startOfToday };
+    } else if (period === "last_7_days") {
+      const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      where.createdAt = { gte: sevenDaysAgo };
+    } else if (period === "this_month") {
+      const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+      where.createdAt = { gte: firstDay };
+    } else if (period === "last_month") {
+      const firstDay = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      const lastDay = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59, 999);
+      where.createdAt = { gte: firstDay, lte: lastDay };
+    }
   }
 
   const [customer, orders, paymentBatches, filteredCount, pendingRequest] = await Promise.all([
@@ -78,6 +97,7 @@ export default async function CustomerWalletPage({ searchParams }: { searchParam
             }
           : null
       }
+      hasPaymentPin={!!customer.paymentPin}
     />
   );
 }

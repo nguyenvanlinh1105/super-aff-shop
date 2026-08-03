@@ -6,6 +6,7 @@ import { FloatingQuickAccess } from "@/components/customer/FloatingQuickAccess";
 import { MobileBottomNav } from "@/components/customer/MobileBottomNav";
 import { PwaInstallBanner } from "@/components/pwa/PwaInstallPrompt";
 import { PendingLinkClaimer } from "@/components/customer/PendingLinkClaimer";
+import { CustomerGlobalUI } from "@/components/customer/CustomerGlobalUI";
 import { Home, RotateCcw, Gift, Wallet, ShoppingBag, Send, BookOpen, Settings, UserPlus, HelpCircle, UserCircle } from "lucide-react";
 
 const sections: NavSection[] = [
@@ -13,7 +14,7 @@ const sections: NavSection[] = [
     title: "Hệ thống 🐾",
     items: [
       { href: "/app", label: "Trang chủ", icon: <Home size={20} strokeWidth={2.25} /> },
-      { href: "/app/refunds", label: "Hoàn tiền", icon: <RotateCcw size={20} strokeWidth={2.25} /> },
+      { href: "/app/refunds", label: "Tạo link hoàn tiền", icon: <RotateCcw size={20} strokeWidth={2.25} /> },
       { href: "/app/deals", label: "Ưu đãi", icon: <Gift size={20} strokeWidth={2.25} /> },
       { href: "/app/wallet", label: "Ví tiền", icon: <Wallet size={20} strokeWidth={2.25} /> },
       { href: "/app/orders", label: "Đơn hàng", icon: <ShoppingBag size={20} strokeWidth={2.25} /> },
@@ -23,7 +24,6 @@ const sections: NavSection[] = [
   {
     title: "Cá nhân",
     items: [
-      { href: "/app/telegram", label: "Liên kết Telegram", icon: <Send size={20} strokeWidth={2.25} /> },
       { href: "/app/settings", label: "Thông tin cá nhân", icon: <UserCircle size={20} strokeWidth={2.25} /> },
     ],
   },
@@ -44,6 +44,17 @@ export default async function CustomerAppLayout({ children }: { children: React.
     where: { userId: session.userId, isRead: false },
   });
 
+  const platforms = await prisma.platform.findMany({
+    where: { status: "active" },
+    select: { id: true, code: true, name: true },
+    orderBy: { name: "asc" },
+  });
+  const platformOptions = platforms.map((p) => ({
+    id: p.id,
+    code: p.code,
+    label: p.name,
+  }));
+
   return (
     <div className="internal-app flex h-screen overflow-hidden bg-neutral-50 flex-col md:flex-row text-neutral-900">
       <Sidebar
@@ -52,7 +63,7 @@ export default async function CustomerAppLayout({ children }: { children: React.
         sections={sections}
       />
       <main className="relative z-10 flex-1 overflow-y-auto w-full">
-        <div className="min-h-full p-4 sm:p-6 md:p-8 pb-[88px] md:pb-8 fade-in w-full max-w-[1400px] mx-auto">
+        <div className="min-h-full p-4 sm:p-6 md:p-8 pb-[88px] md:pb-8 fade-in w-full max-w-6xl mx-auto">
           <PwaInstallBanner />
           {children}
         </div>
@@ -61,6 +72,7 @@ export default async function CustomerAppLayout({ children }: { children: React.
       <FloatingQuickAccess unreadCount={unreadCount} />
       <MobileBottomNav />
       <PendingLinkClaimer />
+      <CustomerGlobalUI platforms={platformOptions} />
     </div>
   );
 }
