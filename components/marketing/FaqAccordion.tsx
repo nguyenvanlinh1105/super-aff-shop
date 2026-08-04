@@ -29,10 +29,10 @@ const GROUP_CONFIG: Record<string, { icon: any; color: string; label: string }> 
     color: "from-primary-400 via-[#FF3B7B] to-primary-600",
     label: "Hoàn & Rút tiền",
   },
-  "VỀ SHOPEE & TIKTOK SHOP": {
+  "VỀ SHOPEE": {
     icon: ShoppingBag,
     color: "from-sky-400 to-blue-600",
-    label: "Shopee & TikTok",
+    label: "Shopee",
   },
   "VỀ BẢO MẬT & TÀI KHOẢN": {
     icon: ShieldCheck,

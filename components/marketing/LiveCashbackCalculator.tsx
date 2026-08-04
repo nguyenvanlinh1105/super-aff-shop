@@ -3,14 +3,12 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Sparkles, TrendingUp, ArrowRight, ShieldCheck, HeartHandshake, Gift } from "lucide-react";
-import { ShopeeIcon, TiktokIcon } from "@/components/icons/PlatformIcons";
 
 /*
- * Tỷ lệ hoa hồng trung bình mà sàn (Shopee/TikTok) trả cho affiliate
- * theo từng ngành hàng. MeowBack sau đó chia lại 80% số hoa hồng sau thuế
- * cho khách hàng (Admin giữ lại 20%).
+ * Tỷ lệ hoa hồng trung bình mà Shopee trả cho affiliate theo từng ngành hàng.
+ * MeowBack chia lại cho khách theo hạng thành viên (50-60-70%).
  *
- * Công thức: Hoàn tiền = Hoa hồng sau thuế × 80%
+ * Công thức: Hoàn tiền = Hoa hồng sau thuế × Tỷ lệ hạng
  */
 const CATEGORIES = [
   { id: "fashion", name: "Thời Trang & Giày Dép", avgRate: 0.12, emoji: "👗" },
@@ -20,23 +18,27 @@ const CATEGORIES = [
   { id: "home", name: "Nhà Cửa & Đời Sống", avgRate: 0.07, emoji: "🏡" },
 ];
 
-/* Tỷ lệ MeowBack chia lại cho khách hàng (80% trên hoa hồng sau thuế) */
-const CASHBACK_SHARE_RATE = 0.8;
+/* Tỷ lệ MeowBack chia lại cho khách hàng theo hạng */
+const MEMBERSHIP_TIERS = [
+  { id: "bronze", name: "Đồng (Mới)", rate: 0.5, emoji: "🥉" },
+  { id: "silver", name: "Bạc", rate: 0.6, emoji: "🥈" },
+  { id: "gold", name: "Vàng", rate: 0.7, emoji: "👑" },
+];
 const DEFAULT_TAX_RATE = 0.1098; // 10.98%
 
 export function LiveCashbackCalculator() {
   const [monthlySpend, setMonthlySpend] = useState<number>(3000000);
-  const [platform, setPlatform] = useState<"shopee" | "tiktok">("shopee");
   const [selectedCatId, setSelectedCatId] = useState<string>("fashion");
+  const [tierId, setTierId] = useState<string>("bronze");
 
   const selectedCat = CATEGORIES.find((c) => c.id === selectedCatId) || CATEGORIES[0];
-  const platformMultiplier = platform === "tiktok" ? 1.1 : 1.0;
+  const selectedTier = MEMBERSHIP_TIERS.find((t) => t.id === tierId) || MEMBERSHIP_TIERS[0];
 
-  // Hoa hồng sàn trả cho affiliate
-  const grossCommission = Math.round(monthlySpend * selectedCat.avgRate * platformMultiplier);
+  // Hoa hồng Shopee trả cho affiliate
+  const grossCommission = Math.round(monthlySpend * selectedCat.avgRate);
   const afterTaxCommission = grossCommission * (1 - DEFAULT_TAX_RATE);
-  // MeowBack chia lại 80% hoa hồng sau thuế cho khách
-  const monthlyCashback = Math.round(afterTaxCommission * CASHBACK_SHARE_RATE);
+  // MeowBack chia lại theo hạng của khách
+  const monthlyCashback = Math.round(afterTaxCommission * selectedTier.rate);
   const yearlyCashback = monthlyCashback * 12;
 
   const formatCurrency = (val: number) =>
@@ -89,44 +91,11 @@ export function LiveCashbackCalculator() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch rounded-3xl bg-white/90 p-6 md:p-10 shadow-cute-lg border border-primary-200/80 backdrop-blur-xl">
           {/* Cột điều khiển */}
           <div className="lg:col-span-7 space-y-7 flex flex-col justify-between">
-            {/* Chọn sàn */}
-            <div className="space-y-3">
-              <label className="text-xs font-black text-neutral-700 uppercase tracking-wider flex items-center gap-2">
-                <span>1. Sàn bạn hay mua nhất</span>
-              </label>
-              <div className="grid grid-cols-2 gap-3">
-                <button
-                  type="button"
-                  onClick={() => setPlatform("shopee")}
-                  className={`flex items-center justify-center gap-3 p-3.5 rounded-2xl font-black transition-all border-2 ${
-                    platform === "shopee"
-                      ? "border-orange-500 bg-orange-50/80 text-orange-600 shadow-sm scale-[1.02]"
-                      : "border-neutral-200 bg-neutral-50/60 text-neutral-600 hover:bg-neutral-100/60"
-                  }`}
-                >
-                  <ShopeeIcon className="w-5 h-5" />
-                  <span className="text-sm">Shopee</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setPlatform("tiktok")}
-                  className={`flex items-center justify-center gap-3 p-3.5 rounded-2xl font-black transition-all border-2 ${
-                    platform === "tiktok"
-                      ? "border-primary-600 bg-gradient-to-r from-primary-600 to-rose-600 text-white shadow-sm scale-[1.02]"
-                      : "border-neutral-200 bg-neutral-50/60 text-neutral-600 hover:bg-neutral-100/60"
-                  }`}
-                >
-                  <TiktokIcon className="w-5 h-5" />
-                  <span className="text-sm">TikTok Shop</span>
-                </button>
-              </div>
-            </div>
 
             {/* Chọn ngành hàng */}
             <div className="space-y-3">
               <label className="text-xs font-black text-neutral-700 uppercase tracking-wider">
-                2. Ngành hàng bạn hay chốt đơn
+                1. Ngành hàng bạn hay chốt đơn
               </label>
               <div className="flex flex-wrap gap-2">
                 {CATEGORIES.map((cat) => (
@@ -142,6 +111,30 @@ export function LiveCashbackCalculator() {
                   >
                     <span className="mr-1.5">{cat.emoji}</span>
                     {cat.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Chọn Hạng Thành Viên */}
+            <div className="space-y-3">
+              <label className="text-xs font-black text-neutral-700 uppercase tracking-wider">
+                2. Hạng Thành Viên
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {MEMBERSHIP_TIERS.map((tier) => (
+                  <button
+                    key={tier.id}
+                    type="button"
+                    onClick={() => setTierId(tier.id)}
+                    className={`px-3.5 py-2 rounded-xl text-xs font-extrabold transition-all border ${
+                      tierId === tier.id
+                        ? "bg-primary-500 text-white border-primary-500 shadow-cute-sm scale-[1.03]"
+                        : "bg-white text-neutral-700 border-neutral-200 hover:bg-primary-50 hover:border-primary-200"
+                    }`}
+                  >
+                    <span className="mr-1.5">{tier.emoji}</span>
+                    {tier.name}
                   </button>
                 ))}
               </div>
@@ -183,7 +176,7 @@ export function LiveCashbackCalculator() {
                   <Sparkles size={14} className="text-amber-300" /> Kết quả dành riêng cho bạn
                 </span>
                 <span className="bg-white/20 text-white text-[11px] font-black px-2.5 py-0.5 rounded-full backdrop-blur-md flex items-center gap-1">
-                  <Gift size={12} /> Hoàn lại 80% sau thuế
+                  <Gift size={12} /> Hoàn lại {selectedTier.rate * 100}% sau thuế
                 </span>
               </div>
 
@@ -193,7 +186,7 @@ export function LiveCashbackCalculator() {
                   ~ {formatCurrency(monthlyCashback)}
                 </div>
                 <div className="text-[11px] font-semibold text-white/60 mt-1">
-                  Từ hoa hồng sau thuế {formatCurrency(Math.round(afterTaxCommission))} × 80% hoàn khách
+                  Từ hoa hồng sau thuế {formatCurrency(Math.round(afterTaxCommission))} × {selectedTier.rate * 100}% hoàn khách
                 </div>
               </div>
 

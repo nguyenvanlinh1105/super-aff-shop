@@ -7,7 +7,7 @@ import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
 import { parseImportCsv } from "@/lib/csvImport";
 import { parseShopeeAffiliateCsv } from "@/lib/shopeeAffiliateCsv";
-import { getActiveCommissionRule, splitCommission, isWithinReferralWindow, isSettlementReady } from "@/lib/commission";
+import { getActiveCommissionRule, splitCommission, isWithinReferralWindow, isSettlementReady, getCustomerTierRate } from "@/lib/commission";
 import { notifyCustomerTelegram } from "@/lib/telegramNotify";
 import { buildOrderApprovedMessage, buildReferralBonusMessage } from "@/lib/telegramBot";
 import { notifyCustomerInApp } from "@/lib/notifications";
@@ -143,6 +143,7 @@ export async function POST(req: NextRequest) {
   let duplicateRows = 0;
   let referralBonusCount = 0;
   let referralBonusTotal = new Prisma.Decimal(0);
+  const customerTierRates = new Map<string, Prisma.Decimal>();
 
   // ============================================================
   // GỘP DÒNG THEO ĐƠN HÀNG
@@ -239,7 +240,6 @@ export async function POST(req: NextRequest) {
       if (!trackingLink) unmappedRows++;
 
       const commissionAmount = netCommissionAmount || grossCommissionAmount || 0;
-      const split = splitCommission(commissionAmount, rule);
 
       const existing = await prisma.order.findUnique({
         where: { platformId_orderExternalId: { platformId, orderExternalId } },
@@ -308,6 +308,19 @@ export async function POST(req: NextRequest) {
       }
 
       const resolvedCustomerId = existing?.customerId ?? trackingLink?.customerId;
+
+      let customerTierRate: Prisma.Decimal | undefined = undefined;
+      if (resolvedCustomerId) {
+        if (!customerTierRates.has(resolvedCustomerId)) {
+          const approvedCount = await prisma.order.count({
+            where: { customerId: resolvedCustomerId, orderStatus: "approved", sourceType: "import" },
+          });
+          customerTierRates.set(resolvedCustomerId, getCustomerTierRate(approvedCount));
+        }
+        customerTierRate = customerTierRates.get(resolvedCustomerId);
+      }
+
+      const split = splitCommission(commissionAmount, rule, customerTierRate);
 
       // ============================================================
       // KHOÁ SỐ TIỀN KHI ĐƠN ĐÃ THANH TOÁN THẬT

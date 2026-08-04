@@ -6,7 +6,7 @@ import { PageHeader } from "@/components/ui/PageHeader";
 const steps = [
   {
     title: "Dán link sản phẩm",
-    body: "Vào mục Hoàn tiền, dán link Shopee/TikTok bạn muốn mua, chọn nền tảng và bấm Đổi link.",
+    body: "Vào mục Hoàn tiền, dán link Shopee bạn muốn mua, chọn nền tảng và bấm Đổi link.",
   },
   {
     title: "Bấm vào link vừa tạo",
@@ -14,11 +14,11 @@ const steps = [
   },
   {
     title: "Hoàn tất mua hàng",
-    body: "Thanh toán bình thường trên Shopee/TikTok như mọi khi.",
+    body: "Thanh toán bình thường trên Shopee như mọi khi.",
   },
   {
     title: "Chờ đối soát",
-    body: "Định kỳ hệ thống đối soát đơn hàng từ sàn — đơn chỉ được xác nhận \"Tiền đã về\" khi Shopee/TikTok đánh dấu trạng thái sản phẩm liên kết là \"Hoàn thành\", không phải chỉ đơn giản là đơn hàng giao thành công.",
+    body: "Định kỳ hệ thống đối soát đơn hàng từ sàn — đơn chỉ được xác nhận \"Tiền đã về\" khi Shopee đánh dấu trạng thái sản phẩm liên kết là \"Hoàn thành\", không phải chỉ đơn giản là đơn hàng giao thành công.",
   },
   {
     title: "Nhận hoàn tiền",
@@ -29,7 +29,7 @@ const steps = [
 const notes = [
   {
     title: "Luôn bấm lại link mỗi lần mua",
-    body: "Mỗi lượt mua hàng cần bấm lại link hoàn tiền ngay trước khi vào Shopee/TikTok. Nếu đã tắt trình duyệt hoặc mở lại app sau đó, link theo dõi có thể hết hiệu lực và đơn sẽ không được ghi nhận.",
+    body: "Mỗi lượt mua hàng cần bấm lại link hoàn tiền ngay trước khi vào Shopee. Nếu đã tắt trình duyệt hoặc mở lại app sau đó, link theo dõi có thể hết hiệu lực và đơn sẽ không được ghi nhận.",
   },
   {
     title: "Không dùng thêm app/link hoàn tiền khác",
@@ -41,7 +41,7 @@ const notes = [
   },
   {
     title: "Một số ngành hàng không được tính hoa hồng",
-    body: "Shopee/TikTok loại trừ hoa hồng với: nạp thẻ điện thoại, Shopee Xu/Ví, vé máy bay, một số sản phẩm Mall/Brand đặc biệt. Những đơn này vẫn lên hệ thống nhưng sẽ không có tiền hoàn.",
+    body: "Shopee loại trừ hoa hồng với: nạp thẻ điện thoại, Shopee Xu/Ví, vé máy bay, một số sản phẩm Mall/Brand đặc biệt. Những đơn này vẫn lên hệ thống nhưng sẽ không có tiền hoàn.",
   },
   {
     title: "Đơn có thể bị huỷ hoa hồng ngay cả khi đã \"đã về\"",
@@ -49,7 +49,7 @@ const notes = [
   },
   {
     title: "Thời gian đối soát thường mất 7–20 ngày",
-    body: "Shopee/TikTok chỉ xác nhận hoa hồng sau khi hết thời hạn đổi trả của đơn hàng. Đơn ở trạng thái \"Chờ xác nhận\" là bình thường, không phải lỗi hệ thống — cứ chờ đến kỳ đối soát tiếp theo.",
+    body: "Shopee chỉ xác nhận hoa hồng sau khi hết thời hạn đổi trả của đơn hàng. Đơn ở trạng thái \"Chờ xác nhận\" là bình thường, không phải lỗi hệ thống — cứ chờ đến kỳ đối soát tiếp theo.",
   },
 ];
 

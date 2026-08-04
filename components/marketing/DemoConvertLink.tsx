@@ -64,7 +64,7 @@ export function DemoConvertLink() {
             type="url"
             value={url}
             onChange={(e) => { setUrl(e.target.value); setPreview(null); setError(null); }}
-            placeholder="Dán link Shopee/TikTok để xem thử..."
+            placeholder="Dán link Shopee để xem hoàn tiền..."
             className="h-12 w-full rounded-full bg-white pl-10 pr-4 text-[13.5px] font-extrabold text-neutral-900 placeholder:font-semibold placeholder:text-neutral-500 border-2 border-primary-200 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200 transition-all shadow-inner"
           />
         </div>

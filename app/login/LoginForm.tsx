@@ -4,6 +4,8 @@ import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Mail, Lock, Eye, EyeOff, ArrowRight, Loader2, ShieldCheck, Key, ArrowLeft, MailWarning } from "lucide-react";
 import { GoogleIcon } from "@/components/icons/PlatformIcons";
+import { useModal } from "@/components/ui/ModalProvider";
+import { useEffect } from "react";
 
 const GOOGLE_ERROR_MESSAGES: Record<string, string> = {
   google_state_mismatch: "Phiên đăng nhập Google đã hết hạn, vui lòng thử lại.",
@@ -18,13 +20,21 @@ export function LoginForm({ next }: { next?: string }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const googleError = searchParams.get("error");
+  const modal = useModal();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState<string | null>(
-    googleError ? GOOGLE_ERROR_MESSAGES[googleError] ?? "Đăng nhập Google thất bại." : null
-  );
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (googleError) {
+      modal.alert({
+        title: "Lỗi đăng nhập Google",
+        message: GOOGLE_ERROR_MESSAGES[googleError] ?? "Đăng nhập Google thất bại.",
+        iconType: "danger",
+      });
+    }
+  }, [googleError, modal]);
 
   // 2MFA Step State
   const [require2FA, setRequire2FA] = useState(false);
@@ -35,16 +45,15 @@ export function LoginForm({ next }: { next?: string }) {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setError(null);
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
-      setError("Email không đúng định dạng.");
+      modal.alert({ title: "Lỗi", message: "Email không đúng định dạng.", iconType: "danger" });
       return;
     }
 
     if (password.length < 6) {
-      setError("Mật khẩu phải có ít nhất 6 ký tự.");
+      modal.alert({ title: "Lỗi", message: "Mật khẩu phải có ít nhất 6 ký tự.", iconType: "danger" });
       return;
     }
 
@@ -60,7 +69,7 @@ export function LoginForm({ next }: { next?: string }) {
 
     if (!res.ok) {
       const data = await res.json().catch(() => ({}));
-      setError(data.error ?? "Đăng nhập thất bại");
+      modal.alert({ title: "Đăng nhập thất bại", message: data.error ?? "Vui lòng kiểm tra lại thông tin.", iconType: "danger" });
       return;
     }
 
@@ -79,7 +88,6 @@ export function LoginForm({ next }: { next?: string }) {
 
   async function handleVerify2FA(e: React.FormEvent) {
     e.preventDefault();
-    setError(null);
     if (!otpCode.trim()) return;
 
     setLoading(true);
@@ -94,7 +102,7 @@ export function LoginForm({ next }: { next?: string }) {
 
     if (!res.ok) {
       const data = await res.json().catch(() => ({}));
-      setError(data.error ?? "Mã 2MFA không chính xác");
+      modal.alert({ title: "Lỗi 2MFA", message: data.error ?? "Mã 2MFA không chính xác", iconType: "danger" });
       return;
     }
 
@@ -105,7 +113,6 @@ export function LoginForm({ next }: { next?: string }) {
 
   async function handleRequestResetMfa() {
     setResetLoading(true);
-    setError(null);
     try {
       const res = await fetch("/api/auth/mfa/reset-request", {
         method: "POST",
@@ -117,10 +124,10 @@ export function LoginForm({ next }: { next?: string }) {
         setResetSent(true);
       } else {
         const data = await res.json().catch(() => ({}));
-        setError(data.error || "Không thể gửi yêu cầu khôi phục");
+        modal.alert({ title: "Lỗi", message: data.error || "Không thể gửi yêu cầu khôi phục", iconType: "danger" });
       }
     } catch (e: any) {
-      setError(e.message);
+      modal.alert({ title: "Lỗi", message: e.message, iconType: "danger" });
     }
     setResetLoading(false);
   }
@@ -134,7 +141,6 @@ export function LoginForm({ next }: { next?: string }) {
           onClick={() => {
             setRequire2FA(false);
             setOtpCode("");
-            setError(null);
           }}
           className="flex items-center gap-1.5 text-xs font-bold text-neutral-500 hover:text-neutral-900 w-fit"
         >
@@ -151,7 +157,7 @@ export function LoginForm({ next }: { next?: string }) {
           </div>
         </div>
 
-        <form onSubmit={handleVerify2FA} className="flex flex-col gap-lg">
+        <form onSubmit={handleVerify2FA} noValidate className="flex flex-col gap-lg">
           <div className="flex flex-col gap-sm">
             <label className="text-[13px] font-bold text-ink">Mã 2MFA (6 số) hoặc Mã dự phòng:</label>
             <div className="relative">
@@ -168,12 +174,8 @@ export function LoginForm({ next }: { next?: string }) {
             </div>
           </div>
 
-          {error && (
-            <div className="rounded-xl bg-negative/10 border border-negative/20 px-lg py-md text-[13px] font-semibold text-negative-darkest leading-relaxed">
-              {error}
-            </div>
-          )}
-
+          {/* 2mfa error message was here */}
+          
           {resetSent && (
             <div className="rounded-xl bg-emerald-50 border border-emerald-200 px-lg py-md text-[12px] font-semibold text-emerald-800 leading-relaxed">
               📩 Nếu email chính xác, liên kết reset 2MFA đã được gửi tới hòm thư <strong>{email}</strong>. Vui lòng kiểm tra hộp thư (hoặc console server dev).
@@ -214,7 +216,7 @@ export function LoginForm({ next }: { next?: string }) {
   // ── Màn hình Bước 1: Đăng nhập Email & Mật khẩu ───────────────────────
   return (
     <div className="flex flex-col gap-lg">
-      <form onSubmit={handleSubmit} className="flex flex-col gap-lg">
+      <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-lg">
         <div className="flex flex-col gap-sm">
           <label className="text-[13px] font-bold text-ink">Email</label>
           <div className="relative">
@@ -226,7 +228,7 @@ export function LoginForm({ next }: { next?: string }) {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="meowback@gmail.com"
               autoComplete="email"
-              className="h-14 w-full rounded-2xl border border-ink/10 bg-canvas-soft/60 pl-[52px] pr-lg text-[15px] font-medium text-ink placeholder:text-mute/70 transition-all focus:border-primary focus:bg-canvas focus:outline-none focus:ring-4 focus:ring-primary/15"
+              className="h-14 w-full rounded-2xl border border-ink/10 bg-canvas-soft/60 pl-[52px] pr-lg text-[16px] font-medium text-ink placeholder:text-mute/70 transition-all focus:border-primary focus:bg-canvas focus:outline-none focus:ring-4 focus:ring-primary/15"
             />
           </div>
         </div>
@@ -248,7 +250,7 @@ export function LoginForm({ next }: { next?: string }) {
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
               autoComplete="current-password"
-              className="h-14 w-full rounded-2xl border border-ink/10 bg-canvas-soft/60 pl-[52px] pr-[52px] text-[15px] font-medium text-ink placeholder:text-mute/70 transition-all focus:border-primary focus:bg-canvas focus:outline-none focus:ring-4 focus:ring-primary/15"
+              className="h-14 w-full rounded-2xl border border-ink/10 bg-canvas-soft/60 pl-[52px] pr-[52px] text-[16px] font-medium text-ink placeholder:text-mute/70 transition-all focus:border-primary focus:bg-canvas focus:outline-none focus:ring-4 focus:ring-primary/15"
             />
             <button
               type="button"
@@ -261,12 +263,7 @@ export function LoginForm({ next }: { next?: string }) {
           </div>
         </div>
 
-        {error && (
-          <div className="rounded-xl bg-negative/10 border border-negative/20 px-lg py-md text-[13px] font-semibold text-negative-darkest">
-            {error}
-          </div>
-        )}
-
+        {/* login error message was here */}
         <button
           type="submit"
           disabled={loading}

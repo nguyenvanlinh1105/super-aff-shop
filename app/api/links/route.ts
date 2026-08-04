@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
 import { createTrackingLink } from "@/lib/trackingLinkService";
+import { detectPlatform } from "@/lib/linkConversion";
 
 export async function GET(req: NextRequest) {
   const session = await getSession();
@@ -42,23 +43,52 @@ export async function POST(req: NextRequest) {
     productPrice?: number;
   };
 
-  if (!originalUrl || (!bodyPlatformId && !platformCode)) {
-    return NextResponse.json({ error: "Thieu link goc hoac nen tang" }, { status: 400 });
+  if (!originalUrl || typeof originalUrl !== "string" || (!bodyPlatformId && !platformCode)) {
+    return NextResponse.json({ error: "Thiếu link gốc hoặc chưa chọn nền tảng" }, { status: 400 });
+  }
+
+  if (originalUrl.length > 2000) {
+    return NextResponse.json({ error: "Link quá dài, vui lòng kiểm tra lại" }, { status: 400 });
+  }
+
+  try {
+    const parsedUrl = new URL(originalUrl.trim());
+    if (parsedUrl.protocol !== "http:" && parsedUrl.protocol !== "https:") {
+      return NextResponse.json({ error: "Link không hợp lệ. URL phải bắt đầu bằng http:// hoặc https://" }, { status: 400 });
+    }
+  } catch (error) {
+    return NextResponse.json({ error: "Định dạng URL không hợp lệ. Vui lòng kiểm tra lại" }, { status: 400 });
   }
 
   // Cho phép truyền platformCode ("SHOPEE"/"TIKTOK") thay vì platformId nội
   // bộ — dùng khi tạo link demo tự động sau đăng ký, lúc đó client chỉ biết
   // mã sàn đã phát hiện từ bước xem trước, không có platformId.
   let platformId = bodyPlatformId;
+  let finalPlatformCode = platformCode;
+  
   if (!platformId && platformCode) {
     const platform = await prisma.platform.findUnique({ where: { code: platformCode } });
     if (!platform) {
-      return NextResponse.json({ error: "Nen tang khong hop le" }, { status: 400 });
+      return NextResponse.json({ error: "Nền tảng không hợp lệ" }, { status: 400 });
     }
     platformId = platform.id;
+  } else if (platformId && !finalPlatformCode) {
+    const platform = await prisma.platform.findUnique({ where: { id: platformId } });
+    if (platform) {
+      finalPlatformCode = platform.code;
+    }
   }
+
   if (!platformId) {
-    return NextResponse.json({ error: "Thieu nen tang" }, { status: 400 });
+    return NextResponse.json({ error: "Thiếu thông tin nền tảng" }, { status: 400 });
+  }
+
+  const detected = detectPlatform(originalUrl);
+  if (finalPlatformCode?.toUpperCase() === "SHOPEE" && detected !== "shopee") {
+    return NextResponse.json({ error: "Link không thuộc hệ thống Shopee. Vui lòng dán đúng link sản phẩm Shopee." }, { status: 400 });
+  }
+  if (finalPlatformCode?.toUpperCase() === "TIKTOK" && detected !== "tiktok") {
+    return NextResponse.json({ error: "Link không thuộc hệ thống TikTok. Vui lòng dán đúng link sản phẩm TikTok." }, { status: 400 });
   }
 
   const customerId = session.role === "customer" ? session.customerId : body.customerId;

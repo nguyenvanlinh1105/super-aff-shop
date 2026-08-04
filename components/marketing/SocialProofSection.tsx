@@ -8,19 +8,9 @@ const TESTIMONIALS = [
     role: "🛒 Shopee Choice VIP",
     avatarImg: "/avatar_user_1.png",
     avatarBg: "from-pink-400 to-rose-500",
-    cashback: "Đã rút: 1.250.000đ 💸",
+    cashback: "Đã rút: 320.000đ 💸",
     quote:
-      "Mỗi tháng mình chốt đơn Shopee tầm 4-5 triệu mua mỹ phẩm & đồ gia dụng. Dùng MeowBack tự động gắn mã hoàn tiền, đến cuối tháng rút thẳng 1.25 triệu về Vietcombank. Quá tiện & cực kỳ uy tín!",
-  },
-  {
-    name: "Trần Hoàng Nam",
-    location: "Hà Nội",
-    role: "📦 Creator TikTok Shop",
-    avatarImg: "/avatar_user_2.png",
-    avatarBg: "from-blue-400 to-[#000000]",
-    cashback: "Đã rút: 3.480.000đ ⚡",
-    quote:
-      "Mình hay dán link mua đồ công nghệ trên TikTok Shop. Tốc độ ghi nhận đơn trên MeowBack cực nhanh chỉ sau 1-2 phút. Hoa hồng minh bạch, rút tiền ngân hàng không tốn 1 đồng phí.",
+      "Mỗi tháng mình chốt đơn Shopee tầm 4-5 triệu mua mỹ phẩm & đồ gia dụng. Dùng MeowBack tự động gắn mã hoàn tiền, cuối tháng rút thẳng về Vietcombank. Quá tiện & cực kỳ uy tín!",
   },
   {
     name: "Trần Mai Phương",
@@ -28,19 +18,19 @@ const TESTIMONIALS = [
     role: "🛍️ Mua sắm thông thái",
     avatarImg: "/avatar_user_3.png",
     avatarBg: "from-purple-400 to-indigo-600",
-    cashback: "Đã rút: 850.000đ 🎁",
+    cashback: "Đã rút: 185.000đ 🎁",
     quote:
-      "Thích nhất là tính năng mời bạn bè nhận 5% hoa hồng trọn đời. Mình giới thiệu cả phòng làm việc cùng dùng, giờ hàng tháng tiền thụ động đổ về ví MeowBack đủ dư tiền cà phê cả tháng!",
+      "Thích nhất là tính năng mời bạn bè nhận 5% hoa hồng cho các đơn đầu tiên. Mình giới thiệu cả phòng làm việc cùng dùng, giờ hàng tháng tiền thụ động đổ về ví MeowBack đủ dư tiền cà phê cả tháng!",
   },
   {
     name: "Phạm Vũ Anh",
     location: "Hải Phòng",
-    role: "💳 Khách hàng VIP",
+    role: "💳 Khách hàng hạng Bạc",
     avatarImg: "/avatar_user_4.png",
     avatarBg: "from-amber-400 to-orange-500",
-    cashback: "Đã rút: 2.150.000đ 🚀",
+    cashback: "Đã rút: 450.000đ 🚀",
     quote:
-      "Giao diện dễ xài nhất trong các nền tảng hoàn tiền hiện nay. Dán link cái có ngay link hoàn tiền. Rút tiền phát là ngân hàng báo Ting Ting trong 60 giây, support hỗ trợ rất nhiệt tình.",
+      "Giao diện dễ xài nhất trong các nền tảng hoàn tiền hiện nay. Dán link Shopee cái có ngay link hoàn tiền. Rút tiền phát là ngân hàng báo Ting Ting trong 60 giây, support hỗ trợ rất nhiệt tình.",
   },
   {
     name: "Đặng Khánh Linh",
@@ -48,24 +38,21 @@ const TESTIMONIALS = [
     role: "🍼 Mẹ bỉm săn sale",
     avatarImg: "/avatar_user_5.png",
     avatarBg: "from-emerald-400 to-teal-600",
-    cashback: "Đã rút: 1.680.000đ 🎀",
+    cashback: "Đã rút: 280.000đ 🎀",
     quote:
-      "Tã bỉm và sữa cho bé đắt đỏ nên mỗi tháng tiết kiệm được 15-20% từ hoàn tiền MeowBack là niềm vui lớn của mẹ bỉm. Web rõ ràng, đối soát chuẩn xác, không có quảng cáo rác phiền phức.",
+      "Tã bỉm và sữa cho bé đắt đỏ nên mỗi tháng tiết kiệm được khoản hoàn tiền từ MeowBack là niềm vui lớn của mẹ bỉm. Web rõ ràng, đối soát chuẩn xác, không có quảng cáo rác phiền phức.",
   },
   {
     name: "Hoàng Trọng Nghĩa",
     location: "Bình Dương",
-    role: "⚡ Hội viên Pro",
+    role: "⚡ Hội viên hạng Vàng",
     avatarImg: "/avatar_user_6.png",
     avatarBg: "from-sky-400 to-blue-600",
-    cashback: "Đã rút: 4.520.000đ 💎",
+    cashback: "Đã rút: 520.000đ 💎",
     quote:
-      "App chạy mượt, đối soát hoa hồng chuẩn từng xu. Thích nhất là mức rút tối thiểu chỉ từ 10K là rút được rồi, chứ không như các nơi khác bắt tích đủ vài trăm K mới cho rút.",
+      "Đối soát hoa hồng chuẩn từng xu. Thích nhất là mức rút tối thiểu chỉ từ 10K là rút được rồi, chứ không như các nơi khác bắt tích đủ vài trăm K mới cho rút. Mua nhiều lên hạng Vàng thấy hoàn nhiều hơn hẳn.",
   },
 ];
-
-const BASE_PAID_OUT = 85500000; // 85.500.000đ base
-const BASE_CUSTOMERS = 2450;    // 2.450+ customers base
 
 function formatVnd(n: number) {
   const formatted = Math.floor(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
@@ -73,8 +60,8 @@ function formatVnd(n: number) {
 }
 
 export function SocialProofSection({ totalPaidOut, totalCustomers }: { totalPaidOut: number; totalCustomers: number }) {
-  const displayPaidOut = BASE_PAID_OUT + (totalPaidOut || 0);
-  const displayCustomers = BASE_CUSTOMERS + (totalCustomers || 0);
+  const displayPaidOut = totalPaidOut || 0;
+  const displayCustomers = totalCustomers || 0;
 
   return (
     <section className="py-20 bg-gradient-to-b from-white via-primary-50/30 to-white relative overflow-hidden">

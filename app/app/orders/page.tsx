@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { formatCurrency, formatDate } from "@/lib/format";
 import { CustomerOrdersClient } from "@/components/customer/CustomerOrdersClient";
 
-export default async function CustomerOrdersPage({ searchParams }: { searchParams: { q?: string; page?: string; tab?: string } }) {
+export default async function CustomerOrdersPage({ searchParams }: { searchParams: { q?: string; page?: string; tab?: string; period?: string } }) {
   const session = await getSession();
   if (!session?.customerId) redirect("/admin");
 
@@ -13,6 +13,7 @@ export default async function CustomerOrdersPage({ searchParams }: { searchParam
   const skip = (page - 1) * limit;
   const q = searchParams.q || "";
   const tab = searchParams.tab || "all";
+  const period = searchParams.period || "all";
 
   const where: any = { customerId: session.customerId };
   if (q) {
@@ -24,6 +25,24 @@ export default async function CustomerOrdersPage({ searchParams }: { searchParam
   if (tab === "reconciling") where.orderStatus = "processing";
   if (tab === "processing") { where.orderStatus = "approved"; where.payoutStatus = { not: "paid" }; }
   if (tab === "cancelled") where.orderStatus = { in: ["cancelled", "rejected", "clawback"] };
+
+  if (period !== "all") {
+    const now = new Date();
+    if (period === "today") {
+      const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+      where.createdAt = { gte: startOfToday };
+    } else if (period === "last_7_days") {
+      const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      where.createdAt = { gte: sevenDaysAgo };
+    } else if (period === "this_month") {
+      const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+      where.createdAt = { gte: firstDay };
+    } else if (period === "last_month") {
+      const firstDay = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      const lastDay = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59, 999);
+      where.createdAt = { gte: firstDay, lte: lastDay };
+    }
+  }
 
   const baseWhere = { customerId: session.customerId };
 

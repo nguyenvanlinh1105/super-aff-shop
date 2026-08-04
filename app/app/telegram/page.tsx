@@ -7,7 +7,7 @@ export default async function CustomerTelegramPage() {
   if (!session?.customerId) redirect("/admin");
 
   return (
-    <div className="mx-auto flex max-w-2xl flex-col gap-xl pb-2xl">
+    <div className="flex w-full flex-col gap-xl pb-2xl">
       <div className="flex items-center gap-md">
         <img src="/meowback_lucky_cat_logo.png" alt="" className="h-14 w-14 shrink-0 object-contain" />
         <div>

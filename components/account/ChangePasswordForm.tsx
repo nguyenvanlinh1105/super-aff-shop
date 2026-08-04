@@ -1,28 +1,26 @@
 "use client";
 
 import { useState } from "react";
-import { Lock, Eye, EyeOff, Loader2, CheckCircle2 } from "lucide-react";
+import { Lock, Eye, EyeOff, Loader2 } from "lucide-react";
+import { useModal } from "@/components/ui/ModalProvider";
 
 export function ChangePasswordForm() {
+  const modal = useModal();
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setError(null);
-    setSuccess(false);
 
     if (newPassword.length < 6) {
-      setError("Mật khẩu mới phải có ít nhất 6 ký tự.");
+      modal.alert({ title: "Lỗi", message: "Mật khẩu mới phải có ít nhất 6 ký tự.", iconType: "danger" });
       return;
     }
     if (newPassword !== confirmPassword) {
-      setError("Mật khẩu mới nhập lại không khớp.");
+      modal.alert({ title: "Lỗi", message: "Mật khẩu mới nhập lại không khớp.", iconType: "danger" });
       return;
     }
 
@@ -36,18 +34,18 @@ export function ChangePasswordForm() {
 
     if (!res.ok) {
       const data = await res.json().catch(() => ({}));
-      setError(data.error ?? "Có lỗi xảy ra, vui lòng thử lại.");
+      modal.alert({ title: "Lỗi đổi mật khẩu", message: data.error ?? "Có lỗi xảy ra, vui lòng thử lại.", iconType: "danger" });
       return;
     }
 
-    setSuccess(true);
+    modal.alert({ title: "Thành công", message: "Đổi mật khẩu thành công!", iconType: "success" });
     setCurrentPassword("");
     setNewPassword("");
     setConfirmPassword("");
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-lg max-w-[420px]">
+    <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-lg max-w-[420px]">
       <div className="flex flex-col gap-sm">
         <label className="text-[13px] font-bold text-ink">Mật khẩu hiện tại</label>
         <div className="relative">
@@ -106,18 +104,7 @@ export function ChangePasswordForm() {
         </div>
       </div>
 
-      {error && (
-        <div className="rounded-xl bg-negative/10 border border-negative/20 px-lg py-md text-[13px] font-semibold text-negative-darkest">
-          {error}
-        </div>
-      )}
-
-      {success && (
-        <div className="flex items-center gap-sm rounded-xl bg-primary/10 border border-primary/20 px-lg py-md text-[13px] font-semibold text-primary-active">
-          <CheckCircle2 size={16} strokeWidth={2.5} className="text-primary shrink-0" />
-          Đổi mật khẩu thành công!
-        </div>
-      )}
+      {/* messages were here */}
 
       <button
         type="submit"

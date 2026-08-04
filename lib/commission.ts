@@ -22,8 +22,22 @@ export function isSettlementReady(completedAt: Date | null | undefined, referenc
 }
 
 const DEFAULT_TAX_RATE = new Prisma.Decimal(10.98);
-const DEFAULT_CUSTOMER_RATE = new Prisma.Decimal(80);
-const DEFAULT_SYSTEM_RATE = new Prisma.Decimal(20);
+
+export const MEMBERSHIP_TIERS = [
+  { id: "bronze", name: "Đồng", minOrders: 0, rate: 50 },
+  { id: "silver", name: "Bạc", minOrders: 10, rate: 60 },
+  { id: "gold", name: "Vàng", minOrders: 20, rate: 70 },
+];
+
+export function getCustomerTierRate(approvedOrdersCount: number): Prisma.Decimal {
+  let rate = MEMBERSHIP_TIERS[0].rate;
+  if (approvedOrdersCount >= 20) {
+    rate = MEMBERSHIP_TIERS[2].rate;
+  } else if (approvedOrdersCount >= 10) {
+    rate = MEMBERSHIP_TIERS[1].rate;
+  }
+  return new Prisma.Decimal(rate);
+}
 
 export async function getActiveCommissionRule() {
   return prisma.commissionRule.findFirst({
@@ -33,25 +47,29 @@ export async function getActiveCommissionRule() {
 }
 
 /**
- * Trước khi chia 80/20, phải trừ thuế thu nhập (mặc định 10.98%) trên hoa
- * hồng gộp — khớp với cách sếp tính tay trong file Excel đối soát:
- *   HH sau thuế = HH ghi nhận × (1 - taxRate/100)
- *   Trả khách   = HH sau thuế × customerRate/100
+ * Trước khi chia tỷ lệ cho khách/hệ thống, phải trừ thuế thu nhập (mặc định 10.98%) trên hoa
+ * hồng gộp. Khách hàng sẽ nhận số tiền chia theo customerRateOverride (động theo hạng),
+ * nếu không truyền sẽ lấy default từ rule (dự phòng). Hệ thống giữ phần còn lại.
  */
 export function splitCommission(
   commissionAmount: Prisma.Decimal | number,
-  rule?: { taxRate?: Prisma.Decimal | null; customerRate: Prisma.Decimal; systemRate: Prisma.Decimal } | null
+  rule?: { taxRate?: Prisma.Decimal | null; customerRate: Prisma.Decimal; systemRate: Prisma.Decimal } | null,
+  customerRateOverride?: Prisma.Decimal
 ): CommissionSplit {
   const amount = new Prisma.Decimal(commissionAmount);
   const taxRate = rule?.taxRate != null ? new Prisma.Decimal(rule.taxRate) : DEFAULT_TAX_RATE;
-  const customerRate = rule ? new Prisma.Decimal(rule.customerRate) : DEFAULT_CUSTOMER_RATE;
-  const systemRate = rule ? new Prisma.Decimal(rule.systemRate) : DEFAULT_SYSTEM_RATE;
+  
+  // Ưu tiên rate động theo hạng của khách, nếu không truyền mới fallback về rule
+  const customerRate = customerRateOverride ?? (rule ? new Prisma.Decimal(rule.customerRate) : new Prisma.Decimal(50));
 
   const afterTaxAmount = amount.mul(new Prisma.Decimal(100).sub(taxRate)).div(100);
   const customerRewardAmount = afterTaxAmount.mul(customerRate).div(100);
   const systemProfitAmount = afterTaxAmount.sub(customerRewardAmount);
 
-  return { customerRewardAmount, systemProfitAmount, customerRate, systemRate };
+  // systemRate thực tế là phần còn lại sau khi chia cho khách
+  const actualSystemRate = new Prisma.Decimal(100).sub(customerRate);
+
+  return { customerRewardAmount, systemProfitAmount, customerRate, systemRate: actualSystemRate };
 }
 
 /**
