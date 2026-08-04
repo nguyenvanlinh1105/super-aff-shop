@@ -56,7 +56,11 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   }
 
   const body = await req.json();
-  const data: { isPartner?: boolean; referredById?: string | null } = {};
+  const data: { status?: string; isPartner?: boolean; referredById?: string | null } = {};
+
+  if (typeof body.status === "string" && ["active", "inactive"].includes(body.status)) {
+    data.status = body.status;
+  }
 
   if (typeof body.isPartner === "boolean") {
     data.isPartner = body.isPartner;
@@ -85,19 +89,16 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
 }
 
 /**
- * Xoá cứng (hard delete) một khách hàng — không thể khôi phục.
- *
- * Order/PaymentBatchItem là dữ liệu đối soát/tài chính thật nên KHÔNG xoá
- * order — chỉ gỡ liên kết (customerId, trackingLinkId = null) để giữ lại
- * lịch sử doanh thu/hoa hồng hệ thống đã ghi nhận. Các bảng con phụ thuộc
- * cứng vào customerId (WithdrawRequest, TelegramLinkCode, PaymentBatch,
- * TrackingLink...) thì xoá theo đúng thứ tự để không vỡ ràng buộc khoá ngoại.
+ * Xoá mềm (soft delete) một khách hàng — chuyển status thành inactive.
+ * Nếu truyền thêm param ?force=true sẽ tiến hành xoá cứng vĩnh viễn khỏi DB.
  */
-export async function DELETE(_req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
   const session = await getSession();
   if (!session || session.role !== "admin") {
     return NextResponse.json({ error: "Không có quyền" }, { status: 403 });
   }
+
+  const force = req.nextUrl.searchParams.get("force") === "true";
 
   const customer = await prisma.customer.findUnique({
     where: { id: params.id },
@@ -107,6 +108,16 @@ export async function DELETE(_req: NextRequest, { params }: { params: { id: stri
     return NextResponse.json({ error: "Không tìm thấy khách hàng" }, { status: 404 });
   }
 
+  if (!force) {
+    // Xoá mềm (Soft delete) -> Chuyển trạng thái sang inactive
+    await prisma.customer.update({
+      where: { id: customer.id },
+      data: { status: "inactive" },
+    });
+    return NextResponse.json({ success: true, message: "Đã xoá mềm tài khoản khách hàng" });
+  }
+
+  // Xoá cứng (Hard delete khi force=true)
   const trackingLinkIds = customer.trackingLinks.map((l) => l.id);
 
   await prisma.$transaction([
@@ -138,5 +149,5 @@ export async function DELETE(_req: NextRequest, { params }: { params: { id: stri
     prisma.customer.delete({ where: { id: customer.id } }),
   ]);
 
-  return NextResponse.json({ success: true });
+  return NextResponse.json({ success: true, message: "Đã xoá vĩnh viễn tài khoản" });
 }

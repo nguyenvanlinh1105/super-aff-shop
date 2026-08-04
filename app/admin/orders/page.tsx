@@ -126,12 +126,6 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
               </p>
             </div>
           </div>
-          <Link href="/admin/orders/import">
-            <button className="flex items-center gap-2 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 px-6 py-3 text-xs font-black text-white shadow-md shadow-emerald-600/20 hover:shadow-lg transition-all active:scale-[0.98]">
-              <Upload size={16} strokeWidth={2.5} />
-              <span>Import CSV Đối Soát</span>
-            </button>
-          </Link>
         </div>
       </div>
 
