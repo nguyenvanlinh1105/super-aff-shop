@@ -207,8 +207,8 @@ export function PaymentPinModal({ isOpen, onClose, hasPin, onPinVerified }: Prop
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4">
-      <div className="absolute inset-0 bg-neutral-900/50 backdrop-blur-sm" onClick={onClose} />
+    <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center sm:p-4">
+      <div className="absolute inset-0 bg-neutral-900/60 backdrop-blur-sm" onClick={onClose} />
       <div className="relative w-full sm:max-w-[400px] overflow-hidden rounded-t-3xl sm:rounded-3xl bg-white shadow-2xl fade-in border border-primary-100">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-primary-100 p-5 bg-gradient-to-r from-primary-50 to-white">
