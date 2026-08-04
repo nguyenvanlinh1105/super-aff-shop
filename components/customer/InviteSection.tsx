@@ -132,75 +132,88 @@ export function InviteSection({
           className="fixed inset-0 z-50 flex items-center justify-center p-4"
           onClick={() => setShowQR(false)}
         >
-          <div className="absolute inset-0 bg-neutral-900/40 backdrop-blur-sm" />
+          <div className="absolute inset-0 bg-neutral-900/50 backdrop-blur-md" />
           <div
-            className="relative w-full max-w-xs overflow-hidden rounded-3xl bg-white shadow-cute-lg fade-in border border-primary-100"
+            className="relative w-full max-w-[340px] overflow-hidden rounded-3xl bg-white shadow-2xl fade-in"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Modal header */}
-            <div
-              className="relative overflow-hidden p-6 text-center bg-gradient-to-b from-primary-100 to-primary-50"
-            >
-              <button
-                onClick={() => setShowQR(false)}
-                className="absolute right-4 top-4 flex h-8 w-8 items-center justify-center rounded-full bg-white/80 text-neutral-500 hover:bg-white hover:text-neutral-900 transition-colors"
-              >
-                <X size={16} strokeWidth={2.5} />
-              </button>
-              <div className="w-14 h-14 rounded-full bg-white flex items-center justify-center text-2xl mx-auto mb-2 shadow-sm">
-                🐱
+            {/* Gradient header */}
+            <div className="relative overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-primary-400 via-primary-300 to-pink-200" />
+              <div className="absolute -top-8 -right-8 h-28 w-28 rounded-full bg-white/10 blur-xl" />
+              <div className="absolute -bottom-4 -left-4 h-20 w-20 rounded-full bg-white/10 blur-xl" />
+
+              <div className="relative px-6 pt-6 pb-5 text-center">
+                <button
+                  onClick={() => setShowQR(false)}
+                  className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm text-white/80 hover:bg-white/30 hover:text-white transition-all"
+                >
+                  <X size={16} strokeWidth={2.5} />
+                </button>
+                <div className="h-16 w-16 rounded-full overflow-hidden bg-white mx-auto mb-3 shadow-lg shadow-primary-500/20">
+                  <img src="/meowback_lucky_cat_logo.png" alt="MeowBack" className="h-full w-full object-cover" />
+                </div>
+                <h3 className="text-[18px] font-extrabold text-white drop-shadow-sm">
+                  Mã QR giới thiệu
+                </h3>
+                <p className="text-[12px] font-medium text-white/80 mt-0.5">
+                  Cho bạn bè quét để đăng ký MeowBack ngay
+                </p>
               </div>
-              <h3 className="text-[17px] font-extrabold text-neutral-900">
-                Mã QR MeowBack 🎀
-              </h3>
-              <p className="text-[12px] font-medium text-neutral-500 mt-0.5">
-                Cho bạn bè quét để đăng ký ngay
-              </p>
             </div>
 
-            {/* QR Code */}
-            <div className="flex flex-col items-center p-6 gap-4">
-              <div className="p-3 rounded-2xl bg-white shadow-inner border border-primary-100">
-                {qrDataUrl ? (
-                  <img
-                    src={qrDataUrl}
-                    alt="QR Code giới thiệu"
-                    className="h-44 w-44 object-contain"
-                  />
-                ) : (
-                  <div className="h-44 w-44 flex items-center justify-center text-neutral-300">
-                    <QrCode size={80} strokeWidth={1} />
-                  </div>
-                )}
+            {/* QR Code section */}
+            <div className="flex flex-col items-center px-6 pt-5 pb-6 gap-4">
+              {/* QR Frame with decorative border */}
+              <div className="relative p-1 rounded-2xl bg-gradient-to-br from-primary-300 via-primary-200 to-pink-200 shadow-lg shadow-primary-200/40">
+                <div className="rounded-xl bg-white p-3">
+                  {qrDataUrl ? (
+                    <img
+                      src={qrDataUrl}
+                      alt="QR Code giới thiệu"
+                      className="h-48 w-48 object-contain"
+                    />
+                  ) : (
+                    <div className="h-48 w-48 flex items-center justify-center text-neutral-300">
+                      <QrCode size={80} strokeWidth={1} />
+                    </div>
+                  )}
+                </div>
               </div>
 
-              <div className="w-full rounded-2xl bg-primary-50 px-3 py-2 text-center border border-primary-100">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-neutral-500 mb-0.5">Link giới thiệu của bạn</p>
-                <p className="text-[12px] font-bold text-primary-600 break-all">
+              {/* Link display */}
+              <div className="w-full rounded-2xl bg-gradient-to-br from-primary-50 to-pink-50 px-4 py-3 text-center border border-primary-100/60">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-primary-400 mb-1">Link giới thiệu của bạn</p>
+                <p className="text-[12px] font-bold text-primary-600 break-all leading-relaxed">
                   {inviteUrl}
                 </p>
               </div>
 
+              {/* Copy button */}
               <button
                 onClick={handleCopy}
-                className={`w-full flex items-center justify-center gap-2 rounded-full py-3 text-[14px] font-bold transition-all ${
+                className={`w-full flex items-center justify-center gap-2 rounded-2xl py-3.5 text-[14px] font-bold transition-all ${
                   copied
-                    ? "bg-[#2D8A56] text-white"
-                    : "bg-gradient-to-r from-primary-400 to-primary-500 text-white shadow-cute"
+                    ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/25"
+                    : "bg-gradient-to-r from-primary-400 to-primary-500 text-white shadow-lg shadow-primary-500/25 hover:shadow-xl hover:shadow-primary-500/30 active:scale-[0.98]"
                 }`}
               >
                 {copied ? (
                   <>
                     <Check size={16} strokeWidth={2.5} />
-                    Đã sao chép!
+                    Đã sao chép! ✅
                   </>
                 ) : (
                   <>
                     <Copy size={16} strokeWidth={2} />
-                    Sao chép link 🎀
+                    Sao chép link giới thiệu 🎀
                   </>
                 )}
               </button>
+
+              <p className="text-[11px] text-neutral-400 font-medium text-center">
+                Chia sẻ link hoặc mã QR cho bạn bè qua Zalo, Facebook, Messenger...
+              </p>
             </div>
           </div>
         </div>,
