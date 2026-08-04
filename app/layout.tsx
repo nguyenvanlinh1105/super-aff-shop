@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Quicksand, Be_Vietnam_Pro } from "next/font/google";
 import { ModalProvider } from "@/components/ui/ModalProvider";
 import { ServiceWorkerRegister } from "@/components/pwa/ServiceWorkerRegister";
+import { GlobalDragScroll } from "@/components/ui/GlobalDragScroll";
 import "./globals.css";
 
 const fontQuicksand = Quicksand({
@@ -59,6 +60,7 @@ export default function RootLayout({
     <html lang="vi" className={`${beVietnamPro.variable} ${fontQuicksand.variable}`} suppressHydrationWarning>
       <body className={`${beVietnamPro.className} selection:bg-primary-200 selection:text-primary-600`} suppressHydrationWarning>
         <ServiceWorkerRegister />
+        <GlobalDragScroll />
         <ModalProvider>{children}</ModalProvider>
       </body>
     </html>

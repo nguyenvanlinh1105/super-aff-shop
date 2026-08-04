@@ -112,8 +112,12 @@ export default async function AdminQuickLinkPage() {
             {recentLinks.map((link) => (
               <div key={link.id} className="p-4 sm:px-6 flex items-center justify-between gap-4 hover:bg-rose-50/20 transition-colors">
                 <div className="flex items-center gap-3.5 min-w-0">
-                  <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-rose-100 to-pink-50 border border-rose-200/60 flex items-center justify-center shrink-0">
-                    <img src="/meow-back-quick-link.png" alt="" className="w-6 h-6 object-contain" />
+                  <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-rose-100 to-pink-50 border border-rose-200/60 flex items-center justify-center shrink-0 overflow-hidden">
+                    {link.productImage ? (
+                      <img src={link.productImage} alt={link.productTitle || ""} className="w-full h-full object-cover" />
+                    ) : (
+                      <img src="/meow-back-quick-link.png" alt="" className="w-6 h-6 object-contain" />
+                    )}
                   </div>
                   <div className="min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
@@ -122,6 +126,11 @@ export default async function AdminQuickLinkPage() {
                         {link.customer.customerCode}
                       </span>
                     </div>
+                    {link.productTitle && (
+                      <div className="text-[11px] font-semibold text-neutral-700 truncate max-w-xs sm:max-w-md mt-0.5" title={link.productTitle}>
+                        {link.productTitle}
+                      </div>
+                    )}
                     <div className="text-xs font-mono text-rose-600 font-bold truncate mt-0.5">
                       {link.shortUrl || link.shortCode}
                     </div>

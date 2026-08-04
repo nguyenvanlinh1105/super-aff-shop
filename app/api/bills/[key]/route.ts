@@ -8,13 +8,13 @@ export async function GET(
   { params }: { params: { key: string } }
 ) {
   const session = await getSession();
-  if (!session || session.role !== "admin") {
+  if (!session) {
     return new NextResponse("Unauthorized", { status: 401 });
   }
 
-  // Sanitize: chỉ cho phép tên file đơn giản, không path traversal
-  const key = params.key.replace(/[/\\..]/g, "");
-  if (!key) return new NextResponse("Not found", { status: 404 });
+  // Dùng path.basename để loại bỏ path traversal (/ hoặc \ hoặc ..) mà KHÔNG xoá dấu chấm (.) phần mở rộng file (.jpg, .png)
+  const key = path.basename(params.key);
+  if (!key || key === "." || key === "..") return new NextResponse("Not found", { status: 404 });
 
   try {
     const filePath = path.join(process.cwd(), "storage", "bills", key);

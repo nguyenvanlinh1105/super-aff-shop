@@ -26,8 +26,11 @@ export function PartnerSettings({
   const [loading, setLoading] = useState(false);
   const [referrerSelect, setReferrerSelect] = useState(referredBy?.id ?? "");
 
+  const [error, setError] = useState<string | null>(null);
+
   async function patch(body: Record<string, unknown>) {
     setLoading(true);
+    setError(null);
     const res = await fetch(`/api/customers/${customerId}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
@@ -38,12 +41,18 @@ export function PartnerSettings({
       router.refresh();
     } else {
       const data = await res.json().catch(() => ({}));
-      alert(data.error || "Có lỗi xảy ra");
+      setError(data.error || "Có lỗi xảy ra");
     }
   }
 
   return (
     <div className="flex flex-col gap-lg">
+      {error && (
+        <div className="rounded-2xl bg-rose-50 border border-rose-200 p-3.5 text-xs text-rose-700 font-extrabold flex items-center justify-between">
+          <span>⚠️ {error}</span>
+          <button onClick={() => setError(null)} className="text-rose-400 hover:text-rose-700 font-black">✕</button>
+        </div>
+      )}
       {/* Toggle Đối tác */}
       <div className="rounded-2xl border border-gray-100 p-lg">
         <div className="flex items-center justify-between gap-md">
