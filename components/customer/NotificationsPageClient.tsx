@@ -64,8 +64,8 @@ export function NotificationsPageClient({
             {t.label}
             {!!t.badge && t.badge > 0 && (
               <span
-                className={`flex h-5 min-w-[20px] items-center justify-center rounded-full px-1 text-[11px] ${
-                  tab === t.id ? "bg-white/20 text-white" : "bg-negative text-white"
+                className={`flex h-5 min-w-[20px] items-center justify-center rounded-full px-1.5 text-[11px] font-extrabold ${
+                  tab === t.id ? "bg-white/20 text-white" : "bg-rose-600 text-white"
                 }`}
               >
                 {t.badge > 99 ? "99+" : t.badge}

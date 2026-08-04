@@ -174,7 +174,7 @@ export function FloatingQuickAccess({ unreadCount }: { unreadCount: number }) {
         >
           <Bell size={24} strokeWidth={2.25} className="text-[#e86a33]" />
           {unreadCount > 0 && (
-            <span className="absolute -top-1 -right-1 flex h-6 min-w-[24px] items-center justify-center rounded-full bg-negative px-1 text-[11px] font-bold text-white ring-2 ring-white">
+            <span className="absolute -top-1 -right-1 flex h-6 min-w-[24px] items-center justify-center rounded-full bg-rose-600 px-1.5 text-[11px] font-extrabold text-white ring-2 ring-white shadow-sm">
               {unreadCount > 99 ? "99+" : unreadCount}
             </span>
           )}
