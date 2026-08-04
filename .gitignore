@@ -17,5 +17,4 @@ prisma/prod.db-journal
 prisma/*.bak-*
 HUONG_DAN_KIEN_TRUC_BE_FE.md
 *.tsbuildinfo
-
-
+.agents/
