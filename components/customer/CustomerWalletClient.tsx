@@ -385,9 +385,9 @@ export function CustomerWalletClient({
           {/* RIGHT COLUMN: TRANSACTION HISTORY */}
           <div className="rounded-3xl bg-white p-6 shadow-cute border border-primary-100/80 overflow-hidden">
             <div className="mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-primary-100 pb-4">
-              <div className="flex items-center gap-3">
-                <h2 className="text-[16px] font-extrabold text-neutral-900">Lịch sử rút tiền</h2>
-                <span className="text-[13px] font-bold text-neutral-500 bg-neutral-100 px-2 py-0.5 rounded-full">{history.length} giao dịch</span>
+              <div className="flex items-center gap-3 shrink-0">
+                <h2 className="text-[16px] font-extrabold text-neutral-900 whitespace-nowrap">Lịch sử rút tiền</h2>
+                <span className="text-[13px] font-bold text-neutral-500 bg-neutral-100 px-2 py-0.5 rounded-full whitespace-nowrap">{history.length} giao dịch</span>
               </div>
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
                 <select
@@ -484,8 +484,8 @@ export function CustomerWalletClient({
 
       {/* MODAL: CHỈNH SỬA THÔNG TIN */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center sm:p-4">
-          <div className="absolute inset-0 bg-neutral-900/40 backdrop-blur-sm" onClick={() => setIsModalOpen(false)} />
+        <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center sm:p-4">
+          <div className="absolute inset-0 bg-neutral-900/60 backdrop-blur-sm" onClick={() => setIsModalOpen(false)} />
           <div className="relative w-full sm:max-w-md overflow-hidden rounded-t-3xl sm:rounded-3xl bg-white shadow-cute-lg fade-in border border-primary-100 max-h-[90vh] sm:max-h-[85vh] flex flex-col">
             <div className="flex items-center justify-between border-b border-primary-100 p-5 bg-gradient-to-r from-primary-100/60 to-primary-50">
               <h3 className="text-[18px] font-extrabold text-neutral-900">Thông tin thanh toán 🏦</h3>
