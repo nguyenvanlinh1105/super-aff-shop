@@ -6,6 +6,7 @@ import { Users, TrendingUp, CheckCircle2 } from "lucide-react";
 import { useModal } from "@/components/ui/ModalProvider";
 import { Button } from "@/components/ui/Button";
 import { IconBow } from "@/components/icons/CatRibbonIcons";
+import { FloatingElement } from "@/components/ui/FloatingElement";
 
 type Friend = {
   id: string;
@@ -75,13 +76,29 @@ export function ReferralClient({ customerCode, totalFriends, totalCommission, re
   };
 
   return (
-    <div className="flex flex-col gap-6 fade-in max-w-4xl mx-auto">
-      {/* Header */}
-      <div>
-        <h1 className="text-[28px] font-extrabold text-neutral-900 tracking-tight flex items-center gap-2">
-          Mời bạn bè 🎀
-        </h1>
-        <p className="mt-1 text-[14px] text-neutral-600 font-medium">Chia sẻ niềm vui mua sắm và nhận hoa hồng thụ động trọn đời</p>
+    <div className="flex w-full flex-col gap-6 fade-in pb-12">
+      {/* HEADER */}
+      <div className="relative overflow-hidden rounded-3xl p-6 sm:p-8 border border-primary-200/60 shadow-xl shadow-primary-500/5 bg-white">
+        <img src="/welcome-bg.png" alt="" className="absolute inset-0 w-full h-full object-cover opacity-80" />
+        <div className="absolute inset-0 bg-white/40 backdrop-blur-[2px]" />
+
+        <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+          <div className="flex items-center gap-5">
+            <FloatingElement duration={4}>
+              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-3xl bg-gradient-to-br from-primary-400 via-primary-500 to-pink-600 text-white flex items-center justify-center shadow-lg shadow-primary-500/25 shrink-0 border border-white/40 overflow-hidden p-1">
+                <img src="/meow-back-community.png" alt="Referral" className="w-full h-full object-contain rounded-2xl" />
+              </div>
+            </FloatingElement>
+            <div>
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold leading-tight text-neutral-900 tracking-tight">
+                Mời bạn bè 🎀
+              </h1>
+              <p className="mt-1 text-xs sm:text-sm text-neutral-600 font-medium leading-relaxed max-w-xl">
+                Chia sẻ niềm vui mua sắm và nhận hoa hồng thụ động trọn đời từ các đơn hàng của người được mời.
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
@@ -209,7 +226,8 @@ export function ReferralClient({ customerCode, totalFriends, totalCommission, re
                   Số tiền ở đơn chưa xong là <strong>dự kiến</strong>
                 </span>
               </div>
-              <div className="max-h-[420px] overflow-auto -mx-6 px-6">
+              {/* Desktop Table */}
+              <div className="hidden md:block max-h-[420px] overflow-auto -mx-6 px-6">
                 <table className="w-full min-w-[600px] text-left text-[13px]">
                   <thead>
                     <tr className="border-b border-primary-100 text-[11px] font-extrabold uppercase tracking-wider text-neutral-500">
@@ -264,12 +282,51 @@ export function ReferralClient({ customerCode, totalFriends, totalCommission, re
                   </tbody>
                 </table>
               </div>
+
+              {/* Mobile Card List */}
+              <div className="md:hidden flex flex-col gap-3 max-h-[420px] overflow-y-auto">
+                {friendOrderTimeline.map((entry) => {
+                  const orderStatus = ORDER_STATUS_LABEL[entry.orderStatus] ?? { text: entry.orderStatus, className: "bg-neutral-100 text-neutral-500" };
+                  const bonus = BONUS_STATE_LABEL[entry.bonusState];
+                  const showAmount = entry.bonusState === "received" || entry.bonusState === "clawed_back" || entry.bonusState === "pending_eligible";
+                  return (
+                    <div key={entry.id} className="rounded-2xl border border-primary-100 p-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <div>
+                          <div className="text-[13px] font-bold text-neutral-900">{entry.friendName}</div>
+                          {entry.friendCode && <div className="font-mono text-[10px] text-neutral-400">{entry.friendCode}</div>}
+                        </div>
+                        <span className={`inline-block whitespace-nowrap rounded-full px-2.5 py-0.5 text-[10px] font-bold ${orderStatus.className}`}>
+                          {orderStatus.text}
+                        </span>
+                      </div>
+                      <div className="text-[13px] font-bold text-neutral-900 truncate" title={entry.itemName ?? undefined}>
+                        {entry.itemName ?? `Đơn ${entry.orderExternalId}`}
+                      </div>
+                      <div className="text-[11px] text-neutral-500 font-medium truncate mt-0.5">
+                        {entry.shopName}{entry.shopName ? " · " : ""}<span className="font-mono">{entry.orderExternalId}</span>
+                      </div>
+                      <div className="flex items-center justify-between mt-2 pt-2 border-t border-primary-50">
+                        <span className="text-[12px] font-medium text-neutral-500">{formatDate(entry.createdAt)}</span>
+                        <div className="text-right">
+                          {showAmount && (
+                            <div className={`text-[13px] font-extrabold ${entry.bonusState === "clawed_back" ? "text-negative line-through" : entry.bonusState === "received" ? "text-[#2D8A56]" : "text-primary-500"}`}>
+                              {entry.bonusState === "pending_eligible" ? "~" : "+"}{formatCurrency(entry.bonusAmount)}
+                            </div>
+                          )}
+                          <div className={`text-[10px] font-bold ${bonus.className}`}>{bonus.text}</div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           )}
         </div>
 
         {/* Right Column */}
-        <div className="lg:col-span-2 flex flex-col gap-6">
+        <div className="lg:col-span-2 flex flex-col gap-6 lg:sticky lg:top-24 lg:self-start">
           {/* Rewards Box */}
           <div className="rounded-3xl bg-white p-6 shadow-cute border border-primary-100/80 relative overflow-hidden">
             <div className="absolute -top-10 -right-10 w-40 h-40 bg-primary-100/40 rounded-full blur-3xl"></div>

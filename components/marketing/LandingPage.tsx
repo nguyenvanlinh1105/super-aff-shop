@@ -15,7 +15,7 @@ import {
   Wand2,
   ShoppingBag,
 } from "lucide-react";
-import { ShopeeIcon, TiktokIcon } from "@/components/icons/PlatformIcons";
+import { ShopeeIcon } from "@/components/icons/PlatformIcons";
 import {
   LogoMeowBack,
   IconBow,
@@ -25,21 +25,21 @@ import { FaqAccordion } from "@/components/marketing/FaqAccordion";
 import { MarketingHeader } from "@/components/marketing/MarketingHeader";
 import { MarketingFooter } from "@/components/marketing/MarketingFooter";
 import { PublicFloatingSupport } from "@/components/marketing/PublicFloatingSupport";
-import { SocialProofSection } from "@/components/marketing/SocialProofSection";
 import { DemoConvertLink } from "@/components/marketing/DemoConvertLink";
 
 import { HeroGallerySlider } from "@/components/marketing/HeroGallerySlider";
+import { HowItWorksSteps } from "@/components/marketing/HowItWorksSteps";
 import { LiveCashbackCalculator } from "@/components/marketing/LiveCashbackCalculator";
-import { LiveActivityTicker } from "@/components/marketing/LiveActivityTicker";
-import { HotDealsSection } from "@/components/marketing/HotDealsSection";
 import { ValueComparisonSection } from "@/components/marketing/ValueComparisonSection";
+import { MagneticButton } from "@/components/ui/MagneticButton";
+import { ShopeeLiveDemo } from "@/components/ui/ShopeeLiveDemo";
 
 const CAT_HIGHLIGHT_CARDS = [
   {
     icon: Zap,
     title: "Tạo link tức thì",
     description:
-      "Dán link Shopee & TikTok Shop, nhận link hoàn tiền chỉ trong 1 giây.",
+      "Dán link Shopee, nhận link hoàn tiền chỉ trong 1 giây.",
     badge: "⚡ 1 Giây",
     gradient: "from-amber-400 to-amber-500 text-white",
     cardBg:
@@ -72,8 +72,8 @@ const CAT_HIGHLIGHT_CARDS = [
     icon: Users,
     title: "Mời bạn nhận 5%",
     description:
-      "Chia sẻ link giới thiệu MeowBack cho bạn bè, nhận thưởng 5% trọn đời.",
-    badge: "🎁 Trọn Đời",
+      "Chia sẻ link giới thiệu MeowBack cho bạn bè, nhận thưởng 5% cho các đơn hàng đầu.",
+    badge: "🎁 Thu Nhập Thêm",
     gradient: "from-emerald-400 to-teal-500 text-white",
     cardBg:
       "bg-gradient-to-b from-emerald-50/70 via-white to-emerald-50/30 border-emerald-200/90 hover:border-emerald-400/80",
@@ -81,35 +81,7 @@ const CAT_HIGHLIGHT_CARDS = [
   },
 ];
 
-const STEPS = [
-  {
-    icon: UserPlus,
-    stepNum: "01",
-    title: "1. Đăng ký tài khoản",
-    description:
-      "Tạo tài khoản MeowBack miễn phí chưa tới 30 giây, không đòi hỏi thẻ thanh toán.",
-    badge: "🔑 Miễn phí 100%",
-    gradient: "from-primary-500 via-[#FF3B7B] to-primary-600",
-  },
-  {
-    icon: Wand2,
-    stepNum: "02",
-    title: "2. Dán link sản phẩm",
-    description:
-      "Copy link Shopee hoặc TikTok Shop bạn muốn mua, dán vào MeowBack để lấy link hoàn tiền.",
-    badge: "🪄 Tự động 1 Giây",
-    gradient: "from-sky-500 via-blue-500 to-indigo-600",
-  },
-  {
-    icon: ShoppingBag,
-    stepNum: "03",
-    title: "3. Mua sắm & Nhận tiền",
-    description:
-      "Bấm vào link hoàn tiền và chốt đơn — tiền hoàn tự động tích lũy thẳng vào ví MeowBack.",
-    badge: "💰 Tích lũy về ví",
-    gradient: "from-emerald-500 via-teal-500 to-green-600",
-  },
-];
+
 
 export function LandingPage({
   totalPaidOut,
@@ -129,64 +101,71 @@ export function LandingPage({
           <div className="absolute top-10 right-10 w-96 h-96 bg-primary-200/30 rounded-full blur-[100px] pointer-events-none" />
           <div className="absolute top-40 left-10 w-72 h-72 bg-secondary-100/50 rounded-full blur-[80px] pointer-events-none" />
 
-          <div className="relative z-10 max-w-[1200px] mx-auto px-4 md:px-8 py-12 md:py-20">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-              <div className="space-y-6 fade-in">
-                <div className="inline-flex items-center gap-2 bg-gradient-to-r from-primary-100 to-primary-200 text-[#8A0B37] px-4 py-1.5 rounded-full shadow-sm border border-primary-300/60">
-                  <IconBow className="w-4 h-4 text-accent-bow" />
-                  <span className="text-[13.5px] font-black tracking-wide">
-                    Hoàn tới 80% hoa hồng + 5% giới thiệu 🎀
+          <div className="relative z-10 max-w-[1200px] mx-auto px-4 md:px-8 py-8 md:py-20">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-12 items-center">
+              <div className="space-y-5 fade-in text-center lg:text-left">
+                <div className="inline-flex items-center gap-2 bg-gradient-to-r from-primary-100 to-primary-200 text-[#8A0B37] px-3 py-1 md:px-4 md:py-1.5 rounded-full shadow-sm border border-primary-300/60">
+                  <IconBow className="w-3.5 h-3.5 md:w-4 md:h-4 text-accent-bow" />
+                  <span className="text-[12px] md:text-[13.5px] font-black tracking-wide">
+                    Thăng hạng VIP, hoàn tới 70% hoa hồng 🎀
                   </span>
                 </div>
 
-                <h1 className="text-[38px] md:text-[54px] font-black leading-tight text-neutral-950 tracking-tight">
-                  Hoàn tiền tự động <br className="hidden sm:inline" />
+                <h1 className="text-[30px] sm:text-[38px] md:text-[54px] font-black leading-[1.15] text-neutral-950 tracking-tight">
+                  Hoàn tiền tự động{" "}
                   <span className="text-primary-600 underline decoration-primary-300 decoration-wavy decoration-2">
-                    khi mua sắm Shopee
+                    mỗi đơn Shopee
                   </span>
                 </h1>
 
-                <p className="text-[17.5px] text-neutral-800 max-w-lg leading-relaxed font-semibold">
-                  Mua sắm{" "}
-                  <strong className="text-primary-600 font-extrabold">
-                    Shopee & TikTok Shop
-                  </strong>{" "}
-                  thông minh hơn với MeowBack. Tự động nhận hoàn tiền từng đơn,
-                  rút về ví dễ dàng từ{" "}
-                  <strong className="text-neutral-950 font-black">
-                    10.000đ
-                  </strong>
-                  .
+                <p className="text-[15px] md:text-[17px] text-neutral-700 max-w-lg leading-relaxed font-semibold mx-auto lg:mx-0">
+                  Mua sắm <strong className="text-primary-600 font-extrabold">Shopee</strong> thông minh hơn với MeowBack.
+                  Nhận hoàn tiền tự động, thăng hạng VIP hoàn đến 70%, rút từ <strong className="text-neutral-950 font-black">10.000đ</strong>.
                 </p>
 
-                <div className="flex flex-col sm:flex-row gap-3 pt-2">
-                  <Link
-                    href="/login"
-                    className="bg-gradient-to-r from-primary-500 via-[#FF3B7B] to-primary-600 hover:scale-[1.02] active:scale-95 text-white px-8 py-3.5 rounded-full font-extrabold text-[16.5px] flex items-center justify-center gap-2 transition-all shadow-cute hover:shadow-cute-lg"
-                  >
-                    Bắt đầu hoàn tiền ngay
-                    <ArrowRight size={18} />
-                  </Link>
+                <div className="flex flex-col sm:flex-row gap-3 pt-1 items-center lg:items-start">
+                  <MagneticButton>
+                    <Link
+                      href="/login"
+                      className="w-full sm:w-auto bg-gradient-to-r from-primary-500 via-[#FF3B7B] to-primary-600 hover:scale-[1.02] active:scale-95 text-white px-7 py-3.5 rounded-full font-extrabold text-[15px] md:text-[16.5px] flex items-center justify-center gap-2 transition-all shadow-cute hover:shadow-cute-lg"
+                    >
+                      Bắt đầu hoàn tiền ngay
+                      <ArrowRight size={17} />
+                    </Link>
+                  </MagneticButton>
                   <a
                     href="#how-it-works"
-                    className="bg-white hover:bg-primary-50 text-neutral-950 hover:text-primary-600 px-7 py-3.5 rounded-full font-extrabold text-[16px] flex items-center justify-center gap-2 transition-all border-2 border-primary-200/90 shadow-sm"
+                    className="w-full sm:w-auto bg-white hover:bg-primary-50 text-neutral-950 hover:text-primary-600 px-6 py-3.5 rounded-full font-extrabold text-[15px] md:text-[16px] flex items-center justify-center gap-2 transition-all border-2 border-primary-200/90 shadow-sm"
                   >
                     Cách hoạt động
                   </a>
                 </div>
 
                 {/* Demo Link Converter Input Component */}
-                <div className="pt-4">
+                <div className="pt-2">
                   <DemoConvertLink />
                 </div>
               </div>
 
-              {/* Animated Background Hero Gallery Slider */}
-              <div className="flex justify-center items-center">
+              {/* Hero Gallery — hidden on small mobile, show from sm up */}
+              <div className="hidden sm:flex justify-center items-center">
                 <HeroGallerySlider />
               </div>
             </div>
           </div>
+        </section>
+
+        {/* Shopee Live Demo Interactive Section */}
+        <section className="py-12 border-b border-primary-100/50 bg-gradient-to-b from-white/50 to-neutral-50/80 backdrop-blur-md overflow-hidden relative">
+          <div className="max-w-[1200px] mx-auto px-4 text-center mb-8">
+            <h2 className="text-2xl md:text-3xl font-black text-neutral-900 mb-3">
+              Chỉ 1 giây để lấy link hoàn tiền Shopee
+            </h2>
+            <p className="text-neutral-600 font-semibold max-w-2xl mx-auto">
+              Không cần tải app phức tạp. Chỉ cần copy link từ Shopee, dán vào MeowBack, và hệ thống sẽ lo phần còn lại.
+            </p>
+          </div>
+          <ShopeeLiveDemo />
         </section>
 
         {/* Feature Highlight Cards */}
@@ -231,184 +210,99 @@ export function LandingPage({
         {/* Live Cashback Calculator Section */}
         <LiveCashbackCalculator />
 
-        {/* Featured Platform Stores Detailed Section */}
+        {/* Hệ thống Hạng Thành Viên */}
         <section
-          id="cua-hang"
-          className="py-20 bg-gradient-to-b from-white via-primary-50/40 to-white border-b border-primary-100/80 relative overflow-hidden"
+          id="hang-thanh-vien"
+          className="py-12 md:py-20 bg-gradient-to-b from-white via-primary-50/40 to-white border-b border-primary-100/80 relative overflow-hidden"
         >
           <div className="max-w-[1200px] mx-auto px-4 md:px-8">
-            {/* Section Header */}
-            <div className="text-center mb-14">
+            <div className="text-center mb-8 md:mb-14">
               <div className="inline-flex items-center justify-center gap-2 mb-3 bg-primary-100/80 text-[#8A0B37] px-4 py-1.5 rounded-full border border-primary-200/80">
                 <Sparkles size={14} className="text-primary-600" />
-                <span className="font-extrabold text-[12.5px] uppercase tracking-widest">
-                  Siêu Sàn Hợp Tác Hoàn Tiền
+                <span className="font-extrabold text-[12px] md:text-[12.5px] uppercase tracking-widest">
+                  Gamification — Mua Nhiều Hoàn Nhiều
                 </span>
               </div>
-              <h2 className="text-[32px] md:text-[44px] font-black text-neutral-950 tracking-tight leading-tight">
-                Mua sắm thả ga — Hoàn tiền tối đa 80% 🛍️
+              <h2 className="text-[26px] sm:text-[32px] md:text-[44px] font-black text-neutral-950 tracking-tight leading-tight">
+                Thăng hạng VIP, mở khóa{" "}
+                <span className="text-primary-600 underline decoration-primary-300 decoration-wavy decoration-2">
+                  hoàn tiền cao hơn
+                </span>{" "}
+                🏆
               </h2>
-              <p className="text-neutral-700 text-[16.5px] font-semibold max-w-2xl mx-auto mt-2">
-                Nhận hoa hồng tự động từ mọi đơn hàng mua qua Shopee & TikTok
-                Shop. Đối soát minh bạch, rút tiền liền tay.
+              <p className="text-neutral-700 text-[14px] md:text-[16.5px] font-semibold max-w-2xl mx-auto mt-2">
+                Mỗi đơn hàng hoàn thành sẽ tích lũy vào hành trình thăng hạng.
+                Hạng càng cao, tỷ lệ hoàn tiền càng lớn — hoàn toàn tự động.
               </p>
             </div>
 
-            {/* 2 Detailed Store Cards */}
-            <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
-              {/* Shopee Detailed Card */}
-              <div className="group relative flex flex-col justify-between rounded-3xl bg-white border-2 border-orange-200 shadow-cute hover:shadow-cute-lg hover:-translate-y-1.5 transition-all duration-300 overflow-hidden">
-                {/* Card Header Banner */}
-                <div className="bg-gradient-to-r from-[#FF5722] via-[#EE4D2D] to-[#FF7043] p-6 text-white relative">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="w-14 h-14 rounded-2xl bg-white flex items-center justify-center p-2 shadow-cute shrink-0">
-                        <ShopeeIcon size={36} />
-                      </div>
-                      <div>
-                        <h3 className="text-[24px] font-black tracking-tight leading-none">
-                          Shopee
-                        </h3>
-                        <span className="text-[12px] font-bold text-orange-100 mt-1 inline-block">
-                          Sàn TMĐT Hàng Đầu VN
-                        </span>
-                      </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-8 max-w-4xl mx-auto">
+              {/* Hạng Đồng */}
+              <div className="group relative flex flex-col justify-between rounded-3xl bg-gradient-to-b from-amber-50/70 via-white to-amber-50/30 p-7 border-2 border-amber-200/90 shadow-cute hover:shadow-cute-lg hover:-translate-y-2 transition-all duration-300 overflow-hidden">
+                <div>
+                  <div className="flex items-center justify-between mb-5">
+                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-400 to-amber-600 text-white flex items-center justify-center shadow-cute group-hover:scale-110 transition-transform duration-300 text-2xl">
+                      🥉
                     </div>
-                    <span className="bg-white text-[#EE4D2D] font-black text-[13px] px-3.5 py-1.5 rounded-full shadow-sm">
-                      Hoàn tới 80% ⚡
+                    <span className="text-[12px] font-black px-3.5 py-1 rounded-full bg-amber-100 text-amber-800 border border-amber-200/90 shadow-sm">
+                      Mặc định
                     </span>
                   </div>
-                </div>
-
-                {/* Card Body */}
-                <div className="p-7 space-y-6 flex-1 flex flex-col justify-between">
-                  <p className="text-neutral-700 text-[14.5px] font-semibold leading-relaxed">
-                    Nhận hoàn tiền cực khủng khi mua sắm hàng thời trang, mỹ
-                    phẩm, điện tử đến đồ gia dụng trên Shopee. Tự động gắn mã
-                    hoàn tiền chỉ trong 1 giây.
+                  <h3 className="font-black text-[22px] text-neutral-950 mb-1">Hạng Đồng</h3>
+                  <p className="text-[36px] font-black text-amber-600 mb-3">50%</p>
+                  <p className="text-neutral-700 text-[14px] font-semibold leading-relaxed mb-4">
+                    Tất cả thành viên mới đều bắt đầu từ hạng Đồng.
+                    Hoàn 50% hoa hồng sau thuế trên mỗi đơn hàng.
                   </p>
-
-                  {/* Stats Grid */}
-                  <div className="grid grid-cols-2 gap-4 bg-orange-50/60 p-4 rounded-2xl border border-orange-100">
-                    <div className="text-center">
-                      <span className="text-[11px] font-bold text-neutral-500 uppercase block mb-0.5">
-                        Mức hoàn tiền
-                      </span>
-                      <span className="text-[18px] font-black text-[#EE4D2D]">
-                        Tối đa 80%
-                      </span>
-                    </div>
-                    <div className="text-center border-l border-orange-200/80">
-                      <span className="text-[11px] font-bold text-neutral-500 uppercase block mb-0.5">
-                        Thời gian đối soát
-                      </span>
-                      <span className="text-[18px] font-black text-neutral-900">
-                        15 – 30 Ngày
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Features Check List */}
-                  <ul className="space-y-2.5 text-[13.5px] font-bold text-neutral-800">
-                    <li className="flex items-center gap-2">
-                      <span className="text-orange-500">✓</span> Tự động ghi
-                      nhận đơn mua Shopee
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <span className="text-orange-500">✓</span> Rút tiền từ
-                      10.000đ về ngân hàng
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <span className="text-orange-500">✓</span> Hỗ trợ đối soát
-                      và khiếu nại 24/7
-                    </li>
-                  </ul>
-
-                  {/* Action CTA */}
-                  <a
-                    href="#demo-convert"
-                    className="block text-center w-full bg-gradient-to-r from-[#FF5722] to-[#EE4D2D] hover:from-[#EE4D2D] hover:to-[#FF5722] text-white font-extrabold py-3.5 rounded-2xl shadow-cute hover:shadow-cute-lg transition-all duration-200 text-[15px]"
-                  >
-                    Dán Link Shopee Nhận Hoàn Tiền ⚡
-                  </a>
+                </div>
+                <div className="pt-4 border-t border-amber-100 text-[13px] font-bold text-neutral-600">
+                  <span className="text-amber-600 font-black">Điều kiện:</span> Dưới 10 đơn hoàn thành
                 </div>
               </div>
 
-              {/* TikTok Shop Detailed Card */}
-              <div className="group relative flex flex-col justify-between rounded-3xl bg-white border-2 border-neutral-300 shadow-cute hover:shadow-cute-lg hover:-translate-y-1.5 transition-all duration-300 overflow-hidden">
-                {/* Card Header Banner */}
-                <div className="bg-gradient-to-r from-[#1E1B1D] via-[#000000] to-[#2D282A] p-6 text-white relative">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="w-14 h-14 rounded-2xl bg-white flex items-center justify-center p-2 shadow-cute shrink-0">
-                        <TiktokIcon size={32} />
-                      </div>
-                      <div>
-                        <h3 className="text-[24px] font-black tracking-tight leading-none">
-                          TikTok Shop
-                        </h3>
-                        <span className="text-[12px] font-bold text-neutral-300 mt-1 inline-block">
-                          Sắm đồ Video & Livestream
-                        </span>
-                      </div>
+              {/* Hạng Bạc */}
+              <div className="group relative flex flex-col justify-between rounded-3xl bg-gradient-to-b from-sky-50/70 via-white to-sky-50/30 p-7 border-2 border-sky-200/90 shadow-cute hover:shadow-cute-lg hover:-translate-y-2 transition-all duration-300 overflow-hidden">
+                <div>
+                  <div className="flex items-center justify-between mb-5">
+                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-sky-400 to-blue-600 text-white flex items-center justify-center shadow-cute group-hover:scale-110 transition-transform duration-300 text-2xl">
+                      🥈
                     </div>
-                    <span className="bg-white text-neutral-950 font-black text-[13px] px-3.5 py-1.5 rounded-full shadow-sm">
-                      Hoàn tới 80% 🔥
+                    <span className="text-[12px] font-black px-3.5 py-1 rounded-full bg-sky-100 text-sky-800 border border-sky-200/90 shadow-sm">
+                      Từ 10 đơn
                     </span>
                   </div>
-                </div>
-
-                {/* Card Body */}
-                <div className="p-7 space-y-6 flex-1 flex flex-col justify-between">
-                  <p className="text-neutral-700 text-[14.5px] font-semibold leading-relaxed">
-                    Bắt kịp xu hướng mua sắm giải trí trên TikTok Shop. Nhận
-                    ngay hoa hồng hoàn tiền cực kỳ hấp dẫn tích lũy tự động trực
-                    tiếp vào ví MeowBack của bạn.
+                  <h3 className="font-black text-[22px] text-neutral-950 mb-1">Hạng Bạc</h3>
+                  <p className="text-[36px] font-black text-sky-600 mb-3">60%</p>
+                  <p className="text-neutral-700 text-[14px] font-semibold leading-relaxed mb-4">
+                    Khi tích lũy đủ 10 đơn hàng hoàn thành, bạn tự động
+                    được nâng lên hạng Bạc với mức hoàn tiền 60%.
                   </p>
+                </div>
+                <div className="pt-4 border-t border-sky-100 text-[13px] font-bold text-neutral-600">
+                  <span className="text-sky-600 font-black">Điều kiện:</span> Từ 10 đến 19 đơn hoàn thành
+                </div>
+              </div>
 
-                  {/* Stats Grid */}
-                  <div className="grid grid-cols-2 gap-4 bg-neutral-100/70 p-4 rounded-2xl border border-neutral-200">
-                    <div className="text-center">
-                      <span className="text-[11px] font-bold text-neutral-500 uppercase block mb-0.5">
-                        Mức hoàn tiền
-                      </span>
-                      <span className="text-[18px] font-black text-neutral-950">
-                        Tối đa 80%
-                      </span>
+              {/* Hạng Vàng */}
+              <div className="group relative flex flex-col justify-between rounded-3xl bg-gradient-to-b from-primary-50/70 via-white to-primary-50/30 p-7 border-2 border-primary-200/90 shadow-cute hover:shadow-cute-lg hover:-translate-y-2 transition-all duration-300 overflow-hidden ring-2 ring-primary-300/50">
+                <div>
+                  <div className="flex items-center justify-between mb-5">
+                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary-400 via-[#FF3B7B] to-primary-600 text-white flex items-center justify-center shadow-cute group-hover:scale-110 transition-transform duration-300 text-2xl">
+                      👑
                     </div>
-                    <div className="text-center border-l border-neutral-300/80">
-                      <span className="text-[11px] font-bold text-neutral-500 uppercase block mb-0.5">
-                        Thời gian đối soát
-                      </span>
-                      <span className="text-[18px] font-black text-neutral-900">
-                        15 – 30 Ngày
-                      </span>
-                    </div>
+                    <span className="text-[12px] font-black px-3.5 py-1 rounded-full bg-primary-100 text-primary-800 border border-primary-200/90 shadow-sm">
+                      ⭐ VIP
+                    </span>
                   </div>
-
-                  {/* Features Check List */}
-                  <ul className="space-y-2.5 text-[13.5px] font-bold text-neutral-800">
-                    <li className="flex items-center gap-2">
-                      <span className="text-neutral-900">✓</span> Ghi nhận đơn
-                      TikTok Shop siêu tốc
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <span className="text-neutral-900">✓</span> Tích lũy tiền
-                      hoàn không giới hạn
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <span className="text-neutral-900">✓</span> 0đ Phí rút
-                      tiền về tài khoản ngân hàng
-                    </li>
-                  </ul>
-
-                  {/* Action CTA */}
-                  <a
-                    href="#demo-convert"
-                    className="block text-center w-full bg-gradient-to-r from-[#111111] via-[#222222] to-[#333333] hover:from-[#222222] hover:to-[#111111] text-white font-extrabold py-3.5 rounded-2xl shadow-cute hover:shadow-cute-lg transition-all duration-200 text-[15px]"
-                  >
-                    Dán Link TikTok Shop Nhận Hoàn Tiền 🔥
-                  </a>
+                  <h3 className="font-black text-[22px] text-neutral-950 mb-1">Hạng Vàng</h3>
+                  <p className="text-[36px] font-black text-primary-600 mb-3">70%</p>
+                  <p className="text-neutral-700 text-[14px] font-semibold leading-relaxed mb-4">
+                    Đây là mức hoàn tiền cao nhất hệ thống.
+                    Mua càng nhiều, hoàn càng khủng — xứng đáng cho khách VIP.
+                  </p>
+                </div>
+                <div className="pt-4 border-t border-primary-100 text-[13px] font-bold text-neutral-600">
+                  <span className="text-primary-600 font-black">Điều kiện:</span> Từ 20 đơn hoàn thành trở lên
                 </div>
               </div>
             </div>
@@ -418,120 +312,68 @@ export function LandingPage({
         {/* How It Works Section */}
         <section
           id="how-it-works"
-          className="py-20 bg-white relative overflow-hidden"
+          className="py-12 md:py-20 bg-white relative overflow-hidden"
         >
           <div className="max-w-[1200px] mx-auto px-4 md:px-8">
-            <div className="text-center mb-16">
+            <div className="text-center mb-10 md:mb-16">
               <div className="inline-flex items-center justify-center gap-2 mb-3 bg-primary-50 px-4 py-1.5 rounded-full border border-primary-200/80">
                 <IconBow className="w-4 h-4 text-accent-bow" />
-                <span className="text-[13px] font-black text-primary-600 uppercase tracking-wide">
+                <span className="text-[12px] md:text-[13px] font-black text-primary-600 uppercase tracking-wide">
                   Hành trình đơn giản
                 </span>
               </div>
-              <h2 className="font-black text-[32px] md:text-[46px] text-neutral-950 tracking-tight leading-tight">
+              <h2 className="font-black text-[26px] sm:text-[32px] md:text-[46px] text-neutral-950 tracking-tight leading-tight">
                 3 Bước Đơn Giản Nhận Hoàn Tiền 🎀
               </h2>
-              <p className="text-neutral-700 text-[16.5px] font-semibold max-w-xl mx-auto mt-2">
-                Nhận hoàn tiền tự động từ mọi đơn hàng Shopee & TikTok Shop chỉ
-                với 3 bước dễ dàng.
+              <p className="text-neutral-700 text-[14px] md:text-[16.5px] font-semibold max-w-xl mx-auto mt-2">
+                Nhận hoàn tiền tự động từ mọi đơn hàng Shopee chỉ với 3 bước dễ dàng.
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 relative">
-              {STEPS.map((step, index) => {
-                const StepIcon = step.icon;
-                return (
-                  <div
-                    key={index}
-                    className="group relative flex flex-col justify-between p-7 bg-gradient-to-b from-primary-50/60 via-white to-primary-50/20 border-2 border-primary-200/90 rounded-3xl hover:border-primary-400 hover:shadow-cute-lg hover:-translate-y-2 transition-all duration-300 overflow-hidden"
-                  >
-                    {/* Top Step Header: Icon + Step Badge */}
-                    <div>
-                      <div className="flex items-center justify-between mb-5">
-                        <div
-                          className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${step.gradient} text-white flex items-center justify-center shadow-cute group-hover:scale-110 transition-transform duration-300`}
-                        >
-                          <StepIcon size={26} strokeWidth={2.2} />
-                        </div>
-                        <span className="text-[12px] font-black px-3.5 py-1 rounded-full bg-primary-100 text-primary-800 border border-primary-200/90 shadow-sm">
-                          {step.badge}
-                        </span>
-                      </div>
-
-                      <h3 className="font-black text-[21px] text-neutral-950 mb-3 leading-snug">
-                        {step.title}
-                      </h3>
-                      <p className="text-neutral-700 text-[14.5px] font-semibold leading-relaxed">
-                        {step.description}
-                      </p>
-                    </div>
-
-                    {/* Bottom Step Indicator Bar */}
-                    <div className="mt-8 pt-4 border-t border-primary-100 flex items-center justify-between">
-                      <span className="text-xs font-black text-primary-600 uppercase tracking-widest">
-                        Bước {step.stepNum}
-                      </span>
-                      <div className="w-8 h-1 rounded-full bg-primary-300 group-hover:w-16 group-hover:bg-primary-500 transition-all duration-300" />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+            <HowItWorksSteps />
           </div>
         </section>
 
         {/* Interactive Value Comparison Table */}
         <ValueComparisonSection />
 
-        {/* Hot Deals High Cashback Section */}
-        <HotDealsSection />
-
-        {/* Social Proof Real Stats */}
-        <SocialProofSection
-          totalPaidOut={totalPaidOut}
-          totalCustomers={totalCustomers}
-        />
-
         {/* Quick Registration Banner */}
-        <section className="py-16 bg-gradient-to-br from-primary-100 via-primary-50 to-secondary-50 relative">
+        <section className="py-10 md:py-16 bg-gradient-to-br from-primary-100 via-primary-50 to-secondary-50 relative">
           <div className="max-w-[1200px] mx-auto px-4 md:px-8">
-            <div className="bg-white rounded-3xl p-8 md:p-12 border border-primary-200/80 shadow-cute-lg grid md:grid-cols-12 gap-8 items-center">
-              <div className="md:col-span-8 space-y-4">
+            <div className="bg-white rounded-3xl p-6 sm:p-8 md:p-12 border border-primary-200/80 shadow-cute-lg flex flex-col md:grid md:grid-cols-12 gap-6 md:gap-8 items-center text-center md:text-left">
+              <div className="md:col-span-8 space-y-3 md:space-y-4">
                 <div className="inline-flex items-center gap-1.5 text-xs font-bold bg-primary-100 text-primary-600 px-3 py-1 rounded-full">
                   MeowBack — Hoàn Tiền Mua Sắm
                 </div>
-                <h2 className="text-[30px] md:text-[40px] font-extrabold text-neutral-900 leading-tight">
+                <h2 className="text-[24px] sm:text-[30px] md:text-[40px] font-extrabold text-neutral-900 leading-tight">
                   Nhận hoàn tiền cho{" "}
-                  <span className="text-primary-500">
-                    ví của bạn ngay hôm nay!
-                  </span>
+                  <span className="text-primary-500">ví của bạn ngay hôm nay!</span>
                 </h2>
-                <p className="text-neutral-600 text-[16px]">
-                  Tạo tài khoản miễn phí 100%, tự động nhận tới 80% hoa hồng
-                  trên mọi đơn hàng Shopee & TikTok Shop.
+                <p className="text-neutral-600 text-[14px] md:text-[16px]">
+                  Tạo tài khoản miễn phí 100%, tự động thăng hạng, nhận tới 70% hoa hồng trên mọi đơn hàng Shopee.
                 </p>
-                <div className="flex flex-wrap gap-4 pt-2">
+                <div className="flex flex-wrap justify-center md:justify-start gap-3 pt-1">
                   <div className="flex items-center gap-2 text-xs font-bold text-neutral-700 bg-primary-50 px-3.5 py-1.5 rounded-full border border-primary-100">
-                    <ShieldCheck className="text-primary-500" size={16} />
+                    <ShieldCheck className="text-primary-500" size={15} />
                     Miễn phí trọn đời
                   </div>
                   <div className="flex items-center gap-2 text-xs font-bold text-neutral-700 bg-primary-50 px-3.5 py-1.5 rounded-full border border-primary-100">
-                    <Wallet className="text-primary-500" size={16} />
+                    <Wallet className="text-primary-500" size={15} />
                     Rút tiền chỉ từ 10K
                   </div>
                 </div>
               </div>
 
-              <div className="md:col-span-4 flex flex-col gap-3">
+              <div className="md:col-span-4 flex flex-col gap-3 w-full">
                 <Link
                   href="/register"
-                  className="w-full bg-gradient-to-r from-primary-400 to-primary-500 hover:scale-[1.02] text-white py-3.5 rounded-full font-extrabold text-[16px] text-center shadow-cute hover:shadow-cute-lg transition-all"
+                  className="w-full bg-gradient-to-r from-primary-400 to-primary-500 hover:scale-[1.02] text-white py-3.5 rounded-full font-extrabold text-[15px] md:text-[16px] text-center shadow-cute hover:shadow-cute-lg transition-all"
                 >
                   Đăng ký tài khoản
                 </Link>
                 <Link
                   href="/login"
-                  className="w-full bg-primary-50 hover:bg-primary-100 border border-primary-200 text-primary-600 py-3 rounded-full font-bold text-[15px] text-center transition-all"
+                  className="w-full bg-primary-50 hover:bg-primary-100 border border-primary-200 text-primary-600 py-3 rounded-full font-bold text-[14px] md:text-[15px] text-center transition-all"
                 >
                   Tôi đã có tài khoản
                 </Link>
@@ -543,7 +385,7 @@ export function LandingPage({
 
       <MarketingFooter />
       <PublicFloatingSupport />
-      <LiveActivityTicker />
+
     </div>
   );
 }

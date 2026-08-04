@@ -8,8 +8,12 @@ import { checkRateLimit, getClientIp } from "@/lib/rateLimit";
 export async function POST(req: NextRequest) {
   const { email, password } = await req.json();
 
-  if (!email || !password) {
-    return NextResponse.json({ error: "Thiếu email hoặc mật khẩu" }, { status: 400 });
+  if (!email || typeof email !== "string" || !/^\S+@\S+\.\S+$/.test(email)) {
+    return NextResponse.json({ error: "Email không hợp lệ" }, { status: 400 });
+  }
+
+  if (!password || typeof password !== "string" || password.length < 6 || password.length > 255) {
+    return NextResponse.json({ error: "Mật khẩu không hợp lệ" }, { status: 400 });
   }
 
   // Chặn brute-force: giới hạn theo IP (quét diện rộng) VÀ theo email

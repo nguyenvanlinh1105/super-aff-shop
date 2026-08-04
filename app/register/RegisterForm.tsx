@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { User, Phone, Mail, Lock, Eye, EyeOff, ArrowRight, ArrowLeft, Loader2, type LucideIcon } from "lucide-react";
 import { GoogleIcon } from "@/components/icons/PlatformIcons";
+import { useModal } from "@/components/ui/ModalProvider";
 
 function IconField({
   icon: Icon,
@@ -35,40 +36,38 @@ export function RegisterForm() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const modal = useModal();
 
   function handleNextStep() {
-    setError(null);
-    if (!fullName.trim()) { setError("Vui lòng nhập họ và tên."); return; }
+    if (!fullName.trim()) { modal.alert({ title: "Lỗi", message: "Vui lòng nhập họ và tên.", iconType: "danger" }); return; }
     const phoneRegex = /(84|0[3|5|7|8|9])+([0-9]{8})\b/;
-    if (!phoneRegex.test(phone)) { setError("Số điện thoại không hợp lệ (bắt đầu bằng 0, 10 chữ số)."); return; }
+    if (!phoneRegex.test(phone)) { modal.alert({ title: "Lỗi", message: "Số điện thoại không hợp lệ (bắt đầu bằng 0, 10 chữ số).", iconType: "danger" }); return; }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) { setError("Email không đúng định dạng."); return; }
+    if (!emailRegex.test(email)) { modal.alert({ title: "Lỗi", message: "Email không đúng định dạng.", iconType: "danger" }); return; }
     setStep(2);
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setError(null);
 
     if (!password) {
-      setError("Vui lòng nhập mật khẩu.");
+      modal.alert({ title: "Lỗi", message: "Vui lòng nhập mật khẩu.", iconType: "danger" });
       return;
     }
 
     if (password.length < 6) {
-      setError("Mật khẩu phải có ít nhất 6 ký tự.");
+      modal.alert({ title: "Lỗi", message: "Mật khẩu phải có ít nhất 6 ký tự.", iconType: "danger" });
       return;
     }
 
     if (!confirmPassword) {
-      setError("Vui lòng nhập lại mật khẩu.");
+      modal.alert({ title: "Lỗi", message: "Vui lòng nhập lại mật khẩu.", iconType: "danger" });
       return;
     }
 
     if (password !== confirmPassword) {
-      setError("Mật khẩu nhập lại không khớp.");
+      modal.alert({ title: "Lỗi", message: "Mật khẩu nhập lại không khớp.", iconType: "danger" });
       return;
     }
 
@@ -84,7 +83,7 @@ export function RegisterForm() {
 
     if (!res.ok) {
       const data = await res.json().catch(() => ({}));
-      setError(data.error ?? "Đăng ký thất bại");
+      modal.alert({ title: "Đăng ký thất bại", message: data.error ?? "Vui lòng kiểm tra lại thông tin.", iconType: "danger" });
       return;
     }
 
@@ -147,11 +146,7 @@ export function RegisterForm() {
             />
           </div>
 
-          {error && (
-            <div className="rounded-xl bg-negative/10 border border-negative/20 px-lg py-md text-[13px] font-semibold text-negative-darkest">
-              {error}
-            </div>
-          )}
+          {/* error step 1 was here */}
 
           <button
             type="button"
@@ -228,16 +223,12 @@ export function RegisterForm() {
             />
           </div>
 
-          {error && (
-            <div className="rounded-xl bg-negative/10 border border-negative/20 px-lg py-md text-[13px] font-semibold text-negative-darkest">
-              {error}
-            </div>
-          )}
+          {/* error step 2 was here */}
 
           <div className="flex gap-3 mt-sm">
             <button
               type="button"
-              onClick={() => { setStep(1); setError(null); }}
+              onClick={() => { setStep(1); }}
               className="flex h-14 items-center justify-center gap-1.5 rounded-2xl border border-neutral-200 bg-white px-5 text-[14px] font-bold text-neutral-700 transition-all hover:bg-neutral-50"
             >
               <ArrowLeft size={16} />

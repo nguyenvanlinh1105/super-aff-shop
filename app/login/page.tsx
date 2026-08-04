@@ -38,7 +38,7 @@ export default function LoginPage({
         Trang chủ
       </Link>
 
-      {/* Floating scattered trust badges with animation — desktop only */}
+      {/* Floating scattered trust badges with animation — xl+ only */}
       {FLOATING_BADGES.map((badge) => (
         <span
           key={badge.text}
