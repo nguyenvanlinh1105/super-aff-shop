@@ -19,6 +19,8 @@ import {
   Archive,
   AlertTriangle,
   Gift,
+  Calendar,
+  CalendarDays,
   type LucideIcon,
 } from "lucide-react";
 
@@ -90,6 +92,11 @@ export function AdminOrdersClient({ orders, customers, totalPages, currentPage, 
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const currentTab = searchParams.get("tab") || "all";
+  const currentPeriod = searchParams.get("period") || "all";
+  const currentYear = searchParams.get("year") || new Date().getFullYear().toString();
+  const currentMonth = searchParams.get("month") || (new Date().getMonth() + 1).toString();
+  const currentStartDate = searchParams.get("startDate") || "";
+  const currentEndDate = searchParams.get("endDate") || "";
 
   const handleTabChange = (tab: string) => {
     const params = new URLSearchParams(searchParams);
@@ -97,6 +104,40 @@ export function AdminOrdersClient({ orders, customers, totalPages, currentPage, 
       params.delete("tab");
     } else {
       params.set("tab", tab);
+    }
+    params.delete("page");
+    router.replace(`${pathname}?${params.toString()}`);
+  };
+
+  const handlePeriodChange = (
+    newPeriod: string,
+    extraParams?: { year?: string; month?: string; startDate?: string; endDate?: string }
+  ) => {
+    const params = new URLSearchParams(searchParams);
+    if (newPeriod === "all") {
+      params.delete("period");
+      params.delete("year");
+      params.delete("month");
+      params.delete("startDate");
+      params.delete("endDate");
+    } else {
+      params.set("period", newPeriod);
+      if (extraParams?.year !== undefined) {
+        if (extraParams.year) params.set("year", extraParams.year);
+        else params.delete("year");
+      }
+      if (extraParams?.month !== undefined) {
+        if (extraParams.month) params.set("month", extraParams.month);
+        else params.delete("month");
+      }
+      if (extraParams?.startDate !== undefined) {
+        if (extraParams.startDate) params.set("startDate", extraParams.startDate);
+        else params.delete("startDate");
+      }
+      if (extraParams?.endDate !== undefined) {
+        if (extraParams.endDate) params.set("endDate", extraParams.endDate);
+        else params.delete("endDate");
+      }
     }
     params.delete("page");
     router.replace(`${pathname}?${params.toString()}`);
@@ -175,6 +216,143 @@ export function AdminOrdersClient({ orders, customers, totalPages, currentPage, 
           <div className="w-full lg:w-96">
             <ServerSearchInput placeholder="Tìm mã đơn, sản phẩm, tên khách hoặc tracking..." />
           </div>
+        </div>
+
+        {/* HÀNG LỌC THEO THỜI GIAN (Năm, Tháng, Tuần, Ngày) */}
+        <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-3 bg-neutral-50/90 p-3 rounded-2xl border border-neutral-200/70">
+          <div className="flex items-center gap-2 shrink-0">
+            <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-emerald-100 text-emerald-800 shadow-xs">
+              <Calendar size={14} className="shrink-0" />
+            </div>
+            <span className="text-xs font-black text-neutral-800 uppercase tracking-wider">Thời gian:</span>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-1.5 flex-1">
+            <button
+              type="button"
+              onClick={() => handlePeriodChange("all")}
+              className={`px-3 py-1.5 rounded-xl text-xs font-extrabold transition-all ${
+                currentPeriod === "all"
+                  ? "bg-neutral-900 text-white shadow-xs"
+                  : "bg-white text-neutral-600 border border-neutral-200/80 hover:bg-neutral-100"
+              }`}
+            >
+              Tất cả
+            </button>
+            <button
+              type="button"
+              onClick={() => handlePeriodChange("today")}
+              className={`px-3 py-1.5 rounded-xl text-xs font-extrabold transition-all ${
+                currentPeriod === "today"
+                  ? "bg-emerald-600 text-white shadow-xs"
+                  : "bg-white text-neutral-600 border border-neutral-200/80 hover:bg-emerald-50 hover:text-emerald-700"
+              }`}
+            >
+              Hôm nay
+            </button>
+            <button
+              type="button"
+              onClick={() => handlePeriodChange("week")}
+              className={`px-3 py-1.5 rounded-xl text-xs font-extrabold transition-all ${
+                currentPeriod === "week"
+                  ? "bg-emerald-600 text-white shadow-xs"
+                  : "bg-white text-neutral-600 border border-neutral-200/80 hover:bg-emerald-50 hover:text-emerald-700"
+              }`}
+            >
+              Tuần này
+            </button>
+            <button
+              type="button"
+              onClick={() => handlePeriodChange("month", { month: currentMonth, year: currentYear })}
+              className={`px-3 py-1.5 rounded-xl text-xs font-extrabold transition-all ${
+                currentPeriod === "month"
+                  ? "bg-emerald-600 text-white shadow-xs"
+                  : "bg-white text-neutral-600 border border-neutral-200/80 hover:bg-emerald-50 hover:text-emerald-700"
+              }`}
+            >
+              Theo tháng
+            </button>
+            <button
+              type="button"
+              onClick={() => handlePeriodChange("year", { year: currentYear })}
+              className={`px-3 py-1.5 rounded-xl text-xs font-extrabold transition-all ${
+                currentPeriod === "year"
+                  ? "bg-emerald-600 text-white shadow-xs"
+                  : "bg-white text-neutral-600 border border-neutral-200/80 hover:bg-emerald-50 hover:text-emerald-700"
+              }`}
+            >
+              Theo năm
+            </button>
+            <button
+              type="button"
+              onClick={() => handlePeriodChange("custom_range")}
+              className={`px-3 py-1.5 rounded-xl text-xs font-extrabold transition-all ${
+                currentPeriod === "custom_range"
+                  ? "bg-emerald-600 text-white shadow-xs"
+                  : "bg-white text-neutral-600 border border-neutral-200/80 hover:bg-emerald-50 hover:text-emerald-700"
+              }`}
+            >
+              Khoảng ngày
+            </button>
+          </div>
+
+          {/* CONTROLS BỔ SUNG CHO THEO THÁNG / THEO NĂM / KHOẢNG NGÀY */}
+          {currentPeriod === "month" && (
+            <div className="flex items-center gap-1.5 shrink-0 bg-white px-2.5 py-1 rounded-xl border border-neutral-200 shadow-xs">
+              <select
+                value={currentMonth}
+                onChange={(e) => handlePeriodChange("month", { month: e.target.value, year: currentYear })}
+                className="text-xs font-black text-neutral-900 bg-transparent focus:outline-none cursor-pointer"
+              >
+                {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
+                  <option key={m} value={m}>Tháng {m}</option>
+                ))}
+              </select>
+              <span className="text-neutral-300 font-bold">/</span>
+              <select
+                value={currentYear}
+                onChange={(e) => handlePeriodChange("month", { month: currentMonth, year: e.target.value })}
+                className="text-xs font-black text-neutral-900 bg-transparent focus:outline-none cursor-pointer"
+              >
+                {[2024, 2025, 2026, 2027].map((y) => (
+                  <option key={y} value={y}>Năm {y}</option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          {currentPeriod === "year" && (
+            <div className="flex items-center gap-1.5 shrink-0 bg-white px-3 py-1 rounded-xl border border-neutral-200 shadow-xs">
+              <span className="text-xs text-neutral-400 font-bold">Năm:</span>
+              <select
+                value={currentYear}
+                onChange={(e) => handlePeriodChange("year", { year: e.target.value })}
+                className="text-xs font-black text-neutral-900 bg-transparent focus:outline-none cursor-pointer"
+              >
+                {[2024, 2025, 2026, 2027].map((y) => (
+                  <option key={y} value={y}>{y}</option>
+                ))}
+              </select>
+            </div>
+          )}
+
+          {currentPeriod === "custom_range" && (
+            <div className="flex items-center gap-1.5 shrink-0 bg-white p-1 rounded-xl border border-neutral-200 shadow-xs">
+              <input
+                type="date"
+                value={currentStartDate}
+                onChange={(e) => handlePeriodChange("custom_range", { startDate: e.target.value, endDate: currentEndDate })}
+                className="text-xs font-bold text-neutral-900 bg-neutral-50 px-2 py-1 rounded-lg border border-neutral-200 focus:outline-none"
+              />
+              <span className="text-xs text-neutral-400 font-bold px-0.5">đến</span>
+              <input
+                type="date"
+                value={currentEndDate}
+                onChange={(e) => handlePeriodChange("custom_range", { startDate: currentStartDate, endDate: e.target.value })}
+                className="text-xs font-bold text-neutral-900 bg-neutral-50 px-2 py-1 rounded-lg border border-neutral-200 focus:outline-none"
+              />
+            </div>
+          )}
         </div>
 
         {/* Đường phân cách nhẹ */}
@@ -314,7 +492,7 @@ export function AdminOrdersClient({ orders, customers, totalPages, currentPage, 
             <thead>
               <tr className="border-b border-neutral-100 bg-neutral-50/80">
                 <th className="px-4 py-3 font-extrabold uppercase tracking-wider text-neutral-400 text-[10px]">Đơn hàng / Tracking</th>
-                <th className="px-4 py-3 font-extrabold uppercase tracking-wider text-neutral-400 text-[10px]">Khách hàng</th>
+                <th className="px-4 py-3 font-extrabold uppercase tracking-wider text-neutral-400 text-[10px] whitespace-nowrap min-w-[140px]">Khách hàng</th>
                 <th className="px-4 py-3 font-extrabold uppercase tracking-wider text-neutral-400 text-[10px]">Thời Gian</th>
                 <th className="px-4 py-3 font-extrabold uppercase tracking-wider text-neutral-400 text-[10px] text-right">Giá trị đơn</th>
                 <th className="px-4 py-3 font-extrabold uppercase tracking-wider text-neutral-400 text-[10px] text-right">HH Trước Thuế</th>
@@ -366,12 +544,12 @@ export function AdminOrdersClient({ orders, customers, totalPages, currentPage, 
                     </td>
 
                     {/* Customer */}
-                    <td className="px-4 py-3" data-label="Khách hàng">
+                    <td className="px-4 py-3 whitespace-nowrap" data-label="Khách hàng">
                       {o.customerName ? (
-                        <span className="font-extrabold text-neutral-900">{o.customerName}</span>
+                        <span className="font-extrabold text-neutral-900 whitespace-nowrap">{o.customerName}</span>
                       ) : (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-rose-50 px-2 py-0.5 text-[10px] font-black text-rose-600 border border-rose-200">
-                          <span className="h-1.5 w-1.5 rounded-full bg-rose-500" /> Chưa map
+                        <span className="inline-flex items-center gap-1 rounded-full bg-rose-50 px-2 py-0.5 text-[10px] font-black text-rose-600 border border-rose-200 whitespace-nowrap shrink-0">
+                          <span className="h-1.5 w-1.5 rounded-full bg-rose-500 shrink-0" /> Chưa map
                         </span>
                       )}
                     </td>
@@ -418,9 +596,15 @@ export function AdminOrdersClient({ orders, customers, totalPages, currentPage, 
                         <Badge tone={orderStatusTone[o.orderStatus] ?? "neutral"} dot>
                           {orderStatusLabel[o.orderStatus] ?? o.orderStatus}
                         </Badge>
-                        <Badge tone={o.payoutStatus === "paid" ? "positive" : "neutral"}>
-                          {payoutStatusLabel[o.payoutStatus] ?? o.payoutStatus}
-                        </Badge>
+                        {o.customerId ? (
+                          <Badge tone={o.payoutStatus === "paid" ? "positive" : "neutral"}>
+                            {payoutStatusLabel[o.payoutStatus] ?? o.payoutStatus}
+                          </Badge>
+                        ) : (
+                          <Badge tone="warning">
+                            Chưa gán khách
+                          </Badge>
+                        )}
                       </div>
                     </td>
 

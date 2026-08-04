@@ -5,22 +5,96 @@ import { AdminOrdersClient } from "@/components/admin/AdminOrdersClient";
 import { Upload, ShoppingCart, Wallet, Clock, HelpCircle } from "lucide-react";
 import { formatCurrency } from "@/lib/format";
 
-export default async function AdminOrdersPage({ searchParams }: { searchParams: { q?: string; page?: string; tab?: string; sort?: string; order?: string } }) {
+export default async function AdminOrdersPage({
+  searchParams,
+}: {
+  searchParams: {
+    q?: string;
+    page?: string;
+    tab?: string;
+    sort?: string;
+    order?: string;
+    period?: string;
+    year?: string;
+    month?: string;
+    startDate?: string;
+    endDate?: string;
+  };
+}) {
   const page = Number(searchParams.page) || 1;
   const limit = 50;
   const skip = (page - 1) * limit;
   const q = searchParams.q || "";
   const tab = searchParams.tab || "all";
+  const period = searchParams.period || "all";
+  const yearStr = searchParams.year;
+  const monthStr = searchParams.month;
+  const startDateStr = searchParams.startDate;
+  const endDateStr = searchParams.endDate;
 
-  const where: any = {};
-  if (q) {
-    where.OR = [
-      { orderExternalId: { contains: q } },
-      { trackingCode: { contains: q } },
-      { itemName: { contains: q } },
-      { customer: { fullName: { contains: q } } },
-    ];
+  // Lọc theo khoảng thời gian
+  let dateStart: Date | null = null;
+  let dateEnd: Date | null = null;
+  const now = new Date();
+
+  if (period === "today") {
+    dateStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
+    dateEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+  } else if (period === "week") {
+    const day = now.getDay();
+    const diffToMon = day === 0 ? -6 : 1 - day;
+    dateStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() + diffToMon, 0, 0, 0, 0);
+    dateEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate() + diffToMon + 6, 23, 59, 59, 999);
+  } else if (period === "month") {
+    const targetYear = yearStr ? parseInt(yearStr) : now.getFullYear();
+    const targetMonth = monthStr ? parseInt(monthStr) - 1 : now.getMonth();
+    dateStart = new Date(targetYear, targetMonth, 1, 0, 0, 0, 0);
+    dateEnd = new Date(targetYear, targetMonth + 1, 0, 23, 59, 59, 999);
+  } else if (period === "year") {
+    const targetYear = yearStr ? parseInt(yearStr) : now.getFullYear();
+    dateStart = new Date(targetYear, 0, 1, 0, 0, 0, 0);
+    dateEnd = new Date(targetYear, 11, 31, 23, 59, 59, 999);
+  } else if (period === "custom_range") {
+    if (startDateStr) dateStart = new Date(`${startDateStr}T00:00:00`);
+    if (endDateStr) dateEnd = new Date(`${endDateStr}T23:59:59.999`);
   }
+
+  const andConditions: any[] = [];
+
+  if (q) {
+    andConditions.push({
+      OR: [
+        { orderExternalId: { contains: q } },
+        { trackingCode: { contains: q } },
+        { itemName: { contains: q } },
+        { customer: { fullName: { contains: q } } },
+      ],
+    });
+  }
+
+  if (dateStart || dateEnd) {
+    andConditions.push({
+      OR: [
+        {
+          orderedAt: {
+            ...(dateStart ? { gte: dateStart } : {}),
+            ...(dateEnd ? { lte: dateEnd } : {}),
+          },
+        },
+        {
+          orderedAt: null,
+          createdAt: {
+            ...(dateStart ? { gte: dateStart } : {}),
+            ...(dateEnd ? { lte: dateEnd } : {}),
+          },
+        },
+      ],
+    });
+  }
+
+  const baseWhere: any = andConditions.length > 0 ? { AND: andConditions } : {};
+
+  const where: any = { ...baseWhere };
 
   if (tab === "unassigned") where.customerId = null;
   if (tab === "assigned") where.customerId = { not: null };
@@ -42,24 +116,24 @@ export default async function AdminOrdersPage({ searchParams }: { searchParams: 
     allCount, unassignedCount, assignedCount, pendingCount, processingCount, moneyInCount, unpaidCount, paidCount, cancelledCount, completedCount, clawbackCount, referralCount,
     orders, customers, filteredCount, sumsAgg, moneyInSumAgg, unpaidSumAgg,
   ] = await Promise.all([
-    prisma.order.count(),
-    prisma.order.count({ where: { customerId: null } }),
-    prisma.order.count({ where: { customerId: { not: null } } }),
-    prisma.order.count({ where: { orderStatus: "pending" } }),
-    prisma.order.count({ where: { orderStatus: "processing" } }),
-    prisma.order.count({ where: { orderStatus: "approved" } }),
-    prisma.order.count({ where: { orderStatus: "approved", payoutStatus: { not: "paid" } } }),
-    prisma.order.count({ where: { payoutStatus: "paid" } }),
-    prisma.order.count({ where: { orderStatus: { in: ["cancelled", "rejected"] } } }),
-    prisma.order.count({ where: { orderStatus: "completed" } }),
-    prisma.order.count({ where: { orderStatus: "clawback" } }),
-    prisma.order.count({ where: { sourceType: "referral" } }),
+    prisma.order.count({ where: baseWhere }),
+    prisma.order.count({ where: { ...baseWhere, customerId: null } }),
+    prisma.order.count({ where: { ...baseWhere, customerId: { not: null } } }),
+    prisma.order.count({ where: { ...baseWhere, orderStatus: "pending" } }),
+    prisma.order.count({ where: { ...baseWhere, orderStatus: "processing" } }),
+    prisma.order.count({ where: { ...baseWhere, orderStatus: "approved" } }),
+    prisma.order.count({ where: { ...baseWhere, orderStatus: "approved", payoutStatus: { not: "paid" } } }),
+    prisma.order.count({ where: { ...baseWhere, payoutStatus: "paid" } }),
+    prisma.order.count({ where: { ...baseWhere, orderStatus: { in: ["cancelled", "rejected"] } } }),
+    prisma.order.count({ where: { ...baseWhere, orderStatus: "completed" } }),
+    prisma.order.count({ where: { ...baseWhere, orderStatus: "clawback" } }),
+    prisma.order.count({ where: { ...baseWhere, sourceType: "referral" } }),
     prisma.order.findMany({ where, orderBy, skip, take: limit, include: { platform: true, customer: true } }),
     prisma.customer.findMany({ orderBy: { fullName: "asc" } }),
     prisma.order.count({ where }),
     prisma.order.aggregate({ where, _sum: { orderAmount: true, commissionAmount: true, customerRewardAmount: true, systemProfitAmount: true, referralBonusDeducted: true } }),
-    prisma.order.aggregate({ where: { orderStatus: "approved" }, _sum: { customerRewardAmount: true } }),
-    prisma.order.aggregate({ where: { orderStatus: "approved", payoutStatus: { not: "paid" } }, _sum: { customerRewardAmount: true } }),
+    prisma.order.aggregate({ where: { ...baseWhere, orderStatus: "approved" }, _sum: { customerRewardAmount: true } }),
+    prisma.order.aggregate({ where: { ...baseWhere, orderStatus: "approved", payoutStatus: { not: "paid" } }, _sum: { customerRewardAmount: true } }),
   ]);
 
   const customerOptions = customers.map((c) => ({ id: c.id, label: `${c.fullName} (${c.customerCode})` }));

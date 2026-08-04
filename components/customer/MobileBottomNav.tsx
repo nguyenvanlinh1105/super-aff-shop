@@ -2,13 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, RotateCcw, Gift, Wallet, ShoppingBag } from "lucide-react";
+import { Home, RotateCcw, Wallet, ShoppingBag } from "lucide-react";
 import { motion } from "framer-motion";
 
 const TABS = [
   { href: "/app", label: "Trang chủ", icon: Home },
-  { href: "/app/refunds", label: "Hoàn tiền", icon: RotateCcw },
-  { href: "/app/deals", label: "Ưu đãi 🎀", icon: Gift },
+  { href: "/app/refunds", label: "Tạo link hoàn tiền", icon: RotateCcw },
   { href: "/app/wallet", label: "Ví tiền", icon: Wallet },
   { href: "/app/orders", label: "Đơn hàng", icon: ShoppingBag },
 ];

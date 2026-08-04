@@ -163,13 +163,13 @@ export function OrderActions({
         )}
 
         {/* Clawback (approved → clawback) — chỉ khi chưa trả tiền khách */}
-        {orderStatus === "approved" && !showClawbackConfirm && (
+        {orderStatus === "approved" && payoutStatus !== "paid" && !showClawbackConfirm && (
           <Button
             variant="secondary"
             size="sm"
             disabled={loading}
             onClick={() => setShowClawbackConfirm(true)}
-            title="Shopee đòi lại hoa hồng — đơn này bị clawback"
+            title="Shopee/TikTok đòi lại hoa hồng — đơn này bị clawback"
           >
             <AlertTriangle size={13} strokeWidth={1.75} />
             Clawback
@@ -177,7 +177,7 @@ export function OrderActions({
         )}
 
         {/* Xác nhận clawback */}
-        {orderStatus === "approved" && showClawbackConfirm && (
+        {orderStatus === "approved" && payoutStatus !== "paid" && showClawbackConfirm && (
           <div className="flex items-center gap-xs">
             <span className="text-[11px] text-red-600 font-bold">Xác nhận?</span>
             <Button
