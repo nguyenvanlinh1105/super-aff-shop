@@ -545,11 +545,20 @@ export function CustomerWalletClient({
                       <label className="mb-1 block text-[12px] font-bold text-neutral-700">Số tài khoản</label>
                       <input
                         type="text"
+                        inputMode="numeric"
                         value={formBankAccountNumber}
-                        onChange={(e) => setFormBankAccountNumber(e.target.value)}
+                        onChange={(e) => {
+                          const clean = e.target.value.replace(/\D/g, "");
+                          setFormBankAccountNumber(clean);
+                        }}
                         placeholder="VD: 1903..."
                         className="h-11 w-full rounded-2xl border border-primary-200 px-4 text-[14px] font-bold focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-200"
                       />
+                      {formBankAccountNumber.length > 0 && formBankAccountNumber.length < 6 && (
+                        <p className="mt-1 text-[11px] font-medium text-amber-600">
+                          Số tài khoản thường có từ 6 đến 20 chữ số
+                        </p>
+                      )}
                     </div>
                     <div>
                       <label className="mb-1 block text-[12px] font-bold text-neutral-700">Tên chủ tài khoản</label>

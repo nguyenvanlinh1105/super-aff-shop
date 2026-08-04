@@ -58,6 +58,7 @@ export function getBankShortName(rawBankName: string): string | null {
   return name.replace(/[^a-z0-9]/g, "");
 }
 
+
 export function isValidAccountNumber(accountNumber: string): boolean {
   if (!accountNumber) return false;
   const clean = accountNumber.replace(/[\s-]/g, "");

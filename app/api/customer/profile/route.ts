@@ -30,11 +30,12 @@ export async function PATCH(request: Request) {
       }
       updateData.bankName = data.bankName.trim();
     }
-    if (data.bankAccountNumber !== undefined) {
-      if (typeof data.bankAccountNumber !== "string" || data.bankAccountNumber.length > 50 || !/^[0-9a-zA-Z]+$/.test(data.bankAccountNumber)) {
-        return NextResponse.json({ error: "Số tài khoản không hợp lệ (chỉ chứa chữ số và chữ cái, tối đa 50 ký tự)" }, { status: 400 });
+    if (data.bankAccountNumber !== undefined && data.bankAccountNumber !== "") {
+      const cleanAcc = data.bankAccountNumber.trim().replace(/[\s-]/g, "");
+      if (!/^\d{6,20}$/.test(cleanAcc)) {
+        return NextResponse.json({ error: "Số tài khoản không hợp lệ (phải từ 6 đến 20 chữ số và không chứa chữ cái)" }, { status: 400 });
       }
-      updateData.bankAccountNumber = data.bankAccountNumber.trim();
+      updateData.bankAccountNumber = cleanAcc;
     }
     if (data.bankAccountName !== undefined) {
       if (typeof data.bankAccountName !== "string" || data.bankAccountName.length > 100) {

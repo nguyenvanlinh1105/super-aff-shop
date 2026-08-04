@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { Lock, ShieldOff, CheckCircle2, ArrowRight, Loader2, ArrowLeft } from "lucide-react";
 import { LogoMeowBack } from "@/components/icons/CatRibbonIcons";
 
-export default function MfaResetPage() {
+function MfaResetContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const token = searchParams.get("token");
@@ -130,5 +130,13 @@ export default function MfaResetPage() {
         </div>
       </div>
     </main>
+  );
+}
+
+export default function MfaResetPage() {
+  return (
+    <Suspense fallback={<div className="p-8 text-center text-xs font-medium text-neutral-500">Đang tải...</div>}>
+      <MfaResetContent />
+    </Suspense>
   );
 }
