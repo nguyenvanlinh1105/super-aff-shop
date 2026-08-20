@@ -16,7 +16,10 @@ import { generateCustomerCode } from "@/lib/customerCode";
 export async function GET(req: NextRequest) {
   const challenge = buildWebhookVerificationResponse(req.nextUrl);
   if (!challenge) {
-    return NextResponse.json({ error: "Webhook verification failed" }, { status: 403 });
+    return NextResponse.json(
+      { error: "Webhook verification failed" },
+      { status: 403 },
+    );
   }
 
   return new NextResponse(challenge, {
@@ -88,7 +91,9 @@ export async function POST(req: NextRequest) {
       replyText = buildUnsupportedPlatformMessage(originalUrl);
       processingStatus = "processed_unsupported_platform";
     } else {
-      const platform = await prisma.platform.findUnique({ where: { code: platformCode } });
+      const platform = await prisma.platform.findUnique({
+        where: { code: platformCode },
+      });
 
       if (!platform) {
         replyText = "Hệ thống chưa cấu hình nền tảng phù hợp để đổi link.";
@@ -127,7 +132,10 @@ export async function POST(req: NextRequest) {
       messageType: "text",
       messageText: replyText,
       payload: JSON.stringify(
-        sendResult.response ?? { error: sendResult.error, simulated: sendResult.simulated }
+        sendResult.response ?? {
+          error: sendResult.error,
+          simulated: sendResult.simulated,
+        },
       ),
       processingStatus: sendResult.ok
         ? sendResult.simulated

@@ -9,7 +9,10 @@ import { ZaloAccountForm } from "@/components/admin/ZaloAccountForm";
 export default async function AdminZaloPage() {
   const [account, logs] = await Promise.all([
     prisma.zaloAccount.findFirst({ orderBy: { createdAt: "desc" } }),
-    prisma.zaloMessageLog.findMany({ orderBy: { createdAt: "desc" }, take: 30 }),
+    prisma.zaloMessageLog.findMany({
+      orderBy: { createdAt: "desc" },
+      take: 30,
+    }),
   ]);
 
   return (
@@ -30,7 +33,9 @@ export default async function AdminZaloPage() {
                 Tích Hợp Zalo OA Assistant
               </h1>
               <p className="mt-1 text-xs text-neutral-600 font-medium max-w-xl">
-                Tự động tiếp nhận tin nhắn từ Zalo Official Account, đổi link Shopee/Lazada sang link affiliate hoàn tiền và gửi phản hồi tin nhắn tự động cho khách hàng.
+                Tự động tiếp nhận tin nhắn từ Zalo Official Account, đổi link
+                Shopee/Lazada sang link affiliate hoàn tiền và gửi phản hồi tin
+                nhắn tự động cho khách hàng.
               </p>
             </div>
           </div>
@@ -39,13 +44,26 @@ export default async function AdminZaloPage() {
 
       <div className="rounded-3xl bg-white shadow-sm border border-neutral-200/70 p-6 sm:p-8">
         <div className="flex flex-col gap-2 mb-6">
-          <h2 className="text-base font-extrabold text-neutral-900 tracking-tight">Thông Tin Webhook Endpoint</h2>
+          <h2 className="text-base font-extrabold text-neutral-900 tracking-tight">
+            Thông Tin Webhook Endpoint
+          </h2>
           <div className="p-4 rounded-2xl bg-neutral-900 text-rose-400 font-mono text-xs font-bold border border-neutral-800 flex items-center gap-2">
-            <span className="text-neutral-400 font-sans font-medium">URL Webhook Receiver:</span>
+            <span className="text-neutral-400 font-sans font-medium">
+              URL Webhook Receiver:
+            </span>
             <span>/api/zalo/webhook</span>
           </div>
           <p className="text-xs text-neutral-500 font-medium mt-1">
-            Lưu ý: Để phát tin nhắn tự động chiều gửi đi (Outbound), hãy khai báo biến môi trường <code className="bg-neutral-100 font-mono px-1.5 py-0.5 rounded font-bold text-neutral-800">ZALO_OA_ACCESS_TOKEN</code> và <code className="bg-neutral-100 font-mono px-1.5 py-0.5 rounded font-bold text-neutral-800">ZALO_OA_MESSAGE_ENDPOINT</code>.
+            Lưu ý: Để phát tin nhắn tự động chiều gửi đi (Outbound), hãy khai
+            báo biến môi trường{" "}
+            <code className="bg-neutral-100 font-mono px-1.5 py-0.5 rounded font-bold text-neutral-800">
+              ZALO_OA_ACCESS_TOKEN
+            </code>{" "}
+            và{" "}
+            <code className="bg-neutral-100 font-mono px-1.5 py-0.5 rounded font-bold text-neutral-800">
+              ZALO_OA_MESSAGE_ENDPOINT
+            </code>
+            .
           </p>
         </div>
 
@@ -53,9 +71,14 @@ export default async function AdminZaloPage() {
       </div>
 
       <div className="rounded-3xl bg-white shadow-sm border border-neutral-200/70 p-6 sm:p-8">
-        <h2 className="text-base font-extrabold text-neutral-900 mb-4 tracking-tight">Nhật Ký Tin Nhắn Zalo OA (Logs)</h2>
+        <h2 className="text-base font-extrabold text-neutral-900 mb-4 tracking-tight">
+          Nhật Ký Tin Nhắn Zalo OA (Logs)
+        </h2>
         {logs.length === 0 ? (
-          <EmptyState title="Chưa có tin nhắn nào" description="Nhật ký sẽ xuất hiện tự động khi webhook nhận sự kiện tin nhắn từ Zalo." />
+          <EmptyState
+            title="Chưa có tin nhắn nào"
+            description="Nhật ký sẽ xuất hiện tự động khi webhook nhận sự kiện tin nhắn từ Zalo."
+          />
         ) : (
           <Table>
             <Thead>
@@ -70,15 +93,24 @@ export default async function AdminZaloPage() {
             <tbody>
               {logs.map((l) => (
                 <Tr key={l.id}>
-                  <Td className="font-mono text-xs text-neutral-500">{formatDate(l.createdAt)}</Td>
+                  <Td className="font-mono text-xs text-neutral-500">
+                    {formatDate(l.createdAt)}
+                  </Td>
                   <Td>
-                    <Badge tone={l.direction === "in" ? "neutral" : "positive"} dot>
+                    <Badge
+                      tone={l.direction === "in" ? "neutral" : "positive"}
+                      dot
+                    >
                       {l.direction === "in" ? "Tin đến 📥" : "Gửi đi 📤"}
                     </Badge>
                   </Td>
                   <Td className="font-bold text-xs">{l.messageType || "—"}</Td>
-                  <Td className="max-w-[300px] truncate font-medium text-neutral-800 text-xs">{l.messageText || "—"}</Td>
-                  <Td className="font-mono text-xs font-extrabold text-blue-700">{l.processingStatus}</Td>
+                  <Td className="max-w-[300px] truncate font-medium text-neutral-800 text-xs">
+                    {l.messageText || "—"}
+                  </Td>
+                  <Td className="font-mono text-xs font-extrabold text-blue-700">
+                    {l.processingStatus}
+                  </Td>
                 </Tr>
               ))}
             </tbody>
@@ -88,4 +120,3 @@ export default async function AdminZaloPage() {
     </div>
   );
 }
-
