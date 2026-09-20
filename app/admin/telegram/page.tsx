@@ -11,12 +11,28 @@ import { TelegramWebhookStatus } from "@/components/admin/TelegramWebhookStatus"
 import { TelegramCommandManager } from "@/components/admin/TelegramCommandManager";
 
 import { TelegramIcon } from "@/components/icons/PlatformIcons";
+import { Pagination } from "@/components/ui/Pagination";
 
-export default async function AdminTelegramPage() {
-  const [account, logs] = await Promise.all([
+export default async function AdminTelegramPage({
+  searchParams,
+}: {
+  searchParams: { page?: string };
+}) {
+  const page = Number(searchParams.page) || 1;
+  const limit = 10;
+  const skip = (page - 1) * limit;
+
+  const [account, logs, totalLogs] = await Promise.all([
     prisma.telegramAccount.findFirst({ orderBy: { createdAt: "desc" } }),
-    prisma.telegramMessageLog.findMany({ orderBy: { createdAt: "desc" }, take: 30 }),
+    prisma.telegramMessageLog.findMany({
+      orderBy: { createdAt: "desc" },
+      skip,
+      take: limit,
+    }),
+    prisma.telegramMessageLog.count(),
   ]);
+
+  const totalPages = Math.ceil(totalLogs / limit);
 
   return (
     <div className="flex flex-col gap-6 fade-in pb-8">
@@ -112,6 +128,7 @@ export default async function AdminTelegramPage() {
             </tbody>
           </Table>
         )}
+        <Pagination totalPages={totalPages} currentPage={page} />
       </div>
     </div>
   );

@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { getSession } from "@/lib/auth";
 import { RegisterForm } from "./RegisterForm";
 import { ArrowLeft } from "lucide-react";
 import { LogoMeowBack } from "@/components/icons/CatRibbonIcons";
@@ -22,7 +24,11 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RegisterPage() {
+export default async function RegisterPage() {
+  const session = await getSession();
+  if (session) {
+    redirect(session.role === "admin" ? "/admin" : "/app");
+  }
   return (
     <main className="min-h-screen bg-neutral-bg flex flex-col items-center justify-center px-4 py-16 md:p-8 relative overflow-hidden">
       {/* ── HIỆU ỨNG HOA NỞ & PHÁO BÔNG NHẸ NHÀNG ── */}

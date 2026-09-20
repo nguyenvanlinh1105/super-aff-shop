@@ -18,7 +18,7 @@ export function CreatePaymentButton({
   customerName?: string;
   amount?: number;
   hasPaymentInfo?: boolean;
-  onSuccess?: () => void;
+  onSuccess?: (batchId?: string) => void;
 }) {
   const router = useRouter();
   const modal = useModal();
@@ -57,8 +57,9 @@ export function CreatePaymentButton({
       }),
     });
 
+    const data = await res.json().catch(() => ({}));
+
     if (!res.ok) {
-      const data = await res.json().catch(() => ({}));
       toast.error(data.error ?? "Đã có lỗi xảy ra, vui lòng thử lại.", "Không thể tạo phiếu");
       setLoading(false);
       return;
@@ -71,7 +72,8 @@ export function CreatePaymentButton({
         : "Đã tạo phiếu thanh toán thành công!",
       "Thành công"
     );
-    onSuccess?.();
+    const batchId = data?.batch?.id;
+    onSuccess?.(batchId);
     router.refresh();
   }
 

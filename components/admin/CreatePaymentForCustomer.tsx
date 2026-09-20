@@ -19,7 +19,13 @@ type Preview = {
   orderCount: number;
 };
 
-export function CreatePaymentForCustomer({ customers }: { customers: ComboboxOption[] }) {
+export function CreatePaymentForCustomer({
+  customers,
+  onCreated,
+}: {
+  customers: ComboboxOption[];
+  onCreated?: (batchId: string) => void;
+}) {
   const [customerId, setCustomerId] = useState("");
   const [preview, setPreview] = useState<Preview | null>(null);
   const [loading, setLoading] = useState(false);
@@ -130,7 +136,10 @@ export function CreatePaymentForCustomer({ customers }: { customers: ComboboxOpt
               customerName={preview.customer.fullName}
               amount={preview.available}
               hasPaymentInfo={!!preview.customer.bankAccountNumber}
-              onSuccess={reset}
+              onSuccess={(batchId) => {
+                reset();
+                if (batchId) onCreated?.(batchId);
+              }}
             />
           )}
         </div>

@@ -655,7 +655,7 @@ export function CustomerWalletClient({
             </div>
 
             {/* Pagination */}
-            {totalPages > 1 && (
+            {history.length > 0 && (
               <div className="border-t border-primary-100/80 pt-3">
                 <Pagination totalPages={totalPages} currentPage={currentPage} />
               </div>

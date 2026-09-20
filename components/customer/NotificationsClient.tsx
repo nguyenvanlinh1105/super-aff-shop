@@ -143,6 +143,78 @@ function formatNotificationTime(iso: string) {
   }
 }
 
+export function getNotificationTargetUrl(n: {
+  link?: string | null;
+  type: string;
+  title?: string;
+  message?: string;
+}): string {
+  // 1. Nếu có link cụ thể đã được khai báo
+  if (n.link && n.link.trim() !== "") {
+    return n.link;
+  }
+
+  // 2. Tự động nhận diện điều hướng thông minh theo loại & từ khoá
+  const text = `${n.title || ""} ${n.message || ""}`.toLowerCase();
+
+  // Săn deal / sale / flash sale / voucher / khuyến mãi
+  if (
+    text.includes("deal") ||
+    text.includes("seal") ||
+    text.includes("sale") ||
+    text.includes("voucher") ||
+    text.includes("khuyến mãi") ||
+    text.includes("giảm giá") ||
+    text.includes("săn") ||
+    text.includes("ưu đãi")
+  ) {
+    return "/app/deals";
+  }
+
+  // Thanh toán / ví / rút tiền / số dư
+  if (
+    n.type === "payment_paid" ||
+    text.includes("thanh toán") ||
+    text.includes("chuyển khoản") ||
+    text.includes("rút tiền") ||
+    text.includes("ví") ||
+    text.includes("số dư")
+  ) {
+    return "/app/wallet";
+  }
+
+  // Đơn hàng / hoàn tiền
+  if (
+    n.type === "order_approved" ||
+    text.includes("đơn hàng") ||
+    text.includes("hoàn tiền") ||
+    text.includes("đối soát")
+  ) {
+    return "/app/orders";
+  }
+
+  // Hoa hồng / bạn bè / giới thiệu
+  if (
+    n.type === "referral_bonus" ||
+    text.includes("hoa hồng") ||
+    text.includes("bạn bè") ||
+    text.includes("giới thiệu") ||
+    text.includes("mời")
+  ) {
+    return "/app/referral";
+  }
+
+  return "/app";
+}
+
+export function getNotificationActionLabel(targetUrl: string): string {
+  if (targetUrl.startsWith("/app/deals")) return "Khám phá Deals Hot ngay";
+  if (targetUrl.startsWith("/app/wallet")) return "Xem Ví tiền & Số dư";
+  if (targetUrl.startsWith("/app/orders")) return "Xem Đơn hàng hoàn tiền";
+  if (targetUrl.startsWith("/app/referral")) return "Xem Hoa hồng & Mời bạn";
+  return "Xem chi tiết";
+}
+
 export function NotificationsClient({
   notifications,
   setNotifications,
@@ -162,8 +234,9 @@ export function NotificationsClient({
 
   const handleCardClick = (n: Notification) => {
     onMarkRead(n);
-    if (n.link) {
-      router.push(n.link);
+    const targetUrl = getNotificationTargetUrl(n);
+    if (targetUrl) {
+      router.push(targetUrl);
     }
   };
 
@@ -370,13 +443,17 @@ export function NotificationsClient({
                       {n.message}
                     </p>
 
-                    {/* Link Action if available */}
-                    {n.link && (
-                      <div className="mt-2.5 inline-flex items-center gap-1 text-xs font-bold text-primary-600 group-hover:text-primary-700">
-                        <span>Xem chi tiết liên quan</span>
-                        <ArrowRight size={13} className="group-hover:translate-x-1 transition-transform" />
-                      </div>
-                    )}
+                    {/* Action button showing destination */}
+                    {(() => {
+                      const targetUrl = getNotificationTargetUrl(n);
+                      const actionLabel = getNotificationActionLabel(targetUrl);
+                      return (
+                        <div className="mt-2.5 inline-flex items-center gap-1.5 text-xs font-extrabold text-primary-600 group-hover:text-primary-700 bg-primary-50/70 group-hover:bg-primary-100/80 px-2.5 py-1 rounded-xl border border-primary-200/70 transition-colors w-fit">
+                          <span>{actionLabel}</span>
+                          <ArrowRight size={13} className="group-hover:translate-x-1 transition-transform" />
+                        </div>
+                      );
+                    })()}
                   </div>
                 </div>
 

@@ -73,11 +73,33 @@ export function NotificationsPageClient({
     setUnreadCount(initialUnreadCount);
   }, [initialUnreadCount]);
 
+  // Lắng nghe sự kiện thông báo từ banner hoặc broadcast để cập nhật số lượng và danh sách
+  useEffect(() => {
+    const handleSet = (e: CustomEvent<number>) => {
+      if (typeof e.detail === "number") setUnreadCount(e.detail);
+    };
+    const handleNotif = (e: CustomEvent<Notification>) => {
+      setUnreadCount((prev) => prev + 1);
+      if (e.detail) {
+        setNotifications((prev) => [e.detail, ...prev]);
+      }
+    };
+    window.addEventListener("meowback-unread-count" as any, handleSet);
+    window.addEventListener("meowback-notification" as any, handleNotif);
+    return () => {
+      window.removeEventListener("meowback-unread-count" as any, handleSet);
+      window.removeEventListener("meowback-notification" as any, handleNotif);
+    };
+  }, []);
+
   const handleMarkAllRead = async () => {
     if (unreadCount === 0 || markingAll) return;
     setMarkingAll(true);
     setNotifications((prev) => prev.map((x) => ({ ...x, isRead: true })));
     setUnreadCount(0);
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("meowback-unread-count", { detail: 0 }));
+    }
     try {
       await fetch("/api/notifications/mark-all-read", { method: "POST" });
       toast.success("Đã đánh dấu đọc toàn bộ thông báo! 🎀", "Thành công");
@@ -92,6 +114,9 @@ export function NotificationsPageClient({
     if (!n.isRead) {
       setNotifications((prev) => prev.map((x) => (x.id === n.id ? { ...x, isRead: true } : x)));
       setUnreadCount((c) => Math.max(0, c - 1));
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new CustomEvent("meowback-unread-delta", { detail: -1 }));
+      }
       fetch(`/api/notifications/${n.id}`, { method: "PATCH" }).catch(() => {});
     }
   };

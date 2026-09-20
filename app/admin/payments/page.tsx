@@ -63,11 +63,19 @@ export default async function AdminPaymentsPage() {
     prisma.customer.findMany({
       where: { status: "active" },
       orderBy: { fullName: "asc" },
-      select: { id: true, fullName: true, customerCode: true },
+      select: {
+        id: true,
+        fullName: true,
+        customerCode: true,
+        bankName: true,
+        bankAccountNumber: true,
+        bankAccountName: true,
+      },
     }),
   ]);
 
   const customerOptions = allCustomers.map((c) => ({ id: c.id, label: `${c.fullName} (${c.customerCode})` }));
+  const customerMap = new Map(allCustomers.map((c) => [c.id, c]));
 
   // Tính tổng số tiền approved + unpaid theo từng customer
   const approvedAmountByCustomer = new Map<string, { amount: number; count: number }>();
@@ -79,9 +87,10 @@ export default async function AdminPaymentsPage() {
     approvedAmountByCustomer.set(o.customerId, cur);
   }
 
-  // Xây dựng pendingList TỪ WithdrawRequest — đảm bảo mọi yêu cầu rút tiền
-  // đều được hiển thị, kể cả khi khách chưa có đơn hàng approved nào.
+  // 1. Khách hàng ĐÃ GỬI YÊU CẦU RÚT TIỀN (WithdrawRequest pending)
+  const requestedCustomerIds = new Set<string>();
   const pendingList = withdrawRequests.map((wr) => {
+    requestedCustomerIds.add(wr.customer.id);
     const approved = approvedAmountByCustomer.get(wr.customer.id) ?? { amount: 0, count: 0 };
     return {
       id: wr.customer.id,
@@ -90,12 +99,34 @@ export default async function AdminPaymentsPage() {
       requestAmount: Number(wr.amount),
       approvedAmount: approved.amount,
       approvedCount: approved.count,
+      hasWithdrawRequest: true,
       bankName: wr.customer.bankName,
       bankAccountNumber: wr.customer.bankAccountNumber,
       bankAccountName: wr.customer.bankAccountName,
       requestedAt: wr.createdAt.toISOString(),
     };
   });
+
+  // 2. TỰ ĐỘNG BỔ SUNG: Khách có đơn đã duyệt đối soát (approved) nhưng chưa chủ động gửi yêu cầu rút
+  for (const [customerId, approved] of approvedAmountByCustomer.entries()) {
+    if (requestedCustomerIds.has(customerId)) continue;
+    if (approved.amount <= 0) continue;
+    const c = customerMap.get(customerId);
+    if (!c) continue;
+    pendingList.push({
+      id: c.id,
+      name: c.fullName,
+      code: c.customerCode,
+      requestAmount: approved.amount,
+      approvedAmount: approved.amount,
+      approvedCount: approved.count,
+      hasWithdrawRequest: false,
+      bankName: c.bankName,
+      bankAccountNumber: c.bankAccountNumber,
+      bankAccountName: c.bankAccountName,
+      requestedAt: new Date().toISOString(),
+    });
+  }
 
   const totalApprovedAmount = pendingList.reduce((s, c) => s + c.approvedAmount, 0);
   const totalPaidAmount = Number(paidAgg._sum.totalAmount ?? 0);
@@ -132,8 +163,13 @@ export default async function AdminPaymentsPage() {
     id: b.id,
     paymentCode: b.paymentCode,
     customerName: b.customer.fullName,
+    customerCode: b.customer.customerCode,
+    bankName: b.customer.bankName,
+    bankAccountNumber: b.customer.bankAccountNumber,
+    bankAccountName: b.customer.bankAccountName,
     totalAmount: Number(b.totalAmount),
     status: b.status,
+    createdAt: b.createdAt.toISOString(),
     paidAt: b.paidAt ? formatDate(b.paidAt) : null,
     transferReference: b.transferReference,
     billStorageKey: b.billStorageKey,

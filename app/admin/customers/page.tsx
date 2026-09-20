@@ -142,6 +142,8 @@ export default async function AdminCustomersPage({ searchParams }: { searchParam
         customers={rows}
         totalPages={totalPages}
         currentPage={page}
+        totalItems={filteredCount}
+        pageSize={limit}
         counts={{ all: totalCount, active: activeCount, locked: lockedCount, debt: 0, partner: partnerCount }}
       />
     </div>

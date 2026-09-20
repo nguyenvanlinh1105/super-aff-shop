@@ -52,6 +52,8 @@ type Props = {
   customers: Option[];
   totalPages: number;
   currentPage: number;
+  totalItems?: number;
+  pageSize?: number;
   counts: { all: number; unassigned: number; assigned: number; pending: number; processing: number; moneyIn: number; unpaid: number; paid: number; cancelled: number; completed: number; clawback: number; referral: number };
   sums: { orderAmount: number; commissionAmount: number; customerRewardAmount: number; systemProfitAmount: number; referralBonusDeductedTotal: number; moneyInTotal: number; unpaidTotal: number };
 };
@@ -87,7 +89,16 @@ function formatDate(iso: string | null) {
   return d.toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" });
 }
 
-export function AdminOrdersClient({ orders, customers, totalPages, currentPage, counts, sums }: Props) {
+export function AdminOrdersClient({
+  orders,
+  customers,
+  totalPages,
+  currentPage,
+  counts,
+  sums,
+  totalItems,
+  pageSize = 10,
+}: Props) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -625,7 +636,14 @@ export function AdminOrdersClient({ orders, customers, totalPages, currentPage, 
           </table>
         </div>
 
-        <Pagination totalPages={totalPages} currentPage={currentPage} />
+        <Pagination
+          totalPages={totalPages}
+          currentPage={currentPage}
+          totalItems={totalItems ?? counts.all}
+          pageSize={pageSize}
+          itemName="đơn hàng"
+          showSinglePage={true}
+        />
       </div>
     </div>
   );

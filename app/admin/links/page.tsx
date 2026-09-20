@@ -144,7 +144,15 @@ export default async function AdminLinksPage({ searchParams }: { searchParams: {
           <span className="text-xs font-extrabold text-neutral-500 bg-neutral-100 px-3 py-1 rounded-full">{totalCount} link</span>
         </div>
         <div className="p-6">
-          <AdminLinksClient links={rows} totalPages={totalPages} currentPage={page} counts={counts} totalClicks={totalClicks} />
+          <AdminLinksClient
+            links={rows}
+            totalPages={totalPages}
+            currentPage={page}
+            totalItems={filteredCount}
+            pageSize={limit}
+            counts={counts}
+            totalClicks={totalClicks}
+          />
         </div>
       </div>
     </div>

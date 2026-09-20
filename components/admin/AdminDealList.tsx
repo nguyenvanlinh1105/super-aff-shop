@@ -314,7 +314,19 @@ function EditDealModal({ deal, onSave, onClose }: {
   );
 }
 
-export function AdminDealList({ initialDeals, totalPages, currentPage }: { initialDeals: Deal[], totalPages: number, currentPage: number }) {
+export function AdminDealList({
+  initialDeals,
+  totalPages,
+  currentPage,
+  totalItems,
+  pageSize = 10,
+}: {
+  initialDeals: Deal[];
+  totalPages: number;
+  currentPage: number;
+  totalItems?: number;
+  pageSize?: number;
+}) {
   const router = useRouter();
   const modal = useModal();
   const { toast } = useToast();
@@ -517,7 +529,14 @@ export function AdminDealList({ initialDeals, totalPages, currentPage }: { initi
           </tbody>
         </table>
       </div>
-      <Pagination totalPages={totalPages} currentPage={currentPage} />
+      <Pagination
+        totalPages={totalPages}
+        currentPage={currentPage}
+        totalItems={totalItems}
+        pageSize={pageSize}
+        itemName="deal"
+        showSinglePage={true}
+      />
     </>
   );
 }

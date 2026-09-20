@@ -52,6 +52,44 @@ export function CustomerHeader({
   const pathname = usePathname();
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
+  const [count, setCount] = useState(unreadCount);
+  const [isBumping, setIsBumping] = useState(false);
+
+  // Sync khi prop unreadCount từ server thay đổi (ví dụ khi chuyển trang hoặc SSR)
+  useEffect(() => {
+    setCount(unreadCount);
+  }, [unreadCount]);
+
+  // Lắng nghe sự kiện thông báo realtime để chuông cập nhật ngay lập tức
+  useEffect(() => {
+    const handleSetCount = (e: CustomEvent<number>) => {
+      if (typeof e.detail === "number") {
+        setCount(e.detail);
+      }
+    };
+
+    const handleDelta = (e: CustomEvent<number>) => {
+      if (typeof e.detail === "number") {
+        setCount((prev) => Math.max(0, prev + e.detail));
+      }
+    };
+
+    const handleNewNotification = () => {
+      setIsBumping(true);
+      setTimeout(() => setIsBumping(false), 800);
+      setCount((prev) => prev + 1);
+    };
+
+    window.addEventListener("meowback-unread-count" as any, handleSetCount);
+    window.addEventListener("meowback-unread-delta" as any, handleDelta);
+    window.addEventListener("meowback-notification" as any, handleNewNotification);
+
+    return () => {
+      window.removeEventListener("meowback-unread-count" as any, handleSetCount);
+      window.removeEventListener("meowback-unread-delta" as any, handleDelta);
+      window.removeEventListener("meowback-notification" as any, handleNewNotification);
+    };
+  }, []);
 
   // Đóng sidebar drawer mỗi khi chuyển trang
   useEffect(() => {
@@ -134,10 +172,14 @@ export function CustomerHeader({
                 title="Thông báo"
                 className="relative p-2 text-primary-500 hover:text-primary-600 transition-transform active:scale-95 rounded-full hover:bg-primary-50/60"
               >
-                <Bell size={24} strokeWidth={2.25} />
-                {unreadCount > 0 && (
-                  <span className="absolute top-1 right-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-black text-white ring-2 ring-white shadow-xs">
-                    {unreadCount > 99 ? "99+" : unreadCount}
+                <Bell size={24} strokeWidth={2.25} className={isBumping ? "animate-bounce" : ""} />
+                {count > 0 && (
+                  <span
+                    className={`absolute top-1 right-1 flex h-4 min-w-[16px] items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-black text-white ring-2 ring-white shadow-xs transition-transform duration-300 ${
+                      isBumping ? "scale-125 animate-pulse" : "scale-100"
+                    }`}
+                  >
+                    {count > 99 ? "99+" : count}
                   </span>
                 )}
               </Link>

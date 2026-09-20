@@ -9,14 +9,22 @@ const PRESET_TEMPLATES = [
   {
     title: "⚡ Siêu Flash Sale Hoàn Tiền X2",
     message: "Duy nhất hôm nay! Mua sắm mọi đơn Shopee & TikTok Shop qua MeowBack để nhận gấp đôi hoa hồng hoàn về ví. Số lượng có hạn, chốt đơn ngay!",
+    link: "/app/deals",
+  },
+  {
+    title: "🎁 Thưởng Nạp Ví Thành Viên Mới 50.000đ",
+    message: "Chúc mừng bạn gia nhập MeowBack! Hoàn thành đơn hàng đầu tiên ngay hôm nay để nhận thêm thưởng 50k vào ví, rút trực tiếp về ngân hàng.",
+    link: "/app/wallet",
+  },
+  {
+    title: "📦 Cập Nhật Đơn Hàng & Hoa Hồng Hoàn Tiền",
+    message: "Các đơn hàng Shopee kỳ mới nhất đã được đối soát thành công. Mời bạn kiểm tra tiến độ đơn hàng và số dư khả dụng.",
+    link: "/app/orders",
   },
   {
     title: "🔧 Thông Báo Bảo Trì Hệ Thống",
     message: "MeowBack sẽ tiến hành nâng cấp hạ tầng đối soát vào 02:00 sáng mai (dự kiến 30 phút). Các giao dịch chốt đơn trong thời gian này vẫn được tự động ghi nhận bình thường.",
-  },
-  {
-    title: "🎁 Thưởng Thành Viên Mới 50.000đ",
-    message: "Chúc mừng bạn gia nhập MeowBack! Hoàn thành đơn hàng đầu tiên ngay hôm nay để nhận thêm voucher thưởng 50k rút trực tiếp về ngân hàng.",
+    link: "/app",
   },
 ];
 
@@ -25,11 +33,13 @@ export function BroadcastForm() {
   const { toast } = useToast();
   const [title, setTitle] = useState("");
   const [message, setMessage] = useState("");
+  const [link, setLink] = useState("/app/deals");
   const [loading, setLoading] = useState(false);
 
   function applyPreset(preset: typeof PRESET_TEMPLATES[0]) {
     setTitle(preset.title);
     setMessage(preset.message);
+    setLink(preset.link);
   }
 
   async function send() {
@@ -37,7 +47,7 @@ export function BroadcastForm() {
 
     const confirmed = await modal.confirm({
       title: "Gửi thông báo cho toàn bộ khách hàng?",
-      message: `Tiêu đề: "${title}". Thông báo này sẽ xuất hiện ngay lập tức trong mục Thông Báo của tất cả khách hàng đang có tài khoản.`,
+      message: `Tiêu đề: "${title}". Chuyển hướng khi click: "${link || "Trang chủ"}". Thông báo này sẽ xuất hiện ngay lập tức trong mục Thông Báo của tất cả khách hàng.`,
       confirmText: "Gửi thông báo ngay",
       cancelText: "Hủy",
       iconType: "warning",
@@ -48,7 +58,7 @@ export function BroadcastForm() {
     const res = await fetch("/api/notifications/broadcast", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title, message }),
+      body: JSON.stringify({ title, message, link }),
     });
     setLoading(false);
 
@@ -124,6 +134,41 @@ export function BroadcastForm() {
               maxLength={500}
               rows={5}
               className="w-full rounded-2xl bg-neutral-50 p-4 text-xs font-medium text-neutral-900 border border-neutral-200 focus:outline-none focus:ring-2 focus:ring-rose-500/20 transition-all resize-none"
+            />
+          </div>
+
+          <div>
+            <label className="text-xs font-extrabold text-neutral-700 block mb-1">
+              Chuyển hướng khi người dùng nhấn vào thông báo:
+            </label>
+            <div className="flex flex-wrap gap-1.5 mb-2">
+              {[
+                { label: "🛍️ Săn Deals Hot", path: "/app/deals" },
+                { label: "👛 Ví tiền & Rút tiền", path: "/app/wallet" },
+                { label: "📦 Đơn hàng hoàn tiền", path: "/app/orders" },
+                { label: "🎁 Mời bạn bè & Hoa hồng", path: "/app/referral" },
+                { label: "🏠 Trang chủ", path: "/app" },
+              ].map((btn) => (
+                <button
+                  key={btn.path}
+                  type="button"
+                  onClick={() => setLink(btn.path)}
+                  className={`text-[11px] font-bold px-2.5 py-1 rounded-xl transition-all ${
+                    link === btn.path
+                      ? "bg-rose-500 text-white shadow-xs font-black"
+                      : "bg-neutral-100 text-neutral-600 hover:bg-rose-50 hover:text-rose-600 border border-neutral-200/80"
+                  }`}
+                >
+                  {btn.label}
+                </button>
+              ))}
+            </div>
+            <input
+              type="text"
+              value={link}
+              onChange={(e) => setLink(e.target.value)}
+              placeholder="Nhập đường dẫn đích (VD: /app/deals hoặc https://...)"
+              className="h-10 w-full rounded-2xl bg-neutral-50 px-4 text-xs font-bold text-neutral-800 border border-neutral-200 focus:outline-none focus:ring-2 focus:ring-rose-500/20 font-mono transition-all"
             />
           </div>
 

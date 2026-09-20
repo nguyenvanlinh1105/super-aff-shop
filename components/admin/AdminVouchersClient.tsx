@@ -8,6 +8,7 @@ import { Card } from "@/components/ui/Card";
 import { VoucherStatusToggle } from "@/components/admin/VoucherStatusToggle";
 import { RenameVoucherButton } from "@/components/admin/RenameVoucherButton";
 import { formatDate } from "@/lib/format";
+import { Pagination } from "@/components/ui/Pagination";
 
 type VoucherRow = {
   id: string;
@@ -192,31 +193,16 @@ export function AdminVouchersClient({ vouchers }: { vouchers: VoucherRow[] }) {
         </div>
       )}
       
-      {totalPages > 1 && (
-        <div className="flex items-center justify-between border-t border-gray-100 px-md pt-lg pb-sm">
-          <span className="text-[13px] text-gray-500 font-medium">
-            Hiển thị {(currentPage - 1) * itemsPerPage + 1} - {Math.min(currentPage * itemsPerPage, filtered.length)} trong số {filtered.length} voucher
-          </span>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-              disabled={currentPage === 1}
-              className="rounded-lg border border-gray-200 bg-white px-3 py-1 text-[13px] font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Trước
-            </button>
-            <span className="text-[13px] font-bold text-gray-900 px-2">
-              Trang {currentPage} / {totalPages}
-            </span>
-            <button
-              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-              disabled={currentPage === totalPages}
-              className="rounded-lg border border-gray-200 bg-white px-3 py-1 text-[13px] font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Sau
-            </button>
-          </div>
-        </div>
+      {filtered.length > 0 && (
+        <Pagination
+          totalPages={totalPages}
+          currentPage={currentPage}
+          totalItems={filtered.length}
+          pageSize={itemsPerPage}
+          itemName="voucher"
+          showSinglePage={true}
+          onPageChange={(p) => setCurrentPage(p)}
+        />
       )}
     </div>
   );

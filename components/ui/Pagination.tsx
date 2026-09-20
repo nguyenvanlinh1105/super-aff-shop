@@ -3,73 +3,110 @@
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
 
-interface PaginationProps {
+export interface PaginationProps {
   totalPages: number;
   currentPage: number;
   showSinglePage?: boolean;
+  totalItems?: number;
+  pageSize?: number;
+  itemName?: string;
+  className?: string;
+  onPageChange?: (page: number) => void;
 }
 
-export function Pagination({ totalPages, currentPage, showSinglePage = false }: PaginationProps) {
+export function Pagination({
+  totalPages,
+  currentPage,
+  showSinglePage = true,
+  totalItems,
+  pageSize = 10,
+  itemName = "mục",
+  className = "",
+  onPageChange,
+}: PaginationProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  if (totalPages <= 0) return null;
-  if (totalPages <= 1 && !showSinglePage) return null;
+  const effectiveTotalPages = Math.max(0, totalPages || 0);
+  const effectiveCurrentPage = Math.max(1, Math.min(currentPage || 1, effectiveTotalPages || 1));
 
-  const createPageURL = (pageNumber: number | string) => {
-    const params = new URLSearchParams(searchParams);
-    params.set("page", pageNumber.toString());
-    return `${pathname}?${params.toString()}`;
-  };
+  // Ẩn phân trang khi hoàn toàn không có dữ liệu (0 trang)
+  if (effectiveTotalPages === 0) {
+    return null;
+  }
+  // Nếu chỉ có 1 trang và showSinglePage = false thì ẩn
+  if (effectiveTotalPages <= 1 && !showSinglePage) {
+    return null;
+  }
 
   const handleNavigate = (page: number) => {
-    router.push(createPageURL(page));
+    if (page < 1 || page > effectiveTotalPages || page === effectiveCurrentPage) return;
+    if (onPageChange) {
+      onPageChange(page);
+    } else {
+      const params = new URLSearchParams(searchParams);
+      params.set("page", page.toString());
+      router.push(`${pathname}?${params.toString()}`);
+    }
   };
 
   return (
-    <div className="flex items-center justify-center gap-1.5 mt-xl pb-lg flex-wrap">
+    <div
+      className={`flex items-center justify-center sm:justify-end gap-1.5 pt-3 pb-1 select-none ${className}`}
+    >
+      {/* First Page (chỉ hiện khi nhiều hơn 5 trang) */}
+      {effectiveTotalPages > 5 && (
+        <button
+          onClick={() => handleNavigate(1)}
+          disabled={effectiveCurrentPage <= 1}
+          className="flex h-8 w-8 items-center justify-center rounded-xl text-neutral-400 hover:text-neutral-900 hover:bg-neutral-100 disabled:opacity-20 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-neutral-400 transition-colors"
+          title="Trang đầu"
+          type="button"
+        >
+          <ChevronsLeft size={15} />
+        </button>
+      )}
+
+      {/* Prev Page */}
       <button
-        onClick={() => handleNavigate(1)}
-        disabled={currentPage <= 1}
-        className="flex h-10 w-10 sm:h-9 sm:w-9 items-center justify-center rounded-2xl text-neutral-500 hover:text-primary-600 hover:bg-primary-50/80 disabled:opacity-25 disabled:hover:bg-transparent disabled:hover:text-neutral-500 transition-colors"
-        title="Trang đầu"
-      >
-        <ChevronsLeft size={16} />
-      </button>
-      <button
-        onClick={() => handleNavigate(currentPage - 1)}
-        disabled={currentPage <= 1}
-        className="flex h-10 w-10 sm:h-9 sm:w-9 items-center justify-center rounded-2xl text-neutral-500 hover:text-primary-600 hover:bg-primary-50/80 disabled:opacity-25 disabled:hover:bg-transparent disabled:hover:text-neutral-500 transition-colors"
+        onClick={() => handleNavigate(effectiveCurrentPage - 1)}
+        disabled={effectiveCurrentPage <= 1}
+        className="flex h-8 w-8 items-center justify-center rounded-xl text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100 disabled:opacity-20 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-neutral-500 transition-colors"
         title="Trang trước"
+        type="button"
       >
         <ChevronLeft size={16} />
       </button>
 
-      <div className="flex items-center gap-1.5 px-1">
-        {Array.from({ length: totalPages }, (_, i) => i + 1)
+      {/* Page Numbers */}
+      <div className="flex items-center gap-1">
+        {Array.from({ length: effectiveTotalPages }, (_, i) => i + 1)
           .filter((page) => {
-            if (totalPages <= 5) return true;
-            if (page === 1 || page === totalPages) return true;
-            if (Math.abs(page - currentPage) <= 1) return true;
+            if (effectiveTotalPages <= 7) return true;
+            if (page === 1 || page === effectiveTotalPages) return true;
+            if (Math.abs(page - effectiveCurrentPage) <= 1) return true;
             return false;
           })
           .map((page, index, array) => {
             if (index > 0 && page - array[index - 1] > 1) {
               return (
-                <span key={`dots-${page}`} className="px-1.5 text-primary-300 font-bold">
-                  ...
+                <span key={`dots-${page}`} className="px-1 text-neutral-300 font-bold select-none text-xs">
+                  …
                 </span>
               );
             }
+            const isActive = effectiveCurrentPage === page;
             return (
               <button
                 key={page}
                 onClick={() => handleNavigate(page)}
-                className={`flex h-10 min-w-[40px] sm:h-9 sm:min-w-[36px] items-center justify-center rounded-2xl text-[14px] font-bold transition-all ${
-                  currentPage === page
-                    ? "bg-gradient-to-r from-primary-400 to-primary-500 text-white shadow-cute scale-105"
-                    : "text-neutral-600 hover:text-primary-600 hover:bg-primary-50/80"
+                disabled={isActive}
+                type="button"
+                className={`flex h-8 min-w-[32px] px-2 items-center justify-center rounded-xl text-xs font-black transition-all tabular-nums ${
+                  isActive
+                    ? "bg-neutral-900 text-white shadow-xs cursor-default"
+                    : "text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100/90 active:scale-95"
                 }`}
               >
                 {page}
@@ -78,22 +115,29 @@ export function Pagination({ totalPages, currentPage, showSinglePage = false }: 
           })}
       </div>
 
+      {/* Next Page */}
       <button
-        onClick={() => handleNavigate(currentPage + 1)}
-        disabled={currentPage >= totalPages}
-        className="flex h-10 w-10 sm:h-9 sm:w-9 items-center justify-center rounded-2xl text-neutral-500 hover:text-primary-600 hover:bg-primary-50/80 disabled:opacity-25 disabled:hover:bg-transparent disabled:hover:text-neutral-500 transition-colors"
+        onClick={() => handleNavigate(effectiveCurrentPage + 1)}
+        disabled={effectiveCurrentPage >= effectiveTotalPages}
+        className="flex h-8 w-8 items-center justify-center rounded-xl text-neutral-500 hover:text-neutral-900 hover:bg-neutral-100 disabled:opacity-20 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-neutral-500 transition-colors"
         title="Trang sau"
+        type="button"
       >
         <ChevronRight size={16} />
       </button>
-      <button
-        onClick={() => handleNavigate(totalPages)}
-        disabled={currentPage >= totalPages}
-        className="flex h-10 w-10 sm:h-9 sm:w-9 items-center justify-center rounded-2xl text-neutral-500 hover:text-primary-600 hover:bg-primary-50/80 disabled:opacity-25 disabled:hover:bg-transparent disabled:hover:text-neutral-500 transition-colors"
-        title="Trang cuối"
-      >
-        <ChevronsRight size={16} />
-      </button>
+
+      {/* Last Page (chỉ hiện khi nhiều hơn 5 trang) */}
+      {effectiveTotalPages > 5 && (
+        <button
+          onClick={() => handleNavigate(effectiveTotalPages)}
+          disabled={effectiveCurrentPage >= effectiveTotalPages}
+          className="flex h-8 w-8 items-center justify-center rounded-xl text-neutral-400 hover:text-neutral-900 hover:bg-neutral-100 disabled:opacity-20 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-neutral-400 transition-colors"
+          title="Trang cuối"
+          type="button"
+        >
+          <ChevronsRight size={15} />
+        </button>
+      )}
     </div>
   );
 }

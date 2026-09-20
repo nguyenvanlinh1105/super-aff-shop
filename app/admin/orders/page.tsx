@@ -259,6 +259,8 @@ export default async function AdminOrdersPage({
         customers={customerOptions}
         totalPages={totalPages}
         currentPage={page}
+        totalItems={filteredCount}
+        pageSize={limit}
         counts={counts}
         sums={sums}
       />

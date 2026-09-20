@@ -29,9 +29,34 @@ export function FloatingQuickAccess({
   unreadCount: number;
   showBell?: boolean;
 }) {
+  const [count, setCount] = useState(unreadCount);
   const [isOpen, setIsOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setCount(unreadCount);
+  }, [unreadCount]);
+
+  useEffect(() => {
+    const handleSet = (e: CustomEvent<number>) => {
+      if (typeof e.detail === "number") setCount(e.detail);
+    };
+    const handleDelta = (e: CustomEvent<number>) => {
+      if (typeof e.detail === "number") setCount((prev) => Math.max(0, prev + e.detail));
+    };
+    const handleNotif = () => setCount((prev) => prev + 1);
+
+    window.addEventListener("meowback-unread-count" as any, handleSet);
+    window.addEventListener("meowback-unread-delta" as any, handleDelta);
+    window.addEventListener("meowback-notification" as any, handleNotif);
+
+    return () => {
+      window.removeEventListener("meowback-unread-count" as any, handleSet);
+      window.removeEventListener("meowback-unread-delta" as any, handleDelta);
+      window.removeEventListener("meowback-notification" as any, handleNotif);
+    };
+  }, []);
 
   const enabledChannels = getEnabledSupportChannels();
 
@@ -180,9 +205,9 @@ export function FloatingQuickAccess({
             className="relative flex h-14 w-14 items-center justify-center rounded-full bg-white shadow-cute border border-primary-200/80 transition-transform hover:scale-105 active:scale-95 text-primary-500 hover:text-primary-600"
           >
             <Bell size={24} strokeWidth={2.25} />
-            {unreadCount > 0 && (
+            {count > 0 && (
               <span className="absolute -top-1 -right-1 flex h-6 min-w-[24px] items-center justify-center rounded-full bg-rose-500 px-1.5 text-[11px] font-extrabold text-white ring-2 ring-white shadow-sm">
-                {unreadCount > 99 ? "99+" : unreadCount}
+                {count > 99 ? "99+" : count}
               </span>
             )}
           </Link>

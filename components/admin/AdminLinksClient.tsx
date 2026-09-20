@@ -46,6 +46,8 @@ interface AdminLinksClientProps {
   links: LinkRow[];
   totalPages: number;
   currentPage: number;
+  totalItems?: number;
+  pageSize?: number;
   counts: {
     all: number;
     active: number;
@@ -54,7 +56,15 @@ interface AdminLinksClientProps {
   totalClicks: number;
 }
 
-export function AdminLinksClient({ links, totalPages, currentPage, counts, totalClicks }: AdminLinksClientProps) {
+export function AdminLinksClient({
+  links,
+  totalPages,
+  currentPage,
+  counts,
+  totalClicks,
+  totalItems,
+  pageSize = 10,
+}: AdminLinksClientProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -166,7 +176,14 @@ export function AdminLinksClient({ links, totalPages, currentPage, counts, total
               </tbody>
             </table>
           </div>
-          <Pagination totalPages={totalPages} currentPage={currentPage} />
+          <Pagination
+            totalPages={totalPages}
+            currentPage={currentPage}
+            totalItems={totalItems ?? counts.all}
+            pageSize={pageSize}
+            itemName="link"
+            showSinglePage={true}
+          />
         </div>
       )}
     </div>

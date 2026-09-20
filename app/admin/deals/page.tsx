@@ -152,7 +152,13 @@ export default async function AdminDealsPage({ searchParams }: { searchParams: {
           <span className="text-xs font-extrabold text-neutral-500 bg-neutral-100 px-3 py-1 rounded-full">{allDealsCount} deals</span>
         </div>
         <div className="p-6">
-          <AdminDealList initialDeals={formattedDeals} totalPages={totalPages} currentPage={page} />
+          <AdminDealList
+            initialDeals={formattedDeals}
+            totalPages={totalPages}
+            currentPage={page}
+            totalItems={filteredCount}
+            pageSize={limit}
+          />
         </div>
       </div>
     </div>

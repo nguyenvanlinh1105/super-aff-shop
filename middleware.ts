@@ -44,6 +44,18 @@ export async function middleware(req: NextRequest) {
     }
   }
 
+  // Nếu đã đăng nhập mà truy cập /login hoặc /register thì tự động chuyển vào đúng role
+  if (session && (pathname === "/login" || pathname === "/register")) {
+    const next = searchParams.get("next");
+    if (session.role === "admin") {
+      const destination = next && (next.startsWith("/admin") || next.startsWith("/app")) ? next : "/admin";
+      response = NextResponse.redirect(new URL(destination, req.url));
+    } else {
+      const destination = next && next.startsWith("/app") ? next : "/app";
+      response = NextResponse.redirect(new URL(destination, req.url));
+    }
+  }
+
   // Dựa theo giao thức THỰC của request (x-forwarded-proto do Nginx set),
   // không ép cứng theo NODE_ENV — tránh cookie bị trình duyệt âm thầm từ
   // chối lưu khi domain chưa có SSL.

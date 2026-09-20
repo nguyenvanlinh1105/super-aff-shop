@@ -70,20 +70,16 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   }
 
   const formData = await req.formData();
-  const transferReference = (formData.get("transferReference") as string | null)?.trim();
-  const transferNote = (formData.get("transferNote") as string | null)?.trim();
+  const rawTransferRef = (formData.get("transferReference") as string | null)?.trim();
+  const rawTransferNote = (formData.get("transferNote") as string | null)?.trim();
   const bill = formData.get("bill") as File | null;
 
-  if (!transferReference) {
-    return NextResponse.json({ error: "Mã giao dịch chuyển khoản là bắt buộc" }, { status: 400 });
-  }
-
-  if (!bill || bill.size === 0) {
-    return NextResponse.json({ error: "Ảnh bill chuyển khoản là bắt buộc" }, { status: 400 });
-  }
+  // Nếu không nhập mã GD, tự động lấy mã phiếu thanh toán
+  const transferReference = rawTransferRef || existingBatch.paymentCode || `QR-${Date.now()}`;
+  const transferNote = rawTransferNote || existingBatch.paymentCode;
 
   let billStorageKey: string | undefined;
-  if (bill && bill.size > 0) {
+  if (bill && typeof bill !== "string" && bill.size > 0) {
     const uploadDir = path.join(process.cwd(), "storage", "bills");
     await mkdir(uploadDir, { recursive: true });
     billStorageKey = `${randomUUID()}-${bill.name}`;

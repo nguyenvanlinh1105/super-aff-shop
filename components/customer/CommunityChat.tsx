@@ -49,6 +49,7 @@ export function CommunityChat({
   const { toast } = useToast();
   const [messages, setMessages] = useState<ChatMessage[]>(initialMessages);
   const [input, setInput] = useState("");
+  const [isFocused, setIsFocused] = useState(false);
   const [sending, setSending] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
   const lastCreatedAtRef = useRef<string | null>(initialMessages.at(-1)?.createdAt ?? null);
@@ -244,23 +245,26 @@ export function CommunityChat({
         )}
       </div>
 
-      {/* ═══ QUICK PROMPT SUGGESTIONS (Hiển thị wrap tự nhiên, không trượt) ═══ */}
-      <div className="px-4 py-2 border-t border-neutral-100 bg-white flex flex-wrap items-center gap-1.5">
-        <span className="text-[11px] font-bold text-neutral-400 shrink-0 flex items-center gap-1">
-          <Sparkles size={11} className="text-primary-400" /> Gợi ý:
-        </span>
-        {QUICK_PROMPTS.map((prompt, idx) => (
-          <button
-            key={idx}
-            type="button"
-            onClick={() => send(prompt)}
-            disabled={sending}
-            className="text-[11px] font-bold text-neutral-600 hover:text-primary-600 bg-neutral-100 hover:bg-primary-50/80 border border-neutral-200/80 px-2.5 py-1 rounded-full transition-all disabled:opacity-50 cursor-pointer"
-          >
-            {prompt}
-          </button>
-        ))}
-      </div>
+      {/* ═══ QUICK PROMPT SUGGESTIONS (Chỉ hiện khi chưa nhập và chưa focus) ═══ */}
+      {!isFocused && !input.trim() && (
+        <div className="px-4 py-2 border-t border-neutral-100 bg-white flex flex-wrap items-center gap-1.5 animate-in fade-in duration-150">
+          <span className="text-[11px] font-bold text-neutral-400 shrink-0 flex items-center gap-1">
+            <Sparkles size={11} className="text-primary-400" /> Gợi ý:
+          </span>
+          {QUICK_PROMPTS.map((prompt, idx) => (
+            <button
+              key={idx}
+              type="button"
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => send(prompt)}
+              disabled={sending}
+              className="text-[11px] font-bold text-neutral-600 hover:text-primary-600 bg-neutral-100 hover:bg-primary-50/80 border border-neutral-200/80 px-2.5 py-1 rounded-full transition-all disabled:opacity-50 cursor-pointer active:scale-95"
+            >
+              {prompt}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* ═══ MESSAGE COMPOSER ═══ */}
       <div className="flex items-center gap-2 sm:gap-3 border-t border-neutral-200/80 p-3 sm:p-4 bg-white">
@@ -268,6 +272,8 @@ export function CommunityChat({
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setTimeout(() => setIsFocused(false), 200)}
           onKeyDown={(e) => {
             if (e.key === "Enter" && !e.shiftKey) {
               e.preventDefault();

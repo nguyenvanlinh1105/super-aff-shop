@@ -5,15 +5,28 @@ import { Badge } from "@/components/ui/Badge";
 import { Table, Thead, Tr, Th, Td } from "@/components/ui/Table";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { ZaloAccountForm } from "@/components/admin/ZaloAccountForm";
+import { Pagination } from "@/components/ui/Pagination";
 
-export default async function AdminZaloPage() {
-  const [account, logs] = await Promise.all([
+export default async function AdminZaloPage({
+  searchParams,
+}: {
+  searchParams: { page?: string };
+}) {
+  const page = Number(searchParams.page) || 1;
+  const limit = 10;
+  const skip = (page - 1) * limit;
+
+  const [account, logs, totalLogs] = await Promise.all([
     prisma.zaloAccount.findFirst({ orderBy: { createdAt: "desc" } }),
     prisma.zaloMessageLog.findMany({
       orderBy: { createdAt: "desc" },
-      take: 30,
+      skip,
+      take: limit,
     }),
+    prisma.zaloMessageLog.count(),
   ]);
+
+  const totalPages = Math.ceil(totalLogs / limit);
 
   return (
     <div className="flex flex-col gap-6 fade-in pb-8">
@@ -116,6 +129,7 @@ export default async function AdminZaloPage() {
             </tbody>
           </Table>
         )}
+        <Pagination totalPages={totalPages} currentPage={page} />
       </div>
     </div>
   );

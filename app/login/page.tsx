@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { LoginForm } from "./LoginForm";
+import { redirect } from "next/navigation";
+import { getSession } from "@/lib/auth";
 import { ArrowLeft } from "lucide-react";
 import { LogoMeowBack } from "@/components/icons/CatRibbonIcons";
 import { BloomAndFireworkEffect } from "@/components/ui/BloomAndFireworkEffect";
@@ -24,11 +26,20 @@ const FLOATING_BADGES = [
   { text: "✨ Ghi nhận 1 giây", pos: "bottom-[16%] right-[25%]", rotate: "-rotate-2", delay: "2.8s" },
 ];
 
-export default function LoginPage({
+export default async function LoginPage({
   searchParams,
 }: {
   searchParams: { next?: string };
 }) {
+  const session = await getSession();
+  if (session) {
+    const next = searchParams?.next;
+    if (session.role === "admin") {
+      redirect(next && (next.startsWith("/admin") || next.startsWith("/app")) ? next : "/admin");
+    } else {
+      redirect(next && next.startsWith("/app") ? next : "/app");
+    }
+  }
   return (
     <main className="min-h-screen bg-neutral-bg flex flex-col items-center justify-center px-4 py-16 md:p-8 relative overflow-hidden">
       {/* ── HIỆU ỨNG HOA NỞ, CÁNH HOA BAY & PHÁO BÔNG NHẸ NHÀNG ── */}

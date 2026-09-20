@@ -30,6 +30,8 @@ interface AdminCustomersClientProps {
   customers: Customer[];
   totalPages: number;
   currentPage: number;
+  totalItems?: number;
+  pageSize?: number;
   counts: {
     all: number;
     active: number;
@@ -39,7 +41,14 @@ interface AdminCustomersClientProps {
   };
 }
 
-export function AdminCustomersClient({ customers, totalPages, currentPage, counts }: AdminCustomersClientProps) {
+export function AdminCustomersClient({
+  customers,
+  totalPages,
+  currentPage,
+  counts,
+  totalItems,
+  pageSize = 10,
+}: AdminCustomersClientProps) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -304,7 +313,10 @@ export function AdminCustomersClient({ customers, totalPages, currentPage, count
               </tbody>
             </Table>
           </div>
-          <Pagination totalPages={totalPages} currentPage={currentPage} />
+          <Pagination
+            totalPages={totalPages}
+            currentPage={currentPage}
+          />
         </div>
       )}
     </div>

@@ -259,8 +259,8 @@ export function RefundHistoryClient({
         </div>
       )}
 
-      {totalPages > 1 && (
-        <div className="mt-6 border-t border-primary-100/80 pt-4 flex justify-center">
+      {links.length > 0 && (
+        <div className="mt-6 border-t border-primary-100/80 pt-4">
           <Pagination totalPages={totalPages} currentPage={currentPage} />
         </div>
       )}

@@ -23,7 +23,11 @@ import {
   UserSearch,
   QrCode,
   Download,
+  Loader2,
+  Sparkles,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useToast } from "@/components/ui/Toast";
 import { Badge } from "@/components/ui/Badge";
 import { formatCurrency, formatDate } from "@/lib/format";
 import { generateVietQrUrl } from "@/lib/vietqr";
@@ -31,6 +35,7 @@ import { CreatePaymentButton } from "@/components/admin/CreatePaymentButton";
 import { CreatePaymentForCustomer } from "@/components/admin/CreatePaymentForCustomer";
 import { MarkPaidForm } from "@/components/admin/MarkPaidForm";
 import type { ComboboxOption } from "@/components/ui/SearchableSelect";
+import { Pagination } from "@/components/ui/Pagination";
 
 type CustomerPending = {
   id: string;
@@ -39,6 +44,7 @@ type CustomerPending = {
   requestAmount: number;
   approvedAmount: number;
   approvedCount: number;
+  hasWithdrawRequest?: boolean;
   bankName: string | null;
   bankAccountNumber: string | null;
   bankAccountName: string | null;
@@ -49,8 +55,13 @@ type PaymentBatch = {
   id: string;
   paymentCode: string;
   customerName: string;
+  customerCode?: string;
+  bankName?: string | null;
+  bankAccountNumber?: string | null;
+  bankAccountName?: string | null;
   totalAmount: number;
   status: string;
+  createdAt?: string;
   paidAt: string | null;
   transferReference: string | null;
   billStorageKey: string | null;
@@ -141,6 +152,139 @@ function CopyInfoBtn({ c }: { c: CustomerPending }) {
   );
 }
 
+// ── Pending Batch Card with VietQR Code ─────────────────────────────────────────
+function PendingBatchQrCard({
+  b,
+  onViewDetail,
+}: {
+  b: PaymentBatch;
+  onViewDetail: (id: string) => void;
+}) {
+  const vietQrUrl =
+    b.bankName && b.bankAccountNumber
+      ? generateVietQrUrl({
+          bankName: b.bankName,
+          accountNumber: b.bankAccountNumber,
+          accountName: b.bankAccountName || undefined,
+          amount: Number(b.totalAmount),
+          memo: b.paymentCode,
+          template: "compact2",
+        })
+      : null;
+
+  return (
+    <div className="rounded-3xl bg-white p-5 sm:p-6 shadow-sm border border-rose-200 flex flex-col justify-between gap-4 relative overflow-hidden bg-gradient-to-br from-rose-50/50 via-white to-white hover:border-rose-300 transition-all">
+      {/* Header */}
+      <div className="flex items-center justify-between gap-3 border-b border-rose-100 pb-3">
+        <div className="flex items-center gap-2.5 min-w-0">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-rose-500 text-white shadow-2xs shrink-0">
+            <QrCode size={18} />
+          </div>
+          <div className="min-w-0">
+            <div className="flex items-center gap-2">
+              <span className="font-mono text-xs font-black text-rose-600">
+                {b.paymentCode}
+              </span>
+              <span className="rounded-full bg-amber-50 px-2 py-0.5 text-[9.5px] font-black text-amber-700 border border-amber-200">
+                ⏳ Chờ chuyển tiền
+              </span>
+            </div>
+            <p className="text-xs font-extrabold text-neutral-900 truncate mt-0.5">
+              {b.customerName} {b.customerCode ? `(${b.customerCode})` : ""}
+            </p>
+          </div>
+        </div>
+        <div className="text-right shrink-0">
+          <div className="text-[10px] font-extrabold uppercase tracking-wider text-neutral-400">
+            Số tiền
+          </div>
+          <div className="text-base sm:text-lg font-black text-emerald-600 tabular-nums">
+            {formatCurrency(b.totalAmount)}
+          </div>
+        </div>
+      </div>
+
+      {/* QR & Bank Info */}
+      <div className="flex flex-col sm:flex-row items-center gap-4 bg-neutral-50/80 p-3.5 rounded-2xl border border-neutral-200/70">
+        {vietQrUrl ? (
+          <div
+            onClick={() => onViewDetail(b.id)}
+            className="group relative cursor-pointer shrink-0 bg-white p-2 rounded-xl border border-neutral-200/80 shadow-2xs hover:scale-105 transition-transform"
+            title="Nhấn để phóng to QR"
+          >
+            <img
+              src={vietQrUrl}
+              alt="VietQR"
+              className="w-28 h-28 object-contain"
+            />
+            <div className="absolute inset-0 bg-black/40 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-[10px] font-extrabold">
+              Phóng to QR
+            </div>
+          </div>
+        ) : (
+          <div className="w-28 h-28 rounded-xl bg-amber-50 border border-amber-200 flex flex-col items-center justify-center text-center p-2 shrink-0">
+            <AlertCircle size={22} className="text-amber-500 mb-1" />
+            <span className="text-[10px] font-bold text-amber-700 leading-tight">
+              Chưa đủ thông tin ngân hàng
+            </span>
+          </div>
+        )}
+
+        {/* Bank Account Details */}
+        <div className="flex-1 w-full flex flex-col gap-1.5 text-xs">
+          <div className="flex items-center justify-between py-1 border-b border-neutral-200/60">
+            <span className="text-neutral-400 font-medium">Ngân hàng:</span>
+            <span className="font-extrabold text-neutral-800 truncate max-w-[180px]">
+              {b.bankName || "Chưa cập nhật"}
+            </span>
+          </div>
+          <div className="flex items-center justify-between py-1 border-b border-neutral-200/60">
+            <span className="text-neutral-400 font-medium">Số tài khoản:</span>
+            <div className="flex items-center gap-1">
+              <span className="font-mono font-black text-rose-600">
+                {b.bankAccountNumber || "—"}
+              </span>
+              {b.bankAccountNumber && <CopyBtn value={b.bankAccountNumber} />}
+            </div>
+          </div>
+          <div className="flex items-center justify-between py-1 border-b border-neutral-200/60">
+            <span className="text-neutral-400 font-medium">Chủ tài khoản:</span>
+            <span className="font-extrabold text-neutral-900 uppercase text-[11px] truncate max-w-[180px]">
+              {b.bankAccountName || "—"}
+            </span>
+          </div>
+          <div className="flex items-center justify-between pt-1">
+            <span className="text-neutral-400 font-medium">Nội dung CK:</span>
+            <div className="flex items-center gap-1">
+              <span className="font-mono font-black text-neutral-900">
+                {b.paymentCode}
+              </span>
+              <CopyBtn value={b.paymentCode} />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Actions */}
+      <div className="flex items-center gap-2 pt-1">
+        <button
+          onClick={() => onViewDetail(b.id)}
+          className="flex-1 h-9 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-extrabold text-xs flex items-center justify-center gap-1.5 shadow-sm hover:from-emerald-600 hover:to-teal-700 transition-all active:scale-[0.99]"
+        >
+          <CheckCircle2 size={15} strokeWidth={2.2} />
+          Xác nhận đã chuyển / Tải bill
+        </button>
+        <button
+          onClick={() => onViewDetail(b.id)}
+          className="px-3 h-9 rounded-xl bg-neutral-100 hover:bg-neutral-200 text-neutral-700 font-bold text-xs transition-colors flex items-center gap-1"
+        >
+          <Eye size={13} /> Chi tiết ({b.itemCount} đơn)
+        </button>
+      </div>
+    </div>
+  );
+}
+
 // ── Batch Detail Modal ────────────────────────────────────────────────────────
 function BatchDetailModal({
   batchId,
@@ -149,10 +293,18 @@ function BatchDetailModal({
   batchId: string;
   onClose: () => void;
 }) {
+  const router = useRouter();
+  const { toast } = useToast();
   const [data, setData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [showBill, setShowBill] = useState(true);
   const [showQrModal, setShowQrModal] = useState(false);
+
+  // States cho form xác nhận chuyển khoản nhanh ngay trong modal
+  const [confirmRef, setConfirmRef] = useState("");
+  const [confirmBill, setConfirmBill] = useState<File | null>(null);
+  const [confirming, setConfirming] = useState(false);
+  const [confirmError, setConfirmError] = useState<string | null>(null);
 
   useEffect(() => {
     fetch(`/api/payments/${batchId}`)
@@ -164,6 +316,52 @@ function BatchDetailModal({
   }, [batchId]);
 
   const batch = data;
+
+  const handleConfirmPayment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!batch) return;
+    setConfirming(true);
+    setConfirmError(null);
+
+    try {
+      const formData = new FormData();
+      const finalRef = confirmRef.trim() || batch.paymentCode;
+      formData.append("transferReference", finalRef);
+      formData.append("transferNote", batch.paymentCode);
+      if (confirmBill) {
+        formData.append("bill", confirmBill);
+      }
+
+      const res = await fetch(`/api/payments/${batchId}`, {
+        method: "PATCH",
+        body: formData,
+      });
+
+      const resData = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setConfirmError(resData.error || "Không thể xác nhận thanh toán");
+        setConfirming(false);
+        return;
+      }
+
+      setData((prev: any) => ({
+        ...prev,
+        status: "paid",
+        paidAt: new Date().toISOString(),
+        transferReference: finalRef,
+      }));
+
+      toast.success(
+        `Đã xác nhận thanh toán phiếu ${batch.paymentCode} thành công! 🎀`,
+        "Thanh toán thành công"
+      );
+      router.refresh();
+    } catch {
+      setConfirmError("Đã xảy ra lỗi kết nối, vui lòng thử lại.");
+    } finally {
+      setConfirming(false);
+    }
+  };
   const billUrl = batch?.billStorageKey
     ? `/api/bills/${batch.billStorageKey}`
     : null;
@@ -426,6 +624,78 @@ function BatchDetailModal({
                           </div>
                         </div>
                       </div>
+                    </div>
+                  )}
+
+                  {/* Xác nhận đã chuyển khoản (Nhanh ngay trong modal, không cần gõ tay) */}
+                  {batch.status !== "paid" && (
+                    <div className="rounded-2xl bg-gradient-to-br from-emerald-50 via-teal-50/50 to-white border border-emerald-200/90 p-4 flex flex-col gap-3 shadow-xs">
+                      <div className="flex items-center gap-2.5">
+                        <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-500 text-white shadow-xs shrink-0">
+                          <CheckCircle2 size={18} strokeWidth={2.5} />
+                        </div>
+                        <div>
+                          <p className="text-xs font-black uppercase tracking-wider text-emerald-900">
+                            XÁC NHẬN ĐÃ CHUYỂN KHOẢN
+                          </p>
+                          <p className="text-[11px] text-emerald-700 font-medium">
+                            Quét mã VietQR trên bằng App Ngân Hàng, sau đó bấm xác nhận hoàn tất.
+                          </p>
+                        </div>
+                      </div>
+
+                      <form onSubmit={handleConfirmPayment} className="flex flex-col gap-3 pt-1">
+                        {confirmError && (
+                          <div className="rounded-xl bg-rose-50 border border-rose-200 p-2.5 text-xs text-rose-700 font-bold flex items-center gap-2">
+                            <span>⚠️</span>
+                            <span>{confirmError}</span>
+                          </div>
+                        )}
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                          <div className="flex flex-col gap-1">
+                            <label className="text-[10px] font-black uppercase tracking-wider text-neutral-600">
+                              Mã giao dịch (Tự điền theo mã phiếu)
+                            </label>
+                            <input
+                              type="text"
+                              value={confirmRef}
+                              onChange={(e) => setConfirmRef(e.target.value)}
+                              placeholder={batch.paymentCode}
+                              className="h-9 w-full rounded-xl border border-neutral-200 bg-white px-3 text-xs font-mono font-bold text-neutral-800 placeholder:text-neutral-400 focus:border-emerald-400 focus:outline-none focus:ring-1 focus:ring-emerald-400"
+                            />
+                          </div>
+
+                          <div className="flex flex-col gap-1">
+                            <label className="text-[10px] font-black uppercase tracking-wider text-neutral-600">
+                              Ảnh bill chuyển khoản (Tùy chọn)
+                            </label>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={(e) => setConfirmBill(e.target.files?.[0] || null)}
+                              className="text-[11px] file:mr-2 file:py-1 file:px-2.5 file:rounded-lg file:border-0 file:text-[11px] file:font-extrabold file:bg-emerald-100 file:text-emerald-700 hover:file:bg-emerald-200 cursor-pointer pt-0.5"
+                            />
+                          </div>
+                        </div>
+
+                        <button
+                          type="submit"
+                          disabled={confirming}
+                          className="w-full h-10 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-extrabold text-xs flex items-center justify-center gap-2 shadow-sm hover:from-emerald-600 hover:to-teal-700 transition-all active:scale-[0.99] disabled:opacity-50"
+                        >
+                          {confirming ? (
+                            <>
+                              <Loader2 size={15} className="animate-spin" /> Đang cập nhật hệ thống...
+                            </>
+                          ) : (
+                            <>
+                              <CheckCircle2 size={16} strokeWidth={2.5} />
+                              Xác nhận đã chuyển {formatCurrency(Number(batch.totalAmount))} qua VietQR
+                            </>
+                          )}
+                        </button>
+                      </form>
                     </div>
                   )}
 
@@ -720,7 +990,7 @@ export function AdminPaymentsClient({
             {
               id: "pending" as const,
               label: "Yêu cầu rút tiền",
-              count: pendingList.length,
+              count: pendingList.length + pendingBatches.length,
               icon: <Wallet size={14} />,
             },
             {
@@ -791,149 +1061,218 @@ export function AdminPaymentsClient({
       </div>
 
       {/* ── PENDING TAB ── */}
-      {activeTab === "pending" &&
-        (filteredPending.length === 0 ? (
-          <div className="flex flex-col items-center gap-2 rounded-3xl bg-white py-16 shadow-sm border border-neutral-200/70">
-            <img
-              src="/meow-back-mascot.png"
-              alt="MeowBack Mascot"
-              className="h-16 w-16 object-contain"
-            />
-            <span className="text-xs font-bold text-neutral-400">
-              Chưa có khách nào yêu cầu rút tiền 🎉
-            </span>
-          </div>
-        ) : (
-          <div className="flex flex-col gap-6">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-              {paginatedPending.map((c) => (
-                <div
-                  key={c.id}
-                  className="rounded-3xl bg-white p-5 sm:p-6 shadow-sm border border-neutral-200/70 flex flex-col gap-4 hover:border-rose-200 transition-all duration-300 hover:-translate-y-0.5"
-                >
-                  {/* Avatar + name */}
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-rose-400 to-pink-600 text-white font-black text-base shadow-xs">
-                      {c.name.charAt(0).toUpperCase()}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="font-extrabold text-neutral-900 truncate">
-                        {c.name}
-                      </div>
-                      <div className="font-mono text-[10px] font-bold text-neutral-400">
-                        {c.code}
-                      </div>
-                    </div>
-                    <span className="shrink-0 rounded-full bg-amber-50 px-2 py-0.5 text-[9px] font-black text-amber-700 border border-amber-200/70">
-                      🔔 {formatDate(c.requestedAt)}
-                    </span>
+      {activeTab === "pending" && (
+        <div className="flex flex-col gap-6">
+          {/* PHẦN 1: CÁC PHIẾU THANH TOÁN ĐANG CHỜ CHUYỂN KHOẢN (HIỆN MÃ VIETQR TRỰC TIẾP) */}
+          {pendingBatches.length > 0 && (
+            <div className="flex flex-col gap-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-gradient-to-br from-rose-500 to-pink-600 text-white shadow-xs text-xs font-black">
+                    ⚡
                   </div>
-
-                  {/* Amount */}
-                  <div className="bg-neutral-50/80 p-3.5 rounded-2xl border border-neutral-100">
-                    <div className="text-[10px] font-extrabold uppercase tracking-widest text-neutral-400 mb-0.5">
-                      SỐ TIỀN YÊU CẦU RÚT
-                    </div>
-                    <div className="text-xl font-black text-rose-600 tabular-nums leading-none">
-                      {formatCurrency(c.requestAmount)}
-                    </div>
-                  </div>
-
-                  {/* Approved amount */}
-                  <div
-                    className={`flex items-center gap-2.5 rounded-2xl p-3 border ${c.approvedCount > 0 ? "bg-emerald-50/80 border-emerald-200" : "bg-amber-50/80 border-amber-200"}`}
-                  >
-                    {c.approvedCount > 0 ? (
-                      <>
-                        <CheckCircle2
-                          size={16}
-                          className="text-emerald-600 shrink-0"
-                        />
-                        <div className="min-w-0 flex-1">
-                          <div className="text-xs font-black text-emerald-800">
-                            Sẵn sàng trả: {formatCurrency(c.approvedAmount)}
-                          </div>
-                          <div className="text-[10px] text-emerald-600 font-medium">
-                            {c.approvedCount} đơn đã duyệt thành công
-                          </div>
-                        </div>
-                      </>
-                    ) : (
-                      <>
-                        <AlertCircle
-                          size={16}
-                          className="text-amber-600 shrink-0"
-                        />
-                        <div className="min-w-0 flex-1">
-                          <div className="text-xs font-black text-amber-800">
-                            Chưa có đơn khả dụng
-                          </div>
-                          <div className="text-[10px] text-amber-600 font-medium">
-                            Cần đối soát CSV trước khi tạo phiếu chi
-                          </div>
-                        </div>
-                      </>
-                    )}
-                  </div>
-
-                  {/* Payment info */}
-                  {c.bankAccountNumber ? (
-                    <div className="flex flex-col gap-1.5">
-                      <div className="flex items-center gap-2.5 rounded-2xl bg-white p-3 border border-neutral-200/70">
-                        <CreditCard
-                          size={15}
-                          className="text-rose-500 shrink-0"
-                        />
-                        <div className="min-w-0 flex-1">
-                          <div className="text-xs font-extrabold text-neutral-900 truncate">
-                            {c.bankName}
-                          </div>
-                          <div className="font-mono text-xs font-bold text-neutral-700">
-                            {c.bankAccountNumber}
-                          </div>
-                          <div className="text-[10px] font-bold text-neutral-400 uppercase truncate">
-                            {c.bankAccountName}
-                          </div>
-                        </div>
-                        <CopyBtn value={c.bankAccountNumber} />
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-2 rounded-2xl bg-amber-50 p-3 border border-amber-200 text-amber-800 text-xs font-bold">
-                      <AlertCircle
-                        size={15}
-                        className="shrink-0 text-amber-600"
-                      />
-                      <span>Khách chưa cập nhật TK ngân hàng</span>
-                    </div>
-                  )}
-
-                  {/* Actions */}
-                  <div className="mt-auto flex items-center gap-2 pt-2 border-t border-neutral-100">
-                    <CopyInfoBtn c={c} />
-                    <div className="flex-1">
-                      <CreatePaymentButton
-                        customerId={c.id}
-                        customerName={c.name}
-                        amount={c.approvedAmount}
-                        hasPaymentInfo={!!c.bankAccountNumber}
-                      />
-                    </div>
+                  <div>
+                    <h3 className="text-sm font-black text-neutral-900 tracking-tight">
+                      Phiếu Thanh Toán Chờ Chuyển Khoản ({pendingBatches.length})
+                    </h3>
+                    <p className="text-[11px] text-neutral-500 font-medium">
+                      Quét mã QR bằng App Ngân Hàng hoặc nhấn sao chép thông tin để chi trả cho khách.
+                    </p>
                   </div>
                 </div>
-              ))}
+                <span className="hidden sm:inline-flex text-xs font-bold text-rose-600 bg-rose-50 px-3 py-1 rounded-full border border-rose-200">
+                  📱 Quét VietQR chuyển tiền tự động
+                </span>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                {pendingBatches.map((b) => (
+                  <PendingBatchQrCard
+                    key={b.id}
+                    b={b}
+                    onViewDetail={(id) => setViewingBatch(id)}
+                  />
+                ))}
+              </div>
             </div>
-            <PagerFooter
-              currentPage={currentPage}
-              totalPages={totalPages}
-              itemsPerPage={itemsPerPage}
-              totalItems={filteredPending.length}
-              unitLabel="khách"
-              onPrev={() => setCurrentPage((p) => Math.max(1, p - 1))}
-              onNext={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-            />
-          </div>
-        ))}
+          )}
+
+          {/* PHẦN 2: DANH SÁCH KHÁCH HÀNG SẴN SÀNG LẬP PHIẾU */}
+          {filteredPending.length === 0 ? (
+            pendingBatches.length === 0 ? (
+              <div className="flex flex-col items-center gap-4 rounded-3xl bg-white py-12 px-6 shadow-sm border border-neutral-200/70 text-center">
+                <img
+                  src="/meow-back-mascot.png"
+                  alt="MeowBack Mascot"
+                  className="h-16 w-16 object-contain"
+                />
+                <div>
+                  <p className="text-sm font-extrabold text-neutral-800">
+                    Chưa có khách nào gửi yêu cầu rút tiền hay đơn chờ chi trả 🎉
+                  </p>
+                  <p className="text-xs text-neutral-500 mt-1">
+                    Các yêu cầu rút tiền hoặc đơn đã đối soát thành công sẽ tự động xuất hiện tại đây.
+                  </p>
+                </div>
+              </div>
+            ) : null
+          ) : (
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center justify-between border-t border-neutral-200/70 pt-4">
+                <div className="flex items-center gap-2">
+                  <div className="flex h-7 w-7 items-center justify-center rounded-xl bg-neutral-900 text-white shadow-xs text-xs font-black">
+                    📋
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-black text-neutral-900 tracking-tight">
+                      Khách Hàng Sẵn Sàng Chi Trả ({filteredPending.length})
+                    </h3>
+                    <p className="text-[11px] text-neutral-500 font-medium">
+                      Nhấn "Tạo phiếu" để mở ngay giao diện quét mã VietQR chuyển khoản.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                {paginatedPending.map((c) => (
+                  <div
+                    key={c.id}
+                    className="rounded-3xl bg-white p-5 sm:p-6 shadow-sm border border-neutral-200/70 flex flex-col gap-4 hover:border-rose-200 transition-all duration-300 hover:-translate-y-0.5"
+                  >
+                    {/* Avatar + name */}
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-rose-400 to-pink-600 text-white font-black text-base shadow-xs">
+                        {c.name.charAt(0).toUpperCase()}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="font-extrabold text-neutral-900 truncate">
+                          {c.name}
+                        </div>
+                        <div className="font-mono text-[10px] font-bold text-neutral-400">
+                          {c.code}
+                        </div>
+                      </div>
+                      <span
+                        className={`shrink-0 rounded-full px-2 py-0.5 text-[9px] font-black border ${
+                          c.hasWithdrawRequest
+                            ? "bg-amber-50 text-amber-700 border-amber-200/70"
+                            : "bg-emerald-50 text-emerald-700 border-emerald-200/70"
+                        }`}
+                      >
+                        {c.hasWithdrawRequest ? `🔔 ${formatDate(c.requestedAt)}` : "💰 Sẵn sàng chi trả"}
+                      </span>
+                    </div>
+
+                    {/* Amount */}
+                    <div className="bg-neutral-50/80 p-3.5 rounded-2xl border border-neutral-100">
+                      <div className="text-[10px] font-extrabold uppercase tracking-widest text-neutral-400 mb-0.5">
+                        {c.hasWithdrawRequest ? "SỐ TIỀN YÊU CẦU RÚT" : "TIỀN HOA HỒNG SẴN SÀNG TRẢ"}
+                      </div>
+                      <div className="text-xl font-black text-rose-600 tabular-nums leading-none">
+                        {formatCurrency(c.requestAmount)}
+                      </div>
+                    </div>
+
+                    {/* Approved amount */}
+                    <div
+                      className={`flex items-center gap-2.5 rounded-2xl p-3 border ${c.approvedCount > 0 ? "bg-emerald-50/80 border-emerald-200" : "bg-amber-50/80 border-amber-200"}`}
+                    >
+                      {c.approvedCount > 0 ? (
+                        <>
+                          <CheckCircle2
+                            size={16}
+                            className="text-emerald-600 shrink-0"
+                          />
+                          <div className="min-w-0 flex-1">
+                            <div className="text-xs font-black text-emerald-800">
+                              Sẵn sàng trả: {formatCurrency(c.approvedAmount)}
+                            </div>
+                            <div className="text-[10px] text-emerald-600 font-medium">
+                              {c.approvedCount} đơn đã duyệt thành công
+                            </div>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <AlertCircle
+                            size={16}
+                            className="text-amber-600 shrink-0"
+                          />
+                          <div className="min-w-0 flex-1">
+                            <div className="text-xs font-black text-amber-800">
+                              Chưa có đơn khả dụng
+                            </div>
+                            <div className="text-[10px] text-amber-600 font-medium">
+                              Cần đối soát CSV trước khi tạo phiếu chi
+                            </div>
+                          </div>
+                        </>
+                      )}
+                    </div>
+
+                    {/* Payment info */}
+                    {c.bankAccountNumber ? (
+                      <div className="flex flex-col gap-1.5">
+                        <div className="flex items-center gap-2.5 rounded-2xl bg-white p-3 border border-neutral-200/70">
+                          <CreditCard
+                            size={15}
+                            className="text-rose-500 shrink-0"
+                          />
+                          <div className="min-w-0 flex-1">
+                            <div className="text-xs font-extrabold text-neutral-900 truncate">
+                              {c.bankName}
+                            </div>
+                            <div className="font-mono text-xs font-bold text-neutral-700">
+                              {c.bankAccountNumber}
+                            </div>
+                            <div className="text-[10px] font-bold text-neutral-400 uppercase truncate">
+                              {c.bankAccountName}
+                            </div>
+                          </div>
+                          <CopyBtn value={c.bankAccountNumber} />
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2 rounded-2xl bg-amber-50 p-3 border border-amber-200 text-amber-800 text-xs font-bold">
+                        <AlertCircle
+                          size={15}
+                          className="shrink-0 text-amber-600"
+                        />
+                        <span>Khách chưa cập nhật TK ngân hàng</span>
+                      </div>
+                    )}
+
+                    {/* Actions */}
+                    <div className="mt-auto flex items-center gap-2 pt-2 border-t border-neutral-100">
+                      <CopyInfoBtn c={c} />
+                      <div className="flex-1">
+                        <CreatePaymentButton
+                          customerId={c.id}
+                          customerName={c.name}
+                          amount={c.approvedAmount}
+                          hasPaymentInfo={!!c.bankAccountNumber}
+                          onSuccess={(batchId) => {
+                            if (batchId) setViewingBatch(batchId);
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <PagerFooter
+                currentPage={currentPage}
+                totalPages={totalPages}
+                itemsPerPage={itemsPerPage}
+                totalItems={filteredPending.length}
+                unitLabel="khách"
+                onPage={(p) => setCurrentPage(p)}
+              />
+            </div>
+          )}
+        </div>
+      )}
 
       {/* ── WAITING TAB ── */}
       {activeTab === "waiting" &&
@@ -1035,8 +1374,7 @@ export function AdminPaymentsClient({
               itemsPerPage={itemsPerPage}
               totalItems={filteredWaiting.length}
               unitLabel="khách"
-              onPrev={() => setCurrentPage((p) => Math.max(1, p - 1))}
-              onNext={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+              onPage={(p) => setCurrentPage(p)}
             />
           </div>
         ))}
@@ -1144,8 +1482,7 @@ export function AdminPaymentsClient({
               itemsPerPage={itemsPerPage}
               totalItems={filteredBatches.length}
               unitLabel="phiếu"
-              onPrev={() => setCurrentPage((p) => Math.max(1, p - 1))}
-              onNext={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+              onPage={(p) => setCurrentPage(p)}
             />
           </div>
         ))}
@@ -1153,7 +1490,10 @@ export function AdminPaymentsClient({
       {/* ── MANUAL TAB ── */}
       {activeTab === "manual" && (
         <div className="max-w-lg">
-          <CreatePaymentForCustomer customers={customers} />
+          <CreatePaymentForCustomer
+            customers={customers}
+            onCreated={(batchId) => setViewingBatch(batchId)}
+          />
         </div>
       )}
     </div>
@@ -1166,44 +1506,20 @@ function PagerFooter({
   itemsPerPage,
   totalItems,
   unitLabel,
-  onPrev,
-  onNext,
+  onPage,
 }: {
   currentPage: number;
   totalPages: number;
   itemsPerPage: number;
   totalItems: number;
   unitLabel: string;
-  onPrev: () => void;
-  onNext: () => void;
+  onPage: (page: number) => void;
 }) {
-  if (totalPages <= 1) return null;
   return (
-    <div className="flex items-center justify-between rounded-2xl bg-white border border-primary-100/80 px-md py-sm shadow-cute">
-      <span className="text-[13px] text-gray-500">
-        {(currentPage - 1) * itemsPerPage + 1}–
-        {Math.min(currentPage * itemsPerPage, totalItems)} / {totalItems}{" "}
-        {unitLabel}
-      </span>
-      <div className="flex items-center gap-sm">
-        <button
-          onClick={onPrev}
-          disabled={currentPage === 1}
-          className="rounded-xl border border-gray-200 bg-white px-md py-[6px] text-[12px] font-bold text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
-        >
-          ← Trước
-        </button>
-        <span className="text-[12px] font-bold text-gray-700 px-xs">
-          {currentPage}/{totalPages}
-        </span>
-        <button
-          onClick={onNext}
-          disabled={currentPage === totalPages}
-          className="rounded-xl border border-gray-200 bg-white px-md py-[6px] text-[12px] font-bold text-gray-600 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed"
-        >
-          Sau →
-        </button>
-      </div>
-    </div>
+    <Pagination
+      currentPage={currentPage}
+      totalPages={totalPages}
+      onPageChange={onPage}
+    />
   );
 }
