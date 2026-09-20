@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo } from "react";
 import { Wallet, Clock, CheckCircle2, Building2, Edit2, AlertCircle, X, Loader2, BellRing, Link as LinkIcon, Landmark, CreditCard, UserCheck, ShieldCheck, Sparkles, Check, ChevronDown } from "lucide-react";
 import { FloatingElement } from "@/components/ui/FloatingElement";
 import { ServerSearchInput } from "@/components/ui/ServerSearchInput";
@@ -69,6 +69,30 @@ export const VIETNAM_BANKS = [
   "Khác...",
 ];
 
+export const BANK_ALIASES: Record<string, string[]> = {
+  "Vietcombank (Ngân hàng TMCP Ngoại thương VN)": ["vcb", "vietcombank", "ngoai thuong", "ngoại thương"],
+  "Techcombank (Ngân hàng TMCP Kỹ thương VN)": ["tcb", "techcombank", "ky thuong", "kỹ thương", "tech"],
+  "MB (Ngân hàng TMCP Quân đội)": ["mb", "mbbank", "quan doi", "quân đội", "mb bank"],
+  "VietinBank (Ngân hàng TMCP Công thương VN)": ["vtb", "vietinbank", "cong thuong", "công thương", "vietin"],
+  "BIDV (Ngân hàng TMCP Đầu tư và Phát triển VN)": ["bidv", "dau tu", "đầu tư", "phat trien"],
+  "Agribank (Ngân hàng NN&PTNT VN)": ["agribank", "nong nghiep", "nông nghiệp", "agri"],
+  "VPBank (Ngân hàng TMCP VN Thịnh Vượng)": ["vpb", "vpbank", "thinh vuong", "thịnh vượng", "vp"],
+  "TPBank (Ngân hàng TMCP Tiên Phong)": ["tpb", "tpbank", "tien phong", "tiên phong", "tp"],
+  "ACB (Ngân hàng TMCP Á Châu)": ["acb", "a chau", "á châu"],
+  "Sacombank (Ngân hàng TMCP Sài Gòn Thương Tín)": ["sacombank", "sai gon thuong tin", "sài gòn thương tín", "stb"],
+  "HDBank (Ngân hàng TMCP Phát triển TPHCM)": ["hdbank", "phat trien", "hdb"],
+  "VIB (Ngân hàng TMCP Quốc tế VN)": ["vib", "quoc te", "quốc tế"],
+  "SHB (Ngân hàng TMCP Sài Gòn - Hà Nội)": ["shb", "sai gon ha noi"],
+  "SeABank (Ngân hàng TMCP Đông Nam Á)": ["seabank", "dong nam a", "sea"],
+  "MSB (Ngân hàng TMCP Hàng Hải VN)": ["msb", "hang hai", "maritime"],
+  "LPBank (Ngân hàng TMCP Lộc Phát VN)": ["lpbank", "loc phat", "lienviet", "lien viet", "bưu điện"],
+  "OCB (Ngân hàng TMCP Phương Đông)": ["ocb", "phuong dong"],
+  "Eximbank (Ngân hàng TMCP Xuất Nhập khẩu VN)": ["eximbank", "xuat nhap khau", "exim"],
+  "Cake by VPBank": ["cake", "cake vpbank"],
+  "Timo": ["timo", "timo bank"],
+  "Liobank by OCB": ["liobank", "lio"],
+};
+
 type PaymentInfo = {
   bankName: string | null;
   bankAccountNumber: string | null;
@@ -123,7 +147,39 @@ export function CustomerWalletClient({
   const [formBankAccountName, setFormBankAccountName] = useState(initialPaymentInfo.bankAccountName || "");
   const [bankSearch, setBankSearch] = useState(initialPaymentInfo.bankName || "");
   const [showBankOptions, setShowBankOptions] = useState(false);
-  const filteredBanks = VIETNAM_BANKS.filter((b) => b.toLowerCase().includes(bankSearch.trim().toLowerCase()));
+  const bankDropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (bankDropdownRef.current && !bankDropdownRef.current.contains(event.target as Node)) {
+        setShowBankOptions(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
+  const filteredBanks = useMemo(() => {
+    const query = bankSearch.trim().toLowerCase();
+    // Nếu rỗng hoặc trùng khớp tên ngân hàng đã chọn -> Hiển thị toàn bộ 50+ ngân hàng!
+    if (!query || query === formBankName.trim().toLowerCase()) {
+      return VIETNAM_BANKS;
+    }
+
+    return VIETNAM_BANKS.filter((bank) => {
+      const lower = bank.toLowerCase();
+      if (lower.includes(query)) return true;
+
+      const aliases = BANK_ALIASES[bank];
+      if (aliases && aliases.some((a) => a.includes(query) || query.includes(a))) {
+        return true;
+      }
+
+      return false;
+    });
+  }, [bankSearch, formBankName]);
 
   const currentPeriod = searchParams.get("period") || "all";
 
@@ -655,7 +711,7 @@ export function CustomerWalletClient({
                     </span>
                   )}
                 </label>
-                <div className="relative">
+                <div ref={bankDropdownRef} className="relative">
                   <div className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400">
                     <Landmark size={18} />
                   </div>
@@ -664,38 +720,109 @@ export function CustomerWalletClient({
                     value={bankSearch}
                     onChange={(e) => {
                       setBankSearch(e.target.value);
-                      setFormBankName("");
                       setShowBankOptions(true);
                     }}
-                    onFocus={() => setShowBankOptions(true)}
-                    onBlur={() => setTimeout(() => setShowBankOptions(false), 150)}
-                    placeholder="Gõ để tìm ngân hàng (VD: Vietcombank, MB...)"
-                    className="h-12 w-full rounded-2xl border border-neutral-200 bg-neutral-50/50 pl-10 pr-10 text-[14px] font-bold text-neutral-900 placeholder:font-normal placeholder:text-neutral-400 focus:border-primary-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-primary-500/10 transition-all"
+                    onClick={() => setShowBankOptions(true)}
+                    onFocus={(e) => {
+                      setShowBankOptions(true);
+                      e.target.select();
+                    }}
+                    placeholder="Bấm để chọn hoặc gõ tìm kiếm trong 50+ ngân hàng..."
+                    className="h-12 w-full rounded-2xl border border-neutral-200 bg-neutral-50/50 pl-10 pr-16 text-[14px] font-bold text-neutral-900 placeholder:font-normal placeholder:text-neutral-400 focus:border-primary-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-primary-500/10 transition-all cursor-pointer"
                   />
-                  <div className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-neutral-400">
-                    <ChevronDown size={16} />
+
+                  {/* Nút xoá tìm kiếm & Mũi tên toggle */}
+                  <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1">
+                    {bankSearch.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setBankSearch("");
+                          setFormBankName("");
+                          setShowBankOptions(true);
+                        }}
+                        title="Xoá tìm kiếm để xem tất cả 50+ ngân hàng"
+                        className="p-1 rounded-full text-neutral-400 hover:text-neutral-700 hover:bg-neutral-200/70 transition-colors cursor-pointer"
+                      >
+                        <X size={14} strokeWidth={2.5} />
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setShowBankOptions((prev) => !prev);
+                      }}
+                      className="p-1 text-neutral-400 hover:text-neutral-700 transition-colors cursor-pointer"
+                    >
+                      <ChevronDown
+                        size={16}
+                        className={`transition-transform duration-200 ${
+                          showBankOptions ? "rotate-180 text-primary-500" : ""
+                        }`}
+                      />
+                    </button>
                   </div>
 
+                  {/* Dropdown danh sách ngân hàng */}
                   {showBankOptions && (
-                    <div className="absolute z-20 mt-1.5 max-h-[220px] w-full overflow-y-auto rounded-2xl border border-primary-100 bg-white p-1.5 shadow-xl animate-in fade-in duration-150">
+                    <div className="absolute z-30 mt-1.5 max-h-[260px] w-full overflow-y-auto rounded-2xl border border-primary-200/90 bg-white p-2 shadow-2xl animate-in fade-in duration-150 [scrollbar-width:thin]">
+                      {/* Tiêu đề trạng thái kết quả */}
+                      <div className="px-2.5 py-1.5 text-[11px] font-extrabold uppercase tracking-wider text-neutral-400 border-b border-neutral-100 mb-1 flex items-center justify-between">
+                        <span>
+                          {bankSearch.trim() && bankSearch.trim().toLowerCase() !== formBankName.trim().toLowerCase()
+                            ? `Tìm thấy ${filteredBanks.length} ngân hàng`
+                            : `Tất cả ngân hàng Việt Nam (${filteredBanks.length})`}
+                        </span>
+                        {bankSearch && bankSearch !== formBankName && (
+                          <span className="text-[10px] text-primary-600 font-bold lowercase">
+                            &quot;{bankSearch}&quot;
+                          </span>
+                        )}
+                      </div>
+
                       {filteredBanks.length === 0 ? (
-                        <div className="px-4 py-3 text-[13px] text-neutral-500 text-center">Không tìm thấy ngân hàng phù hợp</div>
+                        <div className="px-4 py-5 text-center flex flex-col items-center gap-1.5">
+                          <span className="text-[13px] font-bold text-neutral-700">
+                            Không tìm thấy ngân hàng &quot;{bankSearch}&quot;
+                          </span>
+                          <p className="text-[11px] text-neutral-400">
+                            Bạn có thể bấm nút X để xem tất cả hoặc chọn &quot;Khác...&quot;
+                          </p>
+                        </div>
                       ) : (
-                        filteredBanks.map((b) => (
-                          <button
-                            key={b}
-                            type="button"
-                            onMouseDown={() => selectBank(b)}
-                            className={`flex items-center justify-between w-full px-3.5 py-2.5 rounded-xl text-left text-[13px] font-bold transition-all ${
-                              b === formBankName
-                                ? "bg-primary-50 text-primary-600 border border-primary-200/60"
-                                : "text-neutral-700 hover:bg-neutral-100/80"
-                            }`}
-                          >
-                            <span className="truncate pr-2">{b}</span>
-                            {b === formBankName && <Check size={16} className="text-primary-600 shrink-0" />}
-                          </button>
-                        ))
+                        filteredBanks.map((b) => {
+                          const isSelected = b === formBankName;
+                          return (
+                            <button
+                              key={b}
+                              type="button"
+                              onClick={() => selectBank(b)}
+                              className={`flex items-center justify-between w-full px-3 py-2.5 rounded-xl text-left text-[13px] font-bold transition-all cursor-pointer ${
+                                isSelected
+                                  ? "bg-primary-50 text-primary-600 border border-primary-200/80 shadow-2xs"
+                                  : "text-neutral-700 hover:bg-neutral-50 hover:text-neutral-900"
+                              }`}
+                            >
+                              <div className="flex items-center gap-2.5 min-w-0 pr-2">
+                                <div
+                                  className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 text-[11px] font-black ${
+                                    isSelected
+                                      ? "bg-primary-500 text-white shadow-2xs"
+                                      : "bg-neutral-100 text-neutral-600"
+                                  }`}
+                                >
+                                  🏦
+                                </div>
+                                <span className="truncate">{b}</span>
+                              </div>
+                              {isSelected && (
+                                <Check size={16} strokeWidth={2.5} className="text-primary-600 shrink-0" />
+                              )}
+                            </button>
+                          );
+                        })
                       )}
                     </div>
                   )}

@@ -3,8 +3,9 @@ import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { ProfileSummaryCard } from "@/components/account/ProfileSummaryCard";
 import { CustomerSettingsClient } from "@/components/account/CustomerSettingsClient";
+import { PaymentPinSettings } from "@/components/account/PaymentPinSettings";
 import { FloatingElement } from "@/components/ui/FloatingElement";
-import { ShieldCheck, Sparkles, UserCircle, KeyRound } from "lucide-react";
+import { ShieldCheck, Sparkles, KeyRound } from "lucide-react";
 import { IconBow } from "@/components/icons/CatRibbonIcons";
 
 export default async function CustomerSettingsPage({ searchParams }: { searchParams?: { tab?: string } }) {
@@ -82,7 +83,7 @@ export default async function CustomerSettingsPage({ searchParams }: { searchPar
                 Thông tin cá nhân & Bảo mật
               </h1>
               <p className="mt-0.5 text-xs sm:text-sm text-neutral-600 font-medium leading-relaxed max-w-xl">
-                Cập nhật thông tin giao nhận, thiết lập mã PIN rút tiền và quản lý tiện ích tài khoản MeowBack
+                Cập nhật thông tin cá nhân, thiết lập mã PIN rút tiền và quản lý tiện ích tài khoản MeowBack
               </p>
             </div>
           </div>
@@ -91,12 +92,12 @@ export default async function CustomerSettingsPage({ searchParams }: { searchPar
 
       {/* ═══════════════════════════════════════════════════════════
           BODY CONTENT: 2 Cột (Desktop) / 1 Cột (Mobile)
-          - Cột trái (4 col): Thẻ thành viên VIP MeowBack
-          - Cột phải (8 col): Tab điều hướng mượt mà
+          - Cột 1 (lg:col-span-5): Thẻ thành viên VIP MeowBack + Mã PIN rút tiền
+          - Cột 2 (lg:col-span-7): Chi tiết hồ sơ, Đổi mật khẩu, Tiện ích
          ═══════════════════════════════════════════════════════════ */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 w-full items-start">
-        {/* Left Side: VIP Member Summary Card */}
-        <div className="lg:col-span-4 w-full">
+        {/* Left Side (Cột 1): VIP Member Summary Card + Khối Mã PIN rút tiền */}
+        <div className="lg:col-span-5 flex flex-col gap-6 w-full">
           <ProfileSummaryCard 
             customer={{
               id: customer.id,
@@ -110,10 +111,40 @@ export default async function CustomerSettingsPage({ searchParams }: { searchPar
               phone: customer.phone,
             }}
           />
+
+          {/* Khối Cài đặt / Đổi Mã PIN rút tiền (Được đưa sang cột 1 giúp trang cân đối, đỡ dài) */}
+          <div id="pin-security" className="bg-white rounded-3xl border border-primary-100/90 shadow-cute p-6 sm:p-7 scroll-mt-24">
+            <div className="flex items-center gap-3 pb-5 mb-5 border-b border-neutral-100">
+              <div className="w-11 h-11 rounded-2xl bg-emerald-50 border border-emerald-100 text-emerald-600 flex items-center justify-center shrink-0 shadow-2xs">
+                <KeyRound size={20} strokeWidth={2.3} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h2 className="text-base sm:text-lg font-black text-neutral-900 tracking-tight">
+                    Mã PIN rút tiền (6 số)
+                  </h2>
+                  <span
+                    className={`text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full ${
+                      hasPin
+                        ? "bg-emerald-100/80 text-emerald-700"
+                        : "bg-amber-100/80 text-amber-800"
+                    }`}
+                  >
+                    {hasPin ? "Đã bật bảo vệ" : "Chưa cài PIN"}
+                  </span>
+                </div>
+                <p className="text-[12px] text-neutral-500 font-medium mt-0.5 leading-snug">
+                  Bảo vệ số dư ví khi thực hiện các yêu cầu rút tiền về tài khoản ngân hàng
+                </p>
+              </div>
+            </div>
+
+            <PaymentPinSettings hasPin={hasPin} />
+          </div>
         </div>
 
-        {/* Right Side: Tabbed Forms */}
-        <div className="lg:col-span-8 w-full">
+        {/* Right Side (Cột 2): Form hồ sơ, Đổi mật khẩu, Tiện ích */}
+        <div className="lg:col-span-7 flex flex-col gap-6 w-full">
           <CustomerSettingsClient 
             initialProfile={{
               fullName: customer.fullName || "",
@@ -121,7 +152,6 @@ export default async function CustomerSettingsPage({ searchParams }: { searchPar
               address: customer.address || "",
               email: customer.user?.email || "",
             }}
-            hasPaymentPin={hasPin}
             defaultTab={defaultTab}
           />
         </div>

@@ -113,14 +113,18 @@ export function ProfileInfoForm({ initialData }: ProfileInfoFormProps) {
       </div>
 
       <div className="flex flex-col gap-2">
-        <label className="text-[13px] font-bold text-neutral-900">Địa chỉ cụ thể</label>
+        <div className="flex items-center justify-between">
+          <label className="text-[13px] font-bold text-neutral-900">Nơi ở hiện tại</label>
+          <span className="text-[11px] font-medium text-neutral-400">Không bắt buộc</span>
+        </div>
         <div className="relative">
-          <MapPin size={18} strokeWidth={2} className="pointer-events-none absolute left-4 top-[18px] text-neutral-400" />
-          <textarea
+          <MapPin size={18} strokeWidth={2} className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400" />
+          <input
+            type="text"
             value={address}
             onChange={(e) => setAddress(e.target.value)}
-            placeholder="Nhập địa chỉ nhận hàng của bạn..."
-            className="min-h-[100px] w-full rounded-2xl border border-primary-100/90 bg-white pl-[52px] pr-4 py-4 text-[15px] font-medium text-neutral-900 placeholder:text-neutral-400 transition-all focus:border-primary-500 focus:outline-none focus:ring-4 focus:ring-primary-500/15 hover:border-primary-300 resize-y"
+            placeholder="Ví dụ: Hà Nội, TP. Hồ Chí Minh, Đà Nẵng..."
+            className="h-14 w-full rounded-2xl border border-primary-100/90 bg-white pl-[52px] pr-4 text-[15px] font-medium text-neutral-900 placeholder:text-neutral-400 transition-all focus:border-primary-500 focus:outline-none focus:ring-4 focus:ring-primary-500/15 hover:border-primary-300"
           />
         </div>
       </div>
@@ -137,7 +141,7 @@ export function ProfileInfoForm({ initialData }: ProfileInfoFormProps) {
           />
         </div>
         <p className="text-[12px] text-neutral-500 font-medium mt-1">
-          Lưu ý: Vui lòng sử dụng thông tin cá nhân chính xác để thuận tiện cho việc đối soát đơn hàng. Email không thể thay đổi sau khi tạo tài khoản.
+          Lưu ý: Vui lòng sử dụng thông tin chính xác để thuận tiện hỗ trợ tài khoản và đối soát hoàn tiền. Email không thể thay đổi sau khi đăng ký.
         </p>
       </div>
 
