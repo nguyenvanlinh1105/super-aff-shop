@@ -6,6 +6,7 @@ import { FloatingQuickAccess } from "@/components/customer/FloatingQuickAccess";
 import { PwaInstallBanner } from "@/components/pwa/PwaInstallPrompt";
 import { PendingLinkClaimer } from "@/components/customer/PendingLinkClaimer";
 import { CustomerGlobalUI } from "@/components/customer/CustomerGlobalUI";
+import { GlobalClickSparkle } from "@/components/ui/GlobalClickSparkle";
 import { Home, RotateCcw, Gift, Wallet, ShoppingBag, BookOpen, UserPlus, HelpCircle, UserCircle } from "lucide-react";
 
 const sections: NavSection[] = [
@@ -68,6 +69,7 @@ export default async function CustomerAppLayout({ children }: { children: React.
       <FloatingQuickAccess unreadCount={unreadCount} showBell={false} />
       <PendingLinkClaimer />
       <CustomerGlobalUI platforms={platformOptions} />
+      <GlobalClickSparkle />
     </div>
   );
 }

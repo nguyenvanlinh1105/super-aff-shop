@@ -4,6 +4,7 @@ import { ModalProvider } from "@/components/ui/ModalProvider";
 import { ToastProvider } from "@/components/ui/Toast";
 import { ServiceWorkerRegister } from "@/components/pwa/ServiceWorkerRegister";
 import { GlobalDragScroll } from "@/components/ui/GlobalDragScroll";
+import { GlobalClickSparkle } from "@/components/ui/GlobalClickSparkle";
 import "./globals.css";
 
 const fontQuicksand = Quicksand({

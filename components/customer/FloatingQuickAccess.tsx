@@ -164,7 +164,7 @@ export function FloatingQuickAccess({
         <button
           onClick={() => setIsOpen(!isOpen)}
           title={isOpen ? "Đóng menu hỗ trợ" : "Liên hệ hỗ trợ MeowBack"}
-          className={`flex h-14 w-14 items-center justify-center rounded-full shadow-cute border border-primary-200/80 transition-all hover:scale-105 active:scale-95 ${
+          className={`flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full shadow-cute border border-primary-200/80 transition-all hover:scale-105 active:scale-95 ${
             isOpen ? "bg-gradient-to-r from-primary-400 to-primary-500 text-white" : "bg-white text-primary-500 hover:text-primary-600"
           }`}
         >

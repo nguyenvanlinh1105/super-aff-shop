@@ -627,7 +627,7 @@ export function AdminPaymentsClient({
   const [currentPage, setCurrentPage] = useState(1);
   const [viewingBatch, setViewingBatch] = useState<string | null>(null);
   const [expandedWaiting, setExpandedWaiting] = useState<string | null>(null);
-  const itemsPerPage = 9;
+  const itemsPerPage = 10;
 
   const todayTotal = pendingList.reduce((s, c) => s + c.approvedAmount, 0);
   const paidBatches = batches.filter((b) => b.status === "paid");

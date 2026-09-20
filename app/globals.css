@@ -232,8 +232,8 @@
 
   /* Vị trí nút hỗ trợ nổi: trên PC tự động căn sát container 960px thay vì dạt ra rìa màn hình */
   .customer-floating-support {
-    right: 16px;
-    bottom: calc(58px + env(safe-area-inset-bottom) + 16px);
+    right: 12px;
+    bottom: calc(58px + env(safe-area-inset-bottom) + 12px);
   }
   @media (min-width: 768px) {
     .customer-floating-support {

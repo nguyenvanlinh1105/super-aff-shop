@@ -260,7 +260,7 @@ export function ReferralClient({
       {/* ═══ 3. MAIN GRID: CÔNG CỤ MỜI (TRÁI) & QUYỀN LỢI (PHẢI) ═══ */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
         {/* CỘT TRÁI: CÔNG CỤ CHIA SẺ & QR CODE */}
-        <div className="rounded-3xl bg-white p-6 shadow-cute border border-primary-100/80 flex flex-col justify-between gap-5">
+        <div className="rounded-3xl bg-white p-4 sm:p-6 shadow-cute border border-primary-100/80 flex flex-col justify-between gap-5 overflow-hidden">
           <div>
             <div className="flex items-center justify-between border-b border-primary-100/70 pb-3.5 mb-5">
               <div className="flex items-center gap-2">
@@ -275,8 +275,8 @@ export function ReferralClient({
             {/* Mã giới thiệu & Link */}
             <div className="flex flex-col gap-4">
               {/* Mã giới thiệu nổi bật */}
-              <div className="rounded-2xl bg-gradient-to-r from-primary-50/70 to-rose-50/40 p-4 border border-primary-200/80 flex items-center justify-between gap-3 shadow-2xs">
-                <div>
+              <div className="rounded-2xl bg-gradient-to-r from-primary-50/70 to-rose-50/40 p-4 border border-primary-200/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-2xs">
+                <div className="min-w-0">
                   <div className="text-[11px] font-bold uppercase tracking-wider text-neutral-500">Mã giới thiệu độc quyền</div>
                   <div className="text-2xl font-black tracking-wider text-primary-600 font-mono mt-0.5">
                     {customerCode}
@@ -285,7 +285,7 @@ export function ReferralClient({
                 <button
                   type="button"
                   onClick={handleCopyCode}
-                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white hover:bg-neutral-50 text-neutral-800 text-[12.5px] font-bold border border-primary-200/80 shadow-2xs transition-all active:scale-95 cursor-pointer"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-white hover:bg-neutral-50 text-neutral-800 text-[12.5px] font-bold border border-primary-200/80 shadow-2xs transition-all active:scale-95 cursor-pointer shrink-0"
                 >
                   {copiedCode ? <Check size={14} className="text-emerald-600" /> : <Copy size={14} className="text-primary-500" />}
                   <span>{copiedCode ? "Đã chép" : "Sao chép mã"}</span>
@@ -297,17 +297,17 @@ export function ReferralClient({
                 <label className="text-[12px] font-bold text-neutral-700 mb-1.5 block">
                   Link đăng ký giới thiệu
                 </label>
-                <div className="flex items-center gap-2">
+                <div className="flex flex-col sm:flex-row gap-2">
                   <input
                     type="text"
                     value={referralLink}
                     readOnly
-                    className="h-11 flex-1 rounded-2xl bg-neutral-50/80 px-3.5 text-[13px] font-medium text-neutral-800 border border-neutral-200/80 focus:outline-none select-all"
+                    className="h-11 w-full sm:flex-1 rounded-2xl bg-neutral-50/80 px-3.5 text-[13px] font-medium text-neutral-800 border border-neutral-200/80 focus:outline-none select-all min-w-0"
                   />
                   <button
                     type="button"
                     onClick={handleCopyLink}
-                    className="h-11 px-4 sm:px-5 shrink-0 rounded-2xl bg-gradient-to-r from-primary-500 to-rose-500 hover:from-primary-600 hover:to-rose-600 text-white text-[13px] font-extrabold shadow-cute hover:shadow-cute-lg transition-all active:scale-95 flex items-center gap-1.5 cursor-pointer"
+                    className="h-11 px-4 sm:px-5 shrink-0 rounded-2xl bg-gradient-to-r from-primary-500 to-rose-500 hover:from-primary-600 hover:to-rose-600 text-white text-[13px] font-extrabold shadow-cute hover:shadow-cute-lg transition-all active:scale-95 flex items-center justify-center gap-1.5 cursor-pointer"
                   >
                     {copiedLink ? <Check size={15} /> : <Copy size={15} />}
                     <span>{copiedLink ? "Đã copy" : "Sao chép 🎀"}</span>
@@ -364,7 +364,7 @@ export function ReferralClient({
         </div>
 
         {/* CỘT PHẢI: QUYỀN LỢI & CÁCH THỨC HOẠT ĐỘNG */}
-        <div className="rounded-3xl bg-white p-6 shadow-cute border border-primary-100/80 flex flex-col justify-between gap-5">
+        <div className="rounded-3xl bg-white p-4 sm:p-6 shadow-cute border border-primary-100/80 flex flex-col justify-between gap-5 overflow-hidden">
           <div>
             <div className="flex items-center justify-between border-b border-primary-100/70 pb-3.5 mb-5">
               <div className="flex items-center gap-2">
@@ -459,7 +459,7 @@ export function ReferralClient({
       </div>
 
       {/* ═══ 4. TIẾN TRÌNH ĐƠN HÀNG & DANH SÁCH BẠN BÈ ═══ */}
-      <div className="rounded-3xl bg-white p-6 shadow-cute border border-primary-100/80 flex flex-col gap-4">
+      <div className="rounded-3xl bg-white p-4 sm:p-6 shadow-cute border border-primary-100/80 flex flex-col gap-4 overflow-hidden">
         {/* Navigation Tabs */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-primary-100/70 pb-3.5">
           <div className="flex items-center gap-2">

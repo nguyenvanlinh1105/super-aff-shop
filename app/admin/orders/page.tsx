@@ -22,7 +22,7 @@ export default async function AdminOrdersPage({
   };
 }) {
   const page = Number(searchParams.page) || 1;
-  const limit = 50;
+  const limit = 10;
   const skip = (page - 1) * limit;
   const q = searchParams.q || "";
   const tab = searchParams.tab || "all";
