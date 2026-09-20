@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { ShieldCheck, KeyRound, Loader2 } from "lucide-react";
 import { useToast } from "@/components/ui/Toast";
 
@@ -9,6 +10,7 @@ interface Props {
 }
 
 export function PaymentPinSettings({ hasPin: initialHasPin }: Props) {
+  const router = useRouter();
   const { toast } = useToast();
   const [hasPin, setHasPin] = useState(initialHasPin);
   const [mode, setMode] = useState<"idle" | "setup" | "change" | "reset">("idle");
@@ -71,6 +73,7 @@ export function PaymentPinSettings({ hasPin: initialHasPin }: Props) {
     toast.success("Đã thiết lập mã PIN rút tiền thành công! 🎀", "Thành công");
     setHasPin(true);
     resetForm();
+    router.refresh();
   }
 
   // ── Change PIN ──
@@ -160,6 +163,7 @@ export function PaymentPinSettings({ hasPin: initialHasPin }: Props) {
     toast.success("Đặt lại mã PIN rút tiền thành công! Bạn có thể rút tiền ngay.", "Thành công");
     setHasPin(true);
     resetForm();
+    router.refresh();
   }
 
   const inputClass =

@@ -3,8 +3,9 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { createPortal } from "react-dom";
-import { Copy, Check, QrCode, X, ChevronRight, Star } from "lucide-react";
+import { Copy, Check, QrCode, X, ChevronRight, Gift, Sparkles, MessageSquare, ShieldCheck } from "lucide-react";
 import { IconBow } from "@/components/icons/CatRibbonIcons";
+import { useToast } from "@/components/ui/Toast";
 
 type Props = {
   customerCode: string;
@@ -20,11 +21,13 @@ export function InviteSection({
   qrDataUrl,
   referralRate,
   maxReferralOrders,
-  referralValidityMonths,
   isPartner,
 }: Props) {
+  const { toast } = useToast();
   const [inviteUrl, setInviteUrl] = useState("");
-  const [copied, setCopied] = useState(false);
+  const [copiedLink, setCopiedLink] = useState(false);
+  const [copiedCode, setCopiedCode] = useState(false);
+  const [copiedMsg, setCopiedMsg] = useState(false);
   const [showQR, setShowQR] = useState(false);
   const [mounted, setMounted] = useState(false);
   const referralPercent = Math.round(referralRate * 1000) / 10;
@@ -34,99 +37,176 @@ export function InviteSection({
     setMounted(true);
   }, [customerCode]);
 
-  function handleCopy() {
+  function handleCopyLink() {
     if (!inviteUrl) return;
     navigator.clipboard.writeText(inviteUrl);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    setCopiedLink(true);
+    toast.success("Đã sao chép link giới thiệu của bạn! 🎀", "Đã chép link");
+    setTimeout(() => setCopiedLink(false), 2200);
+  }
+
+  function handleCopyCode() {
+    if (!customerCode) return;
+    navigator.clipboard.writeText(customerCode);
+    setCopiedCode(true);
+    toast.success(`Đã sao chép mã giới thiệu "${customerCode}"! 🎀`, "Đã chép mã");
+    setTimeout(() => setCopiedCode(false), 2200);
+  }
+
+  function handleCopyMessage() {
+    const msg = `Săn sale Shopee & TikTok Shop nhận hoàn tiền tự động cùng MeowBack! Đăng ký qua link của mình để được hoàn tiền nhé:\n${inviteUrl}\n(Mã giới thiệu: ${customerCode})`;
+    navigator.clipboard.writeText(msg);
+    setCopiedMsg(true);
+    toast.success("Đã sao chép tin nhắn mời kèm link! Dán vào Zalo / Messenger để gửi ngay 💬", "Đã sao chép tin nhắn");
+    setTimeout(() => setCopiedMsg(false), 2200);
+  }
+
+  function handleDownloadQR() {
+    if (!qrDataUrl) return;
+    const a = document.createElement("a");
+    a.href = qrDataUrl;
+    a.download = `meowback-referral-${customerCode}.png`;
+    a.click();
+    toast.success("Đã tải ảnh mã QR về máy 📲", "Đã tải QR");
   }
 
   return (
-    <div className="rounded-3xl bg-white p-6 shadow-cute border border-primary-100/80 flex-1 min-w-0 overflow-hidden">
-      {/* Header */}
-      <div className="mb-3 flex flex-wrap sm:flex-nowrap items-center justify-between gap-3">
-        <div className="flex items-center gap-2 min-w-0">
-          <IconBow className="w-5 h-5 text-accent-bow shrink-0" />
-          <h2 className="text-[15px] font-extrabold text-neutral-900 whitespace-nowrap">Mời bạn bè 🎀</h2>
+    <div className="h-full rounded-3xl bg-gradient-to-b from-white via-primary-50/20 to-white p-5 sm:p-6 shadow-cute border border-primary-200/80 flex flex-col justify-between gap-4">
+      {/* ═══ 1. HEADER ═══ */}
+      <div>
+        <div className="flex items-center justify-between gap-3 mb-2">
+          <div className="flex items-center gap-2">
+            <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-gradient-to-br from-primary-400 to-pink-500 text-white shadow-sm">
+              <Gift size={18} strokeWidth={2.4} />
+            </div>
+            <div>
+              <div className="text-[10px] font-extrabold uppercase tracking-widest text-primary-500">Giới thiệu bạn bè</div>
+              <h3 className="text-base font-extrabold text-neutral-900 tracking-tight flex items-center gap-1.5">
+                Nhận {referralPercent}% Hoa Hồng 🎀
+              </h3>
+            </div>
+          </div>
+          <Link
+            href="/app/referral"
+            className="flex items-center gap-0.5 text-xs font-extrabold text-primary-600 hover:text-primary-700 transition-colors shrink-0 bg-primary-50 px-2.5 py-1 rounded-full border border-primary-200/60"
+          >
+            <span>Chi tiết</span>
+            <ChevronRight size={13} strokeWidth={2.5} />
+          </Link>
         </div>
-        <Link
-          href="/app/referral"
-          className="flex shrink-0 items-center gap-0.5 text-[12px] font-bold text-primary-500 hover:text-primary-600 transition-colors whitespace-nowrap"
-        >
-          Xem chi tiết
-          <ChevronRight size={14} strokeWidth={2.5} />
-        </Link>
-      </div>
 
-      <p className="text-[13px] text-neutral-600 mb-3 leading-relaxed font-medium">
-        {isPartner ? (
-          <>
-            Bạn là <span className="font-bold text-[#2D8A56]">🤝 Đối tác</span> — nhận{" "}
-            <span className="font-bold text-primary-500">{referralPercent}% hoa hồng</span> trên{" "}
-            <strong>tất cả</strong> đơn hàng của mỗi người bạn mời!
-          </>
-        ) : (
-          <>
-            Mời bạn bè tham gia MeowBack và nhận{" "}
-            <span className="font-bold text-primary-500">{referralPercent}% hoa hồng</span> từ{" "}
-            {maxReferralOrders} đơn hàng đầu tiên của bạn bè!
-          </>
-        )}
-      </p>
-
-      {/* Stars + badge */}
-      <div className="flex items-center gap-1 mb-4">
-        {[1, 2, 3, 4, 5].map((i) => (
-          <Star key={i} size={12} className="text-amber-400 fill-amber-400" />
-        ))}
-        <span className="text-[11px] font-semibold text-neutral-500 ml-1">
-          {isPartner ? `${referralPercent}% hoa hồng / không giới hạn` : `${referralPercent}% / ${maxReferralOrders} đơn đầu tiên`}
-        </span>
-      </div>
-
-      {/* Link display */}
-      {inviteUrl && (
-        <div className="mb-4 flex items-center gap-2 rounded-2xl bg-primary-50 border border-primary-100 p-2.5">
-          <span className="flex-1 truncate text-[12px] font-bold text-neutral-700 px-2">
-            {inviteUrl}
-          </span>
-        </div>
-      )}
-
-      {/* Action buttons */}
-      <div className="flex flex-wrap sm:flex-nowrap gap-2">
-        <button
-          onClick={handleCopy}
-          className={`flex flex-1 items-center justify-center gap-1.5 rounded-full py-2.5 px-4 text-[13px] font-bold whitespace-nowrap transition-all ${
-            copied
-              ? "bg-[#2D8A56] text-white shadow-sm"
-              : "bg-gradient-to-r from-primary-400 to-primary-500 text-white shadow-cute hover:shadow-cute-lg"
-          }`}
-        >
-          {copied ? (
+        <p className="text-xs sm:text-[12.5px] text-neutral-600 leading-relaxed font-medium">
+          {isPartner ? (
             <>
-              <Check size={15} strokeWidth={2.5} className="shrink-0" />
-              Đã sao chép 🎀
+              Bạn là <strong className="text-emerald-700">Đối tác</strong> — nhận trọn{" "}
+              <strong className="text-primary-600">{referralPercent}% hoa hồng</strong> trên toàn bộ đơn mua của bạn bè!
             </>
           ) : (
             <>
-              <Copy size={15} strokeWidth={2} className="shrink-0" />
-              Copy link 🐾
+              Nhận <strong className="text-primary-600">{referralPercent}% hoa hồng</strong> trên{" "}
+              {maxReferralOrders} đơn hàng đầu tiên của mỗi người bạn mời. Bạn bè vẫn giữ trọn 100% tiền hoàn!
+            </>
+          )}
+        </p>
+      </div>
+
+      {/* ═══ 2. EXCLUSIVE REFERRAL CODE BOX ═══ */}
+      <div className="flex items-center justify-between rounded-2xl bg-gradient-to-r from-primary-50 via-pink-50/60 to-primary-50 border border-primary-200/80 p-3 shadow-2xs">
+        <div className="flex flex-col min-w-0 pr-2">
+          <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-400">Mã giới thiệu của bạn</span>
+          <span className="font-mono text-base sm:text-lg font-black text-primary-600 tracking-wider truncate">
+            {customerCode || "---"}
+          </span>
+        </div>
+        <button
+          onClick={handleCopyCode}
+          className={`flex items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-extrabold transition-all shadow-2xs shrink-0 ${
+            copiedCode
+              ? "bg-emerald-500 text-white"
+              : "bg-white text-primary-600 border border-primary-200 hover:bg-primary-50"
+          }`}
+        >
+          {copiedCode ? (
+            <>
+              <Check size={13} strokeWidth={2.5} />
+              <span>Đã chép</span>
+            </>
+          ) : (
+            <>
+              <Copy size={13} strokeWidth={2} />
+              <span>Chép mã</span>
             </>
           )}
         </button>
+      </div>
 
+      {/* ═══ 3. LINK DISPLAY & COPY ═══ */}
+      <div className="flex items-center gap-2 rounded-2xl bg-neutral-50 border border-neutral-200/80 p-1.5 pl-3 shadow-2xs">
+        <span className="flex-1 truncate text-xs font-bold text-neutral-700 select-all">
+          {inviteUrl || "Đang tải link..."}
+        </span>
         <button
-          onClick={() => setShowQR(true)}
-          className="flex items-center justify-center gap-1 rounded-full bg-primary-100 px-5 py-2.5 text-[13px] font-bold text-primary-600 hover:bg-primary-200 whitespace-nowrap transition-all shrink-0"
-          title="Xem mã QR"
+          onClick={handleCopyLink}
+          className={`flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-extrabold text-white transition-all shrink-0 shadow-2xs ${
+            copiedLink
+              ? "bg-emerald-500"
+              : "bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700"
+          }`}
         >
-          <QrCode size={16} strokeWidth={2} className="shrink-0" />
-          QR
+          {copiedLink ? <Check size={13} strokeWidth={2.5} /> : <Copy size={13} strokeWidth={2} />}
+          <span>{copiedLink ? "Đã chép" : "Copy link"}</span>
         </button>
       </div>
 
-      {/* QR Modal */}
+      {/* ═══ 4. TWO QUICK ACTION BUTTONS (QR & Tin nhắn) ═══ */}
+      <div className="grid grid-cols-2 gap-2">
+        <button
+          onClick={() => setShowQR(true)}
+          className="flex items-center justify-center gap-1.5 rounded-2xl bg-white hover:bg-primary-50/70 border border-primary-200/80 py-2.5 px-3 text-xs font-extrabold text-neutral-700 hover:text-primary-600 transition-all shadow-2xs"
+        >
+          <QrCode size={15} strokeWidth={2.2} className="text-primary-500" />
+          <span>Xem mã QR</span>
+        </button>
+
+        <button
+          onClick={handleCopyMessage}
+          className={`flex items-center justify-center gap-1.5 rounded-2xl py-2.5 px-3 text-xs font-extrabold transition-all shadow-2xs border ${
+            copiedMsg
+              ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+              : "bg-white hover:bg-primary-50/70 text-neutral-700 hover:text-primary-600 border-primary-200/80"
+          }`}
+        >
+          {copiedMsg ? (
+            <>
+              <Check size={14} strokeWidth={2.5} className="text-emerald-600" />
+              <span>Đã sao chép</span>
+            </>
+          ) : (
+            <>
+              <MessageSquare size={14} strokeWidth={2.2} className="text-primary-500" />
+              <span>Lời mời mẫu</span>
+            </>
+          )}
+        </button>
+      </div>
+
+      {/* ═══ 5. MINI HIGHLIGHT BULLETS ═══ */}
+      <div className="pt-2 border-t border-primary-100/60 flex items-center justify-between text-[11px] font-semibold text-neutral-500">
+        <div className="flex items-center gap-1">
+          <Sparkles size={11} className="text-primary-500" />
+          <span>Thưởng 5% mỗi đơn</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <ShieldCheck size={11} className="text-emerald-500" />
+          <span>Bạn bè giữ 100%</span>
+        </div>
+        <div className="flex items-center gap-1">
+          <IconBow className="w-3 h-3 text-accent-bow" />
+          <span>Cộng ví tự động</span>
+        </div>
+      </div>
+
+      {/* ═══ QR MODAL POPUP ═══ */}
       {showQR && mounted && createPortal(
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4"
@@ -134,86 +214,57 @@ export function InviteSection({
         >
           <div className="absolute inset-0 bg-neutral-900/50 backdrop-blur-md" />
           <div
-            className="relative w-full max-w-[340px] overflow-hidden rounded-3xl bg-white shadow-2xl fade-in"
+            className="relative w-full max-w-[340px] overflow-hidden rounded-3xl bg-white shadow-2xl fade-in border border-primary-100"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Gradient header */}
-            <div className="relative overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-primary-400 via-primary-300 to-pink-200" />
-              <div className="absolute -top-8 -right-8 h-28 w-28 rounded-full bg-white/10 blur-xl" />
-              <div className="absolute -bottom-4 -left-4 h-20 w-20 rounded-full bg-white/10 blur-xl" />
-
-              <div className="relative px-6 pt-6 pb-5 text-center">
-                <button
-                  onClick={() => setShowQR(false)}
-                  className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm text-white/80 hover:bg-white/30 hover:text-white transition-all"
-                >
-                  <X size={16} strokeWidth={2.5} />
-                </button>
-                <div className="h-16 w-16 rounded-full overflow-hidden bg-white mx-auto mb-3 shadow-lg shadow-primary-500/20">
-                  <img src="/meowback_lucky_cat_logo.png" alt="MeowBack" className="h-full w-full object-cover" />
-                </div>
-                <h3 className="text-[18px] font-extrabold text-white drop-shadow-sm">
-                  Mã QR giới thiệu
-                </h3>
-                <p className="text-[12px] font-medium text-white/80 mt-0.5">
-                  Cho bạn bè quét để đăng ký MeowBack ngay
-                </p>
+            {/* Header */}
+            <div className="relative overflow-hidden bg-gradient-to-br from-primary-400 via-primary-500 to-pink-600 p-6 text-center text-white">
+              <button
+                onClick={() => setShowQR(false)}
+                className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-white hover:bg-white/30 transition-colors"
+              >
+                <X size={16} strokeWidth={2.5} />
+              </button>
+              <div className="h-14 w-14 rounded-2xl bg-white p-1 mx-auto mb-2 shadow-lg">
+                <img src="/meowback_lucky_cat_logo.png" alt="MeowBack" className="h-full w-full object-contain" />
               </div>
+              <h3 className="text-base font-extrabold text-white">Mã QR Giới Thiệu 🎀</h3>
+              <p className="text-xs text-white/85 mt-0.5">Quét bằng camera hoặc Zalo để đăng ký</p>
             </div>
 
-            {/* QR Code section */}
-            <div className="flex flex-col items-center px-6 pt-5 pb-6 gap-4">
-              {/* QR Frame with decorative border */}
-              <div className="relative p-1 rounded-2xl bg-gradient-to-br from-primary-300 via-primary-200 to-pink-200 shadow-lg shadow-primary-200/40">
-                <div className="rounded-xl bg-white p-3">
-                  {qrDataUrl ? (
-                    <img
-                      src={qrDataUrl}
-                      alt="QR Code giới thiệu"
-                      className="h-48 w-48 object-contain"
-                    />
-                  ) : (
-                    <div className="h-48 w-48 flex items-center justify-center text-neutral-300">
-                      <QrCode size={80} strokeWidth={1} />
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Link display */}
-              <div className="w-full rounded-2xl bg-gradient-to-br from-primary-50 to-pink-50 px-4 py-3 text-center border border-primary-100/60">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-primary-400 mb-1">Link giới thiệu của bạn</p>
-                <p className="text-[12px] font-bold text-primary-600 break-all leading-relaxed">
-                  {inviteUrl}
-                </p>
-              </div>
-
-              {/* Copy button */}
-              <button
-                onClick={handleCopy}
-                className={`w-full flex items-center justify-center gap-2 rounded-2xl py-3.5 text-[14px] font-bold transition-all ${
-                  copied
-                    ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/25"
-                    : "bg-gradient-to-r from-primary-400 to-primary-500 text-white shadow-lg shadow-primary-500/25 hover:shadow-xl hover:shadow-primary-500/30 active:scale-[0.98]"
-                }`}
-              >
-                {copied ? (
-                  <>
-                    <Check size={16} strokeWidth={2.5} />
-                    Đã sao chép! ✅
-                  </>
+            {/* QR Section */}
+            <div className="flex flex-col items-center p-6 gap-4">
+              <div className="p-3 rounded-2xl bg-white border border-primary-100 shadow-cute">
+                {qrDataUrl ? (
+                  <img src={qrDataUrl} alt="QR Code" className="h-48 w-48 object-contain" />
                 ) : (
-                  <>
-                    <Copy size={16} strokeWidth={2} />
-                    Sao chép link giới thiệu 🎀
-                  </>
+                  <div className="h-48 w-48 flex items-center justify-center text-neutral-300">
+                    <QrCode size={64} />
+                  </div>
                 )}
-              </button>
+              </div>
 
-              <p className="text-[11px] text-neutral-400 font-medium text-center">
-                Chia sẻ link hoặc mã QR cho bạn bè qua Zalo, Facebook, Messenger...
-              </p>
+              <div className="w-full text-center py-2 px-3 rounded-xl bg-primary-50 border border-primary-100">
+                <span className="text-[11px] font-bold text-neutral-500">Mã giới thiệu: </span>
+                <span className="font-mono text-xs font-black text-primary-600">{customerCode}</span>
+              </div>
+
+              <div className="grid grid-cols-2 gap-2 w-full">
+                <button
+                  onClick={handleCopyLink}
+                  className="flex items-center justify-center gap-1.5 rounded-xl bg-neutral-100 hover:bg-neutral-200 py-2.5 text-xs font-bold text-neutral-700 transition-colors"
+                >
+                  <Copy size={13} />
+                  <span>Sao chép link</span>
+                </button>
+                <button
+                  onClick={handleDownloadQR}
+                  className="flex items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-primary-500 to-primary-600 text-white py-2.5 text-xs font-bold shadow-cute hover:shadow-cute-lg transition-all"
+                >
+                  <QrCode size={13} />
+                  <span>Tải ảnh QR</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>,
@@ -222,4 +273,3 @@ export function InviteSection({
     </div>
   );
 }
-

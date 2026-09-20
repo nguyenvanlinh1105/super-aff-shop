@@ -218,25 +218,34 @@ export function PwaInstallSettingsCard() {
   }
 
   return (
-    <div className="rounded-3xl bg-white p-xl shadow-cute border border-primary-100/80">
-      <div className="mb-md flex items-center gap-sm">
-        <img src={versionedAsset("/meowback_lucky_cat_logo.png")} alt="" className="h-9 w-9 rounded-full object-cover" />
-        <h2 className="text-[15px] font-bold text-gray-900">Cài đặt ứng dụng</h2>
+    <div className="rounded-3xl bg-white p-6 sm:p-8 shadow-cute border border-primary-100/80">
+      <div className="flex items-center gap-3 pb-5 mb-5 border-b border-neutral-100">
+        <div className="w-11 h-11 rounded-2xl bg-primary-50 border border-primary-100 flex items-center justify-center shrink-0 shadow-2xs">
+          <img src={versionedAsset("/meowback_lucky_cat_logo.png")} alt="" className="h-8 w-8 rounded-xl object-cover" />
+        </div>
+        <div>
+          <h2 className="text-lg sm:text-xl font-black text-neutral-900 tracking-tight">Cài đặt ứng dụng MeowBack</h2>
+          <p className="text-xs sm:text-sm text-neutral-500 font-medium">Trải nghiệm mượt mà như app gốc ngay trên màn hình chính</p>
+        </div>
       </div>
       {installed ? (
-        <p className="text-[13px] text-gray-500">Bạn đã cài MeowBack lên máy này rồi 🎉</p>
+        <div className="rounded-2xl bg-emerald-50 border border-emerald-200 p-4 text-[13px] font-bold text-emerald-800 flex items-center gap-2">
+          <span>🎉</span> Bạn đã cài đặt ứng dụng MeowBack lên thiết bị này rồi!
+        </div>
       ) : (
-        <>
-          <p className="mb-md text-[13px] leading-relaxed text-gray-400">
-            Cài MeowBack lên {platform === "ios" ? "iPhone" : "điện thoại"} để mở nhanh hơn, dùng như một ứng dụng thật.
+        <div className="flex flex-col gap-4">
+          <p className="text-[13.5px] leading-relaxed text-neutral-600 font-medium">
+            Cài đặt MeowBack lên {platform === "ios" ? "iPhone" : "điện thoại"} giúp bạn mở ứng dụng nhanh chóng chỉ với 1 chạm, nhận thông báo tiền hoàn và mua sắm tiện lợi hơn.
           </p>
-          <button
-            onClick={handleInstallClick}
-            className="rounded-2xl bg-primary-500 px-lg py-[10px] text-[13px] font-bold text-white shadow-md shadow-primary-500/30 transition-transform active:scale-[0.97]"
-          >
-            {platform === "ios" ? "Xem hướng dẫn cài đặt" : "Cài đặt ngay"}
-          </button>
-        </>
+          <div>
+            <button
+              onClick={handleInstallClick}
+              className="rounded-full bg-gradient-to-r from-primary-400 to-primary-500 px-7 py-3 text-[14px] font-bold text-white shadow-cute hover:shadow-cute-lg transition-all active:scale-[0.98] cursor-pointer"
+            >
+              {platform === "ios" ? "Xem hướng dẫn thêm vào MH chính 📲" : "Cài đặt ứng dụng ngay 🎀"}
+            </button>
+          </div>
+        </div>
       )}
       {showIosSteps && <IosStepsModal onClose={() => setShowIosSteps(false)} />}
     </div>

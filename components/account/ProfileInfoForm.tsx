@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { User, Phone, Mail, Loader2, MapPin } from "lucide-react";
 import { useToast } from "@/components/ui/Toast";
 
@@ -14,6 +15,7 @@ interface ProfileInfoFormProps {
 }
 
 export function ProfileInfoForm({ initialData }: ProfileInfoFormProps) {
+  const router = useRouter();
   const { toast } = useToast();
   const [fullName, setFullName] = useState(initialData.fullName);
   const [phone, setPhone] = useState(initialData.phone || "");
@@ -53,6 +55,7 @@ export function ProfileInfoForm({ initialData }: ProfileInfoFormProps) {
         return;
       }
       toast.success("Thông tin cá nhân đã được cập nhật thành công! 🎀", "Đã lưu hồ sơ");
+      router.refresh();
     } catch {
       toast.error("Đã xảy ra lỗi kết nối tới máy chủ. Vui lòng thử lại sau.", "Lỗi hệ thống");
     } finally {

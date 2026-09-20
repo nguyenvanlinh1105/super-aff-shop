@@ -244,17 +244,18 @@ export function CommunityChat({
         )}
       </div>
 
-      {/* ═══ QUICK PROMPT SUGGESTIONS ═══ */}
-      <div className="px-4 py-2 border-t border-neutral-100 bg-white flex items-center gap-1.5 overflow-x-auto scrollbar-hide">
+      {/* ═══ QUICK PROMPT SUGGESTIONS (Hiển thị wrap tự nhiên, không trượt) ═══ */}
+      <div className="px-4 py-2 border-t border-neutral-100 bg-white flex flex-wrap items-center gap-1.5">
         <span className="text-[11px] font-bold text-neutral-400 shrink-0 flex items-center gap-1">
           <Sparkles size={11} className="text-primary-400" /> Gợi ý:
         </span>
         {QUICK_PROMPTS.map((prompt, idx) => (
           <button
             key={idx}
+            type="button"
             onClick={() => send(prompt)}
             disabled={sending}
-            className="shrink-0 text-[11px] font-bold text-neutral-600 hover:text-primary-600 bg-neutral-100 hover:bg-primary-50/80 border border-neutral-200/80 px-2.5 py-1 rounded-full transition-all disabled:opacity-50"
+            className="text-[11px] font-bold text-neutral-600 hover:text-primary-600 bg-neutral-100 hover:bg-primary-50/80 border border-neutral-200/80 px-2.5 py-1 rounded-full transition-all disabled:opacity-50 cursor-pointer"
           >
             {prompt}
           </button>

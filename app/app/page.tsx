@@ -359,131 +359,174 @@ export default async function CustomerHomePage() {
         </FadeUp>
       </div>
 
-      {/* ═══ BOTTOM PANELS (Editorial Split / Bento Asymmetric) ═══ */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10">
+      {/* ═══ 2 BẢNG CHÍNH: ĐƠN HÀNG & MỜI BẠN BÈ (Cân xứng 50-50, Dễ nhìn, Rõ ràng) ═══ */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
         
-        {/* LỊCH SỬ ĐƠN HÀNG (col-span-8) */}
-        <div className="lg:col-span-8 flex flex-col gap-6">
-          <FadeUp delay={0.6}>
-            <div className="flex items-end justify-between px-2">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-neutral-100 flex items-center justify-center shadow-xs border border-neutral-200 shrink-0 text-lg">
-                  📋
-                </div>
-                <div>
-                  <div className="text-[10px] font-extrabold uppercase tracking-widest text-neutral-500 mb-0.5">Activity</div>
-                  <h2 className="text-base font-extrabold text-neutral-900 tracking-tight">Lịch sử đơn hàng</h2>
-                </div>
-              </div>
-              <Link
-                href="/app/orders"
-                className="group flex items-center gap-2 text-[14px] font-bold text-neutral-500 hover:text-primary-600 transition-colors pb-2"
-              >
-                Xem tất cả
-                <div className="w-6 h-6 rounded-full bg-neutral-100 flex items-center justify-center group-hover:bg-primary-100 transition-colors">
-                  <ChevronRight size={14} strokeWidth={3} className="text-neutral-400 group-hover:text-primary-600" />
-                </div>
-              </Link>
-            </div>
-          </FadeUp>
-
-          <FadeUp delay={0.7}>
-            <div className="p-2 rounded-[2.5rem] bg-white ring-1 ring-neutral-100 shadow-sm">
-              <div className="rounded-[calc(2.5rem-0.5rem)] bg-neutral-50/50 p-4 sm:p-8 border border-neutral-100/50">
-                {recentOrders.length === 0 ? (
-                  <div className="flex flex-col items-center py-20 text-center">
-                    <div className="text-5xl mb-6 opacity-50 grayscale">🐾</div>
-                    <div className="text-[18px] font-extrabold text-neutral-900">Chưa có đơn hàng nào</div>
-                    <div className="mt-2 text-[15px] text-neutral-500 max-w-sm">Tạo link Shopee & TikTok Shop ngay để tích nơ hoàn tiền!</div>
+        {/* CỘT 1: LỊCH SỬ ĐƠN HÀNG */}
+        <FadeUp delay={0.6}>
+          <div className="h-full rounded-3xl bg-white border border-neutral-200/80 shadow-sm p-5 sm:p-6 flex flex-col justify-between gap-4">
+            <div>
+              {/* Header */}
+              <div className="flex items-center justify-between gap-3 mb-4">
+                <div className="flex items-center gap-2.5">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-primary-100 text-primary-600 shadow-2xs">
+                    <ShoppingBag size={18} strokeWidth={2.5} />
                   </div>
-                ) : (
-                  <ul className="flex flex-col gap-3">
-                    {recentOrders.map((order) => {
-                      const platformCode = order.platform?.code?.toUpperCase() ?? "";
-                      const platformColor = PLATFORM_STYLE[platformCode]?.color ?? "#FF6D9E";
-                      const productImage = order.trackingLink?.productImage ?? null;
-                      const productTitle = order.trackingLink?.productTitle ?? order.itemName ?? `Đơn hàng ${order.orderExternalId}`;
+                  <div>
+                    <div className="text-[10px] font-extrabold uppercase tracking-widest text-neutral-400">Hoạt động mua sắm</div>
+                    <h2 className="text-base font-extrabold text-neutral-900 tracking-tight">Đơn hàng gần đây</h2>
+                  </div>
+                </div>
 
-                      return (
-                        <li key={order.id}>
-                          <HoverCard y={-2} scale={1.005}>
-                            <div className="group flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-6 py-5 px-6 bg-white hover:bg-primary-50/30 rounded-[1.5rem] border border-neutral-100 shadow-sm transition-colors duration-300">
-                              <div className="flex items-center gap-5 flex-1 min-w-0">
-                                <ProductThumb image={productImage} color={platformColor} platform={platformCode} />
-                                
-                                <div className="flex-1 min-w-0 pr-4">
-                                  <p className="truncate text-[15px] font-bold text-neutral-900 tracking-tight">{productTitle}</p>
-                                  <div className="flex items-center gap-3 mt-1.5">
-                                    <span
-                                      className="text-[11px] font-extrabold uppercase tracking-wider"
-                                      style={{ color: platformColor }}
-                                    >
-                                      {order.platform?.name ?? platformCode}
-                                    </span>
-                                    <span className="w-1 h-1 rounded-full bg-neutral-200"></span>
-                                    <span className="text-[12px] font-medium text-neutral-400">{formatDate(order.createdAt)}</span>
-                                  </div>
-                                </div>
-                              </div>
+                <Link
+                  href="/app/orders"
+                  className="flex items-center gap-1 text-xs font-bold text-neutral-500 hover:text-primary-600 bg-neutral-100 hover:bg-primary-50 px-3 py-1.5 rounded-full transition-all"
+                >
+                  <span>Xem tất cả ({allOrders.length})</span>
+                  <ChevronRight size={13} strokeWidth={2.5} />
+                </Link>
+              </div>
 
-                              <div className="flex sm:flex-col items-center sm:items-end justify-between sm:justify-center gap-2 shrink-0 border-t sm:border-t-0 sm:border-l border-neutral-100 pt-4 sm:pt-0 sm:pl-6">
-                                <span className="text-[16px] font-black text-positive-deep whitespace-nowrap">
-                                  +{formatCurrency(order.customerRewardAmount)}
-                                </span>
-                                <span
-                                  className={`text-[10px] font-extrabold px-3 py-1 rounded-full uppercase tracking-widest whitespace-nowrap ${
-                                    order.orderStatus === "cancelled" || order.orderStatus === "rejected" || order.orderStatus === "clawback"
-                                      ? "bg-negative-bg text-negative"
-                                      : order.payoutStatus === "paid"
-                                      ? "bg-[#E6F8EE] text-[#2D8A56]"
-                                      : order.orderStatus === "processing"
-                                      ? "bg-[#EBF5FF] text-[#1E70BF]"
-                                      : order.orderStatus === "approved"
-                                      ? "bg-primary-100 text-primary-600"
-                                      : "bg-amber-50 text-amber-600"
-                                  }`}
-                                >
-                                  {order.orderStatus === "cancelled" || order.orderStatus === "rejected" || order.orderStatus === "clawback"
-                                    ? "Đã huỷ"
-                                    : order.payoutStatus === "paid"
-                                    ? "Đã rút"
-                                    : order.orderStatus === "processing"
-                                    ? "Đang đối soát"
-                                    : order.orderStatus === "approved"
-                                    ? "Sẵn sàng"
-                                    : "Chờ duyệt"}
-                                </span>
+              {/* Order List */}
+              {recentOrders.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-10 text-center gap-2">
+                  <img src="/meow-back-mascot.png" alt="" className="h-20 w-20 object-contain opacity-70" />
+                  <div className="text-sm font-extrabold text-neutral-800">Chưa có đơn hàng nào</div>
+                  <p className="text-xs text-neutral-500 max-w-xs leading-relaxed">
+                    Tạo link mua sắm Shopee & TikTok Shop ngay để nhận hoàn tiền tự động 🎀
+                  </p>
+                  <Link
+                    href="/app/refunds"
+                    className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-primary-50 border border-primary-200 px-4 py-1.5 text-xs font-bold text-primary-600 hover:bg-primary-100 transition-colors"
+                  >
+                    <span>Tạo link ngay</span>
+                    <ArrowUpRight size={13} />
+                  </Link>
+                </div>
+              ) : (
+                <div className="flex flex-col gap-2.5">
+                  {recentOrders.slice(0, 4).map((order) => {
+                    const platformCode = order.platform?.code?.toUpperCase() ?? "SHOPEE";
+                    const isCancelled = order.orderStatus === "cancelled" || order.orderStatus === "rejected" || order.orderStatus === "clawback";
+                    const isPaid = order.payoutStatus === "paid";
+                    const isApproved = order.orderStatus === "approved";
+                    const isProcessing = order.orderStatus === "processing";
+                    const productImage = order.trackingLink?.productImage ?? null;
+                    const productTitle = order.trackingLink?.productTitle ?? order.itemName ?? `Đơn hàng ${order.orderExternalId}`;
+
+                    return (
+                      <Link
+                        key={order.id}
+                        href="/app/orders"
+                        className="group flex items-center justify-between gap-3 p-3 rounded-2xl bg-neutral-50/70 hover:bg-primary-50/40 border border-neutral-200/60 hover:border-primary-200 transition-all"
+                      >
+                        {/* Thumbnail & Title */}
+                        <div className="flex items-center gap-3 min-w-0 flex-1">
+                          <div className="relative shrink-0">
+                            {productImage ? (
+                              <img
+                                src={productImage}
+                                alt=""
+                                className="h-11 w-11 rounded-xl object-cover border border-neutral-200"
+                              />
+                            ) : (
+                              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white border border-primary-100 text-primary-500 shadow-2xs font-extrabold text-xs">
+                                {platformCode === "SHOPEE" ? "🛍️" : platformCode === "TIKTOK" ? "🎵" : "📦"}
                               </div>
+                            )}
+                          </div>
+
+                          <div className="min-w-0 flex-1 pr-1">
+                            <p className="truncate text-[13px] font-bold text-neutral-900 group-hover:text-primary-600 transition-colors">
+                              {productTitle}
+                            </p>
+                            <div className="flex items-center gap-2 mt-0.5 text-[11px] text-neutral-400 font-medium">
+                              <span
+                                className="font-extrabold uppercase text-[10px] px-1.5 py-0.2 rounded bg-white border border-neutral-200"
+                                style={{ color: PLATFORM_STYLE[platformCode]?.color ?? "#FF6D9E" }}
+                              >
+                                {order.platform?.name ?? platformCode}
+                              </span>
+                              <span>•</span>
+                              <span>{formatDate(order.createdAt)}</span>
                             </div>
-                          </HoverCard>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                )}
-              </div>
+                          </div>
+                        </div>
+
+                        {/* Amount & Status Badge */}
+                        <div className="shrink-0 flex flex-col items-end gap-1 text-right">
+                          <span
+                            className={`text-[14px] font-black tabular-nums ${
+                              isCancelled
+                                ? "text-neutral-400 line-through"
+                                : isPaid
+                                ? "text-emerald-600"
+                                : isApproved
+                                ? "text-primary-600"
+                                : "text-amber-600"
+                            }`}
+                          >
+                            {isCancelled ? "" : "+"}{formatCurrency(order.customerRewardAmount)}
+                          </span>
+
+                          <span
+                            className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider ${
+                              isCancelled
+                                ? "bg-rose-50 text-rose-600 border border-rose-200"
+                                : isPaid
+                                ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                                : isProcessing
+                                ? "bg-blue-50 text-blue-700 border border-blue-200"
+                                : isApproved
+                                ? "bg-primary-100 text-primary-700 border border-primary-200"
+                                : "bg-amber-50 text-amber-700 border border-amber-200"
+                            }`}
+                          >
+                            {isCancelled
+                              ? "Đã huỷ"
+                              : isPaid
+                              ? "Đã rút"
+                              : isProcessing
+                              ? "Đối soát"
+                              : isApproved
+                              ? "Sẵn sàng"
+                              : "Chờ duyệt"}
+                          </span>
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </div>
+              )}
             </div>
-          </FadeUp>
-        </div>
 
-        {/* PANEL RIGHT: Referral & Quick Nav (col-span-4) */}
-        <div className="lg:col-span-4 flex flex-col gap-10">
-
-          <FadeUp delay={0.9}>
-            <HoverCard y={-3} scale={1.01}>
-              <div className="h-full flex flex-col gap-6">
-                <InviteSection
-                  customerCode={customerCode}
-                  qrDataUrl={qrDataUrl}
-                  referralRate={referralRate}
-                  maxReferralOrders={maxReferralOrders}
-                  referralValidityMonths={referralValidityMonths}
-                  isPartner={customer?.isPartner ?? false}
-                />
+            {/* Footer action */}
+            {allOrders.length > 0 && (
+              <div className="pt-3 border-t border-neutral-100 flex items-center justify-between text-xs">
+                <span className="text-neutral-400 font-medium">Ghi nhận hoàn tiền trong 24h</span>
+                <Link
+                  href="/app/orders"
+                  className="font-bold text-primary-600 hover:text-primary-700 inline-flex items-center gap-1"
+                >
+                  <span>Xem toàn bộ {allOrders.length} đơn</span>
+                  <ChevronRight size={12} strokeWidth={2.5} />
+                </Link>
               </div>
-            </HoverCard>
-          </FadeUp>
-        </div>
+            )}
+          </div>
+        </FadeUp>
+
+        {/* CỘT 2: MỜI BẠN BÈ */}
+        <FadeUp delay={0.7}>
+          <InviteSection
+            customerCode={customerCode}
+            qrDataUrl={qrDataUrl}
+            referralRate={referralRate}
+            maxReferralOrders={maxReferralOrders}
+            referralValidityMonths={referralValidityMonths}
+            isPartner={customer?.isPartner ?? false}
+          />
+        </FadeUp>
       </div>
     </div>
   );

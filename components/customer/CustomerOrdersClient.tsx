@@ -175,21 +175,15 @@ export function CustomerOrdersClient({ orders, totalPages, currentPage, counts }
           </div>
         ) : (
           <div className="flex flex-col gap-sm">
-            <AnimatePresence mode="popLayout">
-              {orders.map((o) => (
-                <motion.div
-                  layout
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.95 }}
-                  transition={{ duration: 0.2 }}
-                  key={o.id}
-                  className={`group flex flex-col sm:flex-row sm:items-center justify-between gap-md rounded-2xl border p-md transition-colors ${
-                    o.sourceType === "referral"
-                      ? "border-purple-100 bg-purple-50/30 hover:border-purple-200"
-                      : "border-primary-100/60 hover:border-primary-300 hover:bg-primary-50/30"
-                  }`}
-                >
+            {orders.map((o) => (
+              <div
+                key={o.id}
+                className={`group flex flex-col sm:flex-row sm:items-center justify-between gap-md rounded-2xl border p-md transition-colors ${
+                  o.sourceType === "referral"
+                    ? "border-purple-100 bg-purple-50/30 hover:border-purple-200"
+                    : "border-primary-100/60 hover:border-primary-300 hover:bg-primary-50/30"
+                }`}
+              >
                   <div className="flex items-start gap-md">
                     <div
                       className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ring-1 ${
@@ -289,9 +283,8 @@ export function CustomerOrdersClient({ orders, totalPages, currentPage, counts }
                       </motion.div>
                     )}
                   </AnimatePresence>
-                </motion.div>
+                </div>
               ))}
-            </AnimatePresence>
           </div>
         )}
         <Pagination totalPages={totalPages} currentPage={currentPage} />

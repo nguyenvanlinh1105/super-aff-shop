@@ -1,7 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
   Bell,
@@ -13,12 +12,10 @@ import {
   Check,
   ArrowRight,
   Clock,
-  Filter,
-  Sparkles,
   CheckCheck,
   RefreshCw,
 } from "lucide-react";
-import { IllustCatEmpty } from "@/components/icons/CatRibbonIcons";
+import { Pagination } from "@/components/ui/Pagination";
 import { useToast } from "@/components/ui/Toast";
 
 type Notification = {
@@ -36,7 +33,11 @@ interface Props {
   setNotifications: React.Dispatch<React.SetStateAction<Notification[]>>;
   unreadCount: number;
   setUnreadCount: React.Dispatch<React.SetStateAction<number>>;
-  initialTotalPages: number;
+  currentPage: number;
+  totalPages: number;
+  categoryCounts: Record<string, number>;
+  currentCategory: string;
+  currentOnlyUnread: boolean;
   onMarkRead: (n: Notification) => void;
 }
 
@@ -147,16 +148,17 @@ export function NotificationsClient({
   setNotifications,
   unreadCount,
   setUnreadCount,
-  initialTotalPages,
+  currentPage,
+  totalPages,
+  categoryCounts,
+  currentCategory,
+  currentOnlyUnread,
   onMarkRead,
 }: Props) {
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const { toast } = useToast();
-  const [activeCategory, setActiveCategory] = useState("all");
-  const [onlyUnread, setOnlyUnread] = useState(false);
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(initialTotalPages);
-  const [loadingMore, setLoadingMore] = useState(false);
 
   const handleCardClick = (n: Notification) => {
     onMarkRead(n);
@@ -171,70 +173,89 @@ export function NotificationsClient({
     toast.success(`Đã đánh dấu đã đọc "${n.title}" 🎀`, "Đã đọc");
   };
 
-  const loadMore = async () => {
-    setLoadingMore(true);
-    const nextPage = page + 1;
-    try {
-      const res = await fetch(`/api/notifications?page=${nextPage}`);
-      if (res.ok) {
-        const data = await res.json();
-        setNotifications((prev) => {
-          const seen = new Set(prev.map((x) => x.id));
-          const fresh = (data.notifications as Notification[]).filter((x) => !seen.has(x.id));
-          return [...prev, ...fresh];
-        });
-        setPage(nextPage);
-        setTotalPages(data.totalPages);
-      }
-    } catch {
-      toast.error("Không thể tải thêm thông báo", "Lỗi");
-    } finally {
-      setLoadingMore(false);
+  const handleCategoryChange = (catId: string) => {
+    const params = new URLSearchParams(searchParams);
+    if (catId === "all") {
+      params.delete("category");
+    } else {
+      params.set("category", catId);
     }
+    params.delete("page"); // Reset về trang 1
+    router.push(`${pathname}?${params.toString()}`);
   };
 
-  // Category counts
-  const categoryCounts = CATEGORIES.reduce((acc, cat) => {
-    if (cat.id === "all") {
-      acc[cat.id] = notifications.length;
+  const handleToggleUnread = (checked: boolean) => {
+    const params = new URLSearchParams(searchParams);
+    if (checked) {
+      params.set("unread", "true");
     } else {
-      acc[cat.id] = notifications.filter((n) => n.type === cat.id).length;
+      params.delete("unread");
     }
-    return acc;
-  }, {} as Record<string, number>);
-
-  // Filtered notifications
-  const filtered = notifications.filter((n) => {
-    if (activeCategory !== "all" && n.type !== activeCategory) return false;
-    if (onlyUnread && n.isRead) return false;
-    return true;
-  });
+    params.delete("page"); // Reset về trang 1
+    router.push(`${pathname}?${params.toString()}`);
+  };
 
   return (
     <div className="flex flex-col gap-5">
-      {/* ═══ FILTER BAR ═══ */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-3 sm:p-4 rounded-2xl border border-neutral-200/80 shadow-xs">
-        {/* Category Pills */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-hide">
+      {/* ═══ FILTER BAR (Dễ nhìn, không trượt ngang, hiển thị trọn vẹn) ═══ */}
+      <div className="bg-white p-4 sm:p-5 rounded-3xl border border-primary-100/90 shadow-cute flex flex-col gap-3.5">
+        {/* Header hàng lọc: Tiêu đề + Nút bật/tắt Chỉ tin chưa đọc */}
+        <div className="flex items-center justify-between gap-3 flex-wrap">
+          <div className="flex items-center gap-2">
+            <span className="text-[12px] font-black uppercase tracking-wider text-neutral-400">
+              Lọc theo danh mục
+            </span>
+            <span className="text-[11px] font-bold text-neutral-500 bg-neutral-100 px-2 py-0.5 rounded-full">
+              {CATEGORIES.length} nhóm tin
+            </span>
+          </div>
+
+          {/* Toggle Chỉ tin chưa đọc - Dạng pill switch bấm êm tay */}
+          <button
+            type="button"
+            onClick={() => handleToggleUnread(!currentOnlyUnread)}
+            className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer select-none ${
+              currentOnlyUnread
+                ? "bg-rose-50 border border-rose-200 text-rose-600 shadow-2xs"
+                : "bg-neutral-50 hover:bg-neutral-100/80 border border-neutral-200/70 text-neutral-600"
+            }`}
+          >
+            <span
+              className={`w-2 h-2 rounded-full transition-colors ${
+                currentOnlyUnread ? "bg-rose-500 animate-pulse" : "bg-neutral-300"
+              }`}
+            />
+            <span>Chỉ tin chưa đọc</span>
+            {currentOnlyUnread && (
+              <span className="text-[10px] bg-rose-200/70 text-rose-700 px-1.5 py-0.2 rounded-full font-black">
+                Bật
+              </span>
+            )}
+          </button>
+        </div>
+
+        {/* Danh sách 6 nút danh mục - Hiển thị wrap tự nhiên trên mọi màn hình, không trượt ngang */}
+        <div className="flex flex-wrap items-center gap-2">
           {CATEGORIES.map((cat) => {
             const Icon = cat.icon;
-            const isActive = activeCategory === cat.id;
+            const isActive = currentCategory === cat.id;
             const count = categoryCounts[cat.id] || 0;
             return (
               <button
                 key={cat.id}
-                onClick={() => setActiveCategory(cat.id)}
-                className={`flex shrink-0 items-center gap-1.5 rounded-xl px-3.5 py-2 text-xs font-bold transition-all ${
+                type="button"
+                onClick={() => handleCategoryChange(cat.id)}
+                className={`flex items-center gap-2 rounded-xl px-3.5 py-2 text-xs sm:text-[13px] font-bold transition-all cursor-pointer select-none ${
                   isActive
-                    ? "bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-cute"
-                    : "bg-neutral-50 hover:bg-primary-50/60 text-neutral-600 hover:text-primary-600 border border-neutral-200/60"
+                    ? "bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-cute scale-[1.02]"
+                    : "bg-neutral-50 hover:bg-primary-50/60 text-neutral-600 hover:text-primary-600 border border-neutral-200/70 hover:border-primary-200"
                 }`}
               >
-                <Icon size={13} className={isActive ? "text-white" : "text-neutral-400"} />
+                <Icon size={14} className={isActive ? "text-white" : "text-neutral-400"} />
                 <span>{cat.label}</span>
                 {count > 0 && (
                   <span
-                    className={`flex h-4 min-w-[16px] items-center justify-center rounded-full px-1 text-[10px] font-black ${
+                    className={`flex h-4 min-w-[18px] items-center justify-center rounded-full px-1 text-[10px] font-black ${
                       isActive ? "bg-white/25 text-white" : "bg-neutral-200/80 text-neutral-700"
                     }`}
                   >
@@ -245,23 +266,10 @@ export function NotificationsClient({
             );
           })}
         </div>
-
-        {/* Unread Toggle */}
-        <div className="shrink-0 flex items-center gap-2 self-end sm:self-center border-t sm:border-t-0 pt-2 sm:pt-0 border-neutral-100">
-          <label className="flex items-center gap-2 cursor-pointer select-none text-xs font-bold text-neutral-600 hover:text-neutral-900">
-            <input
-              type="checkbox"
-              checked={onlyUnread}
-              onChange={(e) => setOnlyUnread(e.target.checked)}
-              className="h-4 w-4 rounded text-primary-500 focus:ring-primary-400 border-neutral-300"
-            />
-            <span>Chỉ tin chưa đọc</span>
-          </label>
-        </div>
       </div>
 
       {/* ═══ NOTIFICATION LIST ═══ */}
-      {filtered.length === 0 ? (
+      {notifications.length === 0 ? (
         <div className="flex flex-col items-center justify-center gap-3 rounded-3xl bg-white py-14 px-6 text-center border border-neutral-200/80 shadow-sm">
           <div className="relative">
             <img
@@ -272,18 +280,18 @@ export function NotificationsClient({
           </div>
           <div className="max-w-md">
             <h3 className="text-base font-extrabold text-neutral-900">
-              {onlyUnread ? "Tuyệt vời! Bạn không có tin chưa đọc 🐾" : "Chưa có thông báo nào trong mục này 🎀"}
+              {currentOnlyUnread ? "Tuyệt vời! Bạn không có tin chưa đọc 🐾" : "Chưa có thông báo nào trong mục này 🎀"}
             </h3>
             <p className="mt-1 text-xs sm:text-sm text-neutral-500 leading-relaxed font-medium">
-              {onlyUnread
+              {currentOnlyUnread
                 ? "Tất cả các tin thông báo đã được bạn xem qua. Bạn có thể bỏ lọc để xem lại lịch sử trước đó."
                 : "Mọi cập nhật về duyệt tiền hoàn, thưởng giới thiệu bạn bè và các sự kiện hot sẽ xuất hiện ngay tại đây."}
             </p>
           </div>
-          {onlyUnread ? (
+          {currentOnlyUnread ? (
             <button
-              onClick={() => setOnlyUnread(false)}
-              className="mt-2 inline-flex items-center gap-2 rounded-full bg-primary-50 border border-primary-200 px-5 py-2 text-xs font-bold text-primary-600 hover:bg-primary-100 transition-colors"
+              onClick={() => handleToggleUnread(false)}
+              className="mt-2 inline-flex items-center gap-2 rounded-full bg-primary-50 border border-primary-200 px-5 py-2 text-xs font-bold text-primary-600 hover:bg-primary-100 transition-colors cursor-pointer"
             >
               <RefreshCw size={13} />
               <span>Xem toàn bộ thông báo</span>
@@ -300,7 +308,7 @@ export function NotificationsClient({
         </div>
       ) : (
         <div className="flex flex-col gap-3">
-          {filtered.map((n) => {
+          {notifications.map((n) => {
             const config = TYPE_CONFIG[n.type] ?? TYPE_CONFIG.system;
             const Icon = config.icon;
 
@@ -394,28 +402,8 @@ export function NotificationsClient({
             );
           })}
 
-          {/* ═══ PAGINATION: LOAD MORE ═══ */}
-          {page < totalPages && (
-            <div className="mt-3 flex justify-center">
-              <button
-                onClick={loadMore}
-                disabled={loadingMore}
-                className="inline-flex items-center gap-2 rounded-full border border-primary-200 bg-white px-6 py-2.5 text-xs sm:text-[13px] font-bold text-primary-600 shadow-cute hover:bg-primary-50 hover:shadow-cute-lg transition-all disabled:opacity-50"
-              >
-                {loadingMore ? (
-                  <>
-                    <RefreshCw size={14} className="animate-spin" />
-                    <span>Đang tải thêm...</span>
-                  </>
-                ) : (
-                  <>
-                    <span>Tải thêm thông báo cũ hơn 🐾</span>
-                    <ArrowRight size={14} />
-                  </>
-                )}
-              </button>
-            </div>
-          )}
+          {/* ═══ PAGINATION (TỐI ĐA 10 THÔNG BÁO / TRANG) ═══ */}
+          <Pagination totalPages={totalPages} currentPage={currentPage} />
         </div>
       )}
     </div>

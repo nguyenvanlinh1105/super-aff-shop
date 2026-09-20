@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import QRCode from "qrcode";
 import { Send, CheckCircle2, ExternalLink, Unlink, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/Button";
@@ -9,6 +10,7 @@ type LinkStatus = { linked: boolean; telegramUsername: string | null };
 type LinkCodeResult = { code: string; expiresInMinutes: number; deepLink: string };
 
 export function TelegramLinkCard() {
+  const router = useRouter();
   const [status, setStatus] = useState<LinkStatus | null>(null);
   const [linkResult, setLinkResult] = useState<LinkCodeResult | null>(null);
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
@@ -56,6 +58,7 @@ export function TelegramLinkCard() {
     setLoading(false);
     setLinkResult(null);
     loadStatus();
+    router.refresh();
   }
 
   return (

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Bell, MessagesSquare, BellRing, TrendingUp, CheckCheck, Sparkles } from "lucide-react";
 import { NotificationsClient } from "./NotificationsClient";
 import { CommunityChat } from "./CommunityChat";
@@ -31,9 +31,13 @@ type Tab = "notifications" | "chat";
 interface Props {
   initialNotifications: Notification[];
   initialUnreadCount: number;
-  initialTotalPages: number;
+  currentPage: number;
+  totalPages: number;
   initialTotalCount: number;
   cashbackCount: number;
+  categoryCounts: Record<string, number>;
+  currentCategory: string;
+  currentOnlyUnread: boolean;
   totalChatCount: number;
   initialChatMessages: ChatMessage[];
   currentUserId: string;
@@ -43,9 +47,13 @@ interface Props {
 export function NotificationsPageClient({
   initialNotifications,
   initialUnreadCount,
-  initialTotalPages,
+  currentPage,
+  totalPages,
   initialTotalCount,
   cashbackCount,
+  categoryCounts,
+  currentCategory,
+  currentOnlyUnread,
   totalChatCount,
   initialChatMessages,
   currentUserId,
@@ -56,6 +64,14 @@ export function NotificationsPageClient({
   const [notifications, setNotifications] = useState(initialNotifications);
   const [unreadCount, setUnreadCount] = useState(initialUnreadCount);
   const [markingAll, setMarkingAll] = useState(false);
+
+  useEffect(() => {
+    setNotifications(initialNotifications);
+  }, [initialNotifications]);
+
+  useEffect(() => {
+    setUnreadCount(initialUnreadCount);
+  }, [initialUnreadCount]);
 
   const handleMarkAllRead = async () => {
     if (unreadCount === 0 || markingAll) return;
@@ -240,50 +256,48 @@ export function NotificationsPageClient({
         </div>
       </div>
 
-      {/* ═══ 3. SEGMENTED TAB SWITCHER ═══ */}
-      <div className="flex items-center justify-between gap-4 border-b border-neutral-200 pb-3">
-        <div className="inline-flex rounded-2xl bg-neutral-100/90 p-1.5 border border-neutral-200/80 shadow-2xs">
-          <button
-            onClick={() => setTab("notifications")}
-            className={`flex items-center gap-2 rounded-xl px-5 py-2.5 text-xs sm:text-[13px] font-bold transition-all ${
-              tab === "notifications"
-                ? "bg-white text-primary-600 shadow-cute"
-                : "text-neutral-600 hover:text-neutral-900"
-            }`}
-          >
-            <Bell size={15} className={tab === "notifications" ? "text-primary-500" : "text-neutral-400"} />
-            <span>Thông báo của bạn</span>
-            {unreadCount > 0 && (
-              <span
-                className={`flex h-5 min-w-[20px] items-center justify-center rounded-full px-1.5 text-[10.5px] font-black ${
-                  tab === "notifications" ? "bg-primary-500 text-white" : "bg-rose-500 text-white"
-                }`}
-              >
-                {unreadCount > 99 ? "99+" : unreadCount}
-              </span>
-            )}
-          </button>
+      {/* ═══ 3. SEGMENTED TAB SWITCHER (2 Cột đầy đủ, không trượt, chạm bấm dễ dàng) ═══ */}
+      <div className="grid grid-cols-2 gap-2 p-1.5 bg-white rounded-3xl border border-primary-100/90 shadow-cute">
+        <button
+          type="button"
+          onClick={() => setTab("notifications")}
+          className={`flex items-center justify-center gap-2 sm:gap-2.5 py-3 px-3 sm:px-5 rounded-2xl text-[13.5px] sm:text-[15px] font-black transition-all cursor-pointer select-none ${
+            tab === "notifications"
+              ? "bg-gradient-to-r from-primary-400 via-primary-500 to-pink-500 text-white shadow-cute"
+              : "bg-neutral-50/70 hover:bg-primary-50/60 text-neutral-600 hover:text-primary-600"
+          }`}
+        >
+          <Bell size={18} strokeWidth={tab === "notifications" ? 2.5 : 2} className={tab === "notifications" ? "text-white" : "text-neutral-500"} />
+          <span>Thông báo cá nhân</span>
+          {unreadCount > 0 && (
+            <span
+              className={`flex h-5 min-w-[20px] items-center justify-center rounded-full px-1.5 text-[11px] font-black ${
+                tab === "notifications"
+                  ? "bg-white text-primary-600 shadow-2xs"
+                  : "bg-rose-500 text-white"
+              }`}
+            >
+              {unreadCount > 99 ? "99+" : unreadCount}
+            </span>
+          )}
+        </button>
 
-          <button
-            onClick={() => setTab("chat")}
-            className={`flex items-center gap-2 rounded-xl px-5 py-2.5 text-xs sm:text-[13px] font-bold transition-all ${
-              tab === "chat"
-                ? "bg-white text-primary-600 shadow-cute"
-                : "text-neutral-600 hover:text-neutral-900"
-            }`}
-          >
-            <MessagesSquare size={15} className={tab === "chat" ? "text-primary-500" : "text-neutral-400"} />
-            <span>Phòng chat cộng đồng</span>
-            <span className="flex h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-          </button>
-        </div>
-
-        {tab === "notifications" && unreadCount > 0 && (
-          <div className="hidden sm:flex items-center gap-1.5 text-xs font-semibold text-neutral-500">
-            <Sparkles size={14} className="text-primary-500" />
-            <span>Bạn có <span className="font-bold text-primary-600">{unreadCount}</span> thông báo mới</span>
-          </div>
-        )}
+        <button
+          type="button"
+          onClick={() => setTab("chat")}
+          className={`flex items-center justify-center gap-2 sm:gap-2.5 py-3 px-3 sm:px-5 rounded-2xl text-[13.5px] sm:text-[15px] font-black transition-all cursor-pointer select-none ${
+            tab === "chat"
+              ? "bg-gradient-to-r from-primary-400 via-primary-500 to-pink-500 text-white shadow-cute"
+              : "bg-neutral-50/70 hover:bg-primary-50/60 text-neutral-600 hover:text-primary-600"
+          }`}
+        >
+          <MessagesSquare size={18} strokeWidth={tab === "chat" ? 2.5 : 2} className={tab === "chat" ? "text-white" : "text-neutral-500"} />
+          <span>Chat cộng đồng</span>
+          <span className="flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+            <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="hidden sm:inline">Online</span>
+          </span>
+        </button>
       </div>
 
       {/* ═══ 4. TAB CONTENTS ═══ */}
@@ -293,7 +307,11 @@ export function NotificationsPageClient({
           setNotifications={setNotifications}
           unreadCount={unreadCount}
           setUnreadCount={setUnreadCount}
-          initialTotalPages={initialTotalPages}
+          currentPage={currentPage}
+          totalPages={totalPages}
+          categoryCounts={categoryCounts}
+          currentCategory={currentCategory}
+          currentOnlyUnread={currentOnlyUnread}
           onMarkRead={handleMarkSingleRead}
         />
       )}

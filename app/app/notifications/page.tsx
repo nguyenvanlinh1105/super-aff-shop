@@ -3,31 +3,57 @@ import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { NotificationsPageClient } from "@/components/customer/NotificationsPageClient";
 
-export default async function NotificationsPage() {
+export default async function NotificationsPage({
+  searchParams,
+}: {
+  searchParams?: { page?: string; tab?: string; category?: string; unread?: string };
+}) {
   const session = await getSession();
   if (!session) redirect("/login");
 
-  const limit = 20;
+  const page = Math.max(1, Number(searchParams?.page) || 1);
+  const limit = 10; // Tối đa 10 thông báo 1 page theo yêu cầu
+  const skip = (page - 1) * limit;
+  const category = searchParams?.category || "all";
+  const onlyUnread = searchParams?.unread === "true";
+
+  const where: any = { userId: session.userId };
+  if (category !== "all") {
+    where.type = category;
+  }
+  if (onlyUnread) {
+    where.isRead = false;
+  }
+
   const [
     notifications,
     unreadCount,
     totalCount,
+    filteredCount,
     cashbackCount,
+    categoryGroup,
     totalChatCount,
     chatMessages,
   ] = await Promise.all([
     prisma.notification.findMany({
-      where: { userId: session.userId },
+      where,
       orderBy: { createdAt: "desc" },
+      skip,
       take: limit,
     }),
     prisma.notification.count({ where: { userId: session.userId, isRead: false } }),
     prisma.notification.count({ where: { userId: session.userId } }),
+    prisma.notification.count({ where }),
     prisma.notification.count({
       where: {
         userId: session.userId,
         type: { in: ["order_approved", "payment_paid", "referral_bonus"] },
       },
+    }),
+    prisma.notification.groupBy({
+      by: ["type"],
+      where: { userId: session.userId, ...(onlyUnread ? { isRead: false } : {}) },
+      _count: { id: true },
     }),
     prisma.chatMessage.count(),
     prisma.chatMessage.findMany({
@@ -36,6 +62,14 @@ export default async function NotificationsPage() {
       include: { user: { select: { fullName: true, role: true } } },
     }),
   ]);
+
+  const totalPages = Math.ceil(filteredCount / limit);
+  const categoryCounts: Record<string, number> = {
+    all: onlyUnread ? unreadCount : totalCount,
+  };
+  categoryGroup.forEach((g) => {
+    categoryCounts[g.type] = g._count.id;
+  });
 
   return (
     <NotificationsPageClient
@@ -49,9 +83,13 @@ export default async function NotificationsPage() {
         createdAt: n.createdAt.toISOString(),
       }))}
       initialUnreadCount={unreadCount}
-      initialTotalPages={Math.ceil(totalCount / limit)}
+      currentPage={page}
+      totalPages={totalPages}
       initialTotalCount={totalCount}
       cashbackCount={cashbackCount}
+      categoryCounts={categoryCounts}
+      currentCategory={category}
+      currentOnlyUnread={onlyUnread}
       totalChatCount={totalChatCount}
       initialChatMessages={chatMessages
         .slice()
