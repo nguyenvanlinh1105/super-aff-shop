@@ -122,7 +122,7 @@ export default async function RootPage() {
   // chứ KHÔNG dùng payoutStatus: "paid" (đã chuyển khoản ngân hàng thật) —
   // toàn hệ thống hiện chưa có đơn nào payoutStatus=paid nên dùng field đó
   // sẽ luôn hiện 0đ, sai lệch với số tiền khách thực sự đã nhận vào ví.
-  const [approvedSumAgg, distinctApprovedCustomers] = await Promise.all([
+  const [approvedSumAgg, distinctApprovedCustomers, activeRule] = await Promise.all([
     prisma.order.aggregate({
       where: { orderStatus: "approved" },
       _sum: { customerRewardAmount: true },
@@ -132,9 +132,15 @@ export default async function RootPage() {
       distinct: ["customerId"],
       select: { customerId: true },
     }),
+    prisma.commissionRule.findFirst({
+      where: { active: true },
+      orderBy: { createdAt: "desc" },
+    }),
   ]);
   const totalPaidOut = Number(approvedSumAgg._sum.customerRewardAmount ?? 0);
   const totalCustomers = distinctApprovedCustomers.length;
+  const customerRate = activeRule?.customerRate != null ? Number(activeRule.customerRate) : 80;
+  const taxRate = activeRule?.taxRate != null ? Number(activeRule.taxRate) : 10.98;
 
   return (
     <>
@@ -145,6 +151,8 @@ export default async function RootPage() {
       <LandingPage
         totalPaidOut={totalPaidOut}
         totalCustomers={totalCustomers}
+        customerRate={customerRate}
+        taxRate={taxRate}
       />
     </>
   );

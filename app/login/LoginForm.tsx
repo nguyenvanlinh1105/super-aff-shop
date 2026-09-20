@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Mail, Lock, Eye, EyeOff, ArrowRight, Loader2, Key, ShieldCheck, MailWarning, ArrowLeft } from "lucide-react";
 import { GoogleIcon } from "@/components/icons/PlatformIcons";
 import { useToast } from "@/components/ui/Toast";
+import { triggerSuccessFireworks } from "@/components/ui/BloomAndFireworkEffect";
 
 const GOOGLE_ERROR_MESSAGES: Record<string, string> = {
   access_denied: "Bạn đã hủy cấp quyền đăng nhập Google.",
@@ -85,9 +86,12 @@ export function LoginForm({ next, googleError }: { next?: string; googleError?: 
         return;
       }
 
-      toast.success("Đăng nhập thành công! Đang chuyển hướng...", "Thành công");
-      router.push(next || data.redirectTo);
-      router.refresh();
+      toast.success("Đăng nhập thành công! Đang chuyển hướng... 🌸", "Thành công");
+      triggerSuccessFireworks();
+      setTimeout(() => {
+        router.push(next || data.redirectTo);
+        router.refresh();
+      }, 450);
     } catch {
       setLoading(false);
       toast.error("Không thể kết nối tới máy chủ, vui lòng thử lại.", "Lỗi kết nối");
@@ -121,9 +125,12 @@ export function LoginForm({ next, googleError }: { next?: string; googleError?: 
       }
 
       const data = await res.json();
-      toast.success("Xác thực 2 bước thành công! 🎀", "Thành công");
-      router.push(next || data.redirectTo);
-      router.refresh();
+      toast.success("Xác thực 2 bước thành công! 🌸", "Thành công");
+      triggerSuccessFireworks();
+      setTimeout(() => {
+        router.push(next || data.redirectTo);
+        router.refresh();
+      }, 450);
     } catch {
       setLoading(false);
       toast.error("Lỗi xác thực hệ thống, vui lòng thử lại.", "Lỗi kết nối");

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { User, Phone, Mail, Lock, Eye, EyeOff, ArrowRight, ArrowLeft, Loader2, type LucideIcon } from "lucide-react";
 import { GoogleIcon } from "@/components/icons/PlatformIcons";
 import { useToast } from "@/components/ui/Toast";
+import { triggerSuccessFireworks } from "@/components/ui/BloomAndFireworkEffect";
 
 function IconField({
   icon: Icon,
@@ -116,9 +117,12 @@ export function RegisterForm() {
       }
 
       const data = await res.json();
-      toast.success("Đăng ký tài khoản thành công! Đang chuyển hướng... 🎀", "Thành công");
-      router.push(data.redirectTo);
-      router.refresh();
+      toast.success("Đăng ký tài khoản thành công! Đang chuyển hướng... 🌸", "Thành công");
+      triggerSuccessFireworks();
+      setTimeout(() => {
+        router.push(data.redirectTo);
+        router.refresh();
+      }, 450);
     } catch {
       setLoading(false);
       toast.error("Không kết nối được tới máy chủ, vui lòng thử lại.", "Lỗi kết nối");

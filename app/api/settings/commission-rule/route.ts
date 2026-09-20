@@ -44,3 +44,20 @@ export async function POST(req: NextRequest) {
 
   return NextResponse.json({ rule });
 }
+
+export async function GET() {
+  const rule = await prisma.commissionRule.findFirst({
+    where: { active: true },
+    orderBy: { createdAt: "desc" },
+  });
+
+  return NextResponse.json({
+    customerRate: rule ? Number(rule.customerRate) : 80,
+    taxRate: rule ? Number(rule.taxRate) : 10.98,
+    systemRate: rule ? Number(rule.systemRate) : 20,
+    referralRate: rule ? Number(rule.referralRate) : 0.05,
+    maxReferralOrders: rule?.maxReferralOrders ?? 5,
+    referralValidityMonths: rule?.referralValidityMonths ?? 6,
+  });
+}
+

@@ -1,5 +1,6 @@
-import { UserPlus, Wand2, ShoppingBag } from "lucide-react";
-import { StickyStack } from "@/components/ui/StickyStack";
+"use client";
+
+import { UserPlus, Wand2, ShoppingBag, ArrowRight } from "lucide-react";
 
 const STEPS = [
   {
@@ -7,75 +8,90 @@ const STEPS = [
     stepNum: "01",
     title: "1. Đăng ký tài khoản",
     description:
-      "Tạo tài khoản MeowBack miễn phí chưa tới 30 giây, không đòi hỏi thẻ thanh toán. Hệ thống tự động kích hoạt ví nhận hoàn tiền cho bạn.",
+      "Tạo tài khoản MeowBack miễn phí trong 30 giây, không đòi hỏi thẻ ngân hàng. Hệ thống tự động kích hoạt ví nhận hoàn tiền ngay lập tức.",
     badge: "🔑 Miễn phí 100%",
     gradient: "from-primary-500 via-[#FF3B7B] to-primary-600",
+    shadow: "shadow-primary-500/20",
+    border: "border-primary-200/90",
+    bg: "bg-gradient-to-b from-primary-50/40 via-white to-white",
   },
   {
     icon: Wand2,
     stepNum: "02",
     title: "2. Dán link sản phẩm",
     description:
-      "Copy link sản phẩm Shopee bạn muốn mua, dán vào MeowBack để lấy link hoàn tiền thông minh chỉ trong 1 giây.",
+      "Copy link sản phẩm Shopee bạn muốn mua, dán vào MeowBack để nhận link hoàn tiền thông minh chỉ trong 1 giây.",
     badge: "🪄 Tự động 1 Giây",
     gradient: "from-sky-500 via-blue-500 to-indigo-600",
+    shadow: "shadow-sky-500/20",
+    border: "border-sky-200/90",
+    bg: "bg-gradient-to-b from-sky-50/40 via-white to-white",
   },
   {
     icon: ShoppingBag,
     stepNum: "03",
     title: "3. Mua sắm & Nhận tiền",
     description:
-      "Bấm vào link hoàn tiền và chốt đơn — tiền hoàn tự động tích lũy thẳng vào ví MeowBack. Rút về ngân hàng từ 10.000đ.",
+      "Bấm vào link hoàn tiền để mua hàng — tiền hoàn tự động cộng thẳng vào ví MeowBack. Rút về ngân hàng từ 10.000đ.",
     badge: "💰 Tích lũy về ví",
     gradient: "from-emerald-500 via-teal-500 to-green-600",
+    shadow: "shadow-emerald-500/20",
+    border: "border-emerald-200/90",
+    bg: "bg-gradient-to-b from-emerald-50/40 via-white to-white",
   },
 ];
 
 export function HowItWorksSteps() {
-  const cards = STEPS.map((step, index) => {
-    const StepIcon = step.icon;
-    return (
-      <div
-        key={index}
-        className="w-full max-w-4xl mx-auto flex flex-col md:flex-row gap-8 p-8 md:p-12 bg-white border border-primary-200/90 rounded-[3rem] shadow-cute-lg overflow-hidden relative"
-      >
-        {/* Step Number Background */}
-        <div className="absolute -top-10 -right-10 text-[200px] font-black text-primary-50/50 leading-none pointer-events-none select-none z-0">
-          {step.stepNum}
-        </div>
-
-        <div className="relative z-10 flex flex-col justify-center flex-1">
-          <div className="flex items-center gap-4 mb-6">
-            <div
-              className={`w-16 h-16 rounded-3xl bg-gradient-to-br ${step.gradient} text-white flex items-center justify-center shadow-lg shadow-primary-500/25`}
-            >
-              <StepIcon size={32} strokeWidth={2.2} />
-            </div>
-            <span className="text-[14px] font-black px-4 py-1.5 rounded-full bg-primary-100 text-primary-800 border border-primary-200/90 shadow-sm uppercase tracking-widest">
-              {step.badge}
-            </span>
-          </div>
-
-          <h3 className="font-black text-[32px] md:text-[40px] text-neutral-950 mb-4 leading-tight">
-            {step.title}
-          </h3>
-          <p className="text-neutral-700 text-[18px] md:text-[20px] font-semibold leading-relaxed">
-            {step.description}
-          </p>
-        </div>
-      </div>
-    );
-  });
-
   return (
-    <div className="relative w-full">
-      {/* On mobile, fallback to simple stack. On desktop, use GSAP StickyStack */}
-      <div className="block md:hidden space-y-6">
-        {cards}
-      </div>
-      <div className="hidden md:block">
-        <StickyStack cards={cards} />
-      </div>
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-5 lg:gap-6 max-w-5xl mx-auto">
+      {STEPS.map((step, index) => {
+        const StepIcon = step.icon;
+        return (
+          <div
+            key={index}
+            className={`relative flex flex-col justify-between p-6 sm:p-7 rounded-3xl ${step.bg} border-2 ${step.border} shadow-cute hover:shadow-cute-lg hover:-translate-y-1 transition-all duration-300 overflow-hidden group`}
+          >
+            {/* Watermark Step Number */}
+            <div className="absolute top-2 right-4 text-6xl sm:text-7xl font-black text-neutral-900/[0.04] select-none pointer-events-none">
+              {step.stepNum}
+            </div>
+
+            <div>
+              {/* Header: Icon + Badge */}
+              <div className="flex items-center justify-between mb-4 relative z-10">
+                <div
+                  className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${step.gradient} text-white flex items-center justify-center shadow-md ${step.shadow} group-hover:scale-105 transition-transform duration-300`}
+                >
+                  <StepIcon size={22} strokeWidth={2.2} />
+                </div>
+                <span className="text-[11.5px] font-black px-3 py-1 rounded-full bg-white text-neutral-800 border border-neutral-200 shadow-xs tracking-wide">
+                  {step.badge}
+                </span>
+              </div>
+
+              {/* Title */}
+              <h3 className="text-lg sm:text-xl font-black text-neutral-950 mb-2 relative z-10">
+                {step.title}
+              </h3>
+
+              {/* Description */}
+              <p className="text-xs sm:text-[13.5px] font-medium text-neutral-600 leading-relaxed relative z-10">
+                {step.description}
+              </p>
+            </div>
+
+            {/* Bottom step progression indicator */}
+            <div className="pt-4 mt-4 border-t border-neutral-100 flex items-center justify-between text-xs font-bold text-neutral-400 relative z-10">
+              <span>Bước {step.stepNum}</span>
+              {index < STEPS.length - 1 && (
+                <span className="hidden md:flex items-center gap-1 text-primary-500 font-extrabold text-[11px]">
+                  Tiếp theo <ArrowRight size={13} />
+                </span>
+              )}
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }

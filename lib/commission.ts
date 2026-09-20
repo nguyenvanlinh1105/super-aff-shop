@@ -24,19 +24,17 @@ export function isSettlementReady(completedAt: Date | null | undefined, referenc
 const DEFAULT_TAX_RATE = new Prisma.Decimal(10.98);
 
 export const MEMBERSHIP_TIERS = [
-  { id: "bronze", name: "Đồng", minOrders: 0, rate: 50 },
-  { id: "silver", name: "Bạc", minOrders: 10, rate: 60 },
-  { id: "gold", name: "Vàng", minOrders: 20, rate: 70 },
+  { id: "bronze", name: "Đồng", minOrders: 0, rate: 80 },
+  { id: "silver", name: "Bạc", minOrders: 10, rate: 80 },
+  { id: "gold", name: "Vàng", minOrders: 20, rate: 80 },
 ];
 
-export function getCustomerTierRate(approvedOrdersCount: number): Prisma.Decimal {
-  let rate = MEMBERSHIP_TIERS[0].rate;
-  if (approvedOrdersCount >= 20) {
-    rate = MEMBERSHIP_TIERS[2].rate;
-  } else if (approvedOrdersCount >= 10) {
-    rate = MEMBERSHIP_TIERS[1].rate;
+export function getCustomerTierRate(approvedOrdersCount?: number, ruleCustomerRate?: Prisma.Decimal | number | null): Prisma.Decimal {
+  // Giá trị thật cài đặt ở admin, code mặc định là 80%
+  if (ruleCustomerRate != null) {
+    return new Prisma.Decimal(ruleCustomerRate);
   }
-  return new Prisma.Decimal(rate);
+  return new Prisma.Decimal(80);
 }
 
 export async function getActiveCommissionRule() {
@@ -59,8 +57,8 @@ export function splitCommission(
   const amount = new Prisma.Decimal(commissionAmount);
   const taxRate = rule?.taxRate != null ? new Prisma.Decimal(rule.taxRate) : DEFAULT_TAX_RATE;
   
-  // Ưu tiên rate động theo hạng của khách, nếu không truyền mới fallback về rule
-  const customerRate = customerRateOverride ?? (rule ? new Prisma.Decimal(rule.customerRate) : new Prisma.Decimal(50));
+  // Ưu tiên rate động theo hạng của khách, nếu không truyền mới fallback về rule (mặc định luôn 80%)
+  const customerRate = customerRateOverride ?? (rule ? new Prisma.Decimal(rule.customerRate) : new Prisma.Decimal(80));
 
   const afterTaxAmount = amount.mul(new Prisma.Decimal(100).sub(taxRate)).div(100);
   const customerRewardAmount = afterTaxAmount.mul(customerRate).div(100);

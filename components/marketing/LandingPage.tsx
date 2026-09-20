@@ -86,9 +86,13 @@ const CAT_HIGHLIGHT_CARDS = [
 export function LandingPage({
   totalPaidOut,
   totalCustomers,
+  customerRate = 80,
+  taxRate = 10.98,
 }: {
   totalPaidOut: number;
   totalCustomers: number;
+  customerRate?: number;
+  taxRate?: number;
 }) {
   return (
     <div className="min-h-screen bg-neutral-bg font-sans overflow-x-hidden text-neutral-950">
@@ -107,7 +111,7 @@ export function LandingPage({
                 <div className="inline-flex items-center gap-2 bg-gradient-to-r from-primary-100 to-primary-200 text-[#8A0B37] px-3 py-1 md:px-4 md:py-1.5 rounded-full shadow-sm border border-primary-300/60">
                   <IconBow className="w-3.5 h-3.5 md:w-4 md:h-4 text-accent-bow" />
                   <span className="text-[12px] md:text-[13.5px] font-black tracking-wide">
-                    Thăng hạng VIP, hoàn tới 70% hoa hồng 🎀
+                    Luôn hoàn {customerRate}% hoa hồng ròng 🎀
                   </span>
                 </div>
 
@@ -120,7 +124,7 @@ export function LandingPage({
 
                 <p className="text-[15px] md:text-[17px] text-neutral-700 max-w-lg leading-relaxed font-semibold mx-auto lg:mx-0">
                   Mua sắm <strong className="text-primary-600 font-extrabold">Shopee</strong> thông minh hơn với MeowBack.
-                  Nhận hoàn tiền tự động, thăng hạng VIP hoàn đến 70%, rút từ <strong className="text-neutral-950 font-black">10.000đ</strong>.
+                  Nhận hoàn tiền tự động, luôn hoàn đến {customerRate}%, rút từ <strong className="text-neutral-950 font-black">10.000đ</strong>.
                 </p>
 
                 <div className="flex flex-col sm:flex-row gap-3 pt-1 items-center lg:items-start">
@@ -149,7 +153,7 @@ export function LandingPage({
 
               {/* Hero Gallery — hidden on small mobile, show from sm up */}
               <div className="hidden sm:flex justify-center items-center">
-                <HeroGallerySlider />
+                <HeroGallerySlider customerRate={customerRate} />
               </div>
             </div>
           </div>
@@ -208,114 +212,15 @@ export function LandingPage({
         </section>
 
         {/* Live Cashback Calculator Section */}
-        <LiveCashbackCalculator />
-
-        {/* Hệ thống Hạng Thành Viên */}
-        <section
-          id="hang-thanh-vien"
-          className="py-12 md:py-20 bg-gradient-to-b from-white via-primary-50/40 to-white border-b border-primary-100/80 relative overflow-hidden"
-        >
-          <div className="max-w-[1200px] mx-auto px-4 md:px-8">
-            <div className="text-center mb-8 md:mb-14">
-              <div className="inline-flex items-center justify-center gap-2 mb-3 bg-primary-100/80 text-[#8A0B37] px-4 py-1.5 rounded-full border border-primary-200/80">
-                <Sparkles size={14} className="text-primary-600" />
-                <span className="font-extrabold text-[12px] md:text-[12.5px] uppercase tracking-widest">
-                  Gamification — Mua Nhiều Hoàn Nhiều
-                </span>
-              </div>
-              <h2 className="text-[26px] sm:text-[32px] md:text-[44px] font-black text-neutral-950 tracking-tight leading-tight">
-                Thăng hạng VIP, mở khóa{" "}
-                <span className="text-primary-600 underline decoration-primary-300 decoration-wavy decoration-2">
-                  hoàn tiền cao hơn
-                </span>{" "}
-                🏆
-              </h2>
-              <p className="text-neutral-700 text-[14px] md:text-[16.5px] font-semibold max-w-2xl mx-auto mt-2">
-                Mỗi đơn hàng hoàn thành sẽ tích lũy vào hành trình thăng hạng.
-                Hạng càng cao, tỷ lệ hoàn tiền càng lớn — hoàn toàn tự động.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-8 max-w-4xl mx-auto">
-              {/* Hạng Đồng */}
-              <div className="group relative flex flex-col justify-between rounded-3xl bg-gradient-to-b from-amber-50/70 via-white to-amber-50/30 p-7 border-2 border-amber-200/90 shadow-cute hover:shadow-cute-lg hover:-translate-y-2 transition-all duration-300 overflow-hidden">
-                <div>
-                  <div className="flex items-center justify-between mb-5">
-                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-400 to-amber-600 text-white flex items-center justify-center shadow-cute group-hover:scale-110 transition-transform duration-300 text-2xl">
-                      🥉
-                    </div>
-                    <span className="text-[12px] font-black px-3.5 py-1 rounded-full bg-amber-100 text-amber-800 border border-amber-200/90 shadow-sm">
-                      Mặc định
-                    </span>
-                  </div>
-                  <h3 className="font-black text-[22px] text-neutral-950 mb-1">Hạng Đồng</h3>
-                  <p className="text-[36px] font-black text-amber-600 mb-3">50%</p>
-                  <p className="text-neutral-700 text-[14px] font-semibold leading-relaxed mb-4">
-                    Tất cả thành viên mới đều bắt đầu từ hạng Đồng.
-                    Hoàn 50% hoa hồng sau thuế trên mỗi đơn hàng.
-                  </p>
-                </div>
-                <div className="pt-4 border-t border-amber-100 text-[13px] font-bold text-neutral-600">
-                  <span className="text-amber-600 font-black">Điều kiện:</span> Dưới 10 đơn hoàn thành
-                </div>
-              </div>
-
-              {/* Hạng Bạc */}
-              <div className="group relative flex flex-col justify-between rounded-3xl bg-gradient-to-b from-sky-50/70 via-white to-sky-50/30 p-7 border-2 border-sky-200/90 shadow-cute hover:shadow-cute-lg hover:-translate-y-2 transition-all duration-300 overflow-hidden">
-                <div>
-                  <div className="flex items-center justify-between mb-5">
-                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-sky-400 to-blue-600 text-white flex items-center justify-center shadow-cute group-hover:scale-110 transition-transform duration-300 text-2xl">
-                      🥈
-                    </div>
-                    <span className="text-[12px] font-black px-3.5 py-1 rounded-full bg-sky-100 text-sky-800 border border-sky-200/90 shadow-sm">
-                      Từ 10 đơn
-                    </span>
-                  </div>
-                  <h3 className="font-black text-[22px] text-neutral-950 mb-1">Hạng Bạc</h3>
-                  <p className="text-[36px] font-black text-sky-600 mb-3">60%</p>
-                  <p className="text-neutral-700 text-[14px] font-semibold leading-relaxed mb-4">
-                    Khi tích lũy đủ 10 đơn hàng hoàn thành, bạn tự động
-                    được nâng lên hạng Bạc với mức hoàn tiền 60%.
-                  </p>
-                </div>
-                <div className="pt-4 border-t border-sky-100 text-[13px] font-bold text-neutral-600">
-                  <span className="text-sky-600 font-black">Điều kiện:</span> Từ 10 đến 19 đơn hoàn thành
-                </div>
-              </div>
-
-              {/* Hạng Vàng */}
-              <div className="group relative flex flex-col justify-between rounded-3xl bg-gradient-to-b from-primary-50/70 via-white to-primary-50/30 p-7 border-2 border-primary-200/90 shadow-cute hover:shadow-cute-lg hover:-translate-y-2 transition-all duration-300 overflow-hidden ring-2 ring-primary-300/50">
-                <div>
-                  <div className="flex items-center justify-between mb-5">
-                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary-400 via-[#FF3B7B] to-primary-600 text-white flex items-center justify-center shadow-cute group-hover:scale-110 transition-transform duration-300 text-2xl">
-                      👑
-                    </div>
-                    <span className="text-[12px] font-black px-3.5 py-1 rounded-full bg-primary-100 text-primary-800 border border-primary-200/90 shadow-sm">
-                      ⭐ VIP
-                    </span>
-                  </div>
-                  <h3 className="font-black text-[22px] text-neutral-950 mb-1">Hạng Vàng</h3>
-                  <p className="text-[36px] font-black text-primary-600 mb-3">70%</p>
-                  <p className="text-neutral-700 text-[14px] font-semibold leading-relaxed mb-4">
-                    Đây là mức hoàn tiền cao nhất hệ thống.
-                    Mua càng nhiều, hoàn càng khủng — xứng đáng cho khách VIP.
-                  </p>
-                </div>
-                <div className="pt-4 border-t border-primary-100 text-[13px] font-bold text-neutral-600">
-                  <span className="text-primary-600 font-black">Điều kiện:</span> Từ 20 đơn hoàn thành trở lên
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
+        <LiveCashbackCalculator customerRate={customerRate} taxRate={taxRate} />
 
         {/* How It Works Section */}
         <section
           id="how-it-works"
-          className="py-12 md:py-20 bg-white relative overflow-hidden"
+          className="pt-6 pb-12 md:pt-8 md:pb-16 bg-white relative overflow-hidden"
         >
           <div className="max-w-[1200px] mx-auto px-4 md:px-8">
-            <div className="text-center mb-10 md:mb-16">
+            <div className="text-center mb-7 md:mb-9">
               <div className="inline-flex items-center justify-center gap-2 mb-3 bg-primary-50 px-4 py-1.5 rounded-full border border-primary-200/80">
                 <IconBow className="w-4 h-4 text-accent-bow" />
                 <span className="text-[12px] md:text-[13px] font-black text-primary-600 uppercase tracking-wide">
@@ -335,7 +240,7 @@ export function LandingPage({
         </section>
 
         {/* Interactive Value Comparison Table */}
-        <ValueComparisonSection />
+        <ValueComparisonSection customerRate={customerRate} />
 
         {/* Quick Registration Banner */}
         <section className="py-10 md:py-16 bg-gradient-to-br from-primary-100 via-primary-50 to-secondary-50 relative">
@@ -350,7 +255,7 @@ export function LandingPage({
                   <span className="text-primary-500">ví của bạn ngay hôm nay!</span>
                 </h2>
                 <p className="text-neutral-600 text-[14px] md:text-[16px]">
-                  Tạo tài khoản miễn phí 100%, tự động thăng hạng, nhận tới 70% hoa hồng trên mọi đơn hàng Shopee.
+                  Tạo tài khoản miễn phí 100%, nhận tới {customerRate}% hoa hồng ròng trên mọi đơn hàng Shopee.
                 </p>
                 <div className="flex flex-wrap justify-center md:justify-start gap-3 pt-1">
                   <div className="flex items-center gap-2 text-xs font-bold text-neutral-700 bg-primary-50 px-3.5 py-1.5 rounded-full border border-primary-100">

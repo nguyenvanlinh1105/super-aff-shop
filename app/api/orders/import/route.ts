@@ -315,7 +315,7 @@ export async function POST(req: NextRequest) {
           const approvedCount = await prisma.order.count({
             where: { customerId: resolvedCustomerId, orderStatus: "approved", sourceType: "import" },
           });
-          customerTierRates.set(resolvedCustomerId, getCustomerTierRate(approvedCount));
+          customerTierRates.set(resolvedCustomerId, getCustomerTierRate(approvedCount, rule?.customerRate));
         }
         customerTierRate = customerTierRates.get(resolvedCustomerId);
       }

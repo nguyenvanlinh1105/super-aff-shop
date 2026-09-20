@@ -3,48 +3,48 @@
 import { Check, X, Sparkles, Trophy, ShieldCheck, Zap, ArrowRight } from "lucide-react";
 import Link from "next/link";
 
-const COMPARISON_ROWS = [
-  {
-    feature: "Hoàn tiền hoa hồng đơn hàng",
-    subtext: "Phần hoa hồng tiếp thị từ Shopee",
-    direct: "0đ (Bị giữ 100% hoa hồng)",
-    meowback: "Hoàn tới 70% hoa hồng ròng về ví",
-  },
-  {
-    feature: "Rút tiền về Ngân hàng Việt Nam",
-    subtext: "Chuyển khoản linh hoạt về mọi ngân hàng",
-    direct: "Không hỗ trợ",
-    meowback: "Rút từ 10.000đ (Duyệt lệnh siêu tốc)",
-  },
-  {
-    feature: "Voucher & Mã giảm giá sàn",
-    subtext: "Voucher Freeship, Shopee Choice, Xu...",
-    direct: "Áp dụng bình thường",
-    meowback: "Giữ 100% Voucher + Thêm tiền hoàn",
-  },
-  {
-    feature: "Thưởng giới thiệu bạn bè (F1)",
-    subtext: "Thu nhập thụ động từ bạn bè mua sắm",
-    direct: "Không có",
-    meowback: "Thưởng 5% doanh số giới thiệu các đơn đầu",
-  },
-  {
-    feature: "Tạo link tự động qua Bot 24/7",
-    subtext: "Gửi link qua Zalo OA hoặc Telegram Bot",
-    direct: "Không hỗ trợ",
-    meowback: "Tạo link hoàn tiền trong 1 giây",
-  },
-];
+export function ValueComparisonSection({ customerRate = 80 }: { customerRate?: number }) {
+  const comparisonRows = [
+    {
+      feature: "Hoàn tiền hoa hồng đơn hàng",
+      subtext: "Phần hoa hồng tiếp thị từ Shopee & TikTok Shop",
+      direct: "0đ (Bị giữ 100% hoa hồng)",
+      meowback: `Luôn hoàn ${customerRate}% hoa hồng ròng về ví`,
+    },
+    {
+      feature: "Rút tiền về Ngân hàng Việt Nam",
+      subtext: "Chuyển khoản linh hoạt về mọi ngân hàng",
+      direct: "Không hỗ trợ",
+      meowback: "Rút từ 10.000đ (Duyệt lệnh siêu tốc)",
+    },
+    {
+      feature: "Voucher & Mã giảm giá sàn",
+      subtext: "Voucher Freeship, Shopee Choice, Xu...",
+      direct: "Áp dụng bình thường",
+      meowback: "Giữ 100% Voucher + Thêm tiền hoàn",
+    },
+    {
+      feature: "Thưởng giới thiệu bạn bè (F1)",
+      subtext: "Thu nhập thụ động từ bạn bè mua sắm",
+      direct: "Không có",
+      meowback: "Thưởng 5% doanh số giới thiệu các đơn đầu",
+    },
+    {
+      feature: "Tạo link tự động qua Bot 24/7",
+      subtext: "Gửi link qua Zalo OA hoặc Telegram Bot",
+      direct: "Không hỗ trợ",
+      meowback: "Tạo link hoàn tiền trong 1 giây",
+    },
+  ];
 
-export function ValueComparisonSection() {
   return (
-    <section className="py-16 md:py-24 bg-gradient-to-b from-white via-[#FFF5F8] to-white relative overflow-hidden">
+    <section className="pt-10 pb-12 md:pt-14 md:pb-16 bg-gradient-to-b from-white via-[#FFF5F8] to-white relative overflow-hidden">
       {/* Dynamic background pastel blur ribbon */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[750px] h-[550px] bg-primary-100/50 rounded-full blur-[150px] pointer-events-none" />
 
       <div className="relative z-10 max-w-[1050px] mx-auto px-4 md:px-8">
         {/* Title Header */}
-        <div className="text-center space-y-3 mb-12">
+        <div className="text-center space-y-3 mb-8 md:mb-10">
           <div className="inline-flex items-center gap-2 bg-primary-100/90 text-[#8A0B37] px-4 py-1.5 rounded-full text-xs font-black shadow-sm border border-primary-200/80">
             <Trophy size={15} className="text-primary-600" />
             <span>So Sánh Lợi Ích Trực Quan 🎀</span>
@@ -56,7 +56,7 @@ export function ValueComparisonSection() {
             </span>
           </h2>
           <p className="text-neutral-600 font-semibold max-w-lg mx-auto text-base">
-            Tại sao phải trả nguyên giá khi bạn có thể nhận lại tới 70% hoa hồng trên từng đơn hàng?
+            Tại sao phải trả nguyên giá khi bạn có thể nhận lại tới {customerRate}% hoa hồng trên từng đơn hàng?
           </p>
         </div>
 
@@ -82,7 +82,7 @@ export function ValueComparisonSection() {
 
           {/* Table Body Rows */}
           <div className="divide-y divide-primary-100/60">
-            {COMPARISON_ROWS.map((row, idx) => (
+            {comparisonRows.map((row, idx) => (
               <div
                 key={idx}
                 className={`grid grid-cols-12 p-4 md:p-5 text-xs md:text-sm items-center transition-colors ${
