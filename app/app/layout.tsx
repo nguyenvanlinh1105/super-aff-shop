@@ -62,8 +62,8 @@ export default async function CustomerAppLayout({ children }: { children: React.
         brandSubtitle="Thành viên MeowBack 🎀"
         sections={sections}
       />
-      <main className="relative flex-1 overflow-y-auto w-full">
-        <div className="min-h-full p-4 sm:p-6 md:p-8 pb-[88px] md:pb-8 fade-in w-full max-w-6xl mx-auto">
+      <main className="relative flex-1 overflow-y-auto w-full px-4 sm:px-8 md:px-12 lg:px-16 xl:px-24 2xl:px-32">
+        <div className="min-h-full py-6 md:py-8 pb-[88px] md:pb-12 fade-in w-full max-w-5xl xl:max-w-6xl mx-auto">
           <PwaInstallBanner />
           {children}
         </div>

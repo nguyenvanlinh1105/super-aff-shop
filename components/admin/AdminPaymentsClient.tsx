@@ -526,7 +526,7 @@ function BatchDetailModal({
                             <img
                               src={img}
                               alt=""
-                              className="h-11 w-11 rounded-xl object-cover ring-1 ring-black/5 shrink-0"
+                              className="h-11 w-11 rounded-xl object-cover border border-primary-100 shrink-0"
                             />
                           ) : (
                             <div className="h-11 w-11 rounded-xl bg-rose-50 border border-rose-100 flex items-center justify-center shrink-0">
@@ -989,7 +989,7 @@ export function AdminPaymentsClient({
                           <img
                             src={o.productImage}
                             alt=""
-                            className="h-10 w-10 rounded-xl object-cover ring-1 ring-black/5 shrink-0"
+                            className="h-10 w-10 rounded-xl object-cover border border-primary-100 shrink-0"
                           />
                         ) : (
                           <div className="h-10 w-10 rounded-xl bg-neutral-100 flex items-center justify-center shrink-0">
@@ -1179,7 +1179,7 @@ function PagerFooter({
 }) {
   if (totalPages <= 1) return null;
   return (
-    <div className="flex items-center justify-between rounded-2xl bg-white ring-1 ring-black/[0.06] px-md py-sm shadow-sm">
+    <div className="flex items-center justify-between rounded-2xl bg-white border border-primary-100/80 px-md py-sm shadow-cute">
       <span className="text-[13px] text-gray-500">
         {(currentPage - 1) * itemsPerPage + 1}–
         {Math.min(currentPage * itemsPerPage, totalItems)} / {totalItems}{" "}

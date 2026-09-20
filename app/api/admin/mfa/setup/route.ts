@@ -9,24 +9,23 @@ export async function GET() {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const users: any[] = await prisma.$queryRawUnsafe("SELECT * FROM users WHERE id = ?", session.userId);
-  const user = users[0];
+  const user = await prisma.user.findUnique({ where: { id: session.userId } });
   if (!user) return NextResponse.json({ error: "User not found" }, { status: 404 });
 
   // Sinh QR Code & Secret mới cho việc setup
   const mfaSetup = await generateTotpSecret(user.email);
 
   let backupCodes: string[] = [];
-  if (user.mfa_backup_codes) {
+  if (user.mfaBackupCodes) {
     try {
-      backupCodes = JSON.parse(user.mfa_backup_codes);
+      backupCodes = JSON.parse(user.mfaBackupCodes);
     } catch {
       backupCodes = [];
     }
   }
 
   return NextResponse.json({
-    mfaEnabled: Boolean(user.mfa_enabled),
+    mfaEnabled: Boolean(user.mfaEnabled),
     secret: mfaSetup.secret,
     qrCodeDataUrl: mfaSetup.qrCodeDataUrl,
     otpauth: mfaSetup.otpauth,
@@ -56,12 +55,14 @@ export async function POST(req: Request) {
     const backupCodes = generateBackupCodes();
     const backupCodesJson = JSON.stringify(backupCodes);
 
-    await prisma.$executeRawUnsafe(
-      "UPDATE users SET mfa_enabled = 1, mfa_secret = ?, mfa_backup_codes = ? WHERE id = ?",
-      secret,
-      backupCodesJson,
-      session.userId
-    );
+    await prisma.user.update({
+      where: { id: session.userId },
+      data: {
+        mfaEnabled: true,
+        mfaSecret: secret,
+        mfaBackupCodes: backupCodesJson,
+      },
+    });
 
     return NextResponse.json({
       success: true,
@@ -80,10 +81,14 @@ export async function DELETE() {
   }
 
   try {
-    await prisma.$executeRawUnsafe(
-      "UPDATE users SET mfa_enabled = 0, mfa_secret = NULL, mfa_backup_codes = NULL WHERE id = ?",
-      session.userId
-    );
+    await prisma.user.update({
+      where: { id: session.userId },
+      data: {
+        mfaEnabled: false,
+        mfaSecret: null,
+        mfaBackupCodes: null,
+      },
+    });
 
     return NextResponse.json({ success: true, mfaEnabled: false });
   } catch (error: any) {

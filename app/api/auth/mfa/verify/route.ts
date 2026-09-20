@@ -29,28 +29,26 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Phiên đăng nhập 2MFA đã hết hạn (5 phút). Vui lòng đăng nhập lại từ đầu." }, { status: 401 });
     }
 
-    const users: any[] = await prisma.$queryRawUnsafe("SELECT * FROM users WHERE id = ?", payload.userId);
-    const user = users[0];
-    if (!user || user.status !== "active" || !user.mfa_enabled || !user.mfa_secret) {
+    const user = await prisma.user.findUnique({ where: { id: payload.userId } });
+    if (!user || user.status !== "active" || !user.mfaEnabled || !user.mfaSecret) {
       return NextResponse.json({ error: "Tài khoản chưa được cấu hình 2MFA hợp lệ." }, { status: 400 });
     }
 
     const cleanCode = code.trim();
-    let isMatch = verifyTotpCode(user.mfa_secret, cleanCode);
+    let isMatch = verifyTotpCode(user.mfaSecret, cleanCode);
     let usedBackupCode = false;
 
     // Nếu không khớp mã TOTP 6 số, thử kiểm tra mã dự phòng (Backup Code) 8 ký tự
-    if (!isMatch && user.mfa_backup_codes) {
-      const backupCheck = verifyBackupCode(user.mfa_backup_codes, cleanCode);
+    if (!isMatch && user.mfaBackupCodes) {
+      const backupCheck = verifyBackupCode(user.mfaBackupCodes, cleanCode);
       if (backupCheck.valid) {
         isMatch = true;
         usedBackupCode = true;
         // Cập nhật lại danh sách mã dự phòng (xóa mã vừa dùng)
-        await prisma.$executeRawUnsafe(
-          "UPDATE users SET mfa_backup_codes = ? WHERE id = ?",
-          JSON.stringify(backupCheck.remainingCodes),
-          user.id
-        );
+        await prisma.user.update({
+          where: { id: user.id },
+          data: { mfaBackupCodes: JSON.stringify(backupCheck.remainingCodes) },
+        });
       }
     }
 
@@ -73,8 +71,8 @@ export async function POST(req: NextRequest) {
     await setSessionCookie({
       userId: user.id,
       role: user.role as "admin",
-      fullName: user.full_name || user.fullName,
-      customerId: user.customer_id || user.customerId,
+      fullName: user.fullName,
+      customerId: user.customerId,
     });
 
     return NextResponse.json({

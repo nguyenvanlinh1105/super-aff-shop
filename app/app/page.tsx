@@ -90,7 +90,7 @@ export default async function CustomerHomePage() {
   } catch (_) {}
 
   return (
-    <div className="flex flex-col gap-16 py-8 pb-32">
+    <div className="flex flex-col gap-10 sm:gap-12 pb-16">
       {!customer?.phone && (
         <FadeUp delay={0}>
           <PhoneNumberPrompt />

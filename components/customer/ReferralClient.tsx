@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { formatCurrency, formatDate } from "@/lib/format";
 import { Users, TrendingUp, CheckCircle2 } from "lucide-react";
-import { useModal } from "@/components/ui/ModalProvider";
+import { useToast } from "@/components/ui/Toast";
 import { Button } from "@/components/ui/Button";
 import { IconBow } from "@/components/icons/CatRibbonIcons";
 import { FloatingElement } from "@/components/ui/FloatingElement";
@@ -58,7 +58,7 @@ const BONUS_STATE_LABEL: Record<FriendOrderTimelineEntry["bonusState"], { text: 
 };
 
 export function ReferralClient({ customerCode, totalFriends, totalCommission, referralRate, maxReferralOrders, referralValidityMonths, isPartner, friends, friendOrderTimeline }: Props) {
-  const modal = useModal();
+  const { toast } = useToast();
   const [referralLink, setReferralLink] = useState("");
 
   useEffect(() => {
@@ -68,11 +68,7 @@ export function ReferralClient({ customerCode, totalFriends, totalCommission, re
   const handleCopy = () => {
     if (!referralLink) return;
     navigator.clipboard.writeText(referralLink);
-    modal.alert({
-      title: "Thành công 🎀",
-      message: "Đã copy link giới thiệu! Hãy gửi cho bạn bè của bạn.",
-      iconType: "success"
-    });
+    toast.success("Đã copy link giới thiệu! Hãy gửi cho bạn bè của bạn 🎀", "Đã sao chép");
   };
 
   return (

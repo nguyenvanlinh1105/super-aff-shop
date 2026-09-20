@@ -9,6 +9,7 @@ import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { Pagination } from "@/components/ui/Pagination";
 import { IconBow } from "@/components/icons/CatRibbonIcons";
 import { useModal } from "@/components/ui/ModalProvider";
+import { useToast } from "@/components/ui/Toast";
 import { PaymentPinModal } from "@/components/customer/PaymentPinModal";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
@@ -107,7 +108,7 @@ export function CustomerWalletClient({
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
-  const modal = useModal();
+  const { toast } = useToast();
   const [submitting, setSubmitting] = useState(false);
   const [pendingRequest, setPendingRequest] = useState<PendingRequest>(initialPendingRequest);
 
@@ -154,14 +155,15 @@ export function CustomerWalletClient({
       if (!res.ok) {
         if (data.pinError) {
           // PIN error — reopen modal
-          modal.alert({ title: "Lỗi mã PIN", message: data.error, iconType: "danger" });
+          toast.error(data.error ?? "Mã PIN không chính xác, vui lòng thử lại.", "Lỗi mã PIN");
+          setIsPinModalOpen(true);
           return;
         }
-        modal.alert({ title: "Lỗi rút tiền", message: data.error ?? "Không thể gửi yêu cầu, vui lòng thử lại", iconType: "danger" });
+        toast.error(data.error ?? "Không thể gửi yêu cầu rút tiền, vui lòng thử lại sau.", "Lỗi rút tiền");
         return;
       }
       setPendingRequest(data.request);
-      modal.alert({ title: "Thành công", message: "Yêu cầu rút tiền của bạn đã được gửi và đang chờ xử lý.", iconType: "success" });
+      toast.success("Yêu cầu rút tiền của bạn đã được gửi và đang chờ xử lý! 🎀", "Rút tiền thành công");
       // Trigger confetti on success
       if (typeof window !== "undefined") {
         import("canvas-confetti").then((mod) => {
@@ -170,7 +172,7 @@ export function CustomerWalletClient({
       }
       router.refresh();
     } catch {
-      modal.alert({ title: "Lỗi hệ thống", message: "Đã có lỗi xảy ra, vui lòng thử lại", iconType: "danger" });
+      toast.error("Đã có lỗi hệ thống xảy ra, vui lòng thử lại sau.", "Lỗi hệ thống");
     } finally {
       setSubmitting(false);
     }
@@ -196,10 +198,10 @@ export function CustomerWalletClient({
       const { customer } = await res.json();
       setPaymentInfo(customer);
       setIsModalOpen(false);
-      modal.alert({ title: "Thành công", message: "Cập nhật thông tin ngân hàng thành công", iconType: "success" });
+      toast.success("Cập nhật thông tin tài khoản ngân hàng thành công! 🏦", "Cập nhật thành công");
       router.refresh();
     } catch (err: any) {
-      modal.alert({ title: "Lỗi lưu thông tin", message: err.message ?? "Đã có lỗi xảy ra khi lưu thông tin.", iconType: "danger" });
+      toast.error(err.message ?? "Đã có lỗi xảy ra khi lưu thông tin.", "Lỗi lưu thông tin");
     } finally {
       setIsSaving(false);
     }

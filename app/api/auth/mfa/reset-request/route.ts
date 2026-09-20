@@ -14,19 +14,21 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Thử quá nhiều lần, vui lòng đợi 15 phút" }, { status: 429 });
     }
 
-    const users: any[] = await prisma.$queryRawUnsafe("SELECT * FROM users WHERE email = ?", email.trim().toLowerCase());
-    const user = users[0];
+    const user = await prisma.user.findUnique({
+      where: { email: email.trim().toLowerCase() },
+    });
 
-    if (user && user.role === "admin" && user.mfa_enabled) {
+    if (user && user.role === "admin" && user.mfaEnabled) {
       const resetToken = crypto.randomBytes(32).toString("hex");
-      const expiresAt = new Date(Date.now() + 15 * 60 * 1000).toISOString(); // 15 phút
+      const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 phút
 
-      await prisma.$executeRawUnsafe(
-        "UPDATE users SET mfa_reset_token = ?, mfa_reset_expires_at = ? WHERE id = ?",
-        resetToken,
-        expiresAt,
-        user.id
-      );
+      await prisma.user.update({
+        where: { id: user.id },
+        data: {
+          mfaResetToken: resetToken,
+          mfaResetExpiresAt: expiresAt,
+        },
+      });
 
       const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
       const resetUrl = `${appUrl}/login/mfa-reset?token=${resetToken}`;

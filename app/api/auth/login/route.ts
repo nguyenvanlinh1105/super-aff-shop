@@ -28,32 +28,29 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // Dùng raw SQL query để lấy đầy đủ các cột mới (mfa_enabled, mfa_secret...) trực tiếp từ SQLite
-  const users: any[] = await prisma.$queryRawUnsafe(
-    "SELECT * FROM users WHERE email = ? LIMIT 1",
-    email.trim().toLowerCase()
-  );
-  const user = users[0];
+  const user = await prisma.user.findUnique({
+    where: { email: email.trim().toLowerCase() },
+  });
 
-  if (!user || user.status !== "active" || !verifyPassword(password, user.password_hash || user.passwordHash)) {
+  if (!user || user.status !== "active" || !verifyPassword(password, user.passwordHash)) {
     return NextResponse.json({ error: "Email hoặc mật khẩu không đúng" }, { status: 401 });
   }
 
-  const isMfaEnabled = Boolean(user.mfa_enabled || user.mfaEnabled);
+  const isMfaEnabled = Boolean(user.mfaEnabled);
 
-  // Nếu là Admin và ĐÃ BẬT 2MFA (mfa_enabled === 1) -> Bắt buộc qua Bước 2
+  // Nếu là Admin và ĐÃ BẬT 2MFA -> Bắt buộc qua Bước 2
   if (user.role === "admin" && isMfaEnabled) {
     const mfaPendingToken = await createMfaPendingToken({
       userId: user.id,
       role: user.role as "admin",
-      fullName: user.full_name || user.fullName,
-      customerId: user.customer_id || user.customerId,
+      fullName: user.fullName,
+      customerId: user.customerId,
     });
 
     return NextResponse.json({
       require2FA: true,
       mfaToken: mfaPendingToken,
-      mfaMethod: user.mfa_method || user.mfaMethod || "totp",
+      mfaMethod: user.mfaMethod || "totp",
     });
   }
 
@@ -61,8 +58,8 @@ export async function POST(req: NextRequest) {
   await setSessionCookie({
     userId: user.id,
     role: user.role as "admin" | "customer",
-    fullName: user.full_name || user.fullName,
-    customerId: user.customer_id || user.customerId,
+    fullName: user.fullName,
+    customerId: user.customerId,
   });
 
   return NextResponse.json({

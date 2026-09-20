@@ -95,13 +95,13 @@ export function CommunityChat({
   }
 
   return (
-    <div className="flex flex-col rounded-3xl bg-white shadow-sm ring-1 ring-black/5 overflow-hidden h-[560px]">
+    <div className="flex flex-col rounded-3xl bg-white shadow-cute border border-primary-100/80 overflow-hidden h-[560px]">
       {/* Header */}
-      <div className="flex items-center gap-sm border-b border-gray-100 px-lg py-md bg-gradient-to-r from-primary-50 to-primary-100">
+      <div className="flex items-center gap-sm border-b border-primary-100/80 px-lg py-md bg-gradient-to-r from-primary-50/80 via-primary-50 to-pink-50">
         <img src="/meowback_lucky_cat_logo.png" alt="" className="h-9 w-9 object-contain" />
         <div className="flex-1 min-w-0">
-          <div className="font-bold text-gray-900 text-[14px]">Cộng đồng MeowBack</div>
-          <div className="text-[11px] text-gray-500 flex items-center gap-1">
+          <div className="font-bold text-neutral-900 text-[14px]">Cộng đồng MeowBack</div>
+          <div className="text-[11px] text-neutral-500 flex items-center gap-1">
             <Users size={11} /> Mọi thành viên đều thấy tin nhắn này
           </div>
         </div>
@@ -112,7 +112,7 @@ export function CommunityChat({
         {messages.length === 0 ? (
           <div className="flex flex-1 flex-col items-center justify-center gap-sm text-center">
             <img src="/meowback_lucky_cat_logo.png" alt="" className="h-16 w-16 object-contain opacity-70" />
-            <p className="text-[13px] font-bold text-gray-400">Chưa có tin nhắn nào — hãy là người đầu tiên!</p>
+            <p className="text-[13px] font-bold text-neutral-400">Chưa có tin nhắn nào — hãy là người đầu tiên!</p>
           </div>
         ) : (
           messages.map((m) => {
@@ -122,26 +122,26 @@ export function CommunityChat({
               <div key={m.id} className={`group flex items-end gap-sm ${isMine ? "flex-row-reverse" : ""}`}>
                 <div
                   className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[11px] font-bold text-white ${
-                    isMsgAdmin ? "bg-gradient-to-br from-primary-400 to-primary-500" : "bg-gradient-to-br from-gray-400 to-gray-500"
+                    isMsgAdmin ? "bg-gradient-to-br from-primary-400 to-primary-500" : "bg-gradient-to-br from-neutral-400 to-neutral-500"
                   }`}
                 >
                   {isMsgAdmin ? "🐱" : initialsOf(m.user?.fullName ?? "?")}
                 </div>
                 <div className={`flex flex-col gap-[2px] max-w-[75%] ${isMine ? "items-end" : "items-start"}`}>
                   <div className="flex items-center gap-xs px-1">
-                    <span className="text-[11px] font-bold text-gray-500">
+                    <span className="text-[11px] font-bold text-neutral-500">
                       {isMsgAdmin ? "Đội ngũ MeowBack" : m.user?.fullName}
                     </span>
-                    <span className="text-[10px] text-gray-300">{formatTime(m.createdAt)}</span>
+                    <span className="text-[10px] text-neutral-300">{formatTime(m.createdAt)}</span>
                   </div>
                   <div className="flex items-center gap-xs">
                     <div
                       className={`rounded-2xl px-md py-[8px] text-[13px] leading-relaxed break-words ${
                         isMsgAdmin
-                          ? "bg-[#fff0e6] text-[#8a4a25] ring-1 ring-[#e86a33]/20"
+                          ? "bg-primary-50 text-primary-800 border border-primary-200/80"
                           : isMine
-                          ? "bg-[#e86a33] text-white"
-                          : "bg-gray-100 text-gray-800"
+                          ? "bg-gradient-to-r from-primary-400 to-primary-500 text-white shadow-sm"
+                          : "bg-neutral-100 text-neutral-800"
                       }`}
                     >
                       {m.message}
@@ -150,7 +150,7 @@ export function CommunityChat({
                       <button
                         onClick={() => removeMessage(m.id)}
                         title="Xoá tin nhắn"
-                        className="opacity-0 group-hover:opacity-100 flex h-6 w-6 items-center justify-center rounded-md text-gray-300 hover:text-red-500 hover:bg-red-50 transition-all shrink-0"
+                        className="opacity-0 group-hover:opacity-100 flex h-6 w-6 items-center justify-center rounded-md text-neutral-300 hover:text-red-500 hover:bg-red-50 transition-all shrink-0"
                       >
                         <Trash2 size={12} />
                       </button>
@@ -164,7 +164,7 @@ export function CommunityChat({
       </div>
 
       {/* Composer */}
-      <div className="flex items-center gap-sm border-t border-gray-100 p-md">
+      <div className="flex items-center gap-sm border-t border-primary-100/80 p-md bg-white/95">
         <input
           type="text"
           value={input}
@@ -177,12 +177,12 @@ export function CommunityChat({
           }}
           placeholder="Nhắn gì đó với cộng đồng..."
           maxLength={1000}
-          className="h-11 flex-1 rounded-2xl bg-gray-50 px-lg text-[14px] font-medium text-gray-900 ring-1 ring-gray-100 focus:outline-none focus:ring-2 focus:ring-[#e86a33]/30 transition-all"
+          className="h-11 flex-1 rounded-2xl bg-neutral-50 px-lg text-[14px] font-medium text-neutral-900 border border-primary-100/80 focus:outline-none focus:border-primary-400 focus:ring-2 focus:ring-primary-200/50 transition-all placeholder:text-neutral-400"
         />
         <button
           onClick={send}
           disabled={!input.trim() || sending}
-          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#e86a33] text-white shadow-md shadow-[#e86a33]/25 transition-all hover:bg-[#d65d2a] active:scale-[0.94] disabled:opacity-40 disabled:cursor-not-allowed"
+          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-r from-primary-400 to-primary-500 text-white shadow-cute transition-all hover:scale-105 active:scale-[0.94] disabled:opacity-40 disabled:scale-100 disabled:cursor-not-allowed"
         >
           <Send size={16} strokeWidth={2.5} />
         </button>

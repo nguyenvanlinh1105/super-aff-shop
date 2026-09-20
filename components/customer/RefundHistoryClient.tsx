@@ -5,14 +5,13 @@ import { Store, ShoppingBag, Music2, Copy, ExternalLink, Star } from "lucide-rea
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Pagination } from "@/components/ui/Pagination";
 import { ServerSearchInput } from "@/components/ui/ServerSearchInput";
-import { useModal } from "@/components/ui/ModalProvider";
-import { Select } from "@/components/ui/Select";
+import { useToast } from "@/components/ui/Toast";
 
-const PLATFORM_STYLE: Record<string, { icon: typeof ShoppingBag; color: string }> = {
-  SHOPEE: { icon: ShoppingBag, color: "#ee4d2d" },
-  TIKTOK: { icon: Music2, color: "#000000" },
-  LAZADA: { icon: Store, color: "#0f146d" },
-  TIKI: { icon: Store, color: "#1a73e8" },
+const PLATFORM_STYLE: Record<string, { icon: typeof ShoppingBag; color: string; bg: string }> = {
+  SHOPEE: { icon: ShoppingBag, color: "#FF6D9E", bg: "bg-primary-50" },
+  TIKTOK: { icon: Music2, color: "#3D2A30", bg: "bg-neutral-100" },
+  LAZADA: { icon: Store, color: "#1E70BF", bg: "bg-blue-50" },
+  TIKI: { icon: Store, color: "#2D8A56", bg: "bg-emerald-50" },
 };
 
 type LinkItem = {
@@ -26,7 +25,7 @@ type LinkItem = {
   platform: { code: string; name: string };
 };
 
-function ProductThumb({ image, color, Icon }: { image: string | null; color: string; Icon: typeof ShoppingBag }) {
+function ProductThumb({ image, color, bg, Icon }: { image: string | null; color: string; bg: string; Icon: typeof ShoppingBag }) {
   const [broken, setBroken] = useState(false);
   if (image && !broken) {
     return (
@@ -34,14 +33,14 @@ function ProductThumb({ image, color, Icon }: { image: string | null; color: str
         src={image}
         alt=""
         onError={() => setBroken(true)}
-        className="h-12 w-12 shrink-0 rounded-xl object-cover ring-1 ring-black/5"
+        className="h-12 w-12 shrink-0 rounded-2xl object-cover border border-primary-100/80 shadow-xs"
       />
     );
   }
   return (
     <div
-      className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl"
-      style={{ color, backgroundColor: `${color}15` }}
+      className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-primary-100/60 ${bg}`}
+      style={{ color }}
     >
       <Icon size={20} strokeWidth={2} />
     </div>
@@ -78,11 +77,13 @@ function FavoriteButton({ linkId, isFavorite }: { linkId: string; isFavorite: bo
       type="button"
       onClick={toggle}
       title={favorite ? "Bỏ yêu thích" : "Đánh dấu yêu thích"}
-      className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition-colors ${
-        favorite ? "bg-amber-50 text-amber-500 hover:bg-amber-100" : "bg-gray-100 text-gray-400 hover:bg-gray-200 hover:text-gray-600"
+      className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-all ${
+        favorite
+          ? "bg-amber-50 text-amber-500 border border-amber-200/80 shadow-xs hover:bg-amber-100"
+          : "bg-primary-50 text-neutral-400 border border-primary-100/60 hover:bg-primary-100/80 hover:text-primary-600"
       }`}
     >
-      <Star size={16} strokeWidth={2.25} fill={favorite ? "currentColor" : "none"} />
+      <Star size={17} strokeWidth={2.2} fill={favorite ? "currentColor" : "none"} />
     </button>
   );
 }
@@ -100,7 +101,7 @@ export function RefundHistoryClient({
   totalCount: number;
   counts: { all: number; favorite: number };
 }) {
-  const modal = useModal();
+  const { toast } = useToast();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -131,54 +132,71 @@ export function RefundHistoryClient({
   };
 
   const handleCopy = (url: string) => {
+    if (!url) return;
     navigator.clipboard.writeText(url);
-    modal.alert({
-      title: "Thành công",
-      message: "Đã copy link: " + url,
-      iconType: "success"
-    });
+    toast.success("Đã copy link hoàn tiền vào bộ nhớ tạm! 🛍️", "Đã sao chép");
   };
 
   return (
-    <div className="rounded-2xl bg-white p-xl shadow-sm ring-1 ring-black/5">
-      <div className="mb-lg flex items-center justify-between border-b border-gray-100 pb-md">
-        <h2 className="text-[16px] font-bold text-gray-900">Lịch sử tạo link</h2>
-        <span className="text-[13px] font-medium text-gray-400">{totalCount} link</span>
+    <div className="rounded-3xl bg-white p-6 sm:p-8 shadow-cute border border-primary-100/80 fade-in">
+      <div className="mb-6 flex items-center justify-between border-b border-primary-100 pb-4">
+        <div>
+          <h2 className="text-[17px] font-extrabold text-neutral-900 tracking-tight">Lịch sử tạo link 🎀</h2>
+          <p className="text-[12px] font-medium text-neutral-500 mt-0.5">Tất cả link hoàn tiền bạn đã chuyển đổi</p>
+        </div>
+        <span className="inline-flex items-center rounded-full bg-primary-50 border border-primary-100 px-3 py-1 text-[12px] font-extrabold text-primary-600 shadow-xs">
+          {totalCount} link
+        </span>
       </div>
 
-      <div className="mb-md flex flex-col gap-sm">
-        <div className="flex items-center gap-sm">
+      <div className="mb-6 flex flex-col gap-4">
+        {/* Tab switcher */}
+        <div className="flex items-center gap-2">
           <button
             type="button"
             onClick={() => handleTabChange("all")}
-            className={`flex h-8 items-center gap-xs rounded-full px-md text-[12px] font-bold transition-colors ${
-              currentTab === "all" ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-500 hover:bg-gray-200"
+            className={`flex h-9 items-center gap-1.5 rounded-full px-4 text-[13px] font-extrabold transition-all ${
+              currentTab === "all"
+                ? "bg-gradient-to-r from-primary-400 to-primary-500 text-white shadow-cute"
+                : "bg-primary-50 text-neutral-600 hover:bg-primary-100/80 border border-primary-100/70"
             }`}
           >
             Tất cả
-            <span className={`rounded-full px-[6px] text-[11px] ${currentTab === "all" ? "bg-white/20" : "bg-white text-gray-400"}`}>
+            <span
+              className={`rounded-full px-1.5 py-0.2 text-[11px] ${
+                currentTab === "all" ? "bg-white/20 text-white" : "bg-white text-neutral-500"
+              }`}
+            >
               {counts.all}
             </span>
           </button>
           <button
             type="button"
             onClick={() => handleTabChange("favorite")}
-            className={`flex h-8 items-center gap-xs rounded-full px-md text-[12px] font-bold transition-colors ${
-              currentTab === "favorite" ? "bg-amber-500 text-white" : "bg-amber-50 text-amber-600 hover:bg-amber-100"
+            className={`flex h-9 items-center gap-1.5 rounded-full px-4 text-[13px] font-extrabold transition-all ${
+              currentTab === "favorite"
+                ? "bg-amber-500 text-white shadow-md shadow-amber-500/20"
+                : "bg-amber-50 text-amber-700 hover:bg-amber-100/80 border border-amber-200/70"
             }`}
           >
-            <Star size={12} strokeWidth={2.5} fill="currentColor" />
+            <Star size={13} strokeWidth={2.5} fill="currentColor" />
             Yêu thích
-            <span className={`rounded-full px-[6px] text-[11px] ${currentTab === "favorite" ? "bg-white/20" : "bg-white text-amber-500"}`}>
+            <span
+              className={`rounded-full px-1.5 py-0.2 text-[11px] ${
+                currentTab === "favorite" ? "bg-white/20 text-white" : "bg-white text-amber-600"
+              }`}
+            >
               {counts.favorite}
             </span>
           </button>
         </div>
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-sm">
+
+        {/* Filters */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
           <select
             value={currentPeriod}
             onChange={handlePeriodChange}
-            className="h-11 rounded-2xl border border-neutral-200 bg-white px-4 py-0 text-[14px] font-semibold text-neutral-700 outline-none transition-all hover:border-neutral-300 focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10 sm:w-[200px]"
+            className="h-11 rounded-2xl border border-primary-200/80 bg-white px-4 text-[13px] font-semibold text-neutral-800 outline-none transition-all hover:border-primary-300 focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10 sm:w-[200px]"
           >
             <option value="all">Tất cả thời gian</option>
             <option value="today">Hôm nay</option>
@@ -186,61 +204,74 @@ export function RefundHistoryClient({
             <option value="this_month">Tháng này</option>
             <option value="last_month">Tháng trước</option>
           </select>
-          <ServerSearchInput placeholder="Tìm tên sản phẩm hoặc mã..." className="sm:max-w-[300px]" />
+          <ServerSearchInput placeholder="Tìm tên sản phẩm hoặc mã..." className="sm:max-w-[320px] flex-1" />
         </div>
       </div>
 
       {currentTab === "favorite" && counts.favorite === 0 && links.length === 0 && (
-        <div className="mb-md rounded-xl bg-amber-50 border border-amber-100 px-lg py-md text-[13px] text-amber-700">
-          Bấm biểu tượng <Star size={12} className="inline -mt-[2px]" fill="currentColor" /> trên mỗi link để lưu lại — tiện cho các link chưa có ảnh sản phẩm, tránh bị lẫn khi danh sách dài ra.
+        <div className="mb-6 rounded-2xl bg-amber-50 border border-amber-200/70 p-4 text-[13px] font-medium text-amber-800">
+          Bấm biểu tượng <Star size={13} className="inline -mt-[2px] text-amber-500" fill="currentColor" /> trên mỗi link để lưu lại vào mục yêu thích — tiện theo dõi và mua sắm lại nhiều lần.
         </div>
       )}
 
       {links.length === 0 ? (
-        <div className="flex flex-col items-center py-xl text-center">
-          <span className="text-[40px] opacity-50 mb-sm">🛒</span>
-          <div className="text-[14px] font-semibold text-gray-700">
+        <div className="flex flex-col items-center py-16 text-center">
+          <div className="flex h-16 w-16 items-center justify-center rounded-3xl bg-primary-50 border border-primary-100 text-2xl mb-3 shadow-xs">
+            🛍️
+          </div>
+          <div className="text-[15px] font-bold text-neutral-800">
             {currentTab === "favorite" ? "Chưa có link yêu thích nào" : "Không tìm thấy link nào"}
           </div>
+          <p className="text-[12px] font-medium text-neutral-500 mt-1">
+            {currentTab === "favorite" ? "Hãy đánh dấu ngôi sao các link bạn muốn mua lại sau." : "Hãy dán link Shopee vào ô trên để tạo link hoàn tiền nhé!"}
+          </p>
         </div>
       ) : (
-        <div className="flex flex-col gap-md">
+        <div className="flex flex-col gap-3">
           {links.map((l) => {
-            const pStyle = PLATFORM_STYLE[l.platform.code.toUpperCase()] ?? { icon: Store, color: "#454745" };
+            const pStyle = PLATFORM_STYLE[l.platform.code.toUpperCase()] ?? { icon: Store, color: "#FF6D9E", bg: "bg-primary-50" };
             const Icon = pStyle.icon;
 
             return (
-              <div key={l.id} className="group flex flex-col sm:flex-row sm:items-center justify-between gap-md rounded-2xl border border-gray-100 p-md transition-all hover:border-gray-200 hover:bg-gray-50 hover:shadow-sm">
-                <div className="flex flex-1 items-center gap-md min-w-0">
-                  <ProductThumb image={l.productImage} color={pStyle.color} Icon={Icon} />
+              <div
+                key={l.id}
+                className="group flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-2xl border border-primary-100/80 bg-white p-4 transition-all hover:border-primary-300 hover:bg-primary-50/25 hover:shadow-cute"
+              >
+                <div className="flex flex-1 items-center gap-3.5 min-w-0">
+                  <ProductThumb image={l.productImage} color={pStyle.color} bg={pStyle.bg} Icon={Icon} />
                   <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-xs text-[11px] font-bold uppercase tracking-wider" style={{ color: pStyle.color }}>
+                    <div className="flex items-center gap-1.5 text-[11px] font-extrabold uppercase tracking-wider" style={{ color: pStyle.color }}>
                       {l.platform.name}
-                      <span className="text-gray-300">•</span>
-                      <span className="text-gray-400 font-medium normal-case tracking-normal">{l.createdAt}</span>
+                      <span className="text-neutral-300">•</span>
+                      <span className="text-neutral-500 font-medium normal-case tracking-normal">{l.createdAt}</span>
                     </div>
-                    <p className="mt-[2px] truncate text-[14px] font-bold text-gray-900">
+                    <p className="mt-0.5 truncate text-[14px] font-bold text-neutral-900">
                       {l.productTitle ?? `Sản phẩm từ ${l.platform.name} (${l.shortCode})`}
                     </p>
-                    <a href={l.shortUrl ?? "#"} target="_blank" rel="noreferrer" className="mt-[2px] block truncate text-[12px] font-medium text-gray-400 transition-colors hover:text-[#e86a33]">
+                    <a
+                      href={l.shortUrl ?? "#"}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="mt-0.5 block truncate text-[12px] font-medium text-neutral-500 transition-colors hover:text-primary-600"
+                    >
                       {l.shortUrl}
                     </a>
                   </div>
                 </div>
 
-                <div className="flex shrink-0 items-center gap-sm mt-sm sm:mt-0">
+                <div className="flex shrink-0 items-center gap-2 mt-2 sm:mt-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-primary-100/60 justify-end">
                   <FavoriteButton linkId={l.id} isFavorite={l.isFavorite} />
                   <button
                     onClick={() => handleCopy(l.shortUrl ?? "")}
-                    className="flex h-10 items-center gap-xs rounded-lg bg-gray-100 px-sm text-[13px] font-bold text-gray-600 transition-colors hover:bg-gray-200 hover:text-gray-900"
+                    className="flex h-10 items-center gap-1.5 rounded-xl border border-primary-200/80 bg-primary-50/80 px-3.5 text-[13px] font-bold text-neutral-800 transition-all hover:bg-primary-100 hover:text-primary-700"
                   >
-                    <Copy size={14} strokeWidth={2.5} />
-                    <span className="inline">Copy</span>
+                    <Copy size={14} strokeWidth={2.2} />
+                    <span>Copy</span>
                   </button>
                   <a href={l.shortUrl ?? "#"} target="_blank" rel="noreferrer">
-                    <button className="flex h-10 items-center gap-xs rounded-lg bg-primary px-sm text-[13px] font-bold text-white transition-colors hover:bg-primary-active hover:shadow-md hover:shadow-primary/20">
-                      <ExternalLink size={14} strokeWidth={2.5} />
-                      <span className="inline">Mở</span>
+                    <button className="flex h-10 items-center gap-1.5 rounded-xl bg-gradient-to-r from-primary-400 to-primary-500 px-4 text-[13px] font-extrabold text-white shadow-cute transition-all hover:shadow-cute-lg hover:scale-[1.02] active:scale-[0.98]">
+                      <ExternalLink size={14} strokeWidth={2.2} />
+                      <span>Mở link</span>
                     </button>
                   </a>
                 </div>
@@ -250,7 +281,7 @@ export function RefundHistoryClient({
         </div>
       )}
 
-      <div className="mt-md border-t border-gray-100 pt-md">
+      <div className="mt-6 border-t border-primary-100 pt-4">
         <Pagination totalPages={totalPages} currentPage={currentPage} />
       </div>
     </div>

@@ -106,7 +106,7 @@ export default function CustomerGuidePage() {
         </div>
         <Link
           href="/app/notifications"
-          className="shrink-0 rounded-xl bg-[#e86a33] px-lg py-[10px] text-center text-[13px] font-bold text-white shadow-md shadow-[#e86a33]/25 transition-all hover:bg-[#d65d2a] active:scale-[0.97]"
+          className="shrink-0 rounded-2xl bg-gradient-to-r from-primary-400 to-primary-500 px-lg py-[10px] text-center text-[13px] font-bold text-white shadow-cute transition-all hover:scale-105 active:scale-[0.97]"
         >
           Xem thông báo &amp; hỗ trợ
         </Link>

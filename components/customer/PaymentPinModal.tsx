@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import { X, Loader2, ShieldCheck, KeyRound, MailCheck, Lock, ChevronRight } from "lucide-react";
-import { useModal } from "@/components/ui/ModalProvider";
+import { useToast } from "@/components/ui/Toast";
 
 type PinMode = "enter" | "setup" | "reset_request" | "reset_confirm";
 
@@ -15,7 +15,7 @@ interface Props {
 }
 
 export function PaymentPinModal({ isOpen, onClose, hasPin, onPinVerified }: Props) {
-  const modal = useModal();
+  const { toast } = useToast();
   const [mode, setMode] = useState<PinMode>(hasPin ? "enter" : "setup");
   const [pin, setPin] = useState("");
   const [confirmPin, setConfirmPin] = useState("");
@@ -25,6 +25,7 @@ export function PaymentPinModal({ isOpen, onClose, hasPin, onPinVerified }: Prop
   const [loading, setLoading] = useState(false);
   const [maskedEmail, setMaskedEmail] = useState("");
   const [step, setStep] = useState<"intro" | "pin" | "confirm">("intro"); // for setup mode
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
@@ -39,6 +40,7 @@ export function PaymentPinModal({ isOpen, onClose, hasPin, onPinVerified }: Prop
       setNewPinConfirm("");
       setStep(hasPin ? "pin" : "intro");
       setLoading(false);
+      setErrorMessage(null);
     }
   }, [isOpen, hasPin]);
 
@@ -141,6 +143,7 @@ export function PaymentPinModal({ isOpen, onClose, hasPin, onPinVerified }: Prop
 
   // ── MODE: SETUP PIN (Tạo PIN lần đầu) ──
   async function handleSetupPin() {
+    setErrorMessage(null);
     if (step === "pin") {
       if (pin.length !== 6) return;
       setStep("confirm");
@@ -151,7 +154,7 @@ export function PaymentPinModal({ isOpen, onClose, hasPin, onPinVerified }: Prop
     // step === "confirm"
     if (confirmPin.length !== 6) return;
     if (pin !== confirmPin) {
-      modal.alert({ title: "Lỗi", message: "Mã PIN nhập lại không khớp. Vui lòng thử lại.", iconType: "danger" });
+      setErrorMessage("Mã PIN nhập lại không khớp. Vui lòng thử lại.");
       setConfirmPin("");
       setStep("pin");
       setPin("");
@@ -168,23 +171,24 @@ export function PaymentPinModal({ isOpen, onClose, hasPin, onPinVerified }: Prop
 
     if (!res.ok) {
       const data = await res.json().catch(() => ({}));
-      modal.alert({ title: "Lỗi", message: data.error ?? "Có lỗi xảy ra", iconType: "danger" });
+      setErrorMessage(data.error ?? "Có lỗi xảy ra khi tạo mã PIN.");
       return;
     }
 
-    modal.alert({ title: "Thành công 🎀", message: "Đã thiết lập mã PIN rút tiền!", iconType: "success" });
+    toast.success("Đã thiết lập mã PIN rút tiền thành công! 🎀", "Thành công");
     onPinVerified(pin);
   }
 
   // ── MODE: RESET REQUEST (Gửi OTP qua email) ──
   async function handleResetRequest() {
+    setErrorMessage(null);
     setLoading(true);
     const res = await fetch("/api/customer/pin/reset-request", { method: "POST" });
     setLoading(false);
 
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
-      modal.alert({ title: "Lỗi", message: data.error ?? "Không gửi được email", iconType: "danger" });
+      setErrorMessage(data.error ?? "Không gửi được email xác nhận.");
       return;
     }
 
@@ -194,16 +198,17 @@ export function PaymentPinModal({ isOpen, onClose, hasPin, onPinVerified }: Prop
 
   // ── MODE: RESET CONFIRM (Nhập OTP + PIN mới) ──
   async function handleResetConfirm() {
+    setErrorMessage(null);
     if (otp.length !== 6) {
-      modal.alert({ title: "Lỗi", message: "Vui lòng nhập mã OTP 6 số", iconType: "danger" });
+      setErrorMessage("Vui lòng nhập mã OTP 6 số.");
       return;
     }
     if (newPin.length !== 6) {
-      modal.alert({ title: "Lỗi", message: "Mã PIN mới phải là 6 chữ số", iconType: "danger" });
+      setErrorMessage("Mã PIN mới phải là 6 chữ số.");
       return;
     }
     if (newPin !== newPinConfirm) {
-      modal.alert({ title: "Lỗi", message: "Mã PIN mới nhập lại không khớp", iconType: "danger" });
+      setErrorMessage("Mã PIN mới nhập lại không khớp.");
       return;
     }
 
@@ -217,14 +222,15 @@ export function PaymentPinModal({ isOpen, onClose, hasPin, onPinVerified }: Prop
 
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
-      modal.alert({ title: "Lỗi", message: data.error ?? "Có lỗi xảy ra", iconType: "danger" });
+      setErrorMessage(data.error ?? "Mã OTP không đúng hoặc có lỗi xảy ra.");
       return;
     }
 
-    modal.alert({ title: "Thành công 🎀", message: "Đã đặt lại mã PIN! Bạn có thể rút tiền ngay.", iconType: "success" });
+    toast.success("Đã đặt lại mã PIN thành công! Bạn có thể rút tiền ngay. 🎀", "Thành công");
     // Return to enter mode with new PIN
     setMode("enter");
     setPin("");
+    setErrorMessage(null);
   }
 
   if (!isOpen) return null;
@@ -312,6 +318,12 @@ export function PaymentPinModal({ isOpen, onClose, hasPin, onPinVerified }: Prop
 
         {/* Content */}
         <div className="p-6 flex flex-col gap-5">
+          {errorMessage && (
+            <div className="rounded-2xl bg-rose-50 border border-rose-200 p-3.5 text-center text-[13px] font-bold text-rose-600 animate-in fade-in">
+              ⚠️ {errorMessage}
+            </div>
+          )}
+
           {/* ENTER MODE */}
           {mode === "enter" && (
             <>

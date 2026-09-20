@@ -113,7 +113,7 @@ export function CategoryRateForm({ initialRows }: { initialRows: Row[] }) {
                     name="isDefault"
                     checked={row.isDefault}
                     onChange={() => setDefault(i)}
-                    className="h-4 w-4 accent-[#e86a33]"
+                    className="h-4 w-4 accent-primary-500"
                   />
                 </td>
                 <td className="py-xs text-center">
@@ -134,7 +134,7 @@ export function CategoryRateForm({ initialRows }: { initialRows: Row[] }) {
       <button
         type="button"
         onClick={addRow}
-        className="flex w-fit items-center gap-xs text-[12px] font-bold text-[#e86a33] hover:text-[#d65d2a]"
+        className="flex w-fit items-center gap-xs text-[12px] font-bold text-primary-500 hover:text-primary-600 transition-colors"
       >
         <Plus size={14} strokeWidth={2.5} />
         Thêm ngành hàng

@@ -57,29 +57,29 @@ function DealCard({ deal }: { deal: Deal }) {
   }
 
   return (
-    <div className="flex flex-col overflow-hidden rounded-3xl bg-white border border-gray-100 shadow-sm hover:shadow-md hover:-translate-y-1 transition-all relative">
+    <div className="flex flex-col overflow-hidden rounded-3xl bg-white border border-primary-100/80 shadow-cute hover:shadow-cute-lg hover:-translate-y-1 hover:border-primary-300 transition-all relative">
       {/* Expiring Soon badge */}
       {isExpiringSoon && (
-        <div className="absolute top-3 left-3 z-10 flex items-center gap-1 rounded-full bg-red-500 px-2.5 py-1 text-[11px] font-black text-white shadow-md animate-pulse">
+        <div className="absolute top-3 left-3 z-10 flex items-center gap-1 rounded-full bg-gradient-to-r from-rose-500 to-pink-500 px-2.5 py-1 text-[11px] font-black text-white shadow-md animate-pulse">
           🔥 Sắp hết hạn
         </div>
       )}
 
-      <div className="flex h-40 items-center justify-center bg-gray-50">
+      <div className="flex h-40 items-center justify-center bg-primary-50/50">
         {deal.productImage ? (
           <img src={deal.productImage} alt="" className="h-full w-full object-cover" />
         ) : (
-          <TicketPercent size={40} className="text-gray-300" />
+          <TicketPercent size={40} className="text-primary-300" />
         )}
       </div>
 
       <div className="flex flex-1 flex-col p-5">
-        <span className="mb-2 inline-block w-fit rounded-md bg-gray-900 px-2 py-1 text-[10px] font-bold text-white uppercase tracking-wider">
+        <span className="mb-2 inline-block w-fit rounded-lg bg-primary-50 border border-primary-100/60 px-2 py-0.5 text-[10px] font-bold text-primary-600 uppercase tracking-wider">
           {deal.platformName}
         </span>
-        <h3 className="text-[15px] font-bold text-gray-900 leading-tight line-clamp-2">{deal.title}</h3>
+        <h3 className="text-[15px] font-bold text-neutral-900 leading-tight line-clamp-2">{deal.title}</h3>
         {deal.benefitText && (
-          <p className="mt-1 text-[13px] text-gray-500 line-clamp-2">{deal.benefitText}</p>
+          <p className="mt-1 text-[13px] text-neutral-500 line-clamp-2">{deal.benefitText}</p>
         )}
 
         {/* Countdown or expiry date */}
@@ -92,7 +92,7 @@ function DealCard({ deal }: { deal: Deal }) {
               </span>
             </div>
           ) : (
-            <div className="flex items-center gap-1 text-gray-400">
+            <div className="flex items-center gap-1 text-neutral-400">
               <CalendarOff size={13} />
               <span className="text-[11px] font-medium">
                 {deal.endsAt ? formatDate(deal.endsAt) : "Số lượng có hạn"}
@@ -108,14 +108,14 @@ function DealCard({ deal }: { deal: Deal }) {
                 href={deal.link}
                 target="_blank"
                 rel="noreferrer"
-                className="flex h-10 flex-1 items-center justify-center gap-1.5 rounded-xl bg-[#e86a33] text-[13px] font-bold text-white hover:bg-[#d65d2a] transition-colors"
+                className="flex h-10 flex-1 items-center justify-center gap-1.5 rounded-2xl bg-gradient-to-r from-primary-400 to-primary-500 text-[13px] font-bold text-white shadow-cute hover:scale-[1.02] active:scale-[0.98] transition-all"
               >
                 <ExternalLink size={14} />
                 Mua ngay
               </a>
               <button
                 onClick={copyLink}
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-gray-200 text-gray-500 hover:bg-gray-50 transition-colors"
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-primary-100/80 text-neutral-500 hover:bg-primary-50 hover:text-primary-600 transition-colors"
                 title="Copy link"
               >
                 {copiedId ? (
@@ -126,7 +126,7 @@ function DealCard({ deal }: { deal: Deal }) {
               </button>
             </>
           ) : (
-            <span className="flex h-10 flex-1 items-center justify-center rounded-xl bg-gray-100 text-[13px] font-medium text-gray-400">
+            <span className="flex h-10 flex-1 items-center justify-center rounded-2xl bg-neutral-100 text-[13px] font-medium text-neutral-400">
               Link chưa sẵn sàng
             </span>
           )}

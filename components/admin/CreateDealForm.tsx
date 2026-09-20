@@ -145,7 +145,7 @@ export function CreateDealForm() {
 
   if (!open) {
     return (
-      <Button variant="primary" onClick={() => setOpen(true)} className="shadow-sm shadow-[#e86a33]/20">
+      <Button variant="primary" onClick={() => setOpen(true)} className="shadow-cute">
         <Plus size={18} strokeWidth={2} className="mr-1" />
         Thêm Deal Mới
       </Button>
@@ -153,16 +153,16 @@ export function CreateDealForm() {
   }
 
   return (
-    <div className="rounded-3xl bg-white shadow-lg ring-1 ring-black/5 overflow-hidden mb-lg">
+    <div className="rounded-3xl bg-white shadow-cute border border-primary-100/80 overflow-hidden mb-lg">
       {/* Header */}
-      <div className="flex items-center justify-between px-xl py-lg border-b border-gray-100 bg-gradient-to-r from-orange-50 to-white">
+      <div className="flex items-center justify-between px-xl py-lg border-b border-primary-100/80 bg-gradient-to-r from-primary-50/80 via-primary-50 to-pink-50">
         <div className="flex items-center gap-sm">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-[#e86a33]/10 text-[#e86a33]">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary-100 text-primary-600">
             <Flame size={18} strokeWidth={2} />
           </div>
           <div>
-            <h3 className="text-[15px] font-bold text-gray-900">Thêm Deal Mới</h3>
-            <p className="text-[12px] text-gray-400">
+            <h3 className="text-[15px] font-bold text-neutral-900">Thêm Deal Mới</h3>
+            <p className="text-[12px] text-neutral-500">
               {step === 1 ? "Bước 1: Dán link deal vào đây" : step === 2 ? "Bước 2: Điền thông tin và đăng" : "✅ Đăng deal thành công!"}
             </p>
           </div>
@@ -171,11 +171,11 @@ export function CreateDealForm() {
           {/* Step indicator */}
           <div className="flex items-center gap-1 mr-md">
             {step < 3 && [1, 2].map((s) => (
-              <div key={s} className={`h-2 w-8 rounded-full transition-colors ${step >= s ? "bg-[#e86a33]" : "bg-gray-200"}`} />
+              <div key={s} className={`h-2 w-8 rounded-full transition-colors ${step >= s ? "bg-primary-500" : "bg-neutral-200"}`} />
             ))}
-            {step === 3 && <div className="h-2 w-16 rounded-full bg-green-500" />}
+            {step === 3 && <div className="h-2 w-16 rounded-full bg-emerald-500" />}
           </div>
-          <button onClick={resetForm} className="h-8 w-8 flex items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-900 transition-colors">
+          <button onClick={resetForm} className="h-8 w-8 flex items-center justify-center rounded-xl text-neutral-400 hover:bg-neutral-100 hover:text-neutral-900 transition-colors">
             <X size={18} />
           </button>
         </div>
@@ -185,19 +185,19 @@ export function CreateDealForm() {
         {/* ═══ STEP 3: SUCCESS ═══ */}
         {step === 3 && (
           <div className="flex flex-col items-center gap-lg py-lg text-center">
-            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-green-50">
-              <CheckCircle2 size={40} className="text-green-500" strokeWidth={1.75} />
+            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-emerald-50 border border-emerald-100">
+              <CheckCircle2 size={40} className="text-emerald-500" strokeWidth={1.75} />
             </div>
             <div>
-              <h3 className="text-[18px] font-black text-gray-900">Deal đã được đăng!</h3>
-              <p className="text-[13px] text-gray-400 mt-xs">Link dưới đây dùng tên miền của bạn, đích đến vẫn là Shopee.</p>
+              <h3 className="text-[18px] font-black text-neutral-900">Deal đã được đăng!</h3>
+              <p className="text-[13px] text-neutral-500 mt-xs">Link dưới đây dùng tên miền của bạn, đích đến vẫn là Shopee.</p>
             </div>
 
             {createdShortUrl && (
-              <div className="w-full rounded-2xl bg-gray-50 border border-gray-100 p-lg flex flex-col sm:flex-row items-center gap-sm">
+              <div className="w-full rounded-2xl bg-neutral-50 border border-primary-100/80 p-lg flex flex-col sm:flex-row items-center gap-sm">
                 <div className="flex-1 min-w-0">
-                  <div className="text-[11px] font-bold uppercase tracking-wider text-gray-400 mb-1">Link deal (tên miền của bạn)</div>
-                  <div className="text-[14px] font-bold text-gray-900 break-all">{createdShortUrl}</div>
+                  <div className="text-[11px] font-bold uppercase tracking-wider text-neutral-400 mb-1">Link deal (tên miền của bạn)</div>
+                  <div className="text-[14px] font-bold text-neutral-900 break-all">{createdShortUrl}</div>
                 </div>
                 <button
                   onClick={() => {
@@ -206,7 +206,7 @@ export function CreateDealForm() {
                     setTimeout(() => setCopied(false), 2000);
                   }}
                   className={`shrink-0 flex items-center gap-xs rounded-xl px-md py-sm text-[13px] font-bold transition-all ${
-                    copied ? "bg-green-500 text-white" : "bg-[#e86a33] text-white hover:bg-[#d4602e]"
+                    copied ? "bg-emerald-500 text-white" : "bg-primary-500 text-white hover:bg-primary-600"
                   }`}
                 >
                   {copied ? "✓ Đã copy!" : "Copy link"}
@@ -234,14 +234,14 @@ export function CreateDealForm() {
 
             <div className="flex flex-col sm:flex-row gap-sm">
               <div className="relative flex-1">
-                <ExternalLink size={16} className="absolute left-md top-1/2 -translate-y-1/2 text-gray-400" />
+                <ExternalLink size={16} className="absolute left-md top-1/2 -translate-y-1/2 text-neutral-400" />
                 <input
                   type="url"
                   placeholder="https://s.shopee.vn/... hoặc link dài đang dính aff đối thủ"
                   value={inputUrl}
                   onChange={(e) => setInputUrl(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleResolve()}
-                  className="h-12 w-full rounded-2xl bg-gray-50 pl-10 pr-md text-[14px] font-medium text-gray-900 ring-1 ring-black/5 focus:outline-none focus:ring-2 focus:ring-[#e86a33]/50 transition-all"
+                  className="h-12 w-full rounded-2xl bg-neutral-50 pl-10 pr-md text-[14px] font-medium text-neutral-900 border border-primary-100/80 focus:outline-none focus:border-primary-400 focus:ring-2 focus:ring-primary-200/50 transition-all placeholder:text-neutral-400"
                 />
               </div>
               <Button
@@ -278,12 +278,12 @@ export function CreateDealForm() {
             <div className="flex flex-col lg:flex-row gap-xl">
               {/* Left: Image */}
               <div className="flex flex-col gap-sm lg:w-[280px] shrink-0">
-                <label className="text-[12px] font-bold text-gray-600 uppercase tracking-wide">
+                <label className="text-[12px] font-bold text-neutral-600 uppercase tracking-wide">
                   Ảnh sản phẩm
                 </label>
                 <div
                   onClick={() => fileRef.current?.click()}
-                  className="relative w-full aspect-square rounded-2xl overflow-hidden bg-gray-100 cursor-pointer border-2 border-dashed border-gray-200 hover:border-[#e86a33] transition-colors group"
+                  className="relative w-full aspect-square rounded-2xl overflow-hidden bg-neutral-100 cursor-pointer border-2 border-dashed border-primary-200 hover:border-primary-400 transition-colors group"
                 >
                   {displayImage ? (
                     <>
@@ -296,15 +296,15 @@ export function CreateDealForm() {
                       </div>
                     </>
                   ) : (
-                    <div className="flex flex-col items-center justify-center h-full gap-sm text-gray-400">
+                    <div className="flex flex-col items-center justify-center h-full gap-sm text-neutral-400">
                       <ImageIcon size={32} strokeWidth={1.5} />
                       <span className="text-[13px] font-medium">Click để upload ảnh</span>
-                      <span className="text-[11px] text-gray-400">Hoặc dùng ảnh Shopee tự động</span>
+                      <span className="text-[11px] text-neutral-400">Hoặc dùng ảnh Shopee tự động</span>
                     </div>
                   )}
                   {imagePreview && (
                     <div className="absolute top-2 right-2">
-                      <span className="rounded-full bg-[#e86a33] px-2 py-1 text-[10px] font-bold text-white">Ảnh của bạn</span>
+                      <span className="rounded-full bg-primary-500 px-2 py-1 text-[10px] font-bold text-white">Ảnh của bạn</span>
                     </div>
                   )}
                   {!imagePreview && resolved.shopeeImageUrl && (
@@ -318,7 +318,7 @@ export function CreateDealForm() {
                   <button
                     type="button"
                     onClick={() => { setImageFile(null); setImagePreview(null); if (fileRef.current) fileRef.current.value = ""; }}
-                    className="text-[12px] text-red-500 hover:text-red-700 text-center"
+                    className="text-[12px] text-rose-500 hover:text-rose-700 text-center"
                   >
                     Xoá ảnh upload → dùng ảnh Shopee
                   </button>
@@ -328,17 +328,17 @@ export function CreateDealForm() {
               {/* Right: Info */}
               <div className="flex-1 flex flex-col gap-lg">
                 {/* Link status + Short URL */}
-                <div className="rounded-xl border border-gray-100 overflow-hidden">
+                <div className="rounded-2xl border border-primary-100/80 overflow-hidden">
                   {/* Row 1: Link đã làm sạch */}
-                  <div className="bg-green-50 border-b border-green-100 px-md py-sm flex items-center gap-sm">
-                    <CheckCircle2 size={14} className="text-green-500 shrink-0" />
-                    <p className="text-[12px] font-bold text-green-700">Link đã xoá affiliate đối thủ thành công!</p>
+                  <div className="bg-emerald-50 border-b border-emerald-100 px-md py-sm flex items-center gap-sm">
+                    <CheckCircle2 size={14} className="text-emerald-500 shrink-0" />
+                    <p className="text-[12px] font-bold text-emerald-700">Link đã xoá affiliate đối thủ thành công!</p>
                   </div>
                   {/* Row 2: Short URL của mình */}
                   <div className="bg-white px-md py-sm flex items-center justify-between gap-sm">
                     <div className="min-w-0">
-                      <div className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-0.5">Link deal (tên miền của bạn)</div>
-                      <div className="text-[13px] font-bold text-gray-900 font-mono">{resolved.shortUrl}</div>
+                      <div className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 mb-0.5">Link deal (tên miền của bạn)</div>
+                      <div className="text-[13px] font-bold text-neutral-900 font-mono">{resolved.shortUrl}</div>
                     </div>
                     <button
                       type="button"
@@ -347,8 +347,8 @@ export function CreateDealForm() {
                         setShortUrlCopied(true);
                         setTimeout(() => setShortUrlCopied(false), 2000);
                       }}
-                      className={`shrink-0 flex items-center gap-xs rounded-lg px-sm py-xs text-[12px] font-bold transition-all ${
-                        shortUrlCopied ? "bg-green-500 text-white" : "bg-[#e86a33] text-white hover:bg-[#d4602e]"
+                      className={`shrink-0 flex items-center gap-xs rounded-xl px-sm py-xs text-[12px] font-bold transition-all ${
+                        shortUrlCopied ? "bg-emerald-500 text-white" : "bg-primary-500 text-white hover:bg-primary-600"
                       }`}
                     >
                       {shortUrlCopied ? "✓ Đã copy!" : "Copy"}
@@ -357,31 +357,31 @@ export function CreateDealForm() {
                 </div>
 
                 <div className="flex flex-col gap-xs">
-                  <label className="text-[12px] font-bold text-gray-600 uppercase tracking-wide">Tiêu đề sản phẩm *</label>
+                  <label className="text-[12px] font-bold text-neutral-600 uppercase tracking-wide">Tiêu đề sản phẩm *</label>
                   <TextInput
                     placeholder="VD: USB Âm Nhạc Ô Tô 1000 Bài..."
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     required
-                    className="bg-gray-50"
+                    className="bg-neutral-50"
                   />
                 </div>
 
                 <div className="flex flex-col gap-xs">
-                  <label className="text-[12px] font-bold text-gray-600 uppercase tracking-wide">Mô tả ngắn (tuỳ chọn)</label>
+                  <label className="text-[12px] font-bold text-neutral-600 uppercase tracking-wide">Mô tả ngắn (tuỳ chọn)</label>
                   <textarea
                     placeholder="Mô tả thêm về deal này..."
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                     rows={2}
-                    className="w-full rounded-2xl bg-gray-50 px-md py-sm text-[14px] font-medium text-gray-900 ring-1 ring-black/5 focus:outline-none focus:ring-2 focus:ring-[#e86a33]/50 transition-all resize-none"
+                    className="w-full rounded-2xl bg-neutral-50 px-md py-sm text-[14px] font-medium text-neutral-900 border border-primary-100/80 focus:outline-none focus:border-primary-400 focus:ring-2 focus:ring-primary-200/50 transition-all resize-none"
                   />
                 </div>
 
                 {/* Pricing */}
                 <div className="grid grid-cols-3 gap-md">
                   <div className="flex flex-col gap-xs">
-                    <label className="text-[12px] font-bold text-gray-600 uppercase tracking-wide flex items-center gap-1">
+                    <label className="text-[12px] font-bold text-neutral-600 uppercase tracking-wide flex items-center gap-1">
                       <DollarSign size={11} /> Giá gốc
                     </label>
                     <TextInput
@@ -389,11 +389,11 @@ export function CreateDealForm() {
                       placeholder="500000"
                       value={originalPrice}
                       onChange={(e) => setOriginalPrice(e.target.value)}
-                      className="bg-gray-50"
+                      className="bg-neutral-50"
                     />
                   </div>
                   <div className="flex flex-col gap-xs">
-                    <label className="text-[12px] font-bold text-[#e86a33] uppercase tracking-wide flex items-center gap-1">
+                    <label className="text-[12px] font-bold text-primary-600 uppercase tracking-wide flex items-center gap-1">
                       <DollarSign size={11} /> Giá sale
                     </label>
                     <TextInput
@@ -401,11 +401,11 @@ export function CreateDealForm() {
                       placeholder="250000"
                       value={salePrice}
                       onChange={(e) => setSalePrice(e.target.value)}
-                      className="bg-orange-50 ring-[#e86a33]/30"
+                      className="bg-primary-50/50 border-primary-200"
                     />
                   </div>
                   <div className="flex flex-col gap-xs">
-                    <label className="text-[12px] font-bold text-gray-600 uppercase tracking-wide flex items-center gap-1">
+                    <label className="text-[12px] font-bold text-neutral-600 uppercase tracking-wide flex items-center gap-1">
                       <Tag size={11} /> % Giảm
                     </label>
                     <TextInput
@@ -413,14 +413,14 @@ export function CreateDealForm() {
                       placeholder="50"
                       value={discountPercent}
                       onChange={(e) => setDiscountPercent(e.target.value)}
-                      className="bg-gray-50"
+                      className="bg-neutral-50"
                     />
                   </div>
                 </div>
 
                 {/* Loại deal */}
                 <div className="flex flex-col gap-xs">
-                  <label className="text-[12px] font-bold text-gray-600 uppercase tracking-wide">Loại deal</label>
+                  <label className="text-[12px] font-bold text-neutral-600 uppercase tracking-wide">Loại deal</label>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-sm">
                     {DEAL_LINK_TYPES.map((t) => (
                       <button
@@ -429,14 +429,14 @@ export function CreateDealForm() {
                         onClick={() => setLinkType(t.value)}
                         className={`rounded-2xl border-2 p-md text-left transition-all ${
                           linkType === t.value
-                            ? "border-[#e86a33] bg-orange-50"
-                            : "border-gray-100 bg-gray-50 hover:border-gray-200"
+                            ? "border-primary-500 bg-primary-50/50"
+                            : "border-neutral-100 bg-neutral-50 hover:border-neutral-200"
                         }`}
                       >
-                        <div className={`text-[13px] font-bold ${linkType === t.value ? "text-[#e86a33]" : "text-gray-700"}`}>
+                        <div className={`text-[13px] font-bold ${linkType === t.value ? "text-primary-600" : "text-neutral-700"}`}>
                           {t.value === "product" ? "🎯" : "🏬"} {t.label}
                         </div>
-                        <div className="text-[11px] text-gray-500 mt-1 leading-relaxed">{t.description}</div>
+                        <div className="text-[11px] text-neutral-500 mt-1 leading-relaxed">{t.description}</div>
                       </button>
                     ))}
                   </div>
@@ -445,11 +445,11 @@ export function CreateDealForm() {
                 {/* Category + Expiry */}
                 <div className="grid grid-cols-2 gap-md">
                   <div className="flex flex-col gap-xs">
-                    <label className="text-[12px] font-bold text-gray-600 uppercase tracking-wide">Danh mục (tuỳ chọn)</label>
+                    <label className="text-[12px] font-bold text-neutral-600 uppercase tracking-wide">Danh mục (tuỳ chọn)</label>
                     <select
                       value={category}
                       onChange={(e) => setCategory(e.target.value)}
-                      className="h-11 w-full rounded-2xl bg-gray-50 px-md text-[14px] font-medium text-gray-900 ring-1 ring-black/5 focus:outline-none focus:ring-2 focus:ring-[#e86a33]/50 transition-all"
+                      className="h-11 w-full rounded-2xl bg-neutral-50 px-md text-[14px] font-medium text-neutral-900 border border-primary-100/80 focus:outline-none focus:border-primary-400 focus:ring-2 focus:ring-primary-200/50 transition-all"
                     >
                       <option value="">— Không chọn —</option>
                       {DEAL_CATEGORIES.map((c) => (
@@ -459,12 +459,12 @@ export function CreateDealForm() {
                   </div>
                   <div className="flex flex-col gap-xs">
                     <div className="flex items-center justify-between">
-                      <label className="text-[12px] font-bold text-gray-600 uppercase tracking-wide">Ngày hết hạn (tuỳ chọn)</label>
+                      <label className="text-[12px] font-bold text-neutral-600 uppercase tracking-wide">Ngày hết hạn (tuỳ chọn)</label>
                       {expiresAt && (
                         <button
                           type="button"
                           onClick={() => setExpiresAt("")}
-                          className="text-[11px] font-bold text-[#e86a33] hover:underline"
+                          className="text-[11px] font-bold text-primary-500 hover:underline"
                         >
                           Xoá — không hết hạn
                         </button>
@@ -474,10 +474,10 @@ export function CreateDealForm() {
                       type="date"
                       value={expiresAt}
                       onChange={(e) => setExpiresAt(e.target.value)}
-                      className="h-11 w-full rounded-2xl bg-gray-50 px-md text-[14px] font-medium text-gray-900 ring-1 ring-black/5 focus:outline-none focus:ring-2 focus:ring-[#e86a33]/50 transition-all"
+                      className="h-11 w-full rounded-2xl bg-neutral-50 px-md text-[14px] font-medium text-neutral-900 border border-primary-100/80 focus:outline-none focus:border-primary-400 focus:ring-2 focus:ring-primary-200/50 transition-all"
                     />
                     {!expiresAt && (
-                      <p className="text-[11px] text-gray-400">Để trống = deal không bao giờ hết hạn.</p>
+                      <p className="text-[11px] text-neutral-400">Để trống = deal không bao giờ hết hạn.</p>
                     )}
                   </div>
                 </div>

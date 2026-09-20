@@ -50,26 +50,26 @@ function IosStepsModal({ onClose }: { onClose: () => void }) {
         </div>
         <div className="flex flex-col gap-md p-xl">
           <div className="flex items-center gap-md">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-orange-100 text-[14px] font-black text-[#e86a33]">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary-100 text-[14px] font-black text-primary-600">
               1
             </div>
-            <div className="flex items-center gap-xs text-[13px] text-gray-700">
+            <div className="flex items-center gap-xs text-[13px] text-neutral-700">
               Nhấn nút <Share size={16} className="text-blue-500" /> <b>Chia sẻ</b> ở thanh dưới trình duyệt Safari
             </div>
           </div>
           <div className="flex items-center gap-md">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-orange-100 text-[14px] font-black text-[#e86a33]">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary-100 text-[14px] font-black text-primary-600">
               2
             </div>
-            <div className="flex items-center gap-xs text-[13px] text-gray-700">
-              Chọn <SquarePlus size={16} className="text-gray-500" /> <b>&quot;Thêm vào MH chính&quot;</b>
+            <div className="flex items-center gap-xs text-[13px] text-neutral-700">
+              Chọn <SquarePlus size={16} className="text-neutral-500" /> <b>&quot;Thêm vào MH chính&quot;</b>
             </div>
           </div>
           <div className="flex items-center gap-md">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-orange-100 text-[14px] font-black text-[#e86a33]">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary-100 text-[14px] font-black text-primary-600">
               3
             </div>
-            <div className="text-[13px] text-gray-700">
+            <div className="text-[13px] text-neutral-700">
               Nhấn <b>&quot;Thêm&quot;</b> ở góc trên bên phải màn hình
             </div>
           </div>
@@ -148,8 +148,8 @@ export function PwaInstallBanner() {
     <>
       <div className="mb-lg flex items-center justify-between gap-md rounded-2xl border border-primary-200 bg-primary-50 p-md shadow-sm sm:p-lg">
         <div className="flex items-center gap-md">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white shadow-sm ring-1 ring-black/5">
-            <img src={versionedAsset("/meowback_lucky_cat_logo.png")} alt="MeowBack" className="h-8 w-8 object-cover rounded-md" />
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white shadow-cute border border-primary-200/80">
+            <img src={versionedAsset("/meowback_lucky_cat_logo.png")} alt="MeowBack" className="h-8 w-8 object-cover rounded-xl" />
           </div>
           <div>
             <h3 className="text-[14px] font-bold text-gray-900 sm:text-[15px]">Cài đặt ứng dụng</h3>
@@ -218,7 +218,7 @@ export function PwaInstallSettingsCard() {
   }
 
   return (
-    <div className="rounded-3xl bg-white p-xl shadow-sm ring-1 ring-black/[0.06]">
+    <div className="rounded-3xl bg-white p-xl shadow-cute border border-primary-100/80">
       <div className="mb-md flex items-center gap-sm">
         <img src={versionedAsset("/meowback_lucky_cat_logo.png")} alt="" className="h-9 w-9 rounded-full object-cover" />
         <h2 className="text-[15px] font-bold text-gray-900">Cài đặt ứng dụng</h2>
@@ -280,7 +280,7 @@ export function PwaInstallHorizontalCard() {
 
   return (
     <>
-      <div className="flex items-center justify-between gap-md rounded-3xl border border-primary-200 bg-white p-4 shadow-sm sm:p-5 ring-1 ring-black/5 hover:border-primary-300 transition-colors">
+      <div className="flex items-center justify-between gap-md rounded-3xl border border-primary-100/80 bg-white p-4 shadow-cute sm:p-5 hover:border-primary-300 transition-colors">
         <div className="flex items-center gap-md">
           <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-primary-400 to-primary-500 shadow-cute ring-2 ring-white p-1">
             <img src={versionedAsset("/meowback_lucky_cat_logo.png")} alt="MeowBack" className="h-full w-full object-cover rounded-xl" />

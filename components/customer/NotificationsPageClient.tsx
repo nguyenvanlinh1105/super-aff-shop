@@ -56,16 +56,16 @@ export function NotificationsPageClient({
             onClick={() => setTab(t.id)}
             className={`flex h-11 shrink-0 items-center gap-xs whitespace-nowrap rounded-full px-lg text-[14px] font-bold transition-all ${
               tab === t.id
-                ? "bg-[#e86a33] text-white shadow-md shadow-[#e86a33]/25"
-                : "bg-white text-gray-500 ring-1 ring-black/[0.08] hover:bg-gray-50 hover:text-gray-900"
+                ? "bg-gradient-to-r from-primary-400 to-primary-500 text-white shadow-cute"
+                : "bg-white text-neutral-600 border border-primary-100/80 hover:bg-primary-50/50 hover:text-primary-600 shadow-sm"
             }`}
           >
-            <span className={tab === t.id ? "text-white/80" : "text-gray-400"}>{t.icon}</span>
+            <span className={tab === t.id ? "text-white/90" : "text-primary-400"}>{t.icon}</span>
             {t.label}
             {!!t.badge && t.badge > 0 && (
               <span
                 className={`flex h-5 min-w-[20px] items-center justify-center rounded-full px-1.5 text-[11px] font-extrabold ${
-                  tab === t.id ? "bg-white/20 text-white" : "bg-rose-600 text-white"
+                  tab === t.id ? "bg-white/25 text-white" : "bg-rose-500 text-white"
                 }`}
               >
                 {t.badge > 99 ? "99+" : t.badge}

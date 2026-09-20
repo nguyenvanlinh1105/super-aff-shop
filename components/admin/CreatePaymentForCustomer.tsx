@@ -62,14 +62,14 @@ export function CreatePaymentForCustomer({ customers }: { customers: ComboboxOpt
   }
 
   return (
-    <div className="rounded-3xl bg-white p-lg shadow-sm ring-1 ring-black/[0.06] flex flex-col gap-md">
+    <div className="rounded-3xl bg-white p-lg shadow-cute border border-primary-100/80 flex flex-col gap-md">
       <div className="flex items-center gap-sm">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[#e86a33]/10 text-[#e86a33]">
+        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl bg-primary-50 text-primary-600">
           <UserSearch size={18} strokeWidth={2} />
         </div>
         <div>
-          <h3 className="text-[14px] font-bold text-gray-900">Chủ động tạo phiếu rút hộ khách</h3>
-          <p className="text-[11px] text-gray-400">Không cần chờ khách gửi yêu cầu — chọn khách bất kỳ đang có số dư</p>
+          <h3 className="text-[14px] font-bold text-neutral-900">Chủ động tạo phiếu rút hộ khách</h3>
+          <p className="text-[11px] text-neutral-500">Không cần chờ khách gửi yêu cầu — chọn khách bất kỳ đang có số dư</p>
         </div>
       </div>
 
@@ -78,37 +78,37 @@ export function CreatePaymentForCustomer({ customers }: { customers: ComboboxOpt
         value={customerId}
         onChange={setCustomerId}
         placeholder="Tìm tên hoặc mã khách hàng..."
-        inputClassName="bg-gray-50 h-11"
+        inputClassName="bg-neutral-50 h-11 border-primary-100/80"
       />
 
-      {loading && <p className="text-[12px] text-gray-400">Đang tải số dư...</p>}
+      {loading && <p className="text-[12px] text-neutral-400">Đang tải số dư...</p>}
 
       {error && (
-        <div className="flex items-center gap-sm rounded-xl bg-red-50 p-sm ring-1 ring-red-100">
-          <AlertCircle size={14} className="text-red-400 shrink-0" />
-          <span className="text-[12px] font-medium text-red-600">{error}</span>
+        <div className="flex items-center gap-sm rounded-xl bg-red-50 p-sm border border-red-100">
+          <AlertCircle size={14} className="text-rose-500 shrink-0" />
+          <span className="text-[12px] font-medium text-rose-600">{error}</span>
         </div>
       )}
 
       {preview && !loading && (
-        <div className="flex flex-col gap-sm rounded-2xl bg-gray-50 p-md ring-1 ring-gray-100">
+        <div className="flex flex-col gap-sm rounded-2xl bg-primary-50/40 p-md border border-primary-100/60">
           <div className="flex items-center justify-between gap-sm">
             <div className="min-w-0">
-              <div className="font-bold text-gray-900 truncate">{preview.customer.fullName}</div>
-              <div className="font-mono text-[11px] text-gray-400">{preview.customer.customerCode}</div>
+              <div className="font-bold text-neutral-900 truncate">{preview.customer.fullName}</div>
+              <div className="font-mono text-[11px] text-neutral-500">{preview.customer.customerCode}</div>
             </div>
             <div className="text-right shrink-0">
-              <div className="text-[11px] text-gray-400">{preview.orderCount} đơn khả dụng</div>
-              <div className="text-[20px] font-black text-[#e86a33] tabular-nums">{formatCurrency(preview.available)}</div>
+              <div className="text-[11px] text-neutral-500">{preview.orderCount} đơn khả dụng</div>
+              <div className="text-[20px] font-black text-primary-600 tabular-nums">{formatCurrency(preview.available)}</div>
             </div>
           </div>
 
           {preview.customer.bankAccountNumber ? (
-            <div className="flex items-center gap-sm rounded-xl bg-white p-sm ring-1 ring-gray-100">
-              <CreditCard size={13} className="text-[#e86a33] shrink-0" />
+            <div className="flex items-center gap-sm rounded-xl bg-white p-sm border border-primary-100/60">
+              <CreditCard size={13} className="text-primary-500 shrink-0" />
               <div className="min-w-0 flex-1">
-                <div className="text-[11px] font-bold text-gray-800 truncate">{preview.customer.bankName}</div>
-                <div className="font-mono text-[11px] text-gray-500">
+                <div className="text-[11px] font-bold text-neutral-800 truncate">{preview.customer.bankName}</div>
+                <div className="font-mono text-[11px] text-neutral-500">
                   {preview.customer.bankAccountNumber} — {preview.customer.bankAccountName}
                 </div>
               </div>

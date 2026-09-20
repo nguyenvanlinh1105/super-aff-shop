@@ -6,6 +6,7 @@ import { formatCurrency } from "@/lib/format";
 import { TextInput } from "@/components/ui/TextInput";
 import { Button } from "@/components/ui/Button";
 import { useModal } from "@/components/ui/ModalProvider";
+import { useToast } from "@/components/ui/Toast";
 import { useRouter } from "next/navigation";
 import { Pagination } from "@/components/ui/Pagination";
 import { ServerSearchInput } from "@/components/ui/ServerSearchInput";
@@ -135,14 +136,14 @@ function EditDealModal({ deal, onSave, onClose }: {
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="sticky top-0 z-10 flex items-center justify-between px-xl py-lg border-b border-gray-100 bg-white rounded-t-3xl">
+        <div className="sticky top-0 z-10 flex items-center justify-between px-xl py-lg border-b border-primary-100/80 bg-white rounded-t-3xl">
           <div className="flex items-center gap-sm">
-            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#e86a33]/10">
-              <Pencil size={15} className="text-[#e86a33]" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary-50 text-primary-600">
+              <Pencil size={15} />
             </div>
-            <h3 className="text-[15px] font-bold text-gray-900">Chỉnh sửa Deal</h3>
+            <h3 className="text-[15px] font-bold text-neutral-900">Chỉnh sửa Deal</h3>
           </div>
-          <button onClick={onClose} className="h-8 w-8 flex items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100">
+          <button onClick={onClose} className="h-8 w-8 flex items-center justify-center rounded-xl text-neutral-400 hover:bg-neutral-100 transition-colors">
             <X size={18} />
           </button>
         </div>
@@ -150,14 +151,14 @@ function EditDealModal({ deal, onSave, onClose }: {
         <div className="p-xl flex flex-col gap-lg">
           {/* Short URL */}
           {deal.shortUrl && (
-            <div className="rounded-2xl bg-gray-50 border border-gray-100 px-md py-sm flex items-center justify-between gap-sm">
+            <div className="rounded-2xl bg-neutral-50 border border-primary-100/80 px-md py-sm flex items-center justify-between gap-sm">
               <div className="min-w-0">
-                <div className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-0.5">Link deal (tên miền của bạn)</div>
-                <div className="text-[13px] font-bold text-gray-900 font-mono truncate">{deal.shortUrl}</div>
+                <div className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 mb-0.5">Link deal (tên miền của bạn)</div>
+                <div className="text-[13px] font-bold text-neutral-900 font-mono truncate">{deal.shortUrl}</div>
               </div>
               <button
                 onClick={() => { navigator.clipboard.writeText(deal.shortUrl!); setCopied(true); setTimeout(() => setCopied(false), 2000); }}
-                className={`shrink-0 flex items-center gap-xs rounded-lg px-sm py-xs text-[12px] font-bold transition-all ${copied ? "bg-green-500 text-white" : "bg-[#e86a33] text-white hover:bg-[#d4602e]"}`}
+                className={`shrink-0 flex items-center gap-xs rounded-xl px-sm py-xs text-[12px] font-bold transition-all ${copied ? "bg-emerald-500 text-white" : "bg-primary-500 text-white hover:bg-primary-600"}`}
               >
                 {copied ? <><Check size={12} /> Đã copy</> : <><Copy size={12} /> Copy</>}
               </button>
@@ -167,10 +168,10 @@ function EditDealModal({ deal, onSave, onClose }: {
           {/* Image */}
           <div className="flex flex-col sm:flex-row gap-lg">
             <div className="shrink-0">
-              <div className="text-[12px] font-bold text-gray-600 uppercase tracking-wide mb-sm">Ảnh sản phẩm</div>
+              <div className="text-[12px] font-bold text-neutral-600 uppercase tracking-wide mb-sm">Ảnh sản phẩm</div>
               <div
                 onClick={() => fileRef.current?.click()}
-                className="relative h-32 w-32 rounded-2xl overflow-hidden bg-gray-100 cursor-pointer border-2 border-dashed border-gray-200 hover:border-[#e86a33] transition-colors group"
+                className="relative h-32 w-32 rounded-2xl overflow-hidden bg-neutral-100 cursor-pointer border-2 border-dashed border-primary-200 hover:border-primary-400 transition-colors group"
               >
                 {displayImage ? (
                   <>
@@ -180,12 +181,12 @@ function EditDealModal({ deal, onSave, onClose }: {
                     </div>
                   </>
                 ) : (
-                  <div className="flex h-full items-center justify-center text-gray-300"><ImageIcon size={24} /></div>
+                  <div className="flex h-full items-center justify-center text-neutral-300"><ImageIcon size={24} /></div>
                 )}
               </div>
               <input ref={fileRef} type="file" accept="image/*" className="hidden" onChange={handleImageChange} />
               {imageFile && (
-                <button type="button" onClick={() => { setImageFile(null); setImagePreview(null); }} className="mt-xs text-[11px] text-red-500 hover:text-red-700 block w-full text-center">
+                <button type="button" onClick={() => { setImageFile(null); setImagePreview(null); }} className="mt-xs text-[11px] text-rose-500 hover:text-rose-700 block w-full text-center">
                   Bỏ ảnh mới
                 </button>
               )}
@@ -194,16 +195,16 @@ function EditDealModal({ deal, onSave, onClose }: {
             {/* Fields */}
             <div className="flex-1 flex flex-col gap-md">
               <div className="flex flex-col gap-xs">
-                <label className="text-[12px] font-bold text-gray-600 uppercase tracking-wide">Tiêu đề *</label>
-                <TextInput value={title} onChange={(e) => setTitle(e.target.value)} className="bg-gray-50" />
+                <label className="text-[12px] font-bold text-neutral-600 uppercase tracking-wide">Tiêu đề *</label>
+                <TextInput value={title} onChange={(e) => setTitle(e.target.value)} className="bg-neutral-50" />
               </div>
               <div className="flex flex-col gap-xs">
-                <label className="text-[12px] font-bold text-gray-600 uppercase tracking-wide">Mô tả</label>
+                <label className="text-[12px] font-bold text-neutral-600 uppercase tracking-wide">Mô tả</label>
                 <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   rows={2}
-                  className="w-full rounded-2xl bg-gray-50 px-md py-sm text-[14px] ring-1 ring-black/5 focus:outline-none focus:ring-2 focus:ring-[#e86a33]/50 resize-none"
+                  className="w-full rounded-2xl bg-neutral-50 px-md py-sm text-[14px] border border-primary-100/80 focus:outline-none focus:border-primary-400 focus:ring-2 focus:ring-primary-200/50 resize-none"
                 />
               </div>
             </div>
@@ -212,22 +213,22 @@ function EditDealModal({ deal, onSave, onClose }: {
           {/* Pricing */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-md">
             <div className="flex flex-col gap-xs">
-              <label className="text-[12px] font-bold text-gray-600 uppercase tracking-wide">Giá gốc</label>
-              <TextInput type="number" value={originalPrice} onChange={(e) => setOriginalPrice(e.target.value)} className="bg-gray-50" placeholder="500000" />
+              <label className="text-[12px] font-bold text-neutral-600 uppercase tracking-wide">Giá gốc</label>
+              <TextInput type="number" value={originalPrice} onChange={(e) => setOriginalPrice(e.target.value)} className="bg-neutral-50" placeholder="500000" />
             </div>
             <div className="flex flex-col gap-xs">
-              <label className="text-[12px] font-bold text-[#e86a33] uppercase tracking-wide">Giá sale</label>
-              <TextInput type="number" value={salePrice} onChange={(e) => setSalePrice(e.target.value)} className="bg-orange-50" placeholder="250000" />
+              <label className="text-[12px] font-bold text-primary-600 uppercase tracking-wide">Giá sale</label>
+              <TextInput type="number" value={salePrice} onChange={(e) => setSalePrice(e.target.value)} className="bg-primary-50/50 border-primary-200" placeholder="250000" />
             </div>
             <div className="flex flex-col gap-xs">
-              <label className="text-[12px] font-bold text-gray-600 uppercase tracking-wide">% Giảm</label>
-              <TextInput type="number" value={discountPercent} onChange={(e) => setDiscountPercent(e.target.value)} className="bg-gray-50" placeholder="50" />
+              <label className="text-[12px] font-bold text-neutral-600 uppercase tracking-wide">% Giảm</label>
+              <TextInput type="number" value={discountPercent} onChange={(e) => setDiscountPercent(e.target.value)} className="bg-neutral-50" placeholder="50" />
             </div>
           </div>
 
           {/* Loại deal */}
           <div className="flex flex-col gap-xs">
-            <label className="text-[12px] font-bold text-gray-600 uppercase tracking-wide">Loại deal</label>
+            <label className="text-[12px] font-bold text-neutral-600 uppercase tracking-wide">Loại deal</label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-sm">
               {DEAL_LINK_TYPES.map((t) => (
                 <button
@@ -236,14 +237,14 @@ function EditDealModal({ deal, onSave, onClose }: {
                   onClick={() => setLinkType(t.value)}
                   className={`rounded-2xl border-2 p-md text-left transition-all ${
                     linkType === t.value
-                      ? "border-[#e86a33] bg-orange-50"
-                      : "border-gray-100 bg-gray-50 hover:border-gray-200"
+                      ? "border-primary-500 bg-primary-50/50"
+                      : "border-neutral-100 bg-neutral-50 hover:border-neutral-200"
                   }`}
                 >
-                  <div className={`text-[13px] font-bold ${linkType === t.value ? "text-[#e86a33]" : "text-gray-700"}`}>
+                  <div className={`text-[13px] font-bold ${linkType === t.value ? "text-primary-600" : "text-neutral-700"}`}>
                     {t.value === "product" ? "🎯" : "🏬"} {t.label}
                   </div>
-                  <div className="text-[11px] text-gray-500 mt-1 leading-relaxed">{t.description}</div>
+                  <div className="text-[11px] text-neutral-500 mt-1 leading-relaxed">{t.description}</div>
                 </button>
               ))}
             </div>
@@ -252,11 +253,11 @@ function EditDealModal({ deal, onSave, onClose }: {
           {/* Category + Expiry */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-md">
             <div className="flex flex-col gap-xs">
-              <label className="text-[12px] font-bold text-gray-600 uppercase tracking-wide">Danh mục</label>
+              <label className="text-[12px] font-bold text-neutral-600 uppercase tracking-wide">Danh mục</label>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="h-11 w-full rounded-2xl bg-gray-50 px-md text-[14px] font-medium text-gray-900 ring-1 ring-black/5 focus:outline-none focus:ring-2 focus:ring-[#e86a33]/50 transition-all"
+                className="h-11 w-full rounded-2xl bg-neutral-50 px-md text-[14px] font-medium text-neutral-900 border border-primary-100/80 focus:outline-none focus:border-primary-400 focus:ring-2 focus:ring-primary-200/50 transition-all"
               >
                 <option value="">— Không chọn —</option>
                 {DEAL_CATEGORIES.map((c) => (
@@ -266,12 +267,12 @@ function EditDealModal({ deal, onSave, onClose }: {
             </div>
             <div className="flex flex-col gap-xs">
               <div className="flex items-center justify-between">
-                <label className="text-[12px] font-bold text-gray-600 uppercase tracking-wide">Ngày hết hạn (tuỳ chọn)</label>
+                <label className="text-[12px] font-bold text-neutral-600 uppercase tracking-wide">Ngày hết hạn (tuỳ chọn)</label>
                 {expiresAt && (
                   <button
                     type="button"
                     onClick={() => setExpiresAt("")}
-                    className="text-[11px] font-bold text-[#e86a33] hover:underline"
+                    className="text-[11px] font-bold text-primary-500 hover:underline"
                   >
                     Xoá — không hết hạn
                   </button>
@@ -281,10 +282,10 @@ function EditDealModal({ deal, onSave, onClose }: {
                 type="date"
                 value={expiresAt}
                 onChange={(e) => setExpiresAt(e.target.value)}
-                className="h-11 w-full rounded-2xl bg-gray-50 px-md text-[14px] font-medium text-gray-900 ring-1 ring-black/5 focus:outline-none focus:ring-2 focus:ring-[#e86a33]/50 transition-all"
+                className="h-11 w-full rounded-2xl bg-neutral-50 px-md text-[14px] font-medium text-neutral-900 border border-primary-100/80 focus:outline-none focus:border-primary-400 focus:ring-2 focus:ring-primary-200/50 transition-all"
               />
               {!expiresAt && (
-                <p className="text-[11px] text-gray-400">Để trống = deal không bao giờ hết hạn.</p>
+                <p className="text-[11px] text-neutral-400">Để trống = deal không bao giờ hết hạn.</p>
               )}
             </div>
           </div>
@@ -316,6 +317,7 @@ function EditDealModal({ deal, onSave, onClose }: {
 export function AdminDealList({ initialDeals, totalPages, currentPage }: { initialDeals: Deal[], totalPages: number, currentPage: number }) {
   const router = useRouter();
   const modal = useModal();
+  const { toast } = useToast();
   const [deals, setDeals] = useState<Deal[]>(initialDeals);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [editingDeal, setEditingDeal] = useState<Deal | null>(null);
@@ -328,6 +330,7 @@ export function AdminDealList({ initialDeals, totalPages, currentPage }: { initi
       body: JSON.stringify({ status: newStatus }),
     });
     setDeals((prev) => prev.map((d) => d.id === deal.id ? { ...d, status: newStatus } : d));
+    toast.info(newStatus === "active" ? "Đã hiện deal" : "Đã ẩn deal");
   }
 
   async function deleteDeal(id: string) {
@@ -342,19 +345,29 @@ export function AdminDealList({ initialDeals, totalPages, currentPage }: { initi
     if (!confirmed) return;
     
     setDeletingId(id);
-    await fetch(`/api/deals/${id}`, { method: "DELETE" });
-    setDeals((prev) => prev.filter((d) => d.id !== id));
-    setDeletingId(null);
+    try {
+      const res = await fetch(`/api/deals/${id}`, { method: "DELETE" });
+      if (res.ok) {
+        setDeals((prev) => prev.filter((d) => d.id !== id));
+        toast.success("Đã xoá deal thành công");
+      } else {
+        toast.error("Không thể xoá deal, vui lòng thử lại");
+      }
+    } catch {
+      toast.error("Đã xảy ra lỗi khi xoá deal");
+    } finally {
+      setDeletingId(null);
+    }
   }
 
   if (deals.length === 0) {
     return (
       <div className="flex flex-col items-center py-3xl text-center">
-        <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-orange-50 mb-lg">
-          <Flame size={36} className="text-[#e86a33]/40" strokeWidth={1.5} />
+        <div className="flex h-20 w-20 items-center justify-center rounded-3xl bg-primary-50 mb-lg border border-primary-100">
+          <Flame size={36} className="text-primary-400" strokeWidth={1.5} />
         </div>
-        <p className="text-[15px] font-bold text-gray-400">Chưa có deal nào</p>
-        <p className="text-[13px] text-gray-300 mt-xs">Bấm "Thêm Deal Mới" để bắt đầu</p>
+        <p className="text-[15px] font-bold text-neutral-500">Chưa có deal nào</p>
+        <p className="text-[13px] text-neutral-400 mt-xs">Bấm &quot;Thêm Deal Mới&quot; để bắt đầu</p>
       </div>
     );
   }
@@ -377,7 +390,7 @@ export function AdminDealList({ initialDeals, totalPages, currentPage }: { initi
         <ServerSearchInput placeholder="Tìm kiếm deal theo tiêu đề, mô tả, link..." className="w-full sm:w-[320px]" />
       </div>
 
-      <div className="responsive-table overflow-x-auto rounded-2xl ring-1 ring-black/5">
+      <div className="responsive-table overflow-x-auto rounded-3xl border border-primary-100/80 shadow-cute bg-white">
         <table className="w-full text-[13px]">
           <thead>
             <tr className="bg-gray-50 border-b border-gray-100">
@@ -437,7 +450,7 @@ export function AdminDealList({ initialDeals, totalPages, currentPage }: { initi
                   <td className="px-md py-sm text-right" data-label="Giá">
                     {deal.salePrice ? (
                       <div>
-                        <div className="font-black text-[#e86a33] text-[15px]">{formatCurrency(deal.salePrice)}</div>
+                        <div className="font-black text-primary-600 text-[15px]">{formatCurrency(deal.salePrice)}</div>
                         {deal.originalPrice && (
                           <div className="text-[11px] text-gray-400 line-through">{formatCurrency(deal.originalPrice)}</div>
                         )}
@@ -472,7 +485,7 @@ export function AdminDealList({ initialDeals, totalPages, currentPage }: { initi
                       </a>
                       <button
                         onClick={() => setEditingDeal(deal)}
-                        className="h-8 w-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-[#e86a33] hover:bg-orange-50 transition-colors"
+                        className="h-8 w-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-primary-600 hover:bg-primary-50 transition-colors"
                         title="Chỉnh sửa"
                       >
                         <Pencil size={15} />

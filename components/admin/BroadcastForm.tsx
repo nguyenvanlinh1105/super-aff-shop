@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Megaphone, Send, Sparkles, Smartphone, Bell, CheckCircle2 } from "lucide-react";
 import { useModal } from "@/components/ui/ModalProvider";
+import { useToast } from "@/components/ui/Toast";
 
 const PRESET_TEMPLATES = [
   {
@@ -21,6 +22,7 @@ const PRESET_TEMPLATES = [
 
 export function BroadcastForm() {
   const modal = useModal();
+  const { toast } = useToast();
   const [title, setTitle] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
@@ -54,18 +56,10 @@ export function BroadcastForm() {
       const data = await res.json();
       setTitle("");
       setMessage("");
-      await modal.alert({
-        title: "Thành công!",
-        message: `Đã phát thông báo thành công tới ${data.sentCount} khách hàng.`,
-        iconType: "success",
-      });
+      toast.success(`Đã phát thông báo thành công tới ${data.sentCount} khách hàng! 📢`, "Thành công");
     } else {
       const data = await res.json().catch(() => ({}));
-      await modal.alert({
-        title: "Không gửi được",
-        message: data.error ?? "Đã có lỗi xảy ra.",
-        iconType: "danger",
-      });
+      toast.error(data.error ?? "Đã có lỗi xảy ra khi phát thông báo.", "Không gửi được");
     }
   }
 

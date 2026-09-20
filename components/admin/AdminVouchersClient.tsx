@@ -75,7 +75,7 @@ export function AdminVouchersClient({ vouchers }: { vouchers: VoucherRow[] }) {
               setSearch(e.target.value);
               setCurrentPage(1);
             }}
-            className="h-11 w-full rounded-2xl bg-white pl-10 pr-md text-[14px] font-medium text-gray-900 shadow-sm ring-1 ring-black/5 focus:border-[#e86a33] focus:outline-none focus:ring-1 focus:ring-[#e86a33] transition-all"
+            className="h-11 w-full rounded-2xl bg-white pl-10 pr-md text-[14px] font-medium text-neutral-800 shadow-sm border border-primary-100/80 focus:border-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-200/50 transition-all placeholder:text-neutral-400"
           />
         </div>
       </div>
@@ -97,50 +97,50 @@ export function AdminVouchersClient({ vouchers }: { vouchers: VoucherRow[] }) {
           {paginated.map((v) => (
             <Card
               key={v.id}
-              className="flex flex-col p-0 overflow-hidden border border-gray-100 hover:border-[#e86a33]/30 hover:shadow-md transition-all group relative"
+              className="flex flex-col p-0 overflow-hidden border border-primary-100/80 rounded-3xl hover:border-primary-300 hover:shadow-cute transition-all group relative"
             >
-              <div className="p-lg bg-gradient-to-br from-[#fff0e6]/50 to-white border-b border-dashed border-gray-200 relative">
+              <div className="p-lg bg-gradient-to-br from-primary-50/50 via-primary-50/20 to-white border-b border-dashed border-primary-200/60 relative">
                 <div className="flex items-start justify-between gap-md">
                   <div className="flex-1">
-                    <span className="inline-block rounded-md bg-gray-900 px-2 py-1 text-[10px] font-bold text-white uppercase tracking-wider mb-sm">
+                    <span className="inline-block rounded-md bg-neutral-900 px-2 py-1 text-[10px] font-bold text-white uppercase tracking-wider mb-sm">
                       {v.platformName}
                     </span>
-                    <h3 className="text-[16px] font-bold text-gray-900 leading-tight line-clamp-2">{v.title}</h3>
+                    <h3 className="text-[16px] font-bold text-neutral-900 leading-tight line-clamp-2">{v.title}</h3>
                   </div>
                   {v.productImage ? (
                     <img
                       src={v.productImage}
                       alt=""
-                      className="h-14 w-14 shrink-0 rounded-xl object-cover ring-1 ring-black/5"
+                      className="h-14 w-14 shrink-0 rounded-2xl object-cover border border-primary-100"
                     />
                   ) : (
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#e86a33]/10 text-[#e86a33]">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary-50 text-primary-500">
                       <TicketPercent size={20} strokeWidth={2} />
                     </div>
                   )}
                 </div>
 
-                <div className="absolute -bottom-2 -left-2 h-4 w-4 rounded-full bg-gray-50 border-t border-r border-gray-200" />
-                <div className="absolute -bottom-2 -right-2 h-4 w-4 rounded-full bg-gray-50 border-t border-l border-gray-200" />
+                <div className="absolute -bottom-2 -left-2 h-4 w-4 rounded-full bg-neutral-50 border-t border-r border-primary-200/60" />
+                <div className="absolute -bottom-2 -right-2 h-4 w-4 rounded-full bg-neutral-50 border-t border-l border-primary-200/60" />
               </div>
 
               <div className="p-lg flex flex-col flex-1 bg-white">
-                <p className="text-[14px] text-gray-600 mb-xl line-clamp-2 min-h-[40px]">
+                <p className="text-[14px] text-neutral-600 mb-xl line-clamp-2 min-h-[40px]">
                   {v.benefitText || "Không có thông tin thêm"}
                 </p>
 
                 <div className="mt-auto flex flex-col gap-md">
                   {v.shortUrl && (
-                    <div className="flex items-center justify-between rounded-lg bg-gray-50 border border-gray-100 p-sm pl-md">
+                    <div className="flex items-center justify-between rounded-xl bg-neutral-50 border border-primary-100/60 p-sm pl-md">
                       <div className="flex items-center gap-xs min-w-0">
-                        <Link2 size={14} className="text-[#e86a33] shrink-0" />
-                        <span className="truncate font-mono text-[12px] font-semibold text-gray-700">
+                        <Link2 size={14} className="text-primary-500 shrink-0" />
+                        <span className="truncate font-mono text-[12px] font-semibold text-neutral-700">
                           {v.shortUrl}
                         </span>
                       </div>
                       <button
                         onClick={() => copyShortUrl(v.id, v.shortUrl!)}
-                        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md text-gray-400 hover:bg-white hover:text-[#e86a33] transition-colors"
+                        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-neutral-400 hover:bg-white hover:text-primary-600 transition-colors"
                         title="Copy link"
                       >
                         {copiedId === v.id ? (
@@ -152,19 +152,19 @@ export function AdminVouchersClient({ vouchers }: { vouchers: VoucherRow[] }) {
                     </div>
                   )}
                   {v.voucherCode ? (
-                    <div className="flex items-center justify-between rounded-lg bg-gray-50 border border-gray-100 p-sm pl-md group-hover:bg-[#fff0e6]/30 transition-colors">
-                      <span className="font-mono text-[16px] font-bold tracking-wider text-gray-900">
+                    <div className="flex items-center justify-between rounded-xl bg-neutral-50 border border-primary-100/60 p-sm pl-md group-hover:bg-primary-50/30 transition-colors">
+                      <span className="font-mono text-[16px] font-bold tracking-wider text-neutral-900">
                         {v.voucherCode}
                       </span>
                       <button
-                        className="flex h-8 w-8 items-center justify-center rounded-md text-gray-400 hover:bg-white hover:text-[#e86a33] transition-colors"
+                        className="flex h-8 w-8 items-center justify-center rounded-lg text-neutral-400 hover:bg-white hover:text-primary-600 transition-colors"
                         title="Copy mã"
                       >
                         <Copy size={16} />
                       </button>
                     </div>
                   ) : (
-                    <div className="flex items-center justify-center rounded-lg bg-gray-50 border border-gray-100 border-dashed p-sm text-[13px] text-gray-400 font-medium h-12">
+                    <div className="flex items-center justify-center rounded-xl bg-neutral-50 border border-neutral-100 border-dashed p-sm text-[13px] text-neutral-400 font-medium h-12">
                       Không cần mã
                     </div>
                   )}
@@ -238,14 +238,14 @@ function TabButton({
       onClick={onClick}
       className={`flex h-9 shrink-0 items-center gap-xs whitespace-nowrap rounded-full px-4 text-[13px] font-bold transition-all ${
         active
-          ? "border-2 border-gray-900 bg-white text-gray-900 shadow-sm"
-          : "border-2 border-transparent bg-white text-gray-500 shadow-sm ring-1 ring-black/5 hover:bg-gray-50 hover:text-gray-900"
+          ? "border-2 border-primary-500 bg-white text-primary-600 shadow-cute"
+          : "border-2 border-transparent bg-white text-neutral-500 shadow-sm border border-primary-100/80 hover:bg-primary-50/50 hover:text-neutral-900"
       }`}
     >
       {label}
       <span
-        className={`flex h-5 min-w-[20px] items-center justify-center rounded-full px-1 text-[11px] ${
-          active ? "bg-gray-100 text-gray-900" : "bg-gray-100 text-gray-400"
+        className={`flex h-5 min-w-[20px] items-center justify-center rounded-full px-1 text-[11px] font-bold ${
+          active ? "bg-primary-100 text-primary-600" : "bg-neutral-100 text-neutral-400"
         }`}
       >
         {count}

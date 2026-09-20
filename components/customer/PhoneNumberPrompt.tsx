@@ -43,21 +43,21 @@ export function PhoneNumberPrompt() {
   }
 
   return (
-    <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-[#25d366]/10 to-[#25d366]/5 p-lg sm:p-xl ring-1 ring-[#25d366]/20 fade-in">
+    <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-emerald-500/10 via-emerald-500/5 to-transparent p-lg sm:p-xl border border-emerald-200/60 shadow-cute fade-in">
       <button
         onClick={() => setDismissed(true)}
-        className="absolute right-lg top-lg text-mute hover:text-ink transition-colors"
+        className="absolute right-lg top-lg text-neutral-400 hover:text-neutral-700 transition-colors"
         aria-label="Đóng"
       >
         <X size={18} />
       </button>
       <div className="flex items-start gap-md pr-xl">
-        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#25d366]/15 text-[#1fa855]">
+        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-600">
           <Phone size={20} strokeWidth={2.25} />
         </div>
         <div className="flex-1 min-w-0">
-          <h3 className="text-[15px] font-bold text-gray-900">Thêm số điện thoại Zalo</h3>
-          <p className="mt-[2px] text-[13px] text-mute leading-relaxed">
+          <h3 className="text-[15px] font-bold text-neutral-900">Thêm số điện thoại Zalo</h3>
+          <p className="mt-[2px] text-[13px] text-neutral-500 leading-relaxed">
             Để chúng tôi liên hệ hỗ trợ và xác nhận hoàn tiền nhanh hơn qua Zalo.
           </p>
           <form onSubmit={submit} className="mt-md flex flex-col gap-sm sm:flex-row sm:items-start">
@@ -67,18 +67,18 @@ export function PhoneNumberPrompt() {
                 placeholder="0901234567"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                className="h-11 bg-white border-gray-200 focus:border-[#25d366] focus:ring-[#25d366]/20"
+                className="h-11 bg-white rounded-2xl border-emerald-200 focus:border-emerald-500 focus:ring-emerald-200"
               />
             </div>
             <Button
               type="submit"
               disabled={loading || !phone}
-              className="h-11 w-fit bg-[#25d366] text-white hover:bg-[#1fa855] focus-visible:ring-[#25d366]"
+              className="h-11 w-fit rounded-2xl bg-emerald-600 text-white hover:bg-emerald-700 shadow-sm"
             >
               {loading ? "Đang lưu..." : "Lưu số điện thoại"}
             </Button>
           </form>
-          {error && <p className="mt-xs text-[12px] font-medium text-red-500">{error}</p>}
+          {error && <p className="mt-xs text-[12px] font-medium text-rose-500">{error}</p>}
         </div>
       </div>
     </div>

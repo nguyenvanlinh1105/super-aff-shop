@@ -9,7 +9,7 @@ import { TextInput } from "@/components/ui/TextInput";
 import { ShopeeIcon, TiktokIcon } from "@/components/icons/PlatformIcons";
 import { IconBow } from "@/components/icons/CatRibbonIcons";
 import { formatCurrency } from "@/lib/format";
-import { useModal } from "@/components/ui/ModalProvider";
+import { useToast } from "@/components/ui/Toast";
 
 type Option = { id: string; code: string; label: string };
 type LinkResult = {
@@ -34,7 +34,7 @@ function platformStyle(code: string) {
 
 export function CustomerLinkForm({ platforms }: { platforms: Option[] }) {
   const router = useRouter();
-  const modal = useModal();
+  const { toast } = useToast();
   const [platformId, setPlatformId] = useState(platforms[0]?.id ?? "");
   const [originalUrl, setOriginalUrl] = useState("");
   const [loading, setLoading] = useState(false);
@@ -46,6 +46,8 @@ export function CustomerLinkForm({ platforms }: { platforms: Option[] }) {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!originalUrl.trim() || !platformId) return;
+
     setLoading(true);
     setResult(null);
     setImgBroken(false);
@@ -64,7 +66,7 @@ export function CustomerLinkForm({ platforms }: { platforms: Option[] }) {
 
     if (!res.ok) {
       const data = await res.json().catch(() => ({}));
-      modal.alert({ title: "Lỗi tạo link", message: data.error ?? "Không tạo được link", iconType: "danger" });
+      toast.error(data.error ?? "Không tạo được link hoàn tiền. Vui lòng kiểm tra lại đường dẫn sản phẩm.", "Lỗi tạo link");
       return;
     }
 
@@ -80,6 +82,7 @@ export function CustomerLinkForm({ platforms }: { platforms: Option[] }) {
       estimatedCashback: data.link.estimatedCashback ?? null,
     });
     setOriginalUrl("");
+    toast.success("Tạo link hoàn tiền thành công! Bạn có thể sao chép và mua sắm ngay.", "Tạo link thành công");
     router.refresh();
   }
 
@@ -87,6 +90,7 @@ export function CustomerLinkForm({ platforms }: { platforms: Option[] }) {
     if (!result) return;
     navigator.clipboard.writeText(result.shortUrl);
     setCopied(true);
+    toast.success("Đã sao chép link hoàn tiền vào bộ nhớ tạm! 🛍️", "Đã copy");
     setTimeout(() => setCopied(false), 1500);
   }
 

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Terminal, Plus, Trash2, Edit3, Check, X, Sparkles, AlertCircle, ToggleLeft, ToggleRight } from "lucide-react";
 import { useModal } from "@/components/ui/ModalProvider";
+import { useToast } from "@/components/ui/Toast";
 
 interface BotCommand {
   id: string;
@@ -21,12 +22,13 @@ const PRESET_COMMANDS = [
 
 export function TelegramCommandManager() {
   const modal = useModal();
+  const { toast } = useToast();
   const [commands, setCommands] = useState<BotCommand[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingCommand, setEditingCommand] = useState<BotCommand | null>(null);
 
-  // Form state
+  // Form states
   const [commandStr, setCommandStr] = useState("");
   const [title, setTitle] = useState("");
   const [replyText, setReplyText] = useState("");
@@ -50,15 +52,15 @@ export function TelegramCommandManager() {
     fetchCommands();
   }, []);
 
-  function openAddModal(preset?: typeof PRESET_COMMANDS[0]) {
+  function handleOpenCreate() {
     setEditingCommand(null);
-    setCommandStr(preset ? preset.command : "");
-    setTitle(preset ? preset.title : "");
-    setReplyText(preset ? preset.replyText : "");
+    setCommandStr("");
+    setTitle("");
+    setReplyText("");
     setShowAddModal(true);
   }
 
-  function openEditModal(cmd: BotCommand) {
+  function handleOpenEdit(cmd: BotCommand) {
     setEditingCommand(cmd);
     setCommandStr(cmd.command);
     setTitle(cmd.title);
@@ -66,16 +68,27 @@ export function TelegramCommandManager() {
     setShowAddModal(true);
   }
 
-  async function handleSaveCommand(e: React.FormEvent) {
+  function handleApplyPreset(preset: typeof PRESET_COMMANDS[0]) {
+    setEditingCommand(null);
+    setCommandStr(preset.command);
+    setTitle(preset.title);
+    setReplyText(preset.replyText);
+    setShowAddModal(true);
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!commandStr.trim() || !title.trim() || !replyText.trim()) return;
 
     setSubmitting(true);
     try {
-      const res = await fetch("/api/admin/telegram/commands", {
-        method: "POST",
+      const endpoint = "/api/admin/telegram/commands";
+      const method = editingCommand ? "PUT" : "POST";
+      const res = await fetch(endpoint, {
+        method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          id: editingCommand?.id,
           command: commandStr,
           title,
           replyText,
@@ -86,21 +99,16 @@ export function TelegramCommandManager() {
       if (res.ok) {
         setShowAddModal(false);
         fetchCommands();
-        await modal.alert({
-          title: "Thành công",
-          message: editingCommand ? `Đã cập nhật lệnh ${commandStr}` : `Đã thêm mới câu lệnh ${commandStr}`,
-          iconType: "success",
-        });
+        toast.success(
+          editingCommand ? `Đã cập nhật câu lệnh ${commandStr} thành công!` : `Đã thêm mới câu lệnh ${commandStr} thành công!`,
+          "Thành công"
+        );
       } else {
         const err = await res.json().catch(() => ({}));
-        await modal.alert({
-          title: "Lỗi",
-          message: err.error || "Không thể lưu câu lệnh",
-          iconType: "danger",
-        });
+        toast.error(err.error || "Không thể lưu câu lệnh", "Lỗi lưu lệnh");
       }
     } catch (err: any) {
-      await modal.alert({ title: "Lỗi", message: err.message, iconType: "danger" });
+      toast.error(err.message, "Lỗi");
     }
     setSubmitting(false);
   }
@@ -136,6 +144,7 @@ export function TelegramCommandManager() {
       const res = await fetch(`/api/admin/telegram/commands?id=${cmd.id}`, { method: "DELETE" });
       if (res.ok) {
         setCommands((prev) => prev.filter((c) => c.id !== cmd.id));
+        toast.success(`Đã xóa câu lệnh ${cmd.command} thành công!`, "Đã xóa");
       }
     } catch (e) {
       console.error(e);
@@ -156,7 +165,7 @@ export function TelegramCommandManager() {
         </div>
 
         <button
-          onClick={() => openAddModal()}
+          onClick={handleOpenCreate}
           className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-indigo-600 to-sky-600 px-4 py-2.5 text-xs font-extrabold text-white shadow-md shadow-indigo-500/20 hover:from-indigo-700 hover:to-sky-700 transition-all shrink-0"
         >
           <Plus size={16} strokeWidth={2.5} />
@@ -186,7 +195,7 @@ export function TelegramCommandManager() {
             {PRESET_COMMANDS.map((preset) => (
               <button
                 key={preset.command}
-                onClick={() => openAddModal(preset)}
+                onClick={() => handleApplyPreset(preset)}
                 className="text-xs font-bold bg-white text-amber-800 hover:bg-amber-100/80 px-3 py-1.5 rounded-xl border border-amber-200 transition-colors flex items-center gap-1.5"
               >
                 <span>+ Thêm {preset.command}</span>
@@ -240,7 +249,7 @@ export function TelegramCommandManager() {
 
               <div className="flex items-center justify-end gap-2 pt-2 border-t border-neutral-100 text-xs font-bold">
                 <button
-                  onClick={() => openEditModal(cmd)}
+                  onClick={() => handleOpenEdit(cmd)}
                   className="flex items-center gap-1 text-indigo-600 hover:text-indigo-700 px-2.5 py-1 rounded-lg hover:bg-indigo-50 transition-colors"
                 >
                   <Edit3 size={14} /> Sửa
@@ -273,7 +282,7 @@ export function TelegramCommandManager() {
               </button>
             </div>
 
-            <form onSubmit={handleSaveCommand} className="flex flex-col gap-4">
+            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
               <div>
                 <label className="text-xs font-extrabold text-neutral-700 block mb-1">
                   Câu lệnh (Bắt đầu bằng dấu /):

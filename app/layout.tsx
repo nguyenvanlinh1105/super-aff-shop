@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Quicksand, Be_Vietnam_Pro } from "next/font/google";
 import { ModalProvider } from "@/components/ui/ModalProvider";
+import { ToastProvider } from "@/components/ui/Toast";
 import { ServiceWorkerRegister } from "@/components/pwa/ServiceWorkerRegister";
 import { GlobalDragScroll } from "@/components/ui/GlobalDragScroll";
 import "./globals.css";
@@ -61,7 +62,9 @@ export default function RootLayout({
       <body className={`${beVietnamPro.className} selection:bg-primary-200 selection:text-primary-600`} suppressHydrationWarning>
         <ServiceWorkerRegister />
         <GlobalDragScroll />
-        <ModalProvider>{children}</ModalProvider>
+        <ToastProvider>
+          <ModalProvider>{children}</ModalProvider>
+        </ToastProvider>
       </body>
     </html>
   );

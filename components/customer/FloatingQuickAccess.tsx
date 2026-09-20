@@ -158,8 +158,8 @@ export function FloatingQuickAccess({ unreadCount }: { unreadCount: number }) {
         <button
           onClick={() => setIsOpen(!isOpen)}
           title={isOpen ? "Đóng menu hỗ trợ" : "Liên hệ hỗ trợ MeowBack"}
-          className={`flex h-14 w-14 items-center justify-center rounded-full shadow-lg ring-1 ring-black/5 transition-all hover:scale-105 active:scale-95 ${
-            isOpen ? "bg-gradient-to-r from-primary-400 to-primary-500 text-white" : "bg-white text-[#e86a33]"
+          className={`flex h-14 w-14 items-center justify-center rounded-full shadow-cute border border-primary-200/80 transition-all hover:scale-105 active:scale-95 ${
+            isOpen ? "bg-gradient-to-r from-primary-400 to-primary-500 text-white" : "bg-white text-primary-500 hover:text-primary-600"
           }`}
         >
           <div className={`transition-transform duration-300 ${isOpen ? "rotate-90 text-white" : "rotate-0"}`}>
@@ -170,11 +170,11 @@ export function FloatingQuickAccess({ unreadCount }: { unreadCount: number }) {
         <Link
           href="/app/notifications"
           title="Thông báo"
-          className="relative flex h-14 w-14 items-center justify-center rounded-full bg-white shadow-lg ring-1 ring-black/5 transition-transform hover:scale-105 active:scale-95"
+          className="relative flex h-14 w-14 items-center justify-center rounded-full bg-white shadow-cute border border-primary-200/80 transition-transform hover:scale-105 active:scale-95 text-primary-500 hover:text-primary-600"
         >
-          <Bell size={24} strokeWidth={2.25} className="text-[#e86a33]" />
+          <Bell size={24} strokeWidth={2.25} />
           {unreadCount > 0 && (
-            <span className="absolute -top-1 -right-1 flex h-6 min-w-[24px] items-center justify-center rounded-full bg-rose-600 px-1.5 text-[11px] font-extrabold text-white ring-2 ring-white shadow-sm">
+            <span className="absolute -top-1 -right-1 flex h-6 min-w-[24px] items-center justify-center rounded-full bg-rose-500 px-1.5 text-[11px] font-extrabold text-white ring-2 ring-white shadow-sm">
               {unreadCount > 99 ? "99+" : unreadCount}
             </span>
           )}

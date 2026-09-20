@@ -3,9 +3,11 @@
 import { useState, useEffect } from "react";
 import { ShieldCheck, ShieldAlert, QrCode, Key, Lock, Copy, Check, RefreshCw, AlertTriangle } from "lucide-react";
 import { useModal } from "@/components/ui/ModalProvider";
+import { useToast } from "@/components/ui/Toast";
 
 export function AdminMfaSetupCard() {
   const modal = useModal();
+  const { toast } = useToast();
   const [mfaEnabled, setMfaEnabled] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -24,8 +26,10 @@ export function AdminMfaSetupCard() {
       if (res.ok) {
         const data = await res.json();
         setMfaEnabled(data.mfaEnabled);
-        setSecret(data.secret);
-        setQrCodeDataUrl(data.qrCodeDataUrl);
+        if (!data.mfaEnabled) {
+          setSecret(data.secret || "");
+          setQrCodeDataUrl(data.qrCodeDataUrl || "");
+        }
         if (data.backupCodes) setBackupCodes(data.backupCodes);
       }
     } catch (e) {
@@ -55,21 +59,16 @@ export function AdminMfaSetupCard() {
         setMfaEnabled(true);
         setBackupCodes(data.backupCodes);
         setTestCode("");
-        await modal.alert({
-          title: "Kích hoạt 2MFA thành công!",
-          message: "Tài khoản Admin của bạn đã được bảo vệ bằng Xác thực 2 bước. Hãy lưu lại 8 mã dự phòng bên dưới.",
-          iconType: "success",
-        });
+        toast.success(
+          "Tài khoản Admin của bạn đã được bảo vệ bằng Xác thực 2 bước. Hãy lưu lại 8 mã dự phòng bên dưới.",
+          "Kích hoạt 2MFA thành công!"
+        );
       } else {
         const err = await res.json().catch(() => ({}));
-        await modal.alert({
-          title: "Mã 2MFA không đúng",
-          message: err.error || "Mã 6 số từ Google Authenticator không chính xác.",
-          iconType: "danger",
-        });
+        toast.error(err.error || "Mã 6 số từ Google Authenticator không chính xác.", "Mã 2MFA không đúng");
       }
     } catch (err: any) {
-      await modal.alert({ title: "Lỗi", message: err.message, iconType: "danger" });
+      toast.error(err.message, "Lỗi");
     }
     setSubmitting(false);
   }
@@ -89,7 +88,7 @@ export function AdminMfaSetupCard() {
       if (res.ok) {
         setMfaEnabled(false);
         fetchSetupData();
-        await modal.alert({ title: "Đã tắt 2MFA", message: "Đã chuyển tài khoản về xác thực 1 bước.", iconType: "info" });
+        toast.info("Đã chuyển tài khoản về xác thực 1 bước.", "Đã tắt 2MFA");
       }
     } catch (e) {
       console.error(e);
@@ -99,6 +98,7 @@ export function AdminMfaSetupCard() {
   function copyBackupCodes() {
     navigator.clipboard.writeText(backupCodes.join("\n"));
     setCopied(true);
+    toast.success("Đã copy danh sách mã dự phòng vào bộ nhớ tạm! 📋", "Đã sao chép");
     setTimeout(() => setCopied(false), 2000);
   }
 

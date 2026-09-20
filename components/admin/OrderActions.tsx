@@ -90,7 +90,7 @@ export function OrderActions({
         <button
           type="button"
           onClick={() => setEditingCustomer(true)}
-          className="flex w-fit items-center gap-1 text-[11px] font-bold text-gray-400 hover:text-[#e86a33] transition-colors"
+          className="flex w-fit items-center gap-1 text-[11px] font-bold text-neutral-400 hover:text-primary-600 transition-colors"
         >
           <Pencil size={11} strokeWidth={2} />
           Đổi khách
