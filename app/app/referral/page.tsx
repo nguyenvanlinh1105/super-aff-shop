@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import QRCode from "qrcode";
 import { ReferralClient } from "@/components/customer/ReferralClient";
 
 export default async function ReferralPage() {
@@ -154,6 +155,16 @@ export default async function ReferralPage() {
     };
   });
 
+  const inviteUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? "https://meowback.vn"}/register?ref=${customer.customerCode}`;
+  let qrDataUrl = "";
+  try {
+    qrDataUrl = await QRCode.toDataURL(inviteUrl, {
+      width: 280,
+      margin: 2,
+      color: { dark: "#3D2A30", light: "#ffffff" },
+    });
+  } catch (_) {}
+
   return (
     <ReferralClient
       customerCode={customer.customerCode}
@@ -165,6 +176,8 @@ export default async function ReferralPage() {
       isPartner={customer.isPartner}
       friends={friends}
       friendOrderTimeline={friendOrderTimeline}
+      inviteUrl={inviteUrl}
+      qrDataUrl={qrDataUrl}
     />
   );
 }

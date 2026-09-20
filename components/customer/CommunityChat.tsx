@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Send, Trash2, Users } from "lucide-react";
+import { Send, Trash2, Users, Sparkles, ShieldAlert, MessageCircle, Heart } from "lucide-react";
+import { IconBow } from "@/components/icons/CatRibbonIcons";
+import { useToast } from "@/components/ui/Toast";
 
 type ChatMessage = {
   id: string;
@@ -11,8 +13,19 @@ type ChatMessage = {
   user: { fullName: string; role: string };
 };
 
+const QUICK_PROMPTS = [
+  "Xin chào cả nhà 🐾",
+  "Shopee hôm nay có deal gì hot không mọi người? 🛍️",
+  "Đơn của mình vừa được duyệt hoàn tiền rồi! 🎀",
+  "Mọi người thường rút tiền vào thứ mấy thế ạ? 💳",
+];
+
 function formatTime(iso: string) {
-  return new Intl.DateTimeFormat("vi-VN", { hour: "2-digit", minute: "2-digit" }).format(new Date(iso));
+  try {
+    return new Intl.DateTimeFormat("vi-VN", { hour: "2-digit", minute: "2-digit" }).format(new Date(iso));
+  } catch {
+    return "";
+  }
 }
 
 function initialsOf(name: string) {
@@ -33,6 +46,7 @@ export function CommunityChat({
   currentUserId: string;
   isAdmin: boolean;
 }) {
+  const { toast } = useToast();
   const [messages, setMessages] = useState<ChatMessage[]>(initialMessages);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
@@ -53,106 +67,173 @@ export function CommunityChat({
     const interval = setInterval(async () => {
       const since = lastCreatedAtRef.current;
       const url = since ? `/api/chat/messages?since=${encodeURIComponent(since)}` : "/api/chat/messages";
-      const res = await fetch(url);
-      if (!res.ok) return;
-      const data = await res.json();
-      const fresh: ChatMessage[] = data.messages ?? [];
-      if (fresh.length === 0) return;
-      lastCreatedAtRef.current = fresh.at(-1)!.createdAt;
-      setMessages((prev) => {
-        const seen = new Set(prev.map((m) => m.id));
-        const merged = [...prev, ...fresh.filter((m) => !seen.has(m.id))];
-        return merged.slice(-200);
-      });
-      scrollToBottom();
+      try {
+        const res = await fetch(url);
+        if (!res.ok) return;
+        const data = await res.json();
+        const fresh: ChatMessage[] = data.messages ?? [];
+        if (fresh.length === 0) return;
+        lastCreatedAtRef.current = fresh.at(-1)!.createdAt;
+        setMessages((prev) => {
+          const seen = new Set(prev.map((m) => m.id));
+          const merged = [...prev, ...fresh.filter((m) => !seen.has(m.id))];
+          return merged.slice(-200);
+        });
+        scrollToBottom();
+      } catch {
+        // silent polling failure
+      }
     }, 4000);
 
     return () => clearInterval(interval);
   }, []);
 
-  async function send() {
-    const trimmed = input.trim();
-    if (!trimmed || sending) return;
+  async function send(textToSend?: string) {
+    const text = (textToSend ?? input).trim();
+    if (!text || sending) return;
     setSending(true);
-    setInput("");
-    const res = await fetch("/api/chat/messages", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: trimmed }),
-    });
-    if (res.ok) {
-      const data = await res.json();
-      setMessages((prev) => [...prev, data.message]);
-      lastCreatedAtRef.current = data.message.createdAt;
-      scrollToBottom();
+    if (!textToSend) setInput("");
+
+    try {
+      const res = await fetch("/api/chat/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: text }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setMessages((prev) => [...prev, data.message]);
+        lastCreatedAtRef.current = data.message.createdAt;
+        scrollToBottom();
+      } else {
+        toast.error("Không thể gửi tin nhắn lúc này", "Lỗi");
+      }
+    } catch {
+      toast.error("Lỗi kết nối", "Lỗi");
+    } finally {
+      setSending(false);
     }
-    setSending(false);
   }
 
   async function removeMessage(id: string) {
     setMessages((prev) => prev.filter((m) => m.id !== id));
-    await fetch(`/api/chat/messages/${id}`, { method: "DELETE" });
+    try {
+      await fetch(`/api/chat/messages/${id}`, { method: "DELETE" });
+      toast.success("Đã xoá tin nhắn", "Thành công");
+    } catch {
+      toast.error("Không thể xoá tin nhắn", "Lỗi");
+    }
   }
 
   return (
-    <div className="flex flex-col rounded-3xl bg-white shadow-cute border border-primary-100/80 overflow-hidden h-[560px]">
-      {/* Header */}
-      <div className="flex items-center gap-sm border-b border-primary-100/80 px-lg py-md bg-gradient-to-r from-primary-50/80 via-primary-50 to-pink-50">
-        <img src="/meowback_lucky_cat_logo.png" alt="" className="h-9 w-9 object-contain" />
-        <div className="flex-1 min-w-0">
-          <div className="font-bold text-neutral-900 text-[14px]">Cộng đồng MeowBack</div>
-          <div className="text-[11px] text-neutral-500 flex items-center gap-1">
-            <Users size={11} /> Mọi thành viên đều thấy tin nhắn này
+    <div className="flex flex-col rounded-3xl bg-white shadow-cute border border-primary-200/70 overflow-hidden h-[620px]">
+      {/* ═══ LOUNGE HEADER ═══ */}
+      <div className="flex items-center justify-between border-b border-primary-100/80 px-5 sm:px-6 py-3.5 bg-gradient-to-r from-primary-50/90 via-pink-50/60 to-white">
+        <div className="flex items-center gap-3">
+          <div className="relative">
+            <img src="/meowback_lucky_cat_logo.png" alt="MeowBack" className="h-10 w-10 object-contain drop-shadow-sm" />
+            <span className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full bg-emerald-500 border-2 border-white" />
           </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="font-black text-neutral-900 text-sm sm:text-base tracking-tight">
+                Cộng Đồng MeowBack 🐾
+              </span>
+              <span className="hidden sm:inline-flex items-center gap-1 rounded-full bg-primary-100/80 px-2 py-0.5 text-[10px] font-black text-primary-700">
+                <Users size={10} /> Mở 24/7
+              </span>
+            </div>
+            <p className="text-[11.5px] text-neutral-500 font-medium">
+              Giao lưu bí kíp gom deal, voucher Shopee & kinh nghiệm tích tiền hoàn
+            </p>
+          </div>
+        </div>
+
+        <div className="hidden sm:flex items-center gap-1.5 text-xs font-bold text-emerald-600 bg-emerald-50 border border-emerald-200/80 px-3 py-1 rounded-full">
+          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+          <span>Trực tuyến</span>
         </div>
       </div>
 
-      {/* Messages */}
-      <div ref={listRef} className="flex-1 overflow-y-auto px-lg py-md flex flex-col gap-md">
+      {/* ═══ PINNED GUIDELINE ═══ */}
+      <div className="flex items-center gap-2 px-5 py-2 bg-amber-50/70 border-b border-amber-200/60 text-[11px] sm:text-xs text-amber-800 font-medium">
+        <IconBow className="w-3.5 h-3.5 text-accent-bow shrink-0" />
+        <span className="truncate">
+          <strong className="font-extrabold">Quy tắc cộng đồng:</strong> Giữ giao tiếp văn minh, không spam link độc hại. Chia sẻ mã mời tại mục Mời Bạn Bè để cùng nhận hoa hồng! 🎀
+        </span>
+      </div>
+
+      {/* ═══ CHAT MESSAGES ═══ */}
+      <div ref={listRef} className="flex-1 overflow-y-auto p-4 sm:p-5 flex flex-col gap-3.5 bg-neutral-50/40">
         {messages.length === 0 ? (
-          <div className="flex flex-1 flex-col items-center justify-center gap-sm text-center">
-            <img src="/meowback_lucky_cat_logo.png" alt="" className="h-16 w-16 object-contain opacity-70" />
-            <p className="text-[13px] font-bold text-neutral-400">Chưa có tin nhắn nào — hãy là người đầu tiên!</p>
+          <div className="flex flex-1 flex-col items-center justify-center gap-3 text-center my-auto py-10">
+            <img src="/meow-back-mascot.png" alt="" className="h-20 w-20 object-contain opacity-70" />
+            <div className="max-w-sm">
+              <p className="text-sm font-extrabold text-neutral-700">Chưa có tin nhắn nào trong phòng chat</p>
+              <p className="mt-1 text-xs text-neutral-400 font-medium">
+                Hãy là người đầu tiên gửi lời chào đến cộng đồng MeowBack hôm nay nhé! 🐾
+              </p>
+            </div>
           </div>
         ) : (
           messages.map((m) => {
             const isMine = currentUserId === m.userId;
             const isMsgAdmin = m.user?.role === "admin";
+
             return (
-              <div key={m.id} className={`group flex items-end gap-sm ${isMine ? "flex-row-reverse" : ""}`}>
+              <div key={m.id} className={`group flex items-end gap-2.5 ${isMine ? "flex-row-reverse" : ""}`}>
+                {/* Avatar */}
                 <div
-                  className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-[11px] font-bold text-white ${
-                    isMsgAdmin ? "bg-gradient-to-br from-primary-400 to-primary-500" : "bg-gradient-to-br from-neutral-400 to-neutral-500"
+                  className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-2xl text-[11px] font-black text-white shadow-2xs ${
+                    isMsgAdmin
+                      ? "bg-gradient-to-br from-primary-400 to-primary-600 border border-white"
+                      : isMine
+                      ? "bg-gradient-to-br from-neutral-700 to-neutral-800"
+                      : "bg-gradient-to-br from-neutral-400 to-neutral-500"
                   }`}
                 >
                   {isMsgAdmin ? "🐱" : initialsOf(m.user?.fullName ?? "?")}
                 </div>
-                <div className={`flex flex-col gap-[2px] max-w-[75%] ${isMine ? "items-end" : "items-start"}`}>
-                  <div className="flex items-center gap-xs px-1">
-                    <span className="text-[11px] font-bold text-neutral-500">
-                      {isMsgAdmin ? "Đội ngũ MeowBack" : m.user?.fullName}
-                    </span>
-                    <span className="text-[10px] text-neutral-300">{formatTime(m.createdAt)}</span>
+
+                {/* Message Bubble Container */}
+                <div className={`flex flex-col gap-1 max-w-[80%] sm:max-w-[70%] ${isMine ? "items-end" : "items-start"}`}>
+                  {/* Sender Name & Role */}
+                  <div className="flex items-center gap-1.5 px-1">
+                    {isMsgAdmin ? (
+                      <span className="inline-flex items-center gap-1 text-[11px] font-black text-primary-600 bg-primary-100/90 px-2 py-0.5 rounded-full border border-primary-200/60">
+                        <span>Đội ngũ MeowBack</span>
+                        <Heart size={10} className="fill-primary-500 text-primary-500" />
+                      </span>
+                    ) : (
+                      <span className="text-[11px] font-bold text-neutral-600">
+                        {isMine ? "Bạn" : m.user?.fullName}
+                      </span>
+                    )}
+                    <span className="text-[10px] text-neutral-400 font-medium">{formatTime(m.createdAt)}</span>
                   </div>
-                  <div className="flex items-center gap-xs">
+
+                  {/* Bubble Content */}
+                  <div className="flex items-center gap-1.5">
                     <div
-                      className={`rounded-2xl px-md py-[8px] text-[13px] leading-relaxed break-words ${
+                      className={`rounded-2xl px-4 py-2 text-xs sm:text-[13px] leading-relaxed break-words shadow-2xs ${
                         isMsgAdmin
-                          ? "bg-primary-50 text-primary-800 border border-primary-200/80"
+                          ? "bg-primary-50/90 text-primary-950 border border-primary-200/80 font-medium"
                           : isMine
-                          ? "bg-gradient-to-r from-primary-400 to-primary-500 text-white shadow-sm"
-                          : "bg-neutral-100 text-neutral-800"
+                          ? "bg-gradient-to-r from-primary-500 to-primary-600 text-white font-medium"
+                          : "bg-white text-neutral-900 border border-neutral-200/80 font-medium"
                       }`}
                     >
                       {m.message}
                     </div>
+
+                    {/* Admin Delete Action */}
                     {isAdmin && (
                       <button
                         onClick={() => removeMessage(m.id)}
                         title="Xoá tin nhắn"
-                        className="opacity-0 group-hover:opacity-100 flex h-6 w-6 items-center justify-center rounded-md text-neutral-300 hover:text-red-500 hover:bg-red-50 transition-all shrink-0"
+                        className="opacity-0 group-hover:opacity-100 flex h-7 w-7 items-center justify-center rounded-xl text-neutral-300 hover:text-red-500 hover:bg-red-50 transition-all shrink-0"
                       >
-                        <Trash2 size={12} />
+                        <Trash2 size={13} />
                       </button>
                     )}
                   </div>
@@ -163,8 +244,25 @@ export function CommunityChat({
         )}
       </div>
 
-      {/* Composer */}
-      <div className="flex items-center gap-sm border-t border-primary-100/80 p-md bg-white/95">
+      {/* ═══ QUICK PROMPT SUGGESTIONS ═══ */}
+      <div className="px-4 py-2 border-t border-neutral-100 bg-white flex items-center gap-1.5 overflow-x-auto scrollbar-hide">
+        <span className="text-[11px] font-bold text-neutral-400 shrink-0 flex items-center gap-1">
+          <Sparkles size={11} className="text-primary-400" /> Gợi ý:
+        </span>
+        {QUICK_PROMPTS.map((prompt, idx) => (
+          <button
+            key={idx}
+            onClick={() => send(prompt)}
+            disabled={sending}
+            className="shrink-0 text-[11px] font-bold text-neutral-600 hover:text-primary-600 bg-neutral-100 hover:bg-primary-50/80 border border-neutral-200/80 px-2.5 py-1 rounded-full transition-all disabled:opacity-50"
+          >
+            {prompt}
+          </button>
+        ))}
+      </div>
+
+      {/* ═══ MESSAGE COMPOSER ═══ */}
+      <div className="flex items-center gap-2 sm:gap-3 border-t border-neutral-200/80 p-3 sm:p-4 bg-white">
         <input
           type="text"
           value={input}
@@ -175,16 +273,17 @@ export function CommunityChat({
               send();
             }
           }}
-          placeholder="Nhắn gì đó với cộng đồng..."
+          placeholder="Nhắn gì đó với cộng đồng săn sale MeowBack..."
           maxLength={1000}
-          className="h-11 flex-1 rounded-2xl bg-neutral-50 px-lg text-[14px] font-medium text-neutral-900 border border-primary-100/80 focus:outline-none focus:border-primary-400 focus:ring-2 focus:ring-primary-200/50 transition-all placeholder:text-neutral-400"
+          className="h-11 flex-1 rounded-2xl bg-neutral-50 px-4 text-xs sm:text-sm font-medium text-neutral-900 border border-neutral-200 focus:outline-none focus:border-primary-400 focus:ring-2 focus:ring-primary-100 transition-all placeholder:text-neutral-400"
         />
         <button
-          onClick={send}
+          onClick={() => send()}
           disabled={!input.trim() || sending}
-          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-r from-primary-400 to-primary-500 text-white shadow-cute transition-all hover:scale-105 active:scale-[0.94] disabled:opacity-40 disabled:scale-100 disabled:cursor-not-allowed"
+          className="flex h-11 px-4 shrink-0 items-center justify-center gap-1.5 rounded-2xl bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-cute transition-all hover:scale-[1.02] active:scale-[0.96] disabled:opacity-40 disabled:scale-100 disabled:cursor-not-allowed text-xs sm:text-sm font-extrabold"
         >
-          <Send size={16} strokeWidth={2.5} />
+          <span>Gửi</span>
+          <Send size={14} strokeWidth={2.5} />
         </button>
       </div>
     </div>

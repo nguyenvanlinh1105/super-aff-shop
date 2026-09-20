@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { Wallet, Clock, CheckCircle2, Building2, Edit2, AlertCircle, X, Loader2, BellRing, Link as LinkIcon, Landmark, CreditCard, UserCheck, ShieldCheck, Sparkles, Check, ChevronDown } from "lucide-react";
 import { FloatingElement } from "@/components/ui/FloatingElement";
 import { ServerSearchInput } from "@/components/ui/ServerSearchInput";
+import { PeriodSelect } from "@/components/ui/PeriodSelect";
 import { formatCurrency } from "@/lib/format";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { Pagination } from "@/components/ui/Pagination";
@@ -225,227 +226,335 @@ export function CustomerWalletClient({
   const renderAccountInfoBox = () => {
     if (paymentInfo.bankName && paymentInfo.bankAccountNumber) {
       return (
-        <div className="rounded-2xl bg-white p-3 shadow-sm border border-primary-100">
-          <div className="text-[13px] font-bold text-neutral-900">{paymentInfo.bankName}</div>
-          <div className="text-[12px] font-semibold text-neutral-500 uppercase">
-            {paymentInfo.bankAccountNumber} - {paymentInfo.bankAccountName}
+        <div className="rounded-2xl bg-white p-3.5 shadow-2xs border border-primary-100/80 flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-primary-50 text-primary-600 font-bold border border-primary-100/80 shadow-2xs">
+              <Building2 size={19} />
+            </div>
+            <div className="min-w-0">
+              <div className="text-[13px] font-extrabold text-neutral-900 truncate">
+                {paymentInfo.bankName}
+              </div>
+              <div className="mt-0.5 flex items-center gap-1.5 text-[12px] font-semibold text-neutral-600">
+                <span className="tracking-wider font-mono font-bold text-neutral-800">{paymentInfo.bankAccountNumber}</span>
+                <span>•</span>
+                <span className="uppercase text-neutral-700 truncate">{paymentInfo.bankAccountName}</span>
+              </div>
+            </div>
           </div>
+          <span className="shrink-0 text-emerald-600 bg-emerald-50 p-1.5 rounded-xl border border-emerald-100" title="Tài khoản đã xác nhận">
+            <ShieldCheck size={16} />
+          </span>
         </div>
       );
     }
 
     return (
-      <div className="flex items-center gap-3 rounded-2xl bg-white p-3 shadow-sm border border-primary-100">
-        <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-primary-100 text-primary-500">
-          <AlertCircle size={16} strokeWidth={2.5} />
+      <button
+        type="button"
+        onClick={openModal}
+        className="w-full flex items-center gap-3 rounded-2xl bg-white p-3.5 shadow-2xs border border-dashed border-primary-200 hover:border-primary-400 hover:bg-primary-50/30 transition-all text-left cursor-pointer group"
+      >
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-primary-50 text-primary-500 group-hover:scale-105 transition-transform">
+          <AlertCircle size={18} strokeWidth={2.5} />
         </div>
         <div>
-          <div className="text-[13px] font-bold text-neutral-900">Chưa có thông tin</div>
-          <div className="text-[11px] font-medium text-neutral-500">Vui lòng cập nhật</div>
+          <div className="text-[13px] font-bold text-neutral-900 group-hover:text-primary-600">Chưa liên kết tài khoản ngân hàng</div>
+          <div className="text-[11.5px] font-medium text-neutral-500">Bấm để cập nhật thông tin nhận tiền</div>
         </div>
-      </div>
+      </button>
     );
   };
 
   return (
     <>
       <div className="flex w-full flex-col gap-6 fade-in pb-12">
-        {/* HEADER */}
-        <div className="relative overflow-hidden rounded-3xl p-6 sm:p-8 border border-primary-200/60 shadow-xl shadow-primary-500/5 bg-white mb-2">
+        {/* HEADER BANNER */}
+        <div className="relative overflow-hidden rounded-3xl p-5 sm:p-7 border border-primary-200/60 shadow-xl shadow-primary-500/5 bg-white">
           <img src="/welcome-bg.png" alt="" className="absolute inset-0 w-full h-full object-cover opacity-80" />
-          <div className="absolute inset-0 bg-white/40 backdrop-blur-[2px]" />
+          <div className="absolute inset-0 bg-white/50 backdrop-blur-[2px]" />
 
-          <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-            <div className="flex items-center gap-5">
+          <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-center gap-4 sm:gap-5">
               <FloatingElement duration={4}>
-                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-3xl bg-gradient-to-br from-primary-400 via-primary-500 to-pink-600 text-white flex items-center justify-center shadow-lg shadow-primary-500/25 shrink-0 border border-white/40 overflow-hidden p-1">
+                <div className="w-14 h-14 sm:w-18 sm:h-18 rounded-3xl bg-gradient-to-br from-primary-400 via-primary-500 to-pink-600 text-white flex items-center justify-center shadow-lg shadow-primary-500/25 shrink-0 border-2 border-white overflow-hidden p-1">
                   <img src="/meowback_lucky_cat_logo.png" alt="Wallet" className="w-full h-full object-contain rounded-2xl" />
                 </div>
               </FloatingElement>
               <div>
-                <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold leading-tight text-neutral-900 tracking-tight">
-                  Ví Hoàn Tiền MeowBack 🎀
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-primary-100/90 text-primary-700 text-[11px] font-bold mb-1.5 border border-primary-200/60 shadow-2xs">
+                  <IconBow className="w-3.5 h-3.5 text-accent-bow" />
+                  <span>Ví điện tử MeowBack</span>
+                </div>
+                <h1 className="text-xl sm:text-2xl lg:text-3xl font-black leading-tight text-neutral-900 tracking-tight">
+                  Ví Tiền & Rút Thưởng 🎀
                 </h1>
+                <p className="mt-1 text-xs sm:text-sm text-neutral-600 font-medium leading-relaxed max-w-xl">
+                  Quản lý số dư tích luỹ, theo dõi tiến độ đối soát và tạo lệnh rút tiền nhanh về tài khoản ngân hàng.
+                </p>
               </div>
             </div>
           </div>
         </div>
 
-        {/* STAT CARDS */}
+        {/* ═══ 3 THẺ THỐNG KÊ (Đồng bộ, cân đối & hài hoà) ═══ */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          {/* Available Card */}
-          <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-primary-400 via-primary-500 to-primary-600 p-6 shadow-cute hover:shadow-cute-lg transition-all duration-200 text-white">
-            <div className="relative z-10">
-              <div className="flex items-center gap-2 text-white/90">
-                <Wallet size={16} strokeWidth={2.5} />
-                <span className="text-[13px] font-bold">Khả dụng</span>
+          {/* Card 1: Khả dụng */}
+          <div className="group relative overflow-hidden rounded-3xl bg-gradient-to-b from-white via-primary-50/25 to-white p-5 sm:p-6 shadow-cute border border-primary-200/80 hover:border-primary-400 hover:shadow-cute-lg transition-all duration-300 flex flex-col justify-between gap-3">
+            <div className="absolute -right-2 -bottom-2 text-6xl select-none opacity-[0.06] pointer-events-none group-hover:scale-110 transition-transform">
+              👛
+            </div>
+            <div className="relative z-10 flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary-100 text-primary-600 shadow-2xs">
+                  <Wallet size={18} strokeWidth={2.5} />
+                </div>
+                <div>
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-neutral-400">Số dư</span>
+                  <div className="text-[13px] font-extrabold text-neutral-800">Khả dụng</div>
+                </div>
               </div>
-              <div className="mt-3 text-[32px] font-extrabold text-white tabular-nums tracking-tight">
+              <span className="rounded-full bg-primary-50 border border-primary-200/80 px-2.5 py-0.5 text-[10.5px] font-black uppercase text-primary-600 tracking-wider">
+                Sẵn sàng
+              </span>
+            </div>
+            <div className="relative z-10 pt-2 border-t border-primary-100/60">
+              <div className="text-[10.5px] font-semibold text-neutral-400 uppercase tracking-wider">Có thể rút ngay</div>
+              <div className="text-2xl sm:text-3xl font-black text-primary-600 tabular-nums leading-tight mt-0.5">
                 {formatCurrency(stats.available)}
               </div>
             </div>
+            <div className="relative z-10 flex items-center gap-1.5 text-[11px] text-neutral-500 font-medium">
+              <span className="w-1.5 h-1.5 rounded-full bg-primary-500 animate-pulse shrink-0" />
+              <span>Rút về ngân hàng bất kỳ lúc nào</span>
+            </div>
           </div>
 
-          {/* Pending Card */}
-          <div className="rounded-3xl bg-white p-6 shadow-cute border border-primary-100/80 hover:-translate-y-0.5 transition-all duration-200">
-            <div className="flex items-center gap-2 text-amber-600">
-              <Clock size={16} strokeWidth={2.5} />
-              <span className="text-[13px] font-bold">Chờ duyệt</span>
+          {/* Card 2: Chờ duyệt */}
+          <div className="group relative overflow-hidden rounded-3xl bg-white p-5 sm:p-6 shadow-sm border border-neutral-200/80 hover:border-amber-300 hover:shadow-md transition-all duration-300 flex flex-col justify-between gap-3">
+            <div className="absolute -right-2 -bottom-2 text-6xl select-none opacity-[0.06] pointer-events-none group-hover:scale-110 transition-transform">
+              ⏳
             </div>
-            <div className="mt-3 text-[24px] font-extrabold text-neutral-900 tabular-nums tracking-tight">
-              {formatCurrency(stats.pending)}
+            <div className="relative z-10 flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-amber-50 text-amber-600 border border-amber-100 shadow-2xs">
+                  <Clock size={18} strokeWidth={2.5} />
+                </div>
+                <div>
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-neutral-400">Tiền thưởng</span>
+                  <div className="text-[13px] font-extrabold text-neutral-800">Chờ duyệt</div>
+                </div>
+              </div>
+              <span className="rounded-full bg-amber-50 border border-amber-200/80 px-2.5 py-0.5 text-[10.5px] font-black uppercase text-amber-700 tracking-wider">
+                Đối soát
+              </span>
             </div>
-            <div className="mt-1 text-[11px] font-semibold text-neutral-500">Đang chờ admin duyệt đối soát</div>
+            <div className="relative z-10 pt-2 border-t border-neutral-100">
+              <div className="text-[10.5px] font-semibold text-neutral-400 uppercase tracking-wider">Trong 15 ngày</div>
+              <div className="text-2xl sm:text-3xl font-black text-neutral-900 tabular-nums leading-tight mt-0.5">
+                {formatCurrency(stats.pending)}
+              </div>
+            </div>
+            <div className="relative z-10 flex items-center gap-1.5 text-[11px] text-neutral-400 font-medium">
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse shrink-0" />
+              <span>Chờ sàn xác nhận đơn hoàn tất</span>
+            </div>
           </div>
 
-          {/* Paid Card */}
-          <div className="rounded-3xl bg-white p-6 shadow-cute border border-primary-100/80 hover:-translate-y-0.5 transition-all duration-200">
-            <div className="flex items-center gap-2 text-[#2D8A56]">
-              <CheckCircle2 size={16} strokeWidth={2.5} />
-              <span className="text-[13px] font-bold">Đã nhận</span>
+          {/* Card 3: Đã nhận */}
+          <div className="group relative overflow-hidden rounded-3xl bg-white p-5 sm:p-6 shadow-sm border border-neutral-200/80 hover:border-emerald-300 hover:shadow-md transition-all duration-300 flex flex-col justify-between gap-3">
+            <div className="absolute -right-2 -bottom-2 text-6xl select-none opacity-[0.06] pointer-events-none group-hover:scale-110 transition-transform">
+              ✅
             </div>
-            <div className="mt-3 text-[24px] font-extrabold text-neutral-900 tabular-nums tracking-tight">
-              {formatCurrency(stats.paid)}
+            <div className="relative z-10 flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-100 shadow-2xs">
+                  <CheckCircle2 size={18} strokeWidth={2.5} />
+                </div>
+                <div>
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-neutral-400">Tích luỹ</span>
+                  <div className="text-[13px] font-extrabold text-neutral-800">Đã nhận</div>
+                </div>
+              </div>
+              <span className="rounded-full bg-emerald-50 border border-emerald-200/80 px-2.5 py-0.5 text-[10.5px] font-black uppercase text-emerald-700 tracking-wider">
+                Thành công
+              </span>
             </div>
-            <div className="mt-1 text-[11px] font-semibold text-neutral-500">Tổng đã rút thành công</div>
+            <div className="relative z-10 pt-2 border-t border-neutral-100">
+              <div className="text-[10.5px] font-semibold text-neutral-400 uppercase tracking-wider">Đã chuyển về ví</div>
+              <div className="text-2xl sm:text-3xl font-black text-neutral-900 tabular-nums leading-tight mt-0.5">
+                {formatCurrency(stats.paid)}
+              </div>
+            </div>
+            <div className="relative z-10 flex items-center gap-1.5 text-[11px] text-neutral-400 font-medium">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+              <span>Tổng tiền đã rút thành công</span>
+            </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:grid-cols-[1fr_2fr] items-start">
-          {/* LEFT COLUMN: PAYMENT REQUEST */}
-          <div className="rounded-3xl bg-white p-6 shadow-cute border border-primary-100/80">
-            <h2 className="text-[16px] font-extrabold text-neutral-900 mb-4 flex items-center gap-2">
-              <IconBow className="w-5 h-5 text-accent-bow" />
-              Yêu cầu rút tiền
-            </h2>
+        {/* ═══ 2 CỘT CHÍNH: RÚT TIỀN (TRÁI) & LỊCH SỬ (PHẢI) ═══ */}
+        <div className="grid grid-cols-1 lg:grid-cols-[360px_1fr] gap-6 items-start">
+          {/* CỘT TRÁI: YÊU CẦU RÚT TIỀN */}
+          <div className="rounded-3xl bg-white p-6 shadow-cute border border-primary-100/80 flex flex-col gap-5">
+            <div className="flex items-center justify-between border-b border-primary-100/70 pb-3.5">
+              <div className="flex items-center gap-2">
+                <IconBow className="w-5 h-5 text-accent-bow" />
+                <h2 className="text-[16px] font-extrabold text-neutral-900">Yêu cầu rút tiền</h2>
+              </div>
+              <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-primary-50 text-primary-600 border border-primary-100">
+                Miễn phí
+              </span>
+            </div>
 
-            <div className="flex flex-col gap-4">
-              <div>
-                <label className="mb-1.5 block text-[13px] font-bold text-neutral-700">Số dư khả dụng</label>
-                <div className="flex h-12 w-full items-center rounded-2xl bg-primary-50 px-4 text-[15px] font-extrabold text-neutral-900 border border-primary-100">
-                  {formatCurrency(stats.available)}
+            {/* Số dư khả dụng card */}
+            <div className="rounded-2xl bg-gradient-to-br from-primary-50/70 via-rose-50/40 to-white p-4 border border-primary-200/80 shadow-2xs">
+              <div className="flex items-center justify-between">
+                <span className="text-[11.5px] font-bold text-neutral-500 uppercase tracking-wider">Số dư rút được</span>
+                <span className="text-[11px] font-extrabold text-primary-600">Tối thiểu 50k</span>
+              </div>
+              <div className="mt-1.5 text-2xl sm:text-3xl font-black text-primary-600 tabular-nums">
+                {formatCurrency(stats.available)}
+              </div>
+              {stats.available < MIN_WITHDRAW_AMOUNT && (
+                <p className="mt-1.5 text-[11px] font-semibold text-neutral-500">
+                  Cần tối thiểu {formatCurrency(MIN_WITHDRAW_AMOUNT)} để gửi yêu cầu rút tiền
+                </p>
+              )}
+            </div>
+
+            {/* Tài khoản nhận tiền */}
+            <div className="rounded-2xl bg-neutral-50/80 p-4 border border-neutral-200/80 hover:border-primary-300 transition-all">
+              <div className="mb-2.5 flex items-center justify-between">
+                <div className="flex items-center gap-1.5 text-neutral-500">
+                  <Landmark size={14} className="text-primary-500" />
+                  <span className="text-[11px] font-extrabold uppercase tracking-wider">Tài khoản nhận tiền</span>
                 </div>
-                {stats.available < MIN_WITHDRAW_AMOUNT && (
-                  <p className="mt-1 text-[11px] font-semibold text-neutral-500">
-                    Cần tối thiểu {formatCurrency(MIN_WITHDRAW_AMOUNT)} để gửi yêu cầu rút tiền
-                  </p>
-                )}
+                <button
+                  type="button"
+                  onClick={openModal}
+                  className="flex items-center gap-1 text-[12px] font-bold text-primary-600 hover:text-primary-700 cursor-pointer"
+                >
+                  <Edit2 size={12} strokeWidth={2.5} />
+                  <span>{hasBankInfo ? "Thay đổi" : "Thêm mới"}</span>
+                </button>
               </div>
 
-              <div className="rounded-2xl bg-primary-50/60 p-4 border border-primary-100">
-                <div className="mb-2 flex items-center justify-between">
-                  <span className="text-[11px] font-extrabold uppercase tracking-wider text-neutral-500">
-                    Tài khoản nhận tiền
-                  </span>
-                  <button
-                    type="button"
-                    onClick={openModal}
-                    className="flex items-center gap-1 text-[12px] font-bold text-primary-500 hover:text-primary-600"
-                  >
-                    <Edit2 size={12} strokeWidth={2.5} />
-                    Chỉnh sửa
-                  </button>
+              {renderAccountInfoBox()}
+            </div>
+
+            {/* Withdraw Action or Pending Status */}
+            {pendingRequest ? (
+              <div className="flex items-start gap-3 rounded-2xl bg-gradient-to-r from-amber-50 to-orange-50/50 p-4 border border-amber-200/80 shadow-2xs">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-700 font-black text-base mt-0.5">
+                  ⏳
                 </div>
-
-                {renderAccountInfoBox()}
-              </div>
-
-              {/* error message was here */}
-
-              {pendingRequest ? (
-                <div className="flex items-start gap-3 rounded-2xl bg-amber-50 p-4 border border-amber-200">
-                  <BellRing size={18} className="mt-0.5 shrink-0 text-amber-600" strokeWidth={2.25} />
-                  <div>
-                    <div className="text-[13px] font-bold text-amber-800">Đã gửi yêu cầu rút 🎀</div>
-                    <div className="text-[12px] text-amber-700 mt-0.5">
-                      Bạn đã yêu cầu rút {formatCurrency(pendingRequest.amount)}. MeowBack Admin sẽ xử lý sớm nhất.
-                    </div>
+                <div className="flex-1">
+                  <div className="text-[13px] font-extrabold text-amber-900 flex items-center gap-1.5">
+                    <span>Đã gửi yêu cầu rút tiền 🎀</span>
                   </div>
+                  <p className="text-[12px] text-amber-800 font-medium mt-1 leading-relaxed">
+                    Bạn đã yêu cầu rút <strong className="font-extrabold text-amber-950">{formatCurrency(pendingRequest.amount)}</strong>. MeowBack Admin sẽ duyệt và chuyển khoản sớm nhất!
+                  </p>
                 </div>
-              ) : (
+              </div>
+            ) : (
+              <div className="flex flex-col gap-2">
                 <button
                   type="button"
                   onClick={handleWithdrawClick}
                   disabled={!canRequest || submitting}
-                  className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-gradient-to-r from-primary-400 to-primary-500 text-[15px] font-bold text-white shadow-cute hover:shadow-cute-lg transition-all active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-none disabled:bg-neutral-200 disabled:text-neutral-400 disabled:shadow-none"
+                  className="flex h-12 w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-primary-500 via-rose-500 to-pink-500 hover:from-primary-600 hover:to-rose-600 text-[14.5px] font-extrabold text-white shadow-cute hover:shadow-cute-lg transition-all active:scale-[0.98] disabled:cursor-not-allowed disabled:bg-none disabled:bg-neutral-200 disabled:text-neutral-400 disabled:shadow-none cursor-pointer"
                 >
                   {submitting ? (
                     <Loader2 size={18} className="animate-spin" />
                   ) : (
-                    `Rút ${formatCurrency(stats.available)} về Ví 🎀`
+                    <>
+                      <Wallet size={17} strokeWidth={2.5} />
+                      <span>Rút {formatCurrency(stats.available)} về Ví 🎀</span>
+                    </>
                   )}
                 </button>
-              )}
-              {!hasBankInfo && !pendingRequest && (
-                <p className="text-[11px] font-semibold text-neutral-500 -mt-2">
-                  Cập nhật thông tin ngân hàng trước khi gửi yêu cầu.
+                <p className="text-center text-[11px] font-medium text-neutral-400">
+                  ⚡ Chuyển khoản 24/7 • Không mất phí giao dịch
                 </p>
-              )}
-            </div>
+              </div>
+            )}
+            {!hasBankInfo && !pendingRequest && (
+              <p className="text-[11px] font-semibold text-neutral-500 text-center">
+                Vui lòng cập nhật thông tin ngân hàng trước khi gửi yêu cầu.
+              </p>
+            )}
           </div>
 
-          {/* RIGHT COLUMN: TRANSACTION HISTORY */}
-          <div className="rounded-3xl bg-white p-6 shadow-cute border border-primary-100/80 overflow-hidden">
-            <div className="mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-primary-100 pb-4">
-              <div className="flex items-center gap-3 shrink-0">
-                <h2 className="text-[16px] font-extrabold text-neutral-900 whitespace-nowrap">Lịch sử rút tiền</h2>
-                <span className="text-[13px] font-bold text-neutral-500 bg-neutral-100 px-2 py-0.5 rounded-full whitespace-nowrap">{history.length} giao dịch</span>
-              </div>
-              <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 w-full sm:w-auto">
-                <select
-                  value={currentPeriod}
-                  onChange={handlePeriodChange}
-                  className="h-11 rounded-2xl border border-neutral-200 bg-white px-4 py-0 text-[14px] font-semibold text-neutral-700 outline-none transition-all hover:border-neutral-300 focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10 sm:w-[180px]"
-                >
-                  <option value="all">Tất cả thời gian</option>
-                  <option value="today">Hôm nay</option>
-                  <option value="last_7_days">7 ngày qua</option>
-                  <option value="this_month">Tháng này</option>
-                  <option value="last_month">Tháng trước</option>
-                </select>
-                <div className="w-full sm:w-[250px]">
-                  <ServerSearchInput placeholder="Tìm kiếm mã phiếu..." />
+          {/* CỘT PHẢI: LỊCH SỬ RÚT TIỀN */}
+          <div className="rounded-3xl bg-white p-6 shadow-cute border border-primary-100/80 flex flex-col gap-4">
+            {/* Header: Title on top, Filters on second line to avoid any clipping */}
+            <div className="flex flex-col gap-3 border-b border-primary-100/70 pb-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <h2 className="text-[16px] font-extrabold text-neutral-900 tracking-tight">Lịch sử rút tiền</h2>
+                  <span className="text-[12px] font-bold text-primary-600 bg-primary-50 border border-primary-100 px-2.5 py-0.5 rounded-full">
+                    {history.length} giao dịch
+                  </span>
                 </div>
+              </div>
+
+              {/* Filters: PeriodSelect & Search in a responsive grid that never overflows */}
+              <div className="grid grid-cols-1 sm:grid-cols-[180px_1fr] gap-2.5 w-full">
+                <PeriodSelect className="w-full" />
+                <ServerSearchInput placeholder="Tìm mã phiếu rút..." className="w-full" />
               </div>
             </div>
 
             {/* Desktop Table */}
-            <div className="hidden md:block responsive-table overflow-x-auto -mx-6">
-              <table className="w-full text-left min-w-[500px]">
+            <div className="hidden md:block overflow-x-auto rounded-2xl border border-primary-100/70">
+              <table className="w-full text-left">
                 <thead>
-                  <tr className="border-b border-primary-100 bg-primary-50/50">
-                    <th className="py-2.5 px-4 text-[11px] font-extrabold uppercase tracking-wider text-neutral-500">Thời gian</th>
-                    <th className="py-2.5 px-4 text-[11px] font-extrabold uppercase tracking-wider text-neutral-500">Số tiền</th>
-                    <th className="py-2.5 px-4 text-[11px] font-extrabold uppercase tracking-wider text-neutral-500">Trạng thái</th>
-                    <th className="py-2.5 px-4 text-[11px] font-extrabold uppercase tracking-wider text-neutral-500">Mã phiếu</th>
+                  <tr className="bg-primary-50/60 border-b border-primary-100">
+                    <th className="py-3 px-4 text-[11px] font-extrabold uppercase tracking-wider text-neutral-500">Thời gian</th>
+                    <th className="py-3 px-4 text-[11px] font-extrabold uppercase tracking-wider text-neutral-500">Số tiền</th>
+                    <th className="py-3 px-4 text-[11px] font-extrabold uppercase tracking-wider text-neutral-500">Trạng thái</th>
+                    <th className="py-3 px-4 text-[11px] font-extrabold uppercase tracking-wider text-neutral-500">Mã phiếu</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="divide-y divide-primary-50">
                   {history.length === 0 ? (
                     <tr>
                       <td colSpan={4} className="py-12 text-center">
-                        <div className="flex flex-col items-center gap-3">
-                          <img src="/meowback_lucky_cat_logo.png" alt="" className="h-16 w-16 object-contain opacity-60" />
-                          <span className="text-[14px] font-bold text-neutral-400">Ví chưa có giao dịch nào</span>
-                          <Link href="/app/refunds" className="mt-1 inline-flex items-center gap-1.5 rounded-full bg-primary-500 px-5 py-2 text-[13px] font-bold text-white hover:bg-primary-600 transition-colors">
-                            <LinkIcon size={13} /> Tạo link hoàn tiền đầu tiên
+                        <div className="flex flex-col items-center justify-center text-center px-4">
+                          <div className="w-16 h-16 rounded-3xl bg-gradient-to-br from-primary-100 via-pink-100 to-rose-100 flex items-center justify-center shadow-cute p-1 border-2 border-white mb-3.5">
+                            <img src="/meowback_lucky_cat_logo.png" alt="MeowBack Mascot" className="w-full h-full object-contain rounded-2xl" />
+                          </div>
+                          <span className="text-[14px] font-bold text-neutral-800">Ví chưa có giao dịch rút nào 🎀</span>
+                          <p className="mt-1 text-[12px] text-neutral-500 max-w-xs font-medium">
+                            Khi tích luỹ đủ số dư tối thiểu từ tiền hoàn, bạn có thể tạo lệnh rút về ngân hàng.
+                          </p>
+                          <Link
+                            href="/app/refunds"
+                            className="mt-4 inline-flex items-center gap-1.5 rounded-2xl bg-gradient-to-r from-primary-500 to-rose-500 px-4 py-2 text-[12.5px] font-bold text-white shadow-cute hover:shadow-cute-lg transition-all active:scale-95 cursor-pointer"
+                          >
+                            <Sparkles size={14} />
+                            <span>Tạo link hoàn tiền ngay</span>
                           </Link>
                         </div>
                       </td>
                     </tr>
                   ) : (
                     history.map((tx, idx) => (
-                      <tr key={idx} className="border-b border-primary-50 last:border-0 hover:bg-primary-50/40">
-                        <td className="py-3.5 px-4 text-[13px] font-medium text-neutral-700">{tx.time}</td>
-                        <td className="py-3.5 px-4 text-[13px] font-extrabold text-neutral-900">{tx.amount}</td>
-                        <td className="py-3.5 px-4 text-[13px]">
-                          <span className={`inline-flex items-center rounded-full px-3 py-0.5 text-[11px] font-extrabold ${
-                            tx.status === 'paid' ? 'bg-[#E6F8EE] text-[#2D8A56]' : 'bg-primary-100 text-primary-600'
+                      <tr key={idx} className="hover:bg-primary-50/30 transition-colors">
+                        <td className="py-3.5 px-4 text-[12.5px] font-medium text-neutral-600 whitespace-nowrap">{tx.time}</td>
+                        <td className="py-3.5 px-4 text-[13.5px] font-black text-neutral-900 tabular-nums whitespace-nowrap">{tx.amount}</td>
+                        <td className="py-3.5 px-4 whitespace-nowrap">
+                          <span className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-extrabold ${
+                            tx.status === 'paid'
+                              ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/80'
+                              : 'bg-amber-50 text-amber-700 border border-amber-200/80'
                           }`}>
                             {tx.status === 'paid' ? 'Đã nhận 🎀' : tx.status}
                           </span>
                         </td>
-                        <td className="py-3.5 px-4 text-[13px] font-mono text-neutral-500">{tx.code}</td>
+                        <td className="py-3.5 px-4 text-[12px] font-mono text-neutral-500 whitespace-nowrap">{tx.code}</td>
                       </tr>
                     ))
                   )}
@@ -454,24 +563,34 @@ export function CustomerWalletClient({
             </div>
 
             {/* Mobile Card List */}
-            <div className="md:hidden flex flex-col gap-3">
+            <div className="md:hidden flex flex-col gap-2.5">
               {history.length === 0 ? (
-                <div className="py-12 text-center">
-                  <span className="text-[14px] font-bold text-neutral-400">Chưa có giao dịch nào</span>
+                <div className="py-10 text-center flex flex-col items-center">
+                  <div className="w-14 h-14 rounded-2xl bg-primary-50 flex items-center justify-center p-1 mb-2.5">
+                    <img src="/meowback_lucky_cat_logo.png" alt="" className="w-full h-full object-contain" />
+                  </div>
+                  <span className="text-[13.5px] font-bold text-neutral-800">Chưa có giao dịch rút nào 🎀</span>
+                  <Link
+                    href="/app/refunds"
+                    className="mt-3.5 inline-flex items-center gap-1.5 rounded-2xl bg-gradient-to-r from-primary-500 to-rose-500 px-4 py-2 text-[12px] font-bold text-white shadow-cute"
+                  >
+                    <Sparkles size={13} />
+                    <span>Tạo link hoàn tiền</span>
+                  </Link>
                 </div>
               ) : (
                 history.map((tx, idx) => (
-                  <div key={idx} className="rounded-2xl border border-primary-100 p-4 hover:bg-primary-50/30 transition-colors">
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-[13px] font-extrabold text-neutral-900">{tx.amount}</span>
-                      <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-extrabold ${
-                        tx.status === 'paid' ? 'bg-[#E6F8EE] text-[#2D8A56]' : 'bg-primary-100 text-primary-600'
+                  <div key={idx} className="rounded-2xl border border-primary-100 bg-white p-3.5 shadow-2xs flex flex-col gap-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11.5px] text-neutral-500">{tx.time}</span>
+                      <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10.5px] font-extrabold ${
+                        tx.status === 'paid' ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/80' : 'bg-amber-50 text-amber-700 border border-amber-200/80'
                       }`}>
                         {tx.status === 'paid' ? 'Đã nhận 🎀' : tx.status}
                       </span>
                     </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-[12px] font-medium text-neutral-500">{tx.time}</span>
+                    <div className="flex items-center justify-between pt-1.5 border-t border-primary-50">
+                      <span className="text-[14.5px] font-black text-neutral-900 tabular-nums">{tx.amount}</span>
                       <span className="text-[11px] font-mono text-neutral-400">{tx.code}</span>
                     </div>
                   </div>
@@ -479,7 +598,12 @@ export function CustomerWalletClient({
               )}
             </div>
 
-            <Pagination totalPages={totalPages} currentPage={currentPage} />
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="border-t border-primary-100/80 pt-3">
+                <Pagination totalPages={totalPages} currentPage={currentPage} />
+              </div>
+            )}
           </div>
         </div>
       </div>

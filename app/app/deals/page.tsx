@@ -70,23 +70,27 @@ export default async function CustomerDealsPage({ searchParams }: { searchParams
   return (
     <div className="flex w-full flex-col gap-6 fade-in pb-12">
       {/* Banner Header */}
-      <div className="relative overflow-hidden rounded-3xl p-6 sm:p-8 border border-primary-200/60 shadow-xl shadow-primary-500/5 bg-white">
+      <div className="relative overflow-hidden rounded-3xl p-5 sm:p-7 border border-primary-200/60 shadow-xl shadow-primary-500/5 bg-white">
         <img src="/deals-bg.png" alt="" className="absolute inset-0 w-full h-full object-cover opacity-80" />
-        <div className="absolute inset-0 bg-white/40 backdrop-blur-[2px]" />
+        <div className="absolute inset-0 bg-white/50 backdrop-blur-[2px]" />
 
-        <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-          <div className="flex items-center gap-5">
+        <div className="relative z-10 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-4 sm:gap-5">
             <FloatingElement duration={4}>
-              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-3xl bg-gradient-to-br from-primary-400 via-primary-500 to-pink-600 text-white flex items-center justify-center shadow-lg shadow-primary-500/25 shrink-0 border border-white/40 overflow-hidden p-1">
+              <div className="w-14 h-14 sm:w-18 sm:h-18 rounded-3xl bg-gradient-to-br from-primary-400 via-primary-500 to-pink-600 text-white flex items-center justify-center shadow-lg shadow-primary-500/25 shrink-0 border-2 border-white overflow-hidden p-1">
                 <img src="/meowback_lucky_cat_logo.png" alt="MeowBack" className="w-full h-full object-contain rounded-2xl" />
               </div>
             </FloatingElement>
             <div>
-              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold leading-tight text-neutral-900 tracking-tight">
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-primary-100/90 text-primary-700 text-[11px] font-bold mb-1.5 border border-primary-200/60 shadow-2xs">
+                <Flame size={12} className="text-primary-500 fill-primary-500" />
+                <span>Ưu đãi độc quyền</span>
+              </div>
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-black leading-tight text-neutral-900 tracking-tight">
                 Deal Sập Sàn Hôm Nay
               </h1>
               <p className="mt-1 text-xs sm:text-sm text-neutral-600 font-medium leading-relaxed max-w-xl">
-                Những ưu đãi giảm giá độc quyền được hệ thống tuyển chọn. Bấm vào link và mua ngay để tự động nhận thêm hoàn tiền vào ví!
+                Những ưu đãi giảm giá tốt nhất do admin tuyển chọn. Bấm deal để mua và tự động tích lũy hoàn tiền!
               </p>
             </div>
           </div>

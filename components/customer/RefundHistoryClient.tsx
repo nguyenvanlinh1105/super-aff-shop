@@ -5,6 +5,7 @@ import { Store, ShoppingBag, Music2, Copy, ExternalLink, Star } from "lucide-rea
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Pagination } from "@/components/ui/Pagination";
 import { ServerSearchInput } from "@/components/ui/ServerSearchInput";
+import { PeriodSelect } from "@/components/ui/PeriodSelect";
 import { useToast } from "@/components/ui/Toast";
 
 const PLATFORM_STYLE: Record<string, { icon: typeof ShoppingBag; color: string; bg: string }> = {
@@ -106,19 +107,6 @@ export function RefundHistoryClient({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const currentTab = searchParams.get("tab") || "all";
-  const currentPeriod = searchParams.get("period") || "all";
-
-  const handlePeriodChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const val = e.target.value;
-    const params = new URLSearchParams(searchParams.toString());
-    if (val === "all") {
-      params.delete("period");
-    } else {
-      params.set("period", val);
-    }
-    params.delete("page");
-    router.replace(`${pathname}?${params.toString()}`);
-  };
 
   const handleTabChange = (tab: string) => {
     const params = new URLSearchParams(searchParams);
@@ -193,17 +181,7 @@ export function RefundHistoryClient({
 
         {/* Filters */}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-          <select
-            value={currentPeriod}
-            onChange={handlePeriodChange}
-            className="h-11 rounded-2xl border border-primary-200/80 bg-white px-4 text-[13px] font-semibold text-neutral-800 outline-none transition-all hover:border-primary-300 focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10 sm:w-[200px]"
-          >
-            <option value="all">Tất cả thời gian</option>
-            <option value="today">Hôm nay</option>
-            <option value="last_7_days">7 ngày qua</option>
-            <option value="this_month">Tháng này</option>
-            <option value="last_month">Tháng trước</option>
-          </select>
+          <PeriodSelect className="w-full sm:w-[200px] shrink-0" />
           <ServerSearchInput placeholder="Tìm tên sản phẩm hoặc mã..." className="sm:max-w-[320px] flex-1" />
         </div>
       </div>
@@ -281,9 +259,14 @@ export function RefundHistoryClient({
         </div>
       )}
 
-      <div className="mt-6 border-t border-primary-100 pt-4">
-        <Pagination totalPages={totalPages} currentPage={currentPage} />
-      </div>
+      {totalCount > 0 && (
+        <div className="mt-6 border-t border-primary-100 pt-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div className="text-[12.5px] font-semibold text-neutral-500">
+            Hiển thị <span className="font-bold text-neutral-800">{links.length > 0 ? (currentPage - 1) * 10 + 1 : 0} - {Math.min(currentPage * 10, totalCount)}</span> trên tổng số <span className="font-bold text-primary-600">{totalCount}</span> link • <span className="text-primary-600 font-bold">Tối đa 10 link / trang</span>
+          </div>
+          <Pagination totalPages={Math.max(totalPages, 1)} currentPage={currentPage} showSinglePage={true} />
+        </div>
+      )}
     </div>
   );
 }

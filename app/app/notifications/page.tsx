@@ -1,7 +1,6 @@
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { PageHeader } from "@/components/ui/PageHeader";
 import { NotificationsPageClient } from "@/components/customer/NotificationsPageClient";
 
 export default async function NotificationsPage() {
@@ -9,7 +8,14 @@ export default async function NotificationsPage() {
   if (!session) redirect("/login");
 
   const limit = 20;
-  const [notifications, unreadCount, totalCount, chatMessages] = await Promise.all([
+  const [
+    notifications,
+    unreadCount,
+    totalCount,
+    cashbackCount,
+    totalChatCount,
+    chatMessages,
+  ] = await Promise.all([
     prisma.notification.findMany({
       where: { userId: session.userId },
       orderBy: { createdAt: "desc" },
@@ -17,6 +23,13 @@ export default async function NotificationsPage() {
     }),
     prisma.notification.count({ where: { userId: session.userId, isRead: false } }),
     prisma.notification.count({ where: { userId: session.userId } }),
+    prisma.notification.count({
+      where: {
+        userId: session.userId,
+        type: { in: ["order_approved", "payment_paid", "referral_bonus"] },
+      },
+    }),
+    prisma.chatMessage.count(),
     prisma.chatMessage.findMany({
       orderBy: { createdAt: "desc" },
       take: 50,
@@ -25,36 +38,33 @@ export default async function NotificationsPage() {
   ]);
 
   return (
-    <div className="flex flex-col gap-2xl">
-      <PageHeader
-        title="Thông báo & Cộng đồng"
-        subtitle="Theo dõi hoạt động tài khoản và trò chuyện cùng cộng đồng MeowBack."
-      />
-      <NotificationsPageClient
-        initialNotifications={notifications.map((n) => ({
-          id: n.id,
-          type: n.type,
-          title: n.title,
-          message: n.message,
-          link: n.link,
-          isRead: n.isRead,
-          createdAt: n.createdAt.toISOString(),
+    <NotificationsPageClient
+      initialNotifications={notifications.map((n) => ({
+        id: n.id,
+        type: n.type,
+        title: n.title,
+        message: n.message,
+        link: n.link,
+        isRead: n.isRead,
+        createdAt: n.createdAt.toISOString(),
+      }))}
+      initialUnreadCount={unreadCount}
+      initialTotalPages={Math.ceil(totalCount / limit)}
+      initialTotalCount={totalCount}
+      cashbackCount={cashbackCount}
+      totalChatCount={totalChatCount}
+      initialChatMessages={chatMessages
+        .slice()
+        .reverse()
+        .map((m) => ({
+          id: m.id,
+          userId: m.userId,
+          message: m.message,
+          createdAt: m.createdAt.toISOString(),
+          user: { fullName: m.user.fullName, role: m.user.role },
         }))}
-        initialUnreadCount={unreadCount}
-        initialTotalPages={Math.ceil(totalCount / limit)}
-        initialChatMessages={chatMessages
-          .slice()
-          .reverse()
-          .map((m) => ({
-            id: m.id,
-            userId: m.userId,
-            message: m.message,
-            createdAt: m.createdAt.toISOString(),
-            user: { fullName: m.user.fullName, role: m.user.role },
-          }))}
-        currentUserId={session.userId}
-        isAdmin={session.role === "admin"}
-      />
-    </div>
+      currentUserId={session.userId}
+      isAdmin={session.role === "admin"}
+    />
   );
 }

@@ -5,6 +5,7 @@ import { CalendarDays, ExternalLink, Package, Gift, ChevronDown, CheckCircle2, C
 import { Pagination } from "@/components/ui/Pagination";
 import { FloatingElement } from "@/components/ui/FloatingElement";
 import { ServerSearchInput } from "@/components/ui/ServerSearchInput";
+import { PeriodSelect } from "@/components/ui/PeriodSelect";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -47,19 +48,6 @@ export function CustomerOrdersClient({ orders, totalPages, currentPage, counts }
   const searchParams = useSearchParams();
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const currentTab = searchParams.get("tab") || "all";
-  const currentPeriod = searchParams.get("period") || "all";
-
-  const handlePeriodChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const val = e.target.value;
-    const params = new URLSearchParams(searchParams.toString());
-    if (val === "all") {
-      params.delete("period");
-    } else {
-      params.set("period", val);
-    }
-    params.delete("page");
-    router.replace(`${pathname}?${params.toString()}`);
-  };
 
   const handleTabChange = (tab: string) => {
     const params = new URLSearchParams(searchParams);
@@ -129,17 +117,7 @@ export function CustomerOrdersClient({ orders, totalPages, currentPage, counts }
 
       {/* TOOLBAR */}
       <div className="flex flex-col gap-sm sm:flex-row sm:items-center">
-        <select
-          value={currentPeriod}
-          onChange={handlePeriodChange}
-          className="h-11 rounded-2xl border border-neutral-200 bg-white px-4 py-0 text-[14px] font-semibold text-neutral-700 outline-none transition-all hover:border-neutral-300 focus:border-primary-500 focus:ring-4 focus:ring-primary-500/10 sm:w-[200px]"
-        >
-          <option value="all">Tất cả thời gian</option>
-          <option value="today">Hôm nay</option>
-          <option value="last_7_days">7 ngày qua</option>
-          <option value="this_month">Tháng này</option>
-          <option value="last_month">Tháng trước</option>
-        </select>
+        <PeriodSelect className="w-full sm:w-[200px] shrink-0" />
         <div className="relative flex-1">
           <ServerSearchInput placeholder="Tìm mã đơn hàng..." />
         </div>

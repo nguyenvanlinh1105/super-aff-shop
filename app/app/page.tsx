@@ -144,75 +144,215 @@ export default async function CustomerHomePage() {
         </FadeUp>
       </div>
 
-      {/* ═══ 4 STAT CARDS (Asymmetrical Bento & Hover Physics) ═══ */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+      {/* ═══ 4 STAT CARDS (Bố cục 1 hàng 2 cột, giàu thông tin, không bị trống) ═══ */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
+        {/* CARD 1: CHỜ DUYỆT */}
         <FadeUp delay={0.2}>
           <HoverCard>
-            <div className="group h-full relative overflow-hidden rounded-3xl bg-white p-5 sm:p-6 shadow-sm border border-neutral-200/70 hover:border-amber-200 transition-colors duration-300">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-50 text-amber-600 font-black text-xl border border-amber-100 group-hover:scale-105 transition-transform">
-                  ⏳
-                </div>
-                <span className="rounded-full bg-amber-50 border border-amber-100 px-2.5 py-0.5 text-[10px] font-black uppercase text-amber-700 tracking-wider">Đang xử lý</span>
+            <div className="group h-full relative overflow-hidden rounded-3xl bg-white p-5 sm:p-6 shadow-sm border border-neutral-200/80 hover:border-amber-300 hover:shadow-md transition-all duration-300 flex flex-col justify-between gap-3.5">
+              {/* Watermark mờ nghệ thuật trang trí góc dưới phải */}
+              <div className="absolute -right-2 -bottom-2 text-7xl select-none opacity-[0.06] pointer-events-none transition-transform duration-500 group-hover:scale-110 group-hover:rotate-6">
+                ⏳
               </div>
-              <div className="text-xs font-bold uppercase tracking-wider text-neutral-400 mb-1">Chờ duyệt</div>
-              <div className="text-2xl sm:text-3xl font-black text-neutral-900 tabular-nums leading-tight">{formatCurrency(pendingIncome)}</div>
-              <div className="mt-1 text-[11px] text-neutral-500 font-medium">
-                {allOrders.filter((o) => o.orderStatus === "pending").length} đơn hàng
+
+              {/* Tầng 1: Icon + Phân loại + Badge trạng thái */}
+              <div className="relative z-10 flex items-center justify-between gap-2">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-amber-50 text-amber-600 font-black text-xl border border-amber-100 group-hover:scale-105 transition-transform">
+                    ⏳
+                  </div>
+                  <div>
+                    <div className="text-[11.5px] font-bold uppercase tracking-wider text-neutral-400">Chờ duyệt</div>
+                    <div className="text-[12px] font-semibold text-neutral-600">
+                      {allOrders.filter((o) => o.orderStatus === "pending").length} đơn hàng đang xử lý
+                    </div>
+                  </div>
+                </div>
+                <span className="shrink-0 rounded-full bg-amber-50 border border-amber-200/80 px-2.5 py-0.5 text-[10.5px] font-black uppercase text-amber-700 tracking-wider">
+                  Đang xử lý
+                </span>
+              </div>
+
+              {/* Tầng 2: Số tiền lớn & Nút xem đơn */}
+              <div className="relative z-10 flex items-end justify-between gap-3 pt-2.5 border-t border-neutral-100">
+                <div>
+                  <div className="text-[10.5px] font-semibold text-neutral-400 uppercase tracking-wider">Tiền chờ đối soát</div>
+                  <div className="text-2xl sm:text-3xl font-black text-neutral-900 tabular-nums leading-tight">
+                    {formatCurrency(pendingIncome)}
+                  </div>
+                </div>
+                <Link
+                  href="/app/orders"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-amber-50/80 hover:bg-amber-100 text-amber-800 text-[12px] font-bold border border-amber-200/60 transition-all hover:translate-x-0.5 shrink-0 shadow-2xs"
+                >
+                  <span>Xem đơn</span>
+                  <ChevronRight size={14} strokeWidth={2.5} />
+                </Link>
+              </div>
+
+              {/* Tầng 3: Dòng trạng thái ngữ cảnh */}
+              <div className="relative z-10 flex items-center gap-2 text-[11px] text-neutral-400 font-medium">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse shrink-0" />
+                <span className="truncate">Chờ sàn Shopee & TikTok xác nhận hoàn tất</span>
               </div>
             </div>
           </HoverCard>
         </FadeUp>
 
+        {/* CARD 2: SẴN SÀNG RÚT */}
         <FadeUp delay={0.3}>
           <HoverCard>
-            <div className="group h-full relative overflow-hidden rounded-3xl bg-white p-5 sm:p-6 shadow-sm border border-neutral-200/70 hover:border-emerald-200 transition-colors duration-300">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 font-black text-xl border border-emerald-100 group-hover:scale-105 transition-transform">
-                  💰
-                </div>
-                <span className="rounded-full bg-emerald-50 border border-emerald-100 px-2.5 py-0.5 text-[10px] font-black uppercase text-emerald-700 tracking-wider">Rút được</span>
+            <div className="group h-full relative overflow-hidden rounded-3xl bg-white p-5 sm:p-6 shadow-sm border border-neutral-200/80 hover:border-emerald-300 hover:shadow-md transition-all duration-300 flex flex-col justify-between gap-3.5">
+              {/* Watermark mờ nghệ thuật trang trí góc dưới phải */}
+              <div className="absolute -right-2 -bottom-2 text-7xl select-none opacity-[0.06] pointer-events-none transition-transform duration-500 group-hover:scale-110 group-hover:rotate-6">
+                💰
               </div>
-              <div className="text-xs font-bold uppercase tracking-wider text-neutral-400 mb-1">Sẵn sàng rút</div>
-              <div className="text-2xl sm:text-3xl font-black text-neutral-900 tabular-nums leading-tight">{formatCurrency(availableBalance)}</div>
-              <div className="mt-1 text-[11px] text-neutral-500 font-medium">
-                {allOrders.filter((o) => o.orderStatus === "approved" && o.payoutStatus === "unpaid").length} đơn hàng
+
+              {/* Tầng 1: Icon + Phân loại + Badge trạng thái */}
+              <div className="relative z-10 flex items-center justify-between gap-2">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 font-black text-xl border border-emerald-100 group-hover:scale-105 transition-transform">
+                    💰
+                  </div>
+                  <div>
+                    <div className="text-[11.5px] font-bold uppercase tracking-wider text-neutral-400">Sẵn sàng rút</div>
+                    <div className="text-[12px] font-semibold text-neutral-600">
+                      {allOrders.filter((o) => o.orderStatus === "approved" && o.payoutStatus === "unpaid").length} đơn hàng khả dụng
+                    </div>
+                  </div>
+                </div>
+                <span className="shrink-0 rounded-full bg-emerald-50 border border-emerald-200/80 px-2.5 py-0.5 text-[10.5px] font-black uppercase text-emerald-700 tracking-wider">
+                  Rút được
+                </span>
+              </div>
+
+              {/* Tầng 2: Số tiền lớn & Nút rút tiền */}
+              <div className="relative z-10 flex items-end justify-between gap-3 pt-2.5 border-t border-neutral-100">
+                <div>
+                  <div className="text-[10.5px] font-semibold text-neutral-400 uppercase tracking-wider">Số dư khả dụng</div>
+                  <div className="text-2xl sm:text-3xl font-black text-emerald-600 tabular-nums leading-tight">
+                    {formatCurrency(availableBalance)}
+                  </div>
+                </div>
+                <Link
+                  href="/app/wallet"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white text-[12px] font-bold shadow-sm shadow-emerald-500/20 transition-all hover:scale-105 active:scale-95 shrink-0"
+                >
+                  <span>Rút tiền</span>
+                  <ArrowUpRight size={14} strokeWidth={2.5} />
+                </Link>
+              </div>
+
+              {/* Tầng 3: Dòng trạng thái ngữ cảnh */}
+              <div className="relative z-10 flex items-center gap-2 text-[11px] text-neutral-400 font-medium">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+                <span className="truncate">Rút về tài khoản ngân hàng bất kỳ lúc nào</span>
               </div>
             </div>
           </HoverCard>
         </FadeUp>
 
+        {/* CARD 3: ĐÃ RÚT VỀ VÍ */}
         <FadeUp delay={0.4}>
           <HoverCard>
-            <div className="group h-full relative overflow-hidden rounded-3xl bg-white p-5 sm:p-6 shadow-sm border border-neutral-200/70 hover:border-indigo-200 transition-colors duration-300">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600 font-black text-xl border border-indigo-100 group-hover:scale-105 transition-transform">
-                  🏦
-                </div>
-                <span className="rounded-full bg-indigo-50 border border-indigo-100 px-2.5 py-0.5 text-[10px] font-black uppercase text-indigo-700 tracking-wider">Đã nhận</span>
+            <div className="group h-full relative overflow-hidden rounded-3xl bg-white p-5 sm:p-6 shadow-sm border border-neutral-200/80 hover:border-indigo-300 hover:shadow-md transition-all duration-300 flex flex-col justify-between gap-3.5">
+              {/* Watermark mờ nghệ thuật trang trí góc dưới phải */}
+              <div className="absolute -right-2 -bottom-2 text-7xl select-none opacity-[0.06] pointer-events-none transition-transform duration-500 group-hover:scale-110 group-hover:rotate-6">
+                🏦
               </div>
-              <div className="text-xs font-bold uppercase tracking-wider text-neutral-400 mb-1">Đã rút về ví</div>
-              <div className="text-2xl sm:text-3xl font-black text-neutral-900 tabular-nums leading-tight">{formatCurrency(paidTotal)}</div>
-              <div className="mt-1 text-[11px] text-neutral-500 font-medium">
-                {allOrders.filter((o) => o.payoutStatus === "paid").length} đơn hàng
+
+              {/* Tầng 1: Icon + Phân loại + Badge trạng thái */}
+              <div className="relative z-10 flex items-center justify-between gap-2">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600 font-black text-xl border border-indigo-100 group-hover:scale-105 transition-transform">
+                    🏦
+                  </div>
+                  <div>
+                    <div className="text-[11.5px] font-bold uppercase tracking-wider text-neutral-400">Đã rút về ví</div>
+                    <div className="text-[12px] font-semibold text-neutral-600">
+                      {allOrders.filter((o) => o.payoutStatus === "paid").length} đơn đã giải ngân
+                    </div>
+                  </div>
+                </div>
+                <span className="shrink-0 rounded-full bg-indigo-50 border border-indigo-200/80 px-2.5 py-0.5 text-[10.5px] font-black uppercase text-indigo-700 tracking-wider">
+                  Đã nhận
+                </span>
+              </div>
+
+              {/* Tầng 2: Số tiền lớn & Nút lịch sử ví */}
+              <div className="relative z-10 flex items-end justify-between gap-3 pt-2.5 border-t border-neutral-100">
+                <div>
+                  <div className="text-[10.5px] font-semibold text-neutral-400 uppercase tracking-wider">Tổng tiền đã nhận</div>
+                  <div className="text-2xl sm:text-3xl font-black text-neutral-900 tabular-nums leading-tight">
+                    {formatCurrency(paidTotal)}
+                  </div>
+                </div>
+                <Link
+                  href="/app/wallet"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-indigo-50/80 hover:bg-indigo-100 text-indigo-700 text-[12px] font-bold border border-indigo-200/60 transition-all hover:translate-x-0.5 shrink-0 shadow-2xs"
+                >
+                  <span>Lịch sử ví</span>
+                  <ChevronRight size={14} strokeWidth={2.5} />
+                </Link>
+              </div>
+
+              {/* Tầng 3: Dòng trạng thái ngữ cảnh */}
+              <div className="relative z-10 flex items-center gap-2 text-[11px] text-neutral-400 font-medium">
+                <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 shrink-0" />
+                <span className="truncate">Tiền đã được chuyển vào tài khoản ngân hàng</span>
               </div>
             </div>
           </HoverCard>
         </FadeUp>
 
+        {/* CARD 4: TỔNG TÍCH LUỸ */}
         <FadeUp delay={0.5}>
           <HoverCard>
-            <div className="group h-full relative overflow-hidden rounded-3xl bg-gradient-to-br from-white via-[#FFF5F8] to-[#FFE8F0] p-5 sm:p-6 shadow-sm border border-primary-200/80 hover:border-primary-300 transition-colors duration-300">
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary-100 text-primary-600 font-black text-xl border border-primary-200 group-hover:scale-105 transition-transform">
-                  🎀
-                </div>
-                <span className="rounded-full bg-primary-50 border border-primary-100 px-2.5 py-0.5 text-[10px] font-black uppercase text-primary-700 tracking-wider">Tổng cộng</span>
+            <div className="group h-full relative overflow-hidden rounded-3xl bg-gradient-to-br from-white via-[#FFF5F8] to-[#FFE8F0] p-5 sm:p-6 shadow-sm border border-primary-200/80 hover:border-primary-300 hover:shadow-md transition-all duration-300 flex flex-col justify-between gap-3.5">
+              {/* Watermark mờ nghệ thuật trang trí góc dưới phải */}
+              <div className="absolute -right-2 -bottom-2 text-7xl select-none opacity-[0.09] pointer-events-none transition-transform duration-500 group-hover:scale-110 group-hover:rotate-6">
+                🎀
               </div>
-              <div className="text-xs font-bold uppercase tracking-wider text-primary-800/60 mb-1">Tổng tích luỹ</div>
-              <div className="text-2xl sm:text-3xl font-black text-primary-900 tabular-nums leading-tight">{formatCurrency(totalIncome)}</div>
-              <div className="mt-1 text-[11px] text-primary-700 font-medium">
-                {allOrders.length} đơn hàng
+
+              {/* Tầng 1: Icon + Phân loại + Badge trạng thái */}
+              <div className="relative z-10 flex items-center justify-between gap-2">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary-100 text-primary-600 font-black text-xl border border-primary-200 group-hover:scale-105 transition-transform">
+                    🎀
+                  </div>
+                  <div>
+                    <div className="text-[11.5px] font-bold uppercase tracking-wider text-primary-800/60">Tổng tích luỹ</div>
+                    <div className="text-[12px] font-semibold text-primary-700">
+                      {allOrders.length} đơn hàng đã mua
+                    </div>
+                  </div>
+                </div>
+                <span className="shrink-0 rounded-full bg-primary-50 border border-primary-200/80 px-2.5 py-0.5 text-[10.5px] font-black uppercase text-primary-700 tracking-wider">
+                  Tổng cộng
+                </span>
+              </div>
+
+              {/* Tầng 2: Số tiền lớn & Nút tất cả đơn */}
+              <div className="relative z-10 flex items-end justify-between gap-3 pt-2.5 border-t border-primary-200/60">
+                <div>
+                  <div className="text-[10.5px] font-semibold text-primary-800/60 uppercase tracking-wider">Tổng thu nhập trọn đời</div>
+                  <div className="text-2xl sm:text-3xl font-black text-primary-900 tabular-nums leading-tight">
+                    {formatCurrency(totalIncome)}
+                  </div>
+                </div>
+                <Link
+                  href="/app/orders"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-gradient-to-r from-primary-500 to-rose-500 hover:from-primary-600 hover:to-rose-600 text-white text-[12px] font-bold shadow-sm shadow-primary-500/25 transition-all hover:scale-105 active:scale-95 shrink-0"
+                >
+                  <span>Tất cả đơn</span>
+                  <ArrowUpRight size={14} strokeWidth={2.5} />
+                </Link>
+              </div>
+
+              {/* Tầng 3: Dòng trạng thái ngữ cảnh */}
+              <div className="relative z-10 flex items-center gap-2 text-[11px] text-primary-600/80 font-medium">
+                <IconBow className="w-3.5 h-3.5 text-accent-bow shrink-0" />
+                <span className="truncate">Càng mua sắm nhiều càng tích luỹ nhiều nơ hoàn tiền</span>
               </div>
             </div>
           </HoverCard>

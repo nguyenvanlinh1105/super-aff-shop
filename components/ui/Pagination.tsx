@@ -6,14 +6,16 @@ import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-r
 interface PaginationProps {
   totalPages: number;
   currentPage: number;
+  showSinglePage?: boolean;
 }
 
-export function Pagination({ totalPages, currentPage }: PaginationProps) {
+export function Pagination({ totalPages, currentPage, showSinglePage = false }: PaginationProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  if (totalPages <= 1) return null;
+  if (totalPages <= 0) return null;
+  if (totalPages <= 1 && !showSinglePage) return null;
 
   const createPageURL = (pageNumber: number | string) => {
     const params = new URLSearchParams(searchParams);

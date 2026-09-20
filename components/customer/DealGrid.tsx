@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { MousePointerClick, Flame, Tag, SlidersHorizontal, Store, ArrowRight } from "lucide-react";
+import { MousePointerClick, Flame, Tag, SlidersHorizontal, Store, ArrowRight, ChevronDown, ArrowUpDown } from "lucide-react";
 import { Pagination } from "@/components/ui/Pagination";
 import { DEAL_CATEGORIES } from "@/lib/dealCategories";
 import { DEAL_LINK_TYPES } from "@/lib/dealLinkTypes";
@@ -171,30 +171,59 @@ function LinkTypeTabs({ counts }: { counts: { product: number; shop: number } })
   }
 
   const tabs = [
-    { value: "all", label: "Tất cả", icon: <Flame size={13} />, count: counts.product + counts.shop },
-    { value: "product", label: DEAL_LINK_TYPES[0].shortLabel, icon: <MousePointerClick size={13} />, count: counts.product },
-    { value: "shop", label: DEAL_LINK_TYPES[1].shortLabel, icon: <Store size={13} />, count: counts.shop },
+    {
+      value: "all",
+      label: "Tất cả",
+      mobileLabel: "Tất cả",
+      icon: <Flame size={13} strokeWidth={2.2} />,
+      count: counts.product + counts.shop,
+    },
+    {
+      value: "product",
+      label: "Sản phẩm cụ thể",
+      mobileLabel: "Sản phẩm",
+      icon: <MousePointerClick size={13} strokeWidth={2.2} />,
+      count: counts.product,
+    },
+    {
+      value: "shop",
+      label: "Cả Shop",
+      mobileLabel: "Cả Shop",
+      icon: <Store size={13} strokeWidth={2.2} />,
+      count: counts.shop,
+    },
   ];
 
   return (
-    <div className="mb-md flex flex-wrap items-center gap-sm">
-      {tabs.map((t) => (
-        <button
-          key={t.value}
-          onClick={() => select(t.value)}
-          className={`flex h-10 items-center gap-xs whitespace-nowrap rounded-full px-lg text-[13px] font-bold transition-all ${
-            active === t.value
-              ? "bg-gradient-to-r from-primary-400 to-primary-500 text-white shadow-cute"
-              : "bg-white/90 text-neutral-600 border border-primary-100/80 hover:bg-primary-50/50 hover:text-primary-600"
-          }`}
-        >
-          <span className={active === t.value ? "text-white/90" : "text-primary-400"}>{t.icon}</span>
-          {t.label}
-          <span className={`flex h-5 min-w-[20px] items-center justify-center rounded-full px-1 text-[11px] font-bold ${
-            active === t.value ? "bg-white/20 text-white" : "bg-primary-50 text-primary-500"
-          }`}>{t.count}</span>
-        </button>
-      ))}
+    <div className="grid grid-cols-3 gap-1.5 sm:gap-2.5 w-full">
+      {tabs.map((t) => {
+        const isActive = active === t.value;
+        return (
+          <button
+            key={t.value}
+            type="button"
+            onClick={() => select(t.value)}
+            className={`flex h-9 sm:h-10 items-center justify-center gap-1 sm:gap-1.5 rounded-2xl px-1.5 sm:px-3 text-[11.5px] xs:text-[12.5px] sm:text-[13px] font-bold transition-all cursor-pointer select-none ${
+              isActive
+                ? "bg-gradient-to-r from-primary-500 to-rose-500 text-white shadow-cute"
+                : "bg-white text-neutral-600 border border-neutral-200/80 hover:border-primary-300 hover:text-primary-600 hover:bg-primary-50/40"
+            }`}
+          >
+            <span className={isActive ? "text-white" : "text-primary-500"}>{t.icon}</span>
+            <span className="truncate">
+              <span className="inline sm:hidden">{t.mobileLabel}</span>
+              <span className="hidden sm:inline">{t.label}</span>
+            </span>
+            <span
+              className={`flex h-4.5 min-w-[18px] sm:h-5 sm:min-w-[20px] items-center justify-center rounded-full px-1 text-[10px] sm:text-[10.5px] font-black shrink-0 ${
+                isActive ? "bg-white/25 text-white" : "bg-primary-50 text-primary-600 border border-primary-100"
+              }`}
+            >
+              {t.count}
+            </span>
+          </button>
+        );
+      })}
     </div>
   );
 }
@@ -220,29 +249,42 @@ function FilterBar() {
   }
 
   const selectClass =
-    "h-10 rounded-2xl bg-white/90 px-md text-[13px] font-semibold text-neutral-700 border border-primary-100/80 shadow-sm focus:outline-none focus:border-primary-400 focus:ring-2 focus:ring-primary-200/50 transition-all";
+    "w-full sm:w-auto h-9 sm:h-10 rounded-2xl bg-white pl-8 pr-7 text-[12.5px] font-semibold text-neutral-700 border border-neutral-200/80 shadow-2xs hover:border-primary-300 focus:outline-none focus:border-primary-500 transition-all cursor-pointer appearance-none";
 
   return (
-    <div className="mb-lg flex flex-wrap items-center gap-sm">
-      <span className="flex items-center gap-1 text-[12px] font-bold text-neutral-400 uppercase tracking-wide">
-        <SlidersHorizontal size={13} /> Lọc
-      </span>
-      <select value={platform} onChange={(e) => updateParam("platform", e.target.value)} className={selectClass}>
-        <option value="all">Tất cả sàn</option>
-        <option value="SHOPEE">Shopee</option>
-        <option value="TIKTOK">TikTok Shop</option>
-      </select>
-      <select value={category} onChange={(e) => updateParam("category", e.target.value)} className={selectClass}>
-        <option value="all">Tất cả danh mục</option>
-        {DEAL_CATEGORIES.map((c) => (
-          <option key={c} value={c}>{c}</option>
-        ))}
-      </select>
-      <select value={sort} onChange={(e) => updateParam("sort", e.target.value)} className={selectClass}>
-        {SORT_OPTIONS.map((o) => (
-          <option key={o.value} value={o.value}>{o.label}</option>
-        ))}
-      </select>
+    <div className="my-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+      <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 w-full sm:w-auto">
+        <div className="relative">
+          <SlidersHorizontal size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-primary-400 pointer-events-none" />
+          <select value={platform} onChange={(e) => updateParam("platform", e.target.value)} className={selectClass}>
+            <option value="all">Tất cả sàn</option>
+            <option value="SHOPEE">Shopee</option>
+            <option value="TIKTOK">TikTok Shop</option>
+          </select>
+          <ChevronDown size={13} strokeWidth={2.2} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none" />
+        </div>
+
+        <div className="relative">
+          <Tag size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-primary-400 pointer-events-none" />
+          <select value={category} onChange={(e) => updateParam("category", e.target.value)} className={selectClass}>
+            <option value="all">Tất cả danh mục</option>
+            {DEAL_CATEGORIES.map((c) => (
+              <option key={c} value={c}>{c}</option>
+            ))}
+          </select>
+          <ChevronDown size={13} strokeWidth={2.2} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none" />
+        </div>
+      </div>
+
+      <div className="relative w-full sm:w-auto">
+        <ArrowUpDown size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-primary-400 pointer-events-none" />
+        <select value={sort} onChange={(e) => updateParam("sort", e.target.value)} className={selectClass}>
+          {SORT_OPTIONS.map((o) => (
+            <option key={o.value} value={o.value}>{o.label}</option>
+          ))}
+        </select>
+        <ChevronDown size={13} strokeWidth={2.2} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none" />
+      </div>
     </div>
   );
 }
@@ -253,7 +295,7 @@ export function DealGrid({
   currentPage,
   hasQuery,
   linkTypeCounts,
-  refundsHref,
+  refundsHref = "/app/refunds",
 }: {
   deals: Deal[];
   totalPages?: number;
@@ -262,26 +304,24 @@ export function DealGrid({
   linkTypeCounts?: { product: number; shop: number };
   refundsHref?: string;
 }) {
+  const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
   const activeLinkType = searchParams.get("linkType") || "all";
 
   return (
-    <div>
+    <div className="flex flex-col gap-3">
       {linkTypeCounts && <LinkTypeTabs counts={linkTypeCounts} />}
 
       {activeLinkType === "shop" && (
-        <div className="mb-lg flex items-start gap-sm rounded-2xl bg-purple-50 border border-purple-200 px-lg py-md">
-          <Store size={18} className="text-purple-500 shrink-0 mt-[1px]" />
-          <p className="text-[13px] text-purple-700 font-medium leading-relaxed">
-            Đây là deal <strong>Cả Shop / Bộ sưu tập</strong> — chọn đúng sản phẩm bạn muốn mua, sau đó{" "}
-            {refundsHref ? (
-              <Link href={refundsHref} className="font-bold underline underline-offset-2">
-                vào mục Hoàn tiền để tạo link riêng
-              </Link>
-            ) : (
-              <strong>tạo link riêng ở mục Hoàn tiền</strong>
-            )}{" "}
-            trước khi thanh toán, để đảm bảo được ghi nhận hoàn tiền chính xác.
+        <div className="flex items-start gap-3 rounded-2xl bg-purple-50/80 border border-purple-200/80 p-3.5 sm:p-4 text-[13px] text-purple-800 leading-relaxed shadow-2xs">
+          <Store size={18} className="text-purple-500 shrink-0 mt-0.5" />
+          <p>
+            Đây là deal <strong>Cả Shop / Bộ sưu tập</strong> — bạn hãy bấm vào để chọn sản phẩm muốn mua, sau đó{" "}
+            <Link href={refundsHref} className="font-extrabold text-purple-700 underline underline-offset-2 hover:text-purple-900">
+              vào mục Tạo link hoàn tiền
+            </Link>{" "}
+            dán link để đảm bảo nhận đầy đủ tiền hoàn vào ví nhé!
           </p>
         </div>
       )}
@@ -289,19 +329,53 @@ export function DealGrid({
       <FilterBar />
 
       {deals.length === 0 ? (
-        <div className="flex flex-col items-center py-3xl text-center">
-          <div className="text-6xl mb-lg">🛒</div>
-          <p className="text-[16px] font-bold text-neutral-500">
-            {hasQuery ? "Không tìm thấy ưu đãi phù hợp" : "Chưa có ưu đãi nào"}
+        /* Empty State thiết kế phong cách MeowBack Mascot cao cấp */
+        <div className="flex flex-col items-center justify-center py-12 sm:py-16 px-4 text-center rounded-3xl bg-gradient-to-b from-white via-primary-50/30 to-white border border-primary-100/80 shadow-xs my-2">
+          <div className="relative mb-5">
+            <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl bg-gradient-to-br from-primary-100 via-pink-100 to-rose-100 flex items-center justify-center shadow-cute p-1.5 border-2 border-white">
+              <img
+                src="/meowback_lucky_cat_logo.png"
+                alt="MeowBack Mascot"
+                className="w-full h-full object-contain rounded-2xl"
+              />
+            </div>
+            <div className="absolute -bottom-1 -right-1 flex h-7 w-7 items-center justify-center rounded-full bg-primary-500 text-white shadow-sm ring-2 ring-white text-xs">
+              🎀
+            </div>
+          </div>
+
+          <h3 className="text-lg sm:text-xl font-extrabold text-neutral-900 tracking-tight">
+            {hasQuery ? "Không tìm thấy ưu đãi phù hợp 🔍" : "Chưa có ưu đãi nào hôm nay 🎀"}
+          </h3>
+          <p className="mt-2 text-xs sm:text-sm text-neutral-500 max-w-md leading-relaxed font-medium">
+            {hasQuery
+              ? "Thử đổi từ khoá hoặc chọn lại bộ lọc sàn và danh mục khác xem sao nhé!"
+              : "Hệ thống đang liên tục săn lùng deal giảm giá sâu từ Shopee & TikTok Shop. Bạn vẫn có thể tự tạo link hoàn tiền ngay cho bất kỳ sản phẩm nào bạn thích!"}
           </p>
-          <p className="text-[13px] text-neutral-400 mt-xs">
-            {hasQuery ? "Thử đổi bộ lọc hoặc từ khoá khác xem sao!" : "Quay lại sau nhé, admin đang cập nhật deal mới!"}
-          </p>
+
+          <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
+            <Link
+              href={refundsHref}
+              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-gradient-to-r from-primary-500 to-rose-500 hover:from-primary-600 hover:to-rose-600 text-white text-[13.5px] font-bold shadow-cute hover:shadow-cute-lg transition-all hover:scale-105 active:scale-95 cursor-pointer"
+            >
+              <Flame size={16} strokeWidth={2.2} />
+              <span>Tạo link hoàn tiền ngay</span>
+            </Link>
+            {hasQuery && (
+              <button
+                type="button"
+                onClick={() => router.replace(pathname)}
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white hover:bg-neutral-50 text-neutral-700 text-[13px] font-bold border border-neutral-200 transition-all shadow-2xs cursor-pointer"
+              >
+                <span>Xoá bộ lọc</span>
+              </button>
+            )}
+          </div>
         </div>
       ) : (
         <>
-          {/* Grid */}
-          <div className="grid grid-cols-2 xs:grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-md">
+          {/* Grid danh sách deal tối ưu cho màn hình 960px và mobile */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3.5 sm:gap-4">
             {deals.map((deal) => (
               <DealCard key={deal.id} deal={deal} />
             ))}
@@ -309,16 +383,18 @@ export function DealGrid({
 
           {/* Pagination */}
           {totalPages && currentPage && (
-            <Pagination totalPages={totalPages} currentPage={currentPage} />
+            <div className="mt-6 border-t border-primary-100/80 pt-4">
+              <Pagination totalPages={totalPages} currentPage={currentPage} />
+            </div>
           )}
 
           {/* Footer note */}
-          <div className="mt-xl flex items-center justify-center gap-sm text-[12px] text-neutral-500 text-center">
-            <Flame size={13} className="text-primary-500 shrink-0" />
+          <div className="mt-4 flex items-center justify-center gap-2 text-[12px] text-neutral-500 text-center font-medium">
+            <Flame size={14} className="text-primary-500 shrink-0" />
             <span>
               {activeLinkType === "shop"
                 ? "Chọn sản phẩm rồi tạo link riêng ở mục Hoàn tiền trước khi mua để nhận hoàn tiền"
-                : "Bấm vào sản phẩm để mua trực tiếp trên Shopee và nhận hoàn tiền"}
+                : "Bấm vào deal để mua trực tiếp trên sàn và tự động nhận hoàn tiền"}
             </span>
           </div>
         </>

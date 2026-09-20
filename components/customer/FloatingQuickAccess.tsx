@@ -22,7 +22,13 @@ const ICON_MAP = {
   threads: ThreadsIcon,
 };
 
-export function FloatingQuickAccess({ unreadCount }: { unreadCount: number }) {
+export function FloatingQuickAccess({
+  unreadCount,
+  showBell = false,
+}: {
+  unreadCount: number;
+  showBell?: boolean;
+}) {
   const [isOpen, setIsOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -65,7 +71,7 @@ export function FloatingQuickAccess({ unreadCount }: { unreadCount: number }) {
   return (
     <div
       ref={containerRef}
-      className="fixed right-lg z-50 flex flex-col items-end bottom-[calc(58px+env(safe-area-inset-bottom)+16px)] md:bottom-lg"
+      className="fixed z-40 flex flex-col items-end customer-floating-support"
     >
       {/* Speed Dial Menu Stack — Nổi phía trên nút hỗ trợ giống UI Home */}
       {isOpen && (
@@ -167,18 +173,20 @@ export function FloatingQuickAccess({ unreadCount }: { unreadCount: number }) {
           </div>
         </button>
 
-        <Link
-          href="/app/notifications"
-          title="Thông báo"
-          className="relative flex h-14 w-14 items-center justify-center rounded-full bg-white shadow-cute border border-primary-200/80 transition-transform hover:scale-105 active:scale-95 text-primary-500 hover:text-primary-600"
-        >
-          <Bell size={24} strokeWidth={2.25} />
-          {unreadCount > 0 && (
-            <span className="absolute -top-1 -right-1 flex h-6 min-w-[24px] items-center justify-center rounded-full bg-rose-500 px-1.5 text-[11px] font-extrabold text-white ring-2 ring-white shadow-sm">
-              {unreadCount > 99 ? "99+" : unreadCount}
-            </span>
-          )}
-        </Link>
+        {showBell && (
+          <Link
+            href="/app/notifications"
+            title="Thông báo"
+            className="relative flex h-14 w-14 items-center justify-center rounded-full bg-white shadow-cute border border-primary-200/80 transition-transform hover:scale-105 active:scale-95 text-primary-500 hover:text-primary-600"
+          >
+            <Bell size={24} strokeWidth={2.25} />
+            {unreadCount > 0 && (
+              <span className="absolute -top-1 -right-1 flex h-6 min-w-[24px] items-center justify-center rounded-full bg-rose-500 px-1.5 text-[11px] font-extrabold text-white ring-2 ring-white shadow-sm">
+                {unreadCount > 99 ? "99+" : unreadCount}
+              </span>
+            )}
+          </Link>
+        )}
       </div>
     </div>
   );
