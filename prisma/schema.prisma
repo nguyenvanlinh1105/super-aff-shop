@@ -551,6 +551,19 @@ model AuditLog {
 // Thông báo trong app cho từng user — mỗi sự kiện (đơn được duyệt, đã trả tiền,
 // hoa hồng giới thiệu, admin gửi thông báo hệ thống) sinh ra 1 dòng riêng cho
 // user đó, kể cả broadcast (tạo N dòng cho N user) để track đã đọc theo từng người.
+model RioHubWebhookEvent {
+  id              String   @id @default(uuid())
+  eventId         String   @unique @map("event_id")
+  event           String
+  orderExternalId String?  @map("order_external_id")
+  payload         String
+  processedAt     DateTime @default(now()) @map("processed_at")
+
+  @@index([event])
+  @@index([orderExternalId])
+  @@map("riohub_webhook_events")
+}
+
 model Notification {
   id        String   @id @default(uuid())
   userId    String   @map("user_id")

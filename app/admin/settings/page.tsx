@@ -5,15 +5,21 @@ import { CommissionRuleForm } from "@/components/admin/CommissionRuleForm";
 import { CategoryRateForm } from "@/components/admin/CategoryRateForm";
 import { ChangePasswordForm } from "@/components/account/ChangePasswordForm";
 import { AdminMfaSetupCard } from "@/components/admin/AdminMfaSetupCard";
-import { Settings, Code2, Info, Tags, ShieldCheck } from "lucide-react";
+import { Settings, Code2, Info, Tags, ShieldCheck, Plug } from "lucide-react";
+import { TikTokIntegrationPanel } from "@/components/admin/TikTokIntegrationPanel";
+import { LazadaIntegrationPanel } from "@/components/admin/LazadaIntegrationPanel";
+import { getRioHubConfigStatus } from "@/lib/riohubTikTok";
+import { getLazadaConfigStatus } from "@/lib/lazadaApi";
 
 export default async function AdminSettingsPage() {
-  const [activeRule, categoryRates] = await Promise.all([
+  const [activeRule, categoryRates, tiktokPlatform, lazadaPlatform] = await Promise.all([
     prisma.commissionRule.findFirst({
       where: { active: true },
       orderBy: { createdAt: "desc" },
     }),
     prisma.categoryCommissionRate.findMany({ orderBy: { sortOrder: "asc" } }),
+    prisma.platform.findUnique({ where: { code: "TIKTOK" } }),
+    prisma.platform.findUnique({ where: { code: "LAZADA" } }),
   ]);
 
   return (
@@ -39,6 +45,28 @@ export default async function AdminSettingsPage() {
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Tích hợp TikTok */}
+      <div className="rounded-3xl bg-white shadow-sm border border-neutral-200/70 p-6 sm:p-8">
+        <div className="flex items-center gap-2.5 mb-6 pb-4 border-b border-neutral-200/70">
+          <div className="w-8 h-8 rounded-xl bg-neutral-100 text-neutral-900 flex items-center justify-center font-black">
+            <Plug size={18} strokeWidth={2} />
+          </div>
+          <h2 className="text-base font-extrabold text-neutral-900 tracking-tight">Tích Hợp TikTok Shop RioHub</h2>
+        </div>
+        <TikTokIntegrationPanel platformStatus={tiktokPlatform?.status ?? "inactive"} config={getRioHubConfigStatus()} />
+      </div>
+
+      {/* Tích hợp Lazada */}
+      <div className="rounded-3xl bg-white shadow-sm border border-neutral-200/70 p-6 sm:p-8">
+        <div className="flex items-center gap-2.5 mb-6 pb-4 border-b border-neutral-200/70">
+          <div className="w-8 h-8 rounded-xl bg-neutral-100 text-neutral-900 flex items-center justify-center font-black">
+            <Plug size={18} strokeWidth={2} />
+          </div>
+          <h2 className="text-base font-extrabold text-neutral-900 tracking-tight">Tích Hợp Lazada Open API</h2>
+        </div>
+        <LazadaIntegrationPanel platformStatus={lazadaPlatform?.status ?? "inactive"} config={getLazadaConfigStatus()} />
       </div>
 
       {/* Commission rule card */}
