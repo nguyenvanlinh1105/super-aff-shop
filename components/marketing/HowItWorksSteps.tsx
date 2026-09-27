@@ -20,7 +20,7 @@ const STEPS = [
     stepNum: "02",
     title: "2. Dán link sản phẩm",
     description:
-      "Copy link sản phẩm Shopee bạn muốn mua, dán vào MeowBack để nhận link hoàn tiền thông minh chỉ trong 1 giây.",
+      "Copy link sản phẩm Shopee, Lazada hoặc TikTok Shop bạn muốn mua, dán vào MeowBack để nhận link hoàn tiền thông minh chỉ trong 1 giây.",
     badge: "🪄 Tự động 1 Giây",
     gradient: "from-sky-500 via-blue-500 to-indigo-600",
     shadow: "shadow-sky-500/20",

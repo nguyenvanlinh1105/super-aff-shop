@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { User, Phone, Mail, Lock, Eye, EyeOff, ArrowRight, ArrowLeft, Loader2, type LucideIcon } from "lucide-react";
 import { GoogleIcon } from "@/components/icons/PlatformIcons";
@@ -44,6 +45,7 @@ export function RegisterForm() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [agreePolicy, setAgreePolicy] = useState(true);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -91,6 +93,10 @@ export function RegisterForm() {
       newErrors.confirmPassword = "Vui lòng nhập lại mật khẩu.";
     } else if (password !== confirmPassword) {
       newErrors.confirmPassword = "Mật khẩu nhập lại không khớp.";
+    }
+
+    if (!agreePolicy) {
+      newErrors.agreePolicy = "Vui lòng tích chọn đồng ý với Điều khoản sử dụng & Chính sách bảo mật.";
     }
 
     if (Object.keys(newErrors).length > 0) {
@@ -238,6 +244,28 @@ export function RegisterForm() {
             <GoogleIcon size={20} />
             Tiếp tục với Google
           </a>
+
+          <p className="text-[11.5px] text-center text-neutral-500 mt-1 leading-relaxed">
+            Bằng việc tiếp tục, bạn đồng ý với{" "}
+            <Link
+              href="/dieu-khoan-su-dung"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-bold text-primary-600 hover:underline"
+            >
+              Điều khoản sử dụng
+            </Link>{" "}
+            và{" "}
+            <Link
+              href="/chinh-sach-bao-mat"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-bold text-primary-600 hover:underline"
+            >
+              Chính sách bảo mật
+            </Link>{" "}
+            của MeowBack 🐾
+          </p>
         </div>
       )}
 
@@ -304,7 +332,48 @@ export function RegisterForm() {
             {errors.confirmPassword && <span className="text-[12px] font-semibold text-rose-500 px-1">{errors.confirmPassword}</span>}
           </div>
 
-          <div className="flex gap-3 mt-2">
+          {/* Privacy Policy & Terms Agreement Checkbox Button */}
+          <div className="flex flex-col gap-1.5 p-3.5 rounded-2xl bg-gradient-to-r from-primary-50/60 to-pink-50/40 border border-primary-200/80 shadow-xs">
+            <label className="flex items-start gap-2.5 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                checked={agreePolicy}
+                onChange={(e) => {
+                  setAgreePolicy(e.target.checked);
+                  if (errors.agreePolicy) setErrors((prev) => ({ ...prev, agreePolicy: "" }));
+                }}
+                className="mt-0.5 h-4 w-4 rounded border-primary-300 text-primary-600 focus:ring-primary-500/20 accent-primary-500 cursor-pointer shrink-0"
+              />
+              <span className="text-[12.5px] leading-relaxed text-neutral-700 font-medium">
+                Tôi đồng ý với{" "}
+                <Link
+                  href="/chinh-sach-bao-mat"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-bold text-primary-600 hover:text-primary-700 underline underline-offset-2 hover:decoration-primary-500 transition-colors"
+                >
+                  Chính sách bảo mật
+                </Link>{" "}
+                và{" "}
+                <Link
+                  href="/dieu-khoan-su-dung"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-bold text-primary-600 hover:text-primary-700 underline underline-offset-2 hover:decoration-primary-500 transition-colors"
+                >
+                  Điều khoản sử dụng
+                </Link>{" "}
+                của MeowBack 🐾
+              </span>
+            </label>
+            {errors.agreePolicy && (
+              <span className="text-[12px] font-semibold text-rose-500 px-1">
+                {errors.agreePolicy}
+              </span>
+            )}
+          </div>
+
+          <div className="flex gap-3 mt-1">
             <button
               type="button"
               onClick={() => {

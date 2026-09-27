@@ -6,14 +6,14 @@ import { LandingPage } from "@/components/marketing/LandingPage";
 import { safeJsonLdString } from "@/lib/jsonLd";
 
 export const metadata: Metadata = {
-  title: "MeowBack — Hoàn Tiền Mua Sắm Shopee & TikTok Shop",
+  title: "MeowBack — Hoàn Tiền Mua Sắm Shopee, Lazada & TikTok Shop",
   description:
-    "Dán link Shopee hoặc TikTok Shop, nhận link hoàn tiền tự động vào ví MeowBack. Rút tiền từ 10.000đ, miễn phí hoàn toàn.",
+    "Dán link Shopee, Lazada hoặc TikTok Shop, nhận link hoàn tiền tự động vào ví MeowBack. Rút tiền từ 10.000đ, miễn phí hoàn toàn.",
   alternates: { canonical: "/" },
   openGraph: {
-    title: "MeowBack — Hoàn Tiền Mua Sắm Shopee & TikTok Shop",
+    title: "MeowBack — Hoàn Tiền Mua Sắm Shopee, Lazada & TikTok Shop",
     description:
-      "Nền tảng hoàn tiền affiliate uy tín cho Shopee và TikTok Shop. Nhận lại tới 80% hoa hồng, rút tiền từ 10.000đ.",
+      "Nền tảng hoàn tiền affiliate uy tín cho Shopee, Lazada và TikTok Shop. Nhận lại tới 80% hoa hồng, rút tiền từ 10.000đ.",
     type: "website",
     locale: "vi_VN",
     url: "/",
@@ -23,15 +23,15 @@ export const metadata: Metadata = {
         url: "/meowback_lucky_cat_logo.png",
         width: 1536,
         height: 1024,
-        alt: "MeowBack - Hoàn Tiền Affiliate Shopee & TikTok Shop",
+        alt: "MeowBack - Hoàn Tiền Affiliate Shopee, Lazada & TikTok Shop",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "MeowBack — Hoàn Tiền Mua Sắm Shopee & TikTok Shop",
+    title: "MeowBack — Hoàn Tiền Mua Sắm Shopee, Lazada & TikTok Shop",
     description:
-      "Nền tảng hoàn tiền affiliate uy tín cho Shopee và TikTok Shop. Nhận lại tới 80% hoa hồng, rút tiền từ 10.000đ.",
+      "Nền tảng hoàn tiền affiliate uy tín cho Shopee, Lazada và TikTok Shop. Nhận lại tới 80% hoa hồng, rút tiền từ 10.000đ.",
     images: ["/meowback_lucky_cat_logo.png"],
   },
 };
@@ -45,7 +45,7 @@ const jsonLd = {
       url: "https://meowback.vn",
       name: "MeowBack",
       description:
-        "Nền tảng affiliate hoàn tiền cho Shopee và TikTok Shop tại Việt Nam.",
+        "Nền tảng affiliate hoàn tiền cho Shopee, Lazada và TikTok Shop tại Việt Nam.",
       inLanguage: "vi-VN",
     },
     {

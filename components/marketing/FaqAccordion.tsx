@@ -285,7 +285,7 @@ export function FaqAccordion({ items }: { items: FaqItem[] }) {
             Đội ngũ CSKH MeowBack sẵn sàng hỗ trợ bạn 24/7 qua Zalo & Telegram.
           </p>
           <a
-            href="https://zalo.me/g/cgmmvw504"
+            href="https://zalo.me/g/cgmmvw394"
             target="_blank"
             rel="noreferrer"
             className="inline-block w-full text-center bg-white text-primary-600 font-extrabold py-2.5 rounded-xl text-[13.5px] shadow-sm hover:scale-[1.02] transition-transform"
@@ -425,7 +425,7 @@ export function FaqAccordion({ items }: { items: FaqItem[] }) {
             Đội ngũ CSKH MeowBack sẵn sàng hỗ trợ bạn 24/7 qua Zalo & Telegram.
           </p>
           <a
-            href="https://zalo.me/g/cgmmvw504"
+            href="https://zalo.me/g/cgmmvw394"
             target="_blank"
             rel="noreferrer"
             className="inline-block w-full text-center bg-white text-primary-600 font-extrabold py-2 rounded-xl text-xs shadow-sm active:scale-98 transition-transform"

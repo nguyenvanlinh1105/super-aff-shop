@@ -24,10 +24,10 @@ const beVietnamPro = Be_Vietnam_Pro({
 export const metadata: Metadata = {
   metadataBase: new URL("https://meowback.vn"),
   title: {
-    default: "MeowBack — Hoàn Tiền Mua Sắm Shopee & TikTok Shop",
+    default: "MeowBack — Hoàn Tiền Mua Sắm Shopee, Lazada & TikTok Shop",
     template: "%s | MeowBack",
   },
-  description: "MeowBack — Nền tảng hoàn tiền affiliate uy tín cho Shopee & TikTok Shop. Tự động nhận hoa hồng lên tới 80%, rút tiền từ 10.000đ. Miễn phí 100%.",
+  description: "MeowBack — Nền tảng hoàn tiền affiliate uy tín cho Shopee, Lazada & TikTok Shop. Tự động nhận hoa hồng lên tới 80%, rút tiền từ 10.000đ. Miễn phí 100%.",
   manifest: "/manifest.webmanifest",
   appleWebApp: {
     capable: true,
@@ -36,11 +36,13 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
+      { url: "/favicon.png", sizes: "64x64", type: "image/png" },
+      { url: "/favicon.ico", sizes: "any" },
       { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
       { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
     ],
-    shortcut: "/icon-192.png",
-    apple: [{ url: "/icon-192.png", sizes: "180x180", type: "image/png" }],
+    shortcut: "/favicon.png",
+    apple: [{ url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" }],
   },
   other: {
     "mobile-web-app-capable": "yes",

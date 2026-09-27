@@ -10,14 +10,14 @@ import { safeJsonLdString } from "@/lib/jsonLd";
 import { IconBow } from "@/components/icons/CatRibbonIcons";
 
 export const metadata: Metadata = {
-  title: "Hướng Dẫn Sử Dụng | MeowBack — Hoàn Tiền Shopee & TikTok Shop",
+  title: "Hướng Dẫn Sử Dụng | MeowBack — Hoàn Tiền Shopee, Lazada & TikTok Shop",
   description:
-    "Cách sử dụng nền tảng hoàn tiền MeowBack: 3 bước đơn giản để mua sắm Shopee, TikTok Shop và nhận hoàn tiền tự động.",
+    "Cách sử dụng nền tảng hoàn tiền MeowBack: 3 bước đơn giản để mua sắm Shopee, Lazada, TikTok Shop và nhận hoàn tiền tự động.",
   alternates: { canonical: "/huong-dan" },
   openGraph: {
-    title: "Hướng Dẫn Sử Dụng | MeowBack — Hoàn Tiền Shopee & TikTok Shop",
+    title: "Hướng Dẫn Sử Dụng | MeowBack — Hoàn Tiền Shopee, Lazada & TikTok Shop",
     description:
-      "Cách sử dụng nền tảng hoàn tiền MeowBack: 3 bước đơn giản để mua sắm Shopee, TikTok Shop và nhận hoàn tiền tự động.",
+      "Cách sử dụng nền tảng hoàn tiền MeowBack: 3 bước đơn giản để mua sắm Shopee, Lazada, TikTok Shop và nhận hoàn tiền tự động.",
     type: "website",
     locale: "vi_VN",
     url: "/huong-dan",

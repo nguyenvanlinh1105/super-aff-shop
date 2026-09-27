@@ -11,12 +11,12 @@ import { FloatingElement } from "@/components/ui/FloatingElement";
 export const metadata: Metadata = {
   title: "Đăng Ký Tài Khoản — MeowBack Nơ Mèo Hoàn Tiền",
   description:
-    "Tạo tài khoản MeowBack miễn phí để bắt đầu nhận hoàn tiền tự động khi mua sắm trên Shopee, TikTok Shop.",
+    "Tạo tài khoản MeowBack miễn phí để bắt đầu nhận hoàn tiền tự động khi mua sắm trên Shopee, Lazada, TikTok Shop.",
   alternates: { canonical: "/register" },
   openGraph: {
     title: "Đăng Ký Tài Khoản — MeowBack",
     description:
-      "Tạo tài khoản MeowBack miễn phí để bắt đầu nhận hoàn tiền tự động khi mua sắm trên Shopee, TikTok Shop.",
+      "Tạo tài khoản MeowBack miễn phí để bắt đầu nhận hoàn tiền tự động khi mua sắm trên Shopee, Lazada, TikTok Shop.",
     type: "website",
     locale: "vi_VN",
     url: "/register",
@@ -75,6 +75,27 @@ export default async function RegisterPage() {
             Đăng nhập ngay 🎀
           </Link>
         </p>
+
+        {/* Legal links */}
+        <div className="mt-4 flex items-center justify-center gap-3 text-[12px] text-neutral-400 font-medium">
+          <Link
+            href="/chinh-sach-bao-mat"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-primary-600 transition-colors hover:underline"
+          >
+            Chính sách bảo mật
+          </Link>
+          <span>•</span>
+          <Link
+            href="/dieu-khoan-su-dung"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-primary-600 transition-colors hover:underline"
+          >
+            Điều khoản sử dụng
+          </Link>
+        </div>
       </div>
     </main>
   );

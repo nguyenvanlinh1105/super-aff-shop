@@ -15,7 +15,7 @@ import {
   Wand2,
   ShoppingBag,
 } from "lucide-react";
-import { ShopeeIcon } from "@/components/icons/PlatformIcons";
+import { ShopeeIcon, LazadaIcon, TiktokIcon } from "@/components/icons/PlatformIcons";
 import {
   LogoMeowBack,
   IconBow,
@@ -27,11 +27,9 @@ import { MarketingFooter } from "@/components/marketing/MarketingFooter";
 import { PublicFloatingSupport } from "@/components/marketing/PublicFloatingSupport";
 import { DemoConvertLink } from "@/components/marketing/DemoConvertLink";
 
-import { HeroGallerySlider } from "@/components/marketing/HeroGallerySlider";
 import { HowItWorksSteps } from "@/components/marketing/HowItWorksSteps";
 import { LiveCashbackCalculator } from "@/components/marketing/LiveCashbackCalculator";
 import { ValueComparisonSection } from "@/components/marketing/ValueComparisonSection";
-import { MagneticButton } from "@/components/ui/MagneticButton";
 import { ShopeeLiveDemo } from "@/components/ui/ShopeeLiveDemo";
 
 const CAT_HIGHLIGHT_CARDS = [
@@ -39,7 +37,7 @@ const CAT_HIGHLIGHT_CARDS = [
     icon: Zap,
     title: "Tạo link tức thì",
     description:
-      "Dán link Shopee, nhận link hoàn tiền chỉ trong 1 giây.",
+      "Dán link Shopee, Lazada hoặc TikTok Shop, nhận link hoàn tiền chỉ trong 1 giây.",
     badge: "⚡ 1 Giây",
     gradient: "from-amber-400 to-amber-500 text-white",
     cardBg:
@@ -102,58 +100,46 @@ export function LandingPage({
         {/* Hero Section */}
         <section className="relative overflow-hidden bg-gradient-to-b from-primary-50 via-neutral-bg to-white">
           {/* Subtle background ribbons */}
-          <div className="absolute top-10 right-10 w-96 h-96 bg-primary-200/30 rounded-full blur-[100px] pointer-events-none" />
-          <div className="absolute top-40 left-10 w-72 h-72 bg-secondary-100/50 rounded-full blur-[80px] pointer-events-none" />
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-gradient-to-b from-primary-200/35 via-primary-100/20 to-transparent rounded-full blur-[90px] pointer-events-none" />
+          <div className="absolute top-20 right-10 w-72 h-72 bg-secondary-100/40 rounded-full blur-[80px] pointer-events-none" />
 
-          <div className="relative z-10 max-w-[1200px] mx-auto px-4 md:px-8 py-8 md:py-20">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-12 items-center">
-              <div className="space-y-5 fade-in text-center lg:text-left">
-                <div className="inline-flex items-center gap-2 bg-gradient-to-r from-primary-100 to-primary-200 text-[#8A0B37] px-3 py-1 md:px-4 md:py-1.5 rounded-full shadow-sm border border-primary-300/60">
-                  <IconBow className="w-3.5 h-3.5 md:w-4 md:h-4 text-accent-bow" />
-                  <span className="text-[12px] md:text-[13.5px] font-black tracking-wide">
-                    Luôn hoàn {customerRate}% hoa hồng ròng 🎀
-                  </span>
-                </div>
+          <div className="relative z-10 max-w-[1200px] mx-auto px-4 md:px-8 py-4 sm:py-10 md:py-16 text-center">
+            <div className="space-y-2.5 sm:space-y-4 fade-in">
+              {/* Main Hero Headline */}
+              <h1 className="text-[24px] sm:text-[40px] md:text-[52px] font-black leading-[1.2] text-neutral-900 tracking-tight max-w-4xl mx-auto">
+                Mua sắm đa sàn,{" "}
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#EE4D2D] via-[#FF3B7B] to-[#0F146D] animate-text-shimmer">
+                  hoàn tiền tới {customerRate}% 🎀
+                </span>
+              </h1>
 
-                <h1 className="text-[30px] sm:text-[38px] md:text-[54px] font-black leading-[1.15] text-neutral-950 tracking-tight">
-                  Hoàn tiền tự động{" "}
-                  <span className="text-primary-600 underline decoration-primary-300 decoration-wavy decoration-2">
-                    mỗi đơn Shopee
-                  </span>
-                </h1>
+              {/* Short, direct value statement — hidden on mobile to avoid text overload */}
+              <p className="hidden sm:block text-[15px] md:text-[17px] text-neutral-600 max-w-2xl mx-auto font-semibold leading-relaxed">
+                Dán link sản phẩm Shopee, Lazada hoặc TikTok Shop để kiểm tra ngay số tiền hoàn nhận về ví!
+              </p>
 
-                <p className="text-[15px] md:text-[17px] text-neutral-700 max-w-lg leading-relaxed font-semibold mx-auto lg:mx-0">
-                  Mua sắm <strong className="text-primary-600 font-extrabold">Shopee</strong> thông minh hơn với MeowBack.
-                  Nhận hoàn tiền tự động, luôn hoàn đến {customerRate}%, rút từ <strong className="text-neutral-950 font-black">10.000đ</strong>.
-                </p>
-
-                <div className="flex flex-col sm:flex-row gap-3 pt-1 items-center lg:items-start">
-                  <MagneticButton>
-                    <Link
-                      href="/login"
-                      className="w-full sm:w-auto bg-gradient-to-r from-primary-500 via-[#FF3B7B] to-primary-600 hover:scale-[1.02] active:scale-95 text-white px-7 py-3.5 rounded-full font-extrabold text-[15px] md:text-[16.5px] flex items-center justify-center gap-2 transition-all shadow-cute hover:shadow-cute-lg"
-                    >
-                      Bắt đầu hoàn tiền ngay
-                      <ArrowRight size={17} />
-                    </Link>
-                  </MagneticButton>
-                  <a
-                    href="#how-it-works"
-                    className="w-full sm:w-auto bg-white hover:bg-primary-50 text-neutral-950 hover:text-primary-600 px-6 py-3.5 rounded-full font-extrabold text-[15px] md:text-[16px] flex items-center justify-center gap-2 transition-all border-2 border-primary-200/90 shadow-sm"
-                  >
-                    Cách hoạt động
-                  </a>
-                </div>
-
-                {/* Demo Link Converter Input Component */}
-                <div className="pt-2">
-                  <DemoConvertLink />
-                </div>
+              {/* Platform & Benefit Badges — Single compact row on mobile */}
+              <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 pt-0.5">
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 sm:px-3.5 sm:py-1 rounded-full text-[11px] sm:text-[12.5px] font-black bg-[#EE4D2D]/10 text-[#EE4D2D] border border-[#EE4D2D]/20 shadow-xs">
+                  <ShopeeIcon size={13} /> Shopee
+                </span>
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 sm:px-3.5 sm:py-1 rounded-full text-[11px] sm:text-[12.5px] font-black bg-[#0F146D]/10 text-[#0F146D] border border-[#0F146D]/20 shadow-xs">
+                  <LazadaIcon size={13} /> Lazada
+                </span>
+                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 sm:px-3.5 sm:py-1 rounded-full text-[11px] sm:text-[12.5px] font-black bg-neutral-900/10 text-neutral-900 border border-neutral-300 shadow-xs">
+                  <TiktokIcon size={13} /> TikTok Shop
+                </span>
+                <span className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-[12.5px] font-black bg-emerald-50 text-emerald-700 border border-emerald-200/80 shadow-xs">
+                  ⚡ Rút từ 10.000đ
+                </span>
+                <span className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-[12.5px] font-black bg-amber-50 text-amber-700 border border-amber-200/80 shadow-xs">
+                  ✨ Miễn phí 100%
+                </span>
               </div>
 
-              {/* Hero Gallery — hidden on small mobile, show from sm up */}
-              <div className="hidden sm:flex justify-center items-center">
-                <HeroGallerySlider customerRate={customerRate} />
+              {/* The Core Hero Feature: Demo Link Converter Box */}
+              <div className="pt-1 sm:pt-2">
+                <DemoConvertLink />
               </div>
             </div>
           </div>
@@ -163,10 +149,10 @@ export function LandingPage({
         <section className="py-12 border-b border-primary-100/50 bg-gradient-to-b from-white/50 to-neutral-50/80 backdrop-blur-md overflow-hidden relative">
           <div className="max-w-[1200px] mx-auto px-4 text-center mb-8">
             <h2 className="text-2xl md:text-3xl font-black text-neutral-900 mb-3">
-              Chỉ 1 giây để lấy link hoàn tiền Shopee
+              Chỉ 1 giây để lấy link hoàn tiền Shopee, Lazada &amp; TikTok Shop
             </h2>
             <p className="text-neutral-600 font-semibold max-w-2xl mx-auto">
-              Không cần tải app phức tạp. Chỉ cần copy link từ Shopee, dán vào MeowBack, và hệ thống sẽ lo phần còn lại.
+              Không cần tải app phức tạp. Chỉ cần copy link từ Shopee, Lazada hoặc TikTok Shop, dán vào MeowBack, và hệ thống sẽ lo phần còn lại.
             </p>
           </div>
           <ShopeeLiveDemo />
@@ -231,7 +217,7 @@ export function LandingPage({
                 3 Bước Đơn Giản Nhận Hoàn Tiền 🎀
               </h2>
               <p className="text-neutral-700 text-[14px] md:text-[16.5px] font-semibold max-w-xl mx-auto mt-2">
-                Nhận hoàn tiền tự động từ mọi đơn hàng Shopee chỉ với 3 bước dễ dàng.
+                Nhận hoàn tiền tự động từ mọi đơn hàng Shopee, Lazada &amp; TikTok Shop chỉ với 3 bước dễ dàng.
               </p>
             </div>
 
@@ -255,7 +241,7 @@ export function LandingPage({
                   <span className="text-primary-500">ví của bạn ngay hôm nay!</span>
                 </h2>
                 <p className="text-neutral-600 text-[14px] md:text-[16px]">
-                  Tạo tài khoản miễn phí 100%, nhận tới {customerRate}% hoa hồng ròng trên mọi đơn hàng Shopee.
+                  Tạo tài khoản miễn phí 100%, nhận tới {customerRate}% hoa hồng ròng trên mọi đơn hàng Shopee, Lazada &amp; TikTok Shop.
                 </p>
                 <div className="flex flex-wrap justify-center md:justify-start gap-3 pt-1">
                   <div className="flex items-center gap-2 text-xs font-bold text-neutral-700 bg-primary-50 px-3.5 py-1.5 rounded-full border border-primary-100">

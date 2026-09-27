@@ -5,7 +5,7 @@ const BADGES: { icon: LucideIcon; label: string; color: string }[] = [
   { icon: Gift, label: "Nhận 5% hoa hồng giới thiệu", color: "text-primary-600" },
   { icon: PiggyBank, label: "Hoàn tiền tự động", color: "text-primary-600" },
   { icon: Wallet, label: "Rút tiền từ 10K", color: "text-emerald-600" },
-  { icon: Store, label: "Hỗ trợ Shopee", color: "text-orange-600" },
+  { icon: Store, label: "Hỗ trợ Shopee, Lazada & TikTok", color: "text-primary-600" },
 ];
 
 export function TrustBadgesCard({ className = "" }: { className?: string }) {
