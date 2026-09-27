@@ -9,7 +9,7 @@ export async function GET(req: NextRequest) {
   }
 
   const page = Number(req.nextUrl.searchParams.get("page")) || 1;
-  const limit = 10;
+  const limit = Number(req.nextUrl.searchParams.get("limit")) || 5;
   const skip = (page - 1) * limit;
 
   const [notifications, unreadCount, totalCount] = await Promise.all([

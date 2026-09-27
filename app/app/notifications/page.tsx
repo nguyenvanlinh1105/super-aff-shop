@@ -12,7 +12,7 @@ export default async function NotificationsPage({
   if (!session) redirect("/login");
 
   const page = Math.max(1, Number(searchParams?.page) || 1);
-  const limit = 10; // Tối đa 10 thông báo 1 page theo yêu cầu
+  const limit = 5; // Giới hạn 5 thông báo trên 1 trang theo yêu cầu
   const skip = (page - 1) * limit;
   const category = searchParams?.category || "all";
   const onlyUnread = searchParams?.unread === "true";

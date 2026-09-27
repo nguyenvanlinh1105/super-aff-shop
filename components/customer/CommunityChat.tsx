@@ -51,6 +51,7 @@ export function CommunityChat({
   const [messages, setMessages] = useState<ChatMessage[]>(initialMessages);
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
+  const [activeMessageId, setActiveMessageId] = useState<string | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const bottomAnchorRef = useRef<HTMLDivElement>(null);
   const lastCreatedAtRef = useRef<string | null>(initialMessages.at(-1)?.createdAt ?? null);
@@ -254,7 +255,11 @@ export function CommunityChat({
       </div>
 
       {/* ═══ CHAT MESSAGES ═══ */}
-      <div ref={listRef} className="flex-1 overflow-y-auto p-4 sm:p-5 flex flex-col gap-3.5 bg-neutral-50/40">
+      <div
+        ref={listRef}
+        onClick={() => setActiveMessageId(null)}
+        className="flex-1 overflow-y-auto p-4 sm:p-5 flex flex-col gap-3.5 bg-neutral-50/40"
+      >
         {messages.length === 0 ? (
           <div className="flex flex-1 flex-col items-center justify-center gap-3 text-center my-auto py-10">
             <div className="w-18 h-18 sm:w-20 sm:h-20 mx-auto rounded-3xl overflow-hidden shadow-cute border-2 border-primary-100/80 bg-pink-50/60 p-1">
@@ -271,6 +276,8 @@ export function CommunityChat({
           messages.map((m) => {
             const isMine = currentUserId === m.userId;
             const isMsgAdmin = m.user?.role === "admin";
+            const canDelete = isMine || isAdmin;
+            const isSelected = activeMessageId === m.id;
 
             return (
               <div key={m.id} className={`group flex items-end gap-2.5 ${isMine ? "flex-row-reverse" : ""}`}>
@@ -312,10 +319,40 @@ export function CommunityChat({
                     <span className="text-[10px] text-neutral-400 font-medium">{formatTime(m.createdAt)}</span>
                   </div>
 
-                  {/* Bubble Content */}
-                  <div className="flex items-center gap-1.5">
+                  {/* Bubble Content Row (relative để nút xoá nằm ở ngoài cùng) */}
+                  <div className="relative inline-flex items-center group/bubble">
+                    {/* Nút Xoá: Nằm HOÀN TOÀN Ở NGOÀI bong bóng chat, màu đỏ nổi bật, chỉ hiện khi HOVER hoặc CLICK */}
+                    {canDelete && (
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          removeMessage(m.id);
+                        }}
+                        title={isMine ? "Xoá tin nhắn của bạn" : "Xoá tin nhắn này (Admin)"}
+                        className={`absolute top-1/2 -translate-y-1/2 flex h-7 w-7 items-center justify-center rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 hover:text-rose-700 border border-rose-200/90 hover:border-rose-300 shadow-2xs transition-all duration-150 shrink-0 cursor-pointer ${
+                          isMine ? "right-full mr-2.5" : "left-full ml-2.5"
+                        } ${
+                          isSelected
+                            ? "opacity-100 scale-100 pointer-events-auto z-20"
+                            : "opacity-0 scale-75 pointer-events-none group-hover:opacity-100 group-hover:scale-100 group-hover:pointer-events-auto z-20"
+                        }`}
+                      >
+                        <Trash2 size={13} strokeWidth={2.3} className="text-rose-600 shrink-0" />
+                      </button>
+                    )}
+
+                    {/* Bong bóng tin nhắn */}
                     <div
-                      className={`rounded-2xl px-4 py-2 text-xs sm:text-[13px] leading-relaxed break-words shadow-2xs ${
+                      onClick={(e) => {
+                        if (canDelete) {
+                          e.stopPropagation();
+                          setActiveMessageId((prev) => (prev === m.id ? null : m.id));
+                        }
+                      }}
+                      className={`rounded-2xl px-4 py-2 text-xs sm:text-[13px] leading-relaxed break-words shadow-2xs transition-all ${
+                        canDelete ? "cursor-pointer" : ""
+                      } ${
                         isMsgAdmin
                           ? "bg-primary-50/90 text-primary-950 border border-primary-200/80 font-medium"
                           : isMine
@@ -325,17 +362,6 @@ export function CommunityChat({
                     >
                       {m.message}
                     </div>
-
-                    {/* Only allow deleting own messages */}
-                    {isMine && (
-                      <button
-                        onClick={() => removeMessage(m.id)}
-                        title="Xoá tin nhắn của bạn"
-                        className="opacity-0 group-hover:opacity-100 flex h-7 w-7 items-center justify-center rounded-xl text-neutral-300 hover:text-red-500 hover:bg-red-50 transition-all shrink-0 cursor-pointer"
-                      >
-                        <Trash2 size={13} />
-                      </button>
-                    )}
                   </div>
                 </div>
               </div>

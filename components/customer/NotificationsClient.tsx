@@ -747,8 +747,8 @@ export function NotificationsClient({
             );
           })}
 
-          {/* ═══ PAGINATION (TỐI ĐA 10 THÔNG BÁO / TRANG) ═══ */}
-          <Pagination totalPages={totalPages} currentPage={currentPage} />
+          {/* ═══ PAGINATION (GIỚI HẠN 5 THÔNG BÁO / TRANG) ═══ */}
+          <Pagination totalPages={totalPages} currentPage={currentPage} pageSize={5} />
         </div>
       )}
     </div>
