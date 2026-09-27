@@ -193,7 +193,7 @@ export default async function CustomerHomePage() {
               {/* Tầng 3: Dòng trạng thái ngữ cảnh */}
               <div className="relative z-10 flex items-center gap-2 text-[11px] text-neutral-400 font-medium">
                 <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse shrink-0" />
-                <span className="truncate">Chờ sàn Shopee & TikTok xác nhận hoàn tất</span>
+                <span className="truncate">Chờ sàn xác nhận hoàn tất</span>
               </div>
             </div>
           </HoverCard>
@@ -393,7 +393,7 @@ export default async function CustomerHomePage() {
                   <img src="/meow-back-mascot.png" alt="" className="h-20 w-20 object-contain opacity-70" />
                   <div className="text-sm font-extrabold text-neutral-800">Chưa có đơn hàng nào</div>
                   <p className="text-xs text-neutral-500 max-w-xs leading-relaxed">
-                    Tạo link mua sắm Shopee & TikTok Shop ngay để nhận hoàn tiền tự động 🎀
+                    Tạo link mua sắm ngay để nhận hoàn tiền tự động từ Shopee, TikTok Shop, Lazada 🎀
                   </p>
                   <Link
                     href="/app/refunds"

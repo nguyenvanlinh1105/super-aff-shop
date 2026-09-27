@@ -275,17 +275,25 @@ export function CommunityChat({
             return (
               <div key={m.id} className={`group flex items-end gap-2.5 ${isMine ? "flex-row-reverse" : ""}`}>
                 {/* Avatar */}
-                <div
-                  className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-2xl text-[11px] font-black text-white shadow-2xs ${
-                    isMsgAdmin
-                      ? "bg-gradient-to-br from-primary-400 to-primary-600 border border-white"
-                      : isMine
-                      ? "bg-gradient-to-br from-neutral-700 to-neutral-800"
-                      : "bg-gradient-to-br from-neutral-400 to-neutral-500"
-                  }`}
-                >
-                  {isMsgAdmin ? "🐱" : initialsOf(m.user?.fullName ?? "?")}
-                </div>
+                {isMsgAdmin ? (
+                  <div className="h-8 w-8 shrink-0 rounded-full overflow-hidden shadow-2xs ring-2 ring-primary-200 bg-primary-50">
+                    <img
+                      src="/meow-back-mascot.png"
+                      alt="MeowBack"
+                      className="h-full w-full object-cover rounded-full"
+                    />
+                  </div>
+                ) : (
+                  <div
+                    className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-2xl text-[11px] font-black text-white shadow-2xs ${
+                      isMine
+                        ? "bg-gradient-to-br from-neutral-700 to-neutral-800"
+                        : "bg-gradient-to-br from-neutral-400 to-neutral-500"
+                    }`}
+                  >
+                    {initialsOf(m.user?.fullName ?? "?")}
+                  </div>
+                )}
 
                 {/* Message Bubble Container */}
                 <div className={`flex flex-col gap-1 max-w-[80%] sm:max-w-[70%] ${isMine ? "items-end" : "items-start"}`}>
