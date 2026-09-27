@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import {
   Bell,
@@ -17,6 +18,9 @@ import {
   RefreshCw,
   ChevronDown,
   Filter,
+  X,
+  Sparkles,
+  ExternalLink,
 } from "lucide-react";
 import { Pagination } from "@/components/ui/Pagination";
 import { useToast } from "@/components/ui/Toast";
@@ -55,6 +59,9 @@ const TYPE_CONFIG: Record<
     iconColor: string;
     badgeBg: string;
     badgeColor: string;
+    gradientFrom: string;
+    gradientTo: string;
+    lightBg: string;
   }
 > = {
   order_approved: {
@@ -66,6 +73,9 @@ const TYPE_CONFIG: Record<
     iconColor: "text-emerald-600",
     badgeBg: "bg-emerald-100/80 border-emerald-200/70",
     badgeColor: "text-emerald-700",
+    gradientFrom: "from-emerald-400",
+    gradientTo: "to-teal-500",
+    lightBg: "bg-emerald-50",
   },
   payment_paid: {
     label: "Thanh toán",
@@ -76,6 +86,9 @@ const TYPE_CONFIG: Record<
     iconColor: "text-primary-600",
     badgeBg: "bg-primary-100/80 border-primary-200/70",
     badgeColor: "text-primary-700",
+    gradientFrom: "from-primary-400",
+    gradientTo: "to-pink-500",
+    lightBg: "bg-primary-50",
   },
   referral_bonus: {
     label: "Hoa hồng",
@@ -86,6 +99,9 @@ const TYPE_CONFIG: Record<
     iconColor: "text-amber-600",
     badgeBg: "bg-amber-100/80 border-amber-200/70",
     badgeColor: "text-amber-700",
+    gradientFrom: "from-amber-400",
+    gradientTo: "to-orange-500",
+    lightBg: "bg-amber-50",
   },
   broadcast: {
     label: "Tin MeowBack",
@@ -96,6 +112,9 @@ const TYPE_CONFIG: Record<
     iconColor: "text-purple-600",
     badgeBg: "bg-purple-100/80 border-purple-200/70",
     badgeColor: "text-purple-700",
+    gradientFrom: "from-purple-400",
+    gradientTo: "to-violet-500",
+    lightBg: "bg-purple-50",
   },
   system: {
     label: "Hệ thống",
@@ -106,6 +125,9 @@ const TYPE_CONFIG: Record<
     iconColor: "text-blue-600",
     badgeBg: "bg-blue-100/80 border-blue-200/70",
     badgeColor: "text-blue-700",
+    gradientFrom: "from-blue-400",
+    gradientTo: "to-indigo-500",
+    lightBg: "bg-blue-50",
   },
 };
 
@@ -135,6 +157,22 @@ function formatNotificationTime(iso: string) {
     }
     if (diffDays < 7) return `${diffDays} ngày trước`;
     return date.toLocaleDateString("vi-VN", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  } catch {
+    return iso;
+  }
+}
+
+function formatNotificationTimeFull(iso: string) {
+  try {
+    const date = new Date(iso);
+    return date.toLocaleDateString("vi-VN", {
+      weekday: "long",
       day: "2-digit",
       month: "2-digit",
       year: "numeric",
@@ -218,6 +256,153 @@ export function getNotificationActionLabel(targetUrl: string): string {
   return "Xem chi tiết";
 }
 
+/* ═══════════════════════════════════════════════════════════
+   🐾 NOTIFICATION DETAIL MODAL — Popup dễ thương đọc thông báo
+   ═══════════════════════════════════════════════════════════ */
+function NotificationDetailModal({
+  notification,
+  onClose,
+  onNavigate,
+}: {
+  notification: Notification;
+  onClose: () => void;
+  onNavigate: (url: string) => void;
+}) {
+  const config = TYPE_CONFIG[notification.type] ?? TYPE_CONFIG.system;
+  const Icon = config.icon;
+  const targetUrl = getNotificationTargetUrl(notification);
+  const actionLabel = getNotificationActionLabel(targetUrl);
+
+  // Đóng khi nhấn ESC
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    document.addEventListener("keydown", handleKey);
+    return () => document.removeEventListener("keydown", handleKey);
+  }, [onClose]);
+
+  // Ngăn cuộn body khi modal mở
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, []);
+
+  return createPortal(
+    <div
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4"
+      onClick={onClose}
+    >
+      {/* Backdrop */}
+      <div className="absolute inset-0 bg-neutral-900/50 backdrop-blur-md animate-in fade-in duration-200" />
+
+      {/* Modal Content */}
+      <div
+        className="relative w-full sm:max-w-[420px] max-h-[85vh] sm:max-h-[80vh] overflow-hidden rounded-t-3xl sm:rounded-3xl bg-white shadow-2xl animate-in slide-in-from-bottom-6 sm:slide-in-from-bottom-4 fade-in duration-300 border border-primary-100/80 flex flex-col"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* ── Header với gradient theo loại thông báo ── */}
+        <div className={`relative overflow-hidden bg-gradient-to-br ${config.gradientFrom} ${config.gradientTo} px-5 pt-5 pb-6 shrink-0`}>
+          {/* Decorative circles */}
+          <div className="absolute -top-8 -right-8 w-32 h-32 rounded-full bg-white/10" />
+          <div className="absolute -bottom-4 -left-4 w-20 h-20 rounded-full bg-white/10" />
+
+          {/* Close button */}
+          <button
+            onClick={onClose}
+            className="absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full bg-white/20 text-white hover:bg-white/30 transition-colors z-10 cursor-pointer"
+          >
+            <X size={16} strokeWidth={2.5} />
+          </button>
+
+          {/* Mascot + Type badge */}
+          <div className="relative flex items-center gap-3">
+            <div className="h-14 w-14 rounded-full overflow-hidden shadow-lg ring-2 ring-white/50 bg-white/20 shrink-0">
+              <img
+                src="/meow-back-mascot.png"
+                alt="MeowBack"
+                className="h-full w-full object-cover rounded-full"
+              />
+            </div>
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5 mb-0.5">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-white/25 text-[10px] font-black uppercase tracking-wider text-white backdrop-blur-sm">
+                  <Icon size={10} strokeWidth={2.5} />
+                  {config.label}
+                </span>
+                {!notification.isRead && (
+                  <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-white/30 text-[10px] font-black text-white">
+                    <span className="h-1.5 w-1.5 rounded-full bg-white animate-pulse" />
+                    Mới
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center gap-1 text-white/80 text-[11px] font-semibold">
+                <Clock size={10} />
+                <span>{formatNotificationTimeFull(notification.createdAt)}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ── Body: Nội dung thông báo đầy đủ ── */}
+        <div className="flex-1 overflow-y-auto px-5 py-4">
+          {/* Title */}
+          <h3 className="text-base sm:text-[17px] font-black text-neutral-900 leading-snug tracking-tight">
+            {notification.title}
+          </h3>
+
+          {/* Divider dễ thương */}
+          <div className="flex items-center gap-2 my-3">
+            <div className="flex-1 h-px bg-gradient-to-r from-primary-200 via-pink-200 to-transparent" />
+            <span className="text-sm">🐾</span>
+            <div className="flex-1 h-px bg-gradient-to-l from-primary-200 via-pink-200 to-transparent" />
+          </div>
+
+          {/* Full message content */}
+          <div className={`${config.lightBg} rounded-2xl p-4 border border-neutral-100`}>
+            <p className="text-[13px] sm:text-sm text-neutral-700 leading-relaxed font-medium whitespace-pre-line">
+              {notification.message}
+            </p>
+          </div>
+
+          {/* Thời gian nhận */}
+          <div className="mt-3 flex items-center gap-1.5 text-[11px] font-semibold text-neutral-400">
+            <Sparkles size={11} className="text-primary-400" />
+            <span>Thông báo từ MeowBack • {formatNotificationTime(notification.createdAt)}</span>
+          </div>
+        </div>
+
+        {/* ── Footer: Action buttons ── */}
+        <div className="shrink-0 border-t border-neutral-100 px-5 py-4 bg-neutral-50/50 flex flex-col gap-2.5">
+          {/* Primary action button — chuyển đến trang tương ứng */}
+          <button
+            onClick={() => {
+              onClose();
+              onNavigate(targetUrl);
+            }}
+            className={`w-full flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r ${config.gradientFrom} ${config.gradientTo} text-white py-3 text-sm font-extrabold shadow-cute hover:shadow-cute-lg transition-all hover:scale-[1.01] active:scale-[0.98] cursor-pointer`}
+          >
+            <span>{actionLabel}</span>
+            <ArrowRight size={15} strokeWidth={2.5} />
+          </button>
+
+          {/* Secondary: Đóng */}
+          <button
+            onClick={onClose}
+            className="w-full flex items-center justify-center gap-1.5 rounded-2xl bg-white border border-neutral-200 text-neutral-600 py-2.5 text-xs font-bold hover:bg-neutral-50 transition-colors cursor-pointer"
+          >
+            Đóng thông báo
+          </button>
+        </div>
+      </div>
+    </div>,
+    document.body
+  );
+}
+
 export function NotificationsClient({
   notifications,
   setNotifications,
@@ -235,7 +420,18 @@ export function NotificationsClient({
   const searchParams = useSearchParams();
   const { toast } = useToast();
 
+  // State cho popup chi tiết thông báo
+  const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null);
+
+  // Click vào card → Mở popup đọc nội dung đầy đủ (KHÔNG redirect)
   const handleCardClick = (n: Notification) => {
+    onMarkRead(n);
+    setSelectedNotification(n);
+  };
+
+  // Click vào action link text → redirect đến trang tương ứng
+  const handleActionLinkClick = (e: React.MouseEvent, n: Notification) => {
+    e.stopPropagation(); // Ngăn không kích hoạt handleCardClick
     onMarkRead(n);
     const targetUrl = getNotificationTargetUrl(n);
     if (targetUrl) {
@@ -290,6 +486,15 @@ export function NotificationsClient({
 
   return (
     <div className="flex flex-col gap-5">
+      {/* ═══ NOTIFICATION DETAIL POPUP ═══ */}
+      {selectedNotification && (
+        <NotificationDetailModal
+          notification={selectedNotification}
+          onClose={() => setSelectedNotification(null)}
+          onNavigate={(url) => router.push(url)}
+        />
+      )}
+
       {/* ═══ FILTER TOOLBAR: CUSTOMER SELECTION STYLE ═══ */}
       <div className="bg-white p-2.5 sm:p-3 rounded-2xl border border-primary-100/90 shadow-2xs flex items-center gap-2">
         {/* Custom Category Selection Dropdown */}
@@ -520,16 +725,20 @@ export function NotificationsClient({
                     {n.message}
                   </p>
 
-                  {/* Row 3: Action Link Prompt */}
+                  {/* Row 3: Action Link — chỉ link text này mới redirect */}
                   {(() => {
                     const targetUrl = getNotificationTargetUrl(n);
                     const actionLabel = getNotificationActionLabel(targetUrl);
                     return (
                       <div className="mt-1.5 flex items-center justify-between">
-                        <span className="inline-flex items-center gap-1 text-[11px] font-extrabold text-primary-600 group-hover:text-primary-700 transition-colors">
+                        <button
+                          type="button"
+                          onClick={(e) => handleActionLinkClick(e, n)}
+                          className="inline-flex items-center gap-1 text-[11px] font-extrabold text-primary-600 hover:text-primary-700 hover:underline underline-offset-2 transition-colors cursor-pointer"
+                        >
                           <span>{actionLabel}</span>
                           <ArrowRight size={11} className="group-hover:translate-x-0.5 transition-transform" />
-                        </span>
+                        </button>
                       </div>
                     );
                   })()}

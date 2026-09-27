@@ -37,8 +37,11 @@ export function FloatingQuickAccess({
   // Kéo thả nút hỗ trợ trên Mobile
   const [mobilePos, setMobilePos] = useState<{ x: number; y: number } | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [isSnapping, setIsSnapping] = useState(false);
   const dragStartRef = useRef<{ clientX: number; clientY: number; startX: number; startY: number } | null>(null);
   const hasDraggedRef = useRef(false);
+  const EDGE_MARGIN = 8;
+  const BUTTON_SIZE = 52;
 
   // Khôi phục vị trí đã lưu trong session (nếu có) trên mobile
   useEffect(() => {
@@ -48,12 +51,15 @@ export function FloatingQuickAccess({
         if (saved) {
           const parsed = JSON.parse(saved);
           if (typeof parsed.x === "number" && typeof parsed.y === "number") {
-            const maxX = window.innerWidth - 56;
+            const screenW = window.innerWidth;
             const maxY = window.innerHeight - 72;
-            setMobilePos({
-              x: Math.max(8, Math.min(parsed.x, maxX)),
-              y: Math.max(60, Math.min(parsed.y, maxY)),
-            });
+            const clampedY = Math.max(60, Math.min(parsed.y, maxY));
+            // Snap về cạnh gần nhất khi khôi phục
+            const centerX = parsed.x + BUTTON_SIZE / 2;
+            const snapX = centerX < screenW / 2
+              ? EDGE_MARGIN
+              : screenW - BUTTON_SIZE - EDGE_MARGIN;
+            setMobilePos({ x: snapX, y: clampedY });
           }
         }
       } catch {}
@@ -111,13 +117,32 @@ export function FloatingQuickAccess({
     } catch {}
 
     if (hasDraggedRef.current && mobilePos) {
+      // Snap về cạnh trái hoặc phải gần nhất (không cho ở giữa)
+      const screenW = window.innerWidth;
+      const centerX = mobilePos.x + BUTTON_SIZE / 2;
+      const snapX = centerX < screenW / 2
+        ? EDGE_MARGIN                          // Trôi về bên trái
+        : screenW - BUTTON_SIZE - EDGE_MARGIN; // Trôi về bên phải
+
+      const snappedPos = { x: snapX, y: mobilePos.y };
+
+      // Bật animation transition trước khi thay đổi vị trí
+      setIsSnapping(true);
+      setMobilePos(snappedPos);
+
       try {
-        sessionStorage.setItem("meowback-support-pos", JSON.stringify(mobilePos));
+        sessionStorage.setItem("meowback-support-pos", JSON.stringify(snappedPos));
       } catch {}
+
+      // Tắt transition sau khi animation kết thúc
+      setTimeout(() => {
+        setIsSnapping(false);
+      }, 320);
+
       // Giữ cờ hasDraggedRef một chút để onClick không kích hoạt bật tắt menu
       setTimeout(() => {
         hasDraggedRef.current = false;
-      }, 80);
+      }, 100);
     }
 
     dragStartRef.current = null;
@@ -205,6 +230,7 @@ export function FloatingQuickAccess({
               top: `${mobilePos.y}px`,
               right: "auto",
               bottom: "auto",
+              ...(isSnapping ? { transition: "left 0.3s cubic-bezier(0.25, 1, 0.5, 1), top 0.3s cubic-bezier(0.25, 1, 0.5, 1)" } : {}),
             }
           : undefined
       }
