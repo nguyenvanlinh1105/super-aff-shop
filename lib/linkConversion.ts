@@ -64,8 +64,16 @@ export async function resolveShortLink(rawUrl: string): Promise<string> {
 
 export function normalizeUrl(rawUrl: string): string {
   try {
-    const shopeeExtractedUrl = extractNestedShopeeUrl(rawUrl.trim());
-    const url = new URL(shopeeExtractedUrl ?? rawUrl.trim());
+    let target = extractNestedShopeeUrl(rawUrl.trim()) ?? rawUrl.trim();
+
+    // Nếu link Shopee là dạng redirect trung gian từ app (/opaanlp/shopId/itemId),
+    // chuẩn hoá thành link sản phẩm tiêu chuẩn (/product/shopId/itemId)
+    const opaanlpMatch = target.match(/\/opaanlp\/(\d+)\/(\d+)/);
+    if (opaanlpMatch) {
+      target = `https://shopee.vn/product/${opaanlpMatch[1]}/${opaanlpMatch[2]}`;
+    }
+
+    const url = new URL(target);
     // Bỏ query params tracking cũ để tránh chồng tracking khi đổi link nhiều lần.
     [
       "utm_source",

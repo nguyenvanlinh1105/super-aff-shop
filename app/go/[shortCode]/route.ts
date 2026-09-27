@@ -4,23 +4,7 @@ import { getSession } from "@/lib/auth";
 import { getOrCreatePersonalDealLink } from "@/lib/dealPersonalization";
 
 export async function GET(_: NextRequest, { params }: { params: { shortCode: string } }) {
-  // 1. Thử tìm trong TrackingLink trước
-  const link = await prisma.trackingLink.findUnique({
-    where: { shortCode: params.shortCode },
-  });
-
-  if (link) {
-    if (link.status !== "active") {
-      return new NextResponse("Link không tồn tại hoặc đã ngừng hoạt động", { status: 404 });
-    }
-    await prisma.trackingLink.update({
-      where: { id: link.id },
-      data: { clicks: { increment: 1 }, lastClickedAt: new Date() },
-    });
-    return NextResponse.redirect(link.affiliateUrl, { status: 302 });
-  }
-
-  // 2. Thử tìm trong DealPost (deal giảm giá)
+  // 1. Thử tìm trong DealPost (deal giảm giá) trước để áp dụng cá nhân hoá nếu có
   const deal = await prisma.dealPost.findUnique({
     where: { shortCode: params.shortCode },
   });
@@ -58,6 +42,22 @@ export async function GET(_: NextRequest, { params }: { params: { shortCode: str
       data: { clicks: { increment: 1 } },
     }).catch(() => {});
     return NextResponse.redirect(deal.affiliateUrl, { status: 302 });
+  }
+
+  // 2. Thử tìm trong TrackingLink (link cá nhân hoặc link deal đã pre-generate)
+  const link = await prisma.trackingLink.findUnique({
+    where: { shortCode: params.shortCode },
+  });
+
+  if (link) {
+    if (link.status !== "active") {
+      return new NextResponse("Link không tồn tại hoặc đã ngừng hoạt động", { status: 404 });
+    }
+    await prisma.trackingLink.update({
+      where: { id: link.id },
+      data: { clicks: { increment: 1 }, lastClickedAt: new Date() },
+    });
+    return NextResponse.redirect(link.affiliateUrl, { status: 302 });
   }
 
   return new NextResponse("Link không tồn tại", { status: 404 });

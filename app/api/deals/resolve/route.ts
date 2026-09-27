@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
-import { resolveShortLink, normalizeUrl } from "@/lib/linkConversion";
+import { detectPlatform, resolveShortLink, normalizeUrl } from "@/lib/linkConversion";
 import { generateShortCode, buildShortUrl } from "@/lib/shortLink";
 import { fetchProductInfo } from "@/lib/productInfo";
 import { createTrackingLink } from "@/lib/trackingLinkService";
@@ -42,56 +42,93 @@ export async function POST(req: NextRequest) {
   const normalized = normalizeUrl(resolved);
   const cleanLink = stripCompetitorParams(normalized);
 
-  // shortCode/shortUrl riêng của deal — dùng cho link công khai + đếm click
-  // trên trang /uu-dai, độc lập với TrackingLink bên dưới.
-  const shortCode = await generateShortCode();
-  const shortUrl = buildShortUrl(shortCode);
+  let shortCode = await generateShortCode();
+  let shortUrl = buildShortUrl(shortCode);
 
-  // Link affiliate PHẢI đi qua createTrackingLink (giống hệt luồng voucher)
-  // để có trackingCode + sub_id đúng chuẩn, gắn cho khách hệ thống "SYSTEM"
-  // (Link chia sẻ công khai) — nếu không, sub_id gửi cho Shopee sẽ không
-  // khớp với bất kỳ TrackingLink nào khi đối soát CSV, khiến đơn hàng của
-  // deal rơi vào "chưa map" và không ai được ghi nhận hoa hồng.
   let affiliateUrl = cleanLink;
   let productTitle: string | null = null;
   let shopeeImageUrl: string | null = null;
+  let trackingCreated = false;
 
-  if (cleanLink.includes("shopee.vn")) {
-    try {
-      const platform = await prisma.platform.findFirst({ where: { code: "SHOPEE" } });
-      if (platform) {
-        const systemCustomer = await getSystemCustomer();
-        const result = await createTrackingLink({
-          originalUrl: cleanLink,
-          platformId: platform.id,
-          customerId: systemCustomer.id,
-          channelSource: "web",
-          createdByUserId: session.userId,
-        });
-        affiliateUrl = result.generatedLink;
-        productTitle = result.link.productTitle;
-        shopeeImageUrl = result.link.productImage;
-      }
-    } catch {
-      // Thiếu SHOPEE_AFFILIATE_ID hoặc lỗi tạm thời — vẫn cho đăng deal với
-      // link gốc, không chặn luồng đăng tin của admin.
+  const platformType = detectPlatform(cleanLink);
+  const platformCode =
+    platformType === "tiktok"
+      ? "TIKTOK"
+      : platformType === "lazada"
+      ? "LAZADA"
+      : "SHOPEE";
+
+  try {
+    const platform =
+      (await prisma.platform.findFirst({ where: { code: platformCode } })) ||
+      (await prisma.platform.findFirst({ where: { code: "SHOPEE" } }));
+
+    if (platform) {
+      const systemCustomer = await getSystemCustomer();
+      const result = await createTrackingLink({
+        originalUrl: cleanLink,
+        platformId: platform.id,
+        customerId: systemCustomer.id,
+        channelSource: "web",
+        createdByUserId: session.userId,
+      });
+
+      affiliateUrl = result.generatedLink;
+      productTitle = result.link.productTitle;
+      shopeeImageUrl = result.link.productImage;
+      // Dùng luôn shortCode/shortUrl của TrackingLink đã lưu vào DB
+      // để khi admin copy/click test ở bước 2 KHÔNG BAO GIỜ bị 404!
+      if (result.link.shortCode) shortCode = result.link.shortCode;
+      if (result.link.shortUrl) shortUrl = result.link.shortUrl;
+      trackingCreated = true;
     }
+  } catch (err) {
+    console.error("Lỗi tạo tracking link cho deal:", err);
   }
 
-  // Chỉ fetch riêng nếu chưa có sẵn từ createTrackingLink ở trên (tránh gọi
-  // fetchProductInfo 2 lần cho cùng 1 link).
-  if (productTitle === null && shopeeImageUrl === null) {
+  // Nếu chưa lấy đủ tiêu đề hoặc ảnh từ createTrackingLink, dùng fetchProductInfo
+  if (!productTitle || !shopeeImageUrl) {
     const productInfo = await fetchProductInfo(cleanLink);
-    productTitle = productInfo?.title ?? null;
-    shopeeImageUrl = productInfo?.image ?? null;
+    if (!productTitle && productInfo?.title) productTitle = productInfo.title;
+    if (!shopeeImageUrl && productInfo?.image) shopeeImageUrl = productInfo.image;
+  }
+
+  // Đảm bảo shortCode được lưu trong DB ngay lập tức để link luôn hoạt động 100%
+  if (!trackingCreated) {
+    try {
+      const systemCustomer = await getSystemCustomer();
+      const fallbackPlatform =
+        (await prisma.platform.findFirst({ where: { code: platformCode } })) ||
+        (await prisma.platform.findFirst());
+      if (fallbackPlatform) {
+        await prisma.trackingLink.create({
+          data: {
+            customerId: systemCustomer.id,
+            platformId: fallbackPlatform.id,
+            channelSource: "web",
+            trackingCode: `DEAL_${shortCode}`,
+            originalUrl: cleanLink,
+            normalizedUrl: cleanLink,
+            affiliateUrl,
+            productTitle,
+            productImage: shopeeImageUrl,
+            shortCode,
+            shortUrl,
+            createdByUserId: session.userId,
+          },
+        });
+      }
+    } catch (e) {
+      console.error("Lỗi tạo fallback tracking link:", e);
+    }
   }
 
   return NextResponse.json({
     rawInputLink: url.trim(),
     cleanLink,
     affiliateUrl,
-    shortCode,   // trả về để client giữ và truyền lên khi tạo deal
-    shortUrl,    // link đã dạng tên miền của mình, hiện ngay cho admin
+    shortCode, // trả về để client giữ và truyền lên khi tạo deal
+    shortUrl, // link đã dạng tên miền của mình, hiện ngay cho admin và hoạt động ngay lập tức
     productTitle,
     shopeeImageUrl,
   });

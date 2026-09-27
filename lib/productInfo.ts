@@ -20,11 +20,9 @@ function extractMeta(html: string, property: string): string | null {
 
 /**
  * Trích xuất giá từ JSON-LD schema (schema.org/Product > offers.price).
- * Shopee inject block này cho Googlebot và các crawler có thể đọc được giá.
  */
 function extractJsonLdPrice(html: string): number | null {
   try {
-    // Tìm tất cả <script type="application/ld+json"> blocks
     const scriptPattern = /<script[^>]+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi;
     let match: RegExpExecArray | null;
     while ((match = scriptPattern.exec(html)) !== null) {
@@ -32,7 +30,6 @@ function extractJsonLdPrice(html: string): number | null {
         const data = JSON.parse(match[1]);
         const entries = Array.isArray(data) ? data : [data];
         for (const entry of entries) {
-          // Xử lý @graph array (Google thường dùng)
           const nodes = entry["@graph"] ? [...entry["@graph"], entry] : [entry];
           for (const node of nodes) {
             if (node["@type"] === "Product" || node["@type"]?.includes?.("Product")) {
@@ -50,7 +47,7 @@ function extractJsonLdPrice(html: string): number | null {
           }
         }
       } catch {
-        // JSON parse failed, thử block tiếp theo
+        // ignore
       }
     }
   } catch {
@@ -74,7 +71,6 @@ function extractSold(html: string): number | null {
           const nodes = entry["@graph"] ? [...entry["@graph"], entry] : [entry];
           for (const node of nodes) {
             if (node["@type"] === "Product") {
-              // aggregateRating.reviewCount dùng tạm để detect, sold thường không có trong schema
               const agg = node.aggregateRating;
               if (agg?.reviewCount) return Number(agg.reviewCount);
             }
@@ -90,17 +86,6 @@ function extractSold(html: string): number | null {
   return null;
 }
 
-// ============================================================
-// FALLBACK CUỐI: đọc thẳng theo class CSS trên trang Shopee, dùng khi cả
-// og:tag lẫn JSON-LD đều không có (vd trang app-share /opaanlp/...).
-//
-// CẢNH BÁO: các class này (auau1S, P39yUt, pyzxvq, pw3J3G...) là tên do
-// công cụ build frontend của Shopee TỰ SINH RA, không phải tên cố định —
-// đổi bất kỳ lúc nào Shopee deploy lại giao diện, không báo trước. Vì vậy
-// đây CHỈ là lớp dự phòng cuối cùng, chạy SAU khi og:tag/JSON-LD đã thử mà
-// không ra kết quả — không được để lớp này ảnh hưởng tới đường lấy dữ liệu
-// chính đang chạy ổn định.
-// ============================================================
 const CLASS_FALLBACK = {
   title: ["auau1S"],
   image: ["P39yUt"],
@@ -122,7 +107,6 @@ function extractImageSrcByClass(html: string, classNames: string[]): string | nu
     let pattern = new RegExp(`<img[^>]*class="[^"]*\\b${className}\\b[^"]*"[^>]*src="([^"]+)"`, "i");
     let match = html.match(pattern);
     if (match?.[1]) return match[1];
-    // Thử trường hợp src nằm trước class trong thẻ img
     pattern = new RegExp(`<img[^>]*src="([^"]+)"[^>]*class="[^"]*\\b${className}\\b[^"]*"`, "i");
     match = html.match(pattern);
     if (match?.[1]) return match[1];
@@ -137,62 +121,134 @@ function extractPriceByClass(html: string, classNames: string[]): number | null 
   return !isNaN(parsed) && parsed > 0 ? parsed : null;
 }
 
+function extractShopeeIds(url: string): { shopId: string; itemId: string } | null {
+  try {
+    const path = new URL(url).pathname;
+    const opaanlpMatch = path.match(/\/opaanlp\/(\d+)\/(\d+)/);
+    if (opaanlpMatch) return { shopId: opaanlpMatch[1], itemId: opaanlpMatch[2] };
+    const suffixMatch = path.match(/-i\.(\d+)\.(\d+)/);
+    if (suffixMatch) return { shopId: suffixMatch[1], itemId: suffixMatch[2] };
+    const productMatch = path.match(/\/product\/(\d+)\/(\d+)/);
+    if (productMatch) return { shopId: productMatch[1], itemId: productMatch[2] };
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+function cleanTitle(raw: string | null): string | null {
+  if (!raw) return null;
+  const t = raw.trim();
+  // Bỏ qua tiêu đề fallback mặc định của Shopee khi bot bị redirect hoặc trang chưa tải xong
+  if (
+    /Mua và Bán Trên Ứng Dụng/i.test(t) ||
+    /Shopee Việt Nam \| Mua và Bán/i.test(t) ||
+    /^Shopee\s*(?:Việt Nam|Vietnam)?$/i.test(t) ||
+    /^Shopee: Mua Sắm/i.test(t) ||
+    /^Đăng nhập tài khoản/i.test(t)
+  ) {
+    return null;
+  }
+  return t
+    .replace(/\s*[|\-–—]\s*Shopee\s*(?:Việt Nam|Vietnam)?$/i, "")
+    .replace(/&amp;/g, "&")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .trim() || null;
+}
+
+function cleanImage(raw: string | null): string | null {
+  if (!raw) return null;
+  const img = raw.trim();
+  // Loại bỏ ảnh logo hệ thống mặc định của Shopee
+  if (
+    /shopee-mobilemall-live/i.test(img) ||
+    /shopee_logo/i.test(img) ||
+    /favicon/i.test(img)
+  ) {
+    return null;
+  }
+  return img;
+}
+
 export type ProductInfo = {
   title: string | null;
   image: string | null;
-  price: number | null;   // giá gốc (VNĐ)
-  sold: number | null;    // số lượng đã bán (nếu có)
+  price: number | null; // giá gốc (VNĐ)
+  sold: number | null;  // số lượng đã bán (nếu có)
 };
 
 /**
- * Best-effort scrape: lấy Open Graph tags + JSON-LD schema để lấy thêm giá.
- * Shopee/TikTok render JSON-LD cho Googlebot — giả mạo UA Googlebot để đọc.
- * Fallback về Facebook UA nếu Googlebot bị chặn.
+ * Best-effort scrape: lấy Open Graph tags + JSON-LD schema để lấy tiêu đề, ảnh, giá.
+ * Hỗ trợ linh hoạt cả Shopee, TikTok Shop, Lazada.
  */
 export async function fetchProductInfo(url: string): Promise<ProductInfo | null> {
+  const candidateUrls: string[] = [];
+
+  // Đối với Shopee, nếu trích xuất được shopId & itemId thì ưu tiên universal-link
+  // vì Shopee render đầy đủ OpenGraph meta tags cho bot khi gọi qua universal-link.
+  const shopeeIds = extractShopeeIds(url);
+  if (shopeeIds) {
+    candidateUrls.push(`https://shopee.vn/universal-link/product/${shopeeIds.shopId}/${shopeeIds.itemId}`);
+    candidateUrls.push(`https://shopee.vn/product/${shopeeIds.shopId}/${shopeeIds.itemId}`);
+  }
+  candidateUrls.push(url);
+
   const UAS = [
-    // Googlebot — Shopee render JSON-LD đầy đủ cho UA này
-    "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)",
+    // WhatsApp UA — Shopee trả về 100% og:title + og:image thật, không bị chặn
+    "WhatsApp/2.21.12.21 A",
+    // TelegramBot — Shopee trả về meta tags đầy đủ
+    "TelegramBot (like TwitterBot)",
+    "Twitterbot/1.0",
     // Facebook crawler — lấy được og:title + og:image
     "facebookexternalhit/1.1 (+http://www.facebook.com/externalhit_uatext.php)",
+    // Mobile Chrome UA
+    "Mozilla/5.0 (iPhone; CPU iPhone OS 16_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.5 Mobile/15E148 Safari/604.1",
+    // Standard Desktop UA
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0 Safari/537.36",
+    // Googlebot (cho các trang khác Shopee hỗ trợ JSON-LD)
+    "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)",
   ];
 
-  for (const ua of UAS) {
-    try {
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+  for (const targetUrl of candidateUrls) {
+    for (const ua of UAS) {
+      try {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
 
-      const res = await fetch(url, {
-        signal: controller.signal,
-        headers: {
-          "User-Agent": ua,
-          Accept: "text/html",
-          "Accept-Language": "vi-VN,vi;q=0.9",
-        },
-      });
-      clearTimeout(timeout);
+        const res = await fetch(targetUrl, {
+          signal: controller.signal,
+          headers: {
+            "User-Agent": ua,
+            Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+            "Accept-Language": "vi-VN,vi;q=0.9",
+          },
+        });
+        clearTimeout(timeout);
 
-      if (!res.ok) continue;
+        if (!res.ok) continue;
 
-      const html = await res.text();
-      let title = extractMeta(html, "og:title");
-      let image = extractMeta(html, "og:image");
-      let price = extractJsonLdPrice(html);
-      const sold = extractSold(html);
+        const html = await res.text();
+        let rawTitle = extractMeta(html, "og:title") || extractMeta(html, "twitter:title");
+        let title = cleanTitle(rawTitle);
 
-      // og:tag/JSON-LD là nguồn chính, ổn định — chỉ khi cả hai đều trống
-      // (trang không render thẻ mô tả, vd link app-share) mới thử fallback
-      // theo class CSS (kém bền hơn, xem cảnh báo ở CLASS_FALLBACK).
-      if (!title) title = extractTextByClass(html, CLASS_FALLBACK.title);
-      if (!image) image = extractImageSrcByClass(html, CLASS_FALLBACK.image);
-      if (price == null) price = extractPriceByClass(html, CLASS_FALLBACK.price);
+        let rawImage = extractMeta(html, "og:image") || extractMeta(html, "twitter:image");
+        let image = cleanImage(rawImage);
 
-      // Nếu không lấy được gì từ UA này, thử UA tiếp theo
-      if (!title && !image && price == null) continue;
+        let price = extractJsonLdPrice(html);
+        const sold = extractSold(html);
 
-      return { title, image, price, sold };
-    } catch {
-      continue;
+        if (!title) title = cleanTitle(extractTextByClass(html, CLASS_FALLBACK.title));
+        if (!image) image = cleanImage(extractImageSrcByClass(html, CLASS_FALLBACK.image));
+        if (price == null) price = extractPriceByClass(html, CLASS_FALLBACK.price);
+
+        // Nếu lấy được ít nhất tiêu đề hoặc ảnh hợp lệ, trả về ngay
+        if (title || image) {
+          return { title, image, price, sold };
+        }
+      } catch {
+        continue;
+      }
     }
   }
 
