@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
 
   const platform = detectPlatform(url.trim());
   if (platform === "unknown") {
-    return NextResponse.json({ error: "Chỉ hỗ trợ link Shopee hoặc TikTok Shop" }, { status: 400 });
+    return NextResponse.json({ error: "Chỉ hỗ trợ link Shopee, TikTok Shop hoặc Lazada" }, { status: 400 });
   }
 
   try {
@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
     const cashback = await estimateCashback(productInfo?.title ?? null, productInfo?.price ?? null);
 
     return NextResponse.json({
-      platformCode: platform === "shopee" ? "SHOPEE" : "TIKTOK",
+      platformCode: platform.toUpperCase(),
       productTitle: productInfo?.title ?? null,
       productImage: productInfo?.image ?? null,
       productPrice: productInfo?.price ?? null,
@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
     // Không lấy được thông tin sản phẩm (link lạ, site chặn bot...) — vẫn
     // trả về thành công tối thiểu để không chặn khách, chỉ là preview rỗng.
     return NextResponse.json({
-      platformCode: platform === "shopee" ? "SHOPEE" : "TIKTOK",
+      platformCode: platform.toUpperCase(),
       productTitle: null,
       productImage: null,
       productPrice: null,

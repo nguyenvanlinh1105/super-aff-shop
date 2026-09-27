@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { CalendarDays, ExternalLink, Package, Gift, ChevronDown, CheckCircle2, Clock, Truck, Wallet } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { CalendarDays, ExternalLink, Package, Gift, ChevronDown, CheckCircle2, Clock, Truck, Wallet, Check } from "lucide-react";
 import { Pagination } from "@/components/ui/Pagination";
 import { FloatingElement } from "@/components/ui/FloatingElement";
 import { ServerSearchInput } from "@/components/ui/ServerSearchInput";
@@ -31,6 +31,15 @@ type Props = {
   counts: { all: number; completed: number; pending: number; reconciling: number; processing: number; cancelled: number };
 };
 
+const ORDER_STATUS_TABS = [
+  { id: "all", label: "Tất cả", emoji: "📋" },
+  { id: "pending", label: "Chờ Shopee xác nhận", emoji: "⏳" },
+  { id: "reconciling", label: "Đang đối soát", emoji: "🕐" },
+  { id: "processing", label: "Chờ chuyển khoản", emoji: "💰" },
+  { id: "completed", label: "Đã nhận tiền", emoji: "✅" },
+  { id: "cancelled", label: "Đã huỷ", emoji: "❌" },
+];
+
 function getOrderTimeline(order: Order) {
   const isDone = (s: string) => order.orderStatus === s || (s === "processing" && ["approved"].includes(order.orderStatus));
   const steps = [
@@ -48,6 +57,18 @@ export function CustomerOrdersClient({ orders, totalPages, currentPage, counts }
   const searchParams = useSearchParams();
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const currentTab = searchParams.get("tab") || "all";
+  const [mobileDropdownOpen, setMobileDropdownOpen] = useState(false);
+  const mobileDropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (mobileDropdownRef.current && !mobileDropdownRef.current.contains(event.target as Node)) {
+        setMobileDropdownOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const handleTabChange = (tab: string) => {
     const params = new URLSearchParams(searchParams);
@@ -123,8 +144,90 @@ export function CustomerOrdersClient({ orders, totalPages, currentPage, counts }
         </div>
       </div>
 
-      {/* TABS */}
-      <div className="relative">
+      {/* ─── STATUS FILTER: CUSTOM-SELECTION TRÊN MOBILE, TABS TRÊN PC ─── */}
+      {/* 1. MOBILE CUSTOM SELECTION DROPDOWN (md:hidden) */}
+      {(() => {
+        const activeTabObj = ORDER_STATUS_TABS.find((t) => t.id === currentTab) || ORDER_STATUS_TABS[0];
+        const activeCount = counts[activeTabObj.id as keyof typeof counts] ?? 0;
+        return (
+          <div ref={mobileDropdownRef} className="relative md:hidden w-full">
+            <button
+              type="button"
+              onClick={() => setMobileDropdownOpen(!mobileDropdownOpen)}
+              className="w-full flex items-center justify-between gap-2.5 rounded-2xl bg-white border border-primary-200/90 px-4 py-3 shadow-2xs text-xs font-black text-neutral-900 transition-all cursor-pointer active:scale-[0.99]"
+            >
+              <div className="flex items-center gap-2.5 min-w-0">
+                <span className="text-base shrink-0">{activeTabObj.emoji}</span>
+                <span className="truncate">{activeTabObj.label}</span>
+                {activeCount > 0 && (
+                  <span className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-primary-100 text-primary-700 px-1.5 text-[10px] font-black shrink-0">
+                    {activeCount}
+                  </span>
+                )}
+              </div>
+              <ChevronDown
+                size={16}
+                strokeWidth={2.5}
+                className={`text-neutral-400 shrink-0 transition-transform duration-200 ${
+                  mobileDropdownOpen ? "rotate-180 text-primary-600" : ""
+                }`}
+              />
+            </button>
+
+            {mobileDropdownOpen && (
+              <div className="absolute left-0 top-full mt-1.5 w-full bg-white/95 backdrop-blur-md rounded-2xl border border-primary-100 shadow-xl shadow-primary-500/10 p-1.5 z-40 animate-in fade-in slide-in-from-top-2 duration-150">
+                <div className="px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-neutral-400 border-b border-neutral-100 mb-1 flex items-center justify-between">
+                  <span>Lọc trạng thái đơn</span>
+                  <span>{ORDER_STATUS_TABS.length} mục</span>
+                </div>
+                <div className="flex flex-col gap-0.5">
+                  {ORDER_STATUS_TABS.map((tab) => {
+                    const isSelected = currentTab === tab.id;
+                    const count = counts[tab.id as keyof typeof counts] ?? 0;
+                    return (
+                      <button
+                        key={tab.id}
+                        type="button"
+                        onClick={() => {
+                          handleTabChange(tab.id);
+                          setMobileDropdownOpen(false);
+                        }}
+                        className={`flex items-center justify-between gap-2.5 px-3 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                          isSelected
+                            ? "bg-primary-50 text-primary-700 font-black"
+                            : "text-neutral-700 hover:bg-neutral-50 hover:text-primary-600"
+                        }`}
+                      >
+                        <div className="flex items-center gap-2.5 min-w-0">
+                          <span className="text-sm shrink-0">{tab.emoji}</span>
+                          <span className="truncate">{tab.label}</span>
+                        </div>
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          {count > 0 && (
+                            <span
+                              className={`flex h-4.5 min-w-[18px] items-center justify-center rounded-full px-1.5 text-[10px] font-black ${
+                                isSelected
+                                  ? "bg-primary-500 text-white shadow-2xs"
+                                  : "bg-neutral-100 text-neutral-600"
+                              }`}
+                            >
+                              {count}
+                            </span>
+                          )}
+                          {isSelected && <Check size={14} strokeWidth={3} className="text-primary-600" />}
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+        );
+      })()}
+
+      {/* 2. PC STATUS TABS (hidden md:block — giữ nguyên 100% như cũ) */}
+      <div className="relative hidden md:block">
         <div className="flex flex-nowrap items-center gap-sm overflow-x-auto pb-2 -mx-md px-md md:mx-0 md:px-0 scrollbar-hide w-full max-w-[100vw]">
           <TabButton active={currentTab === "all"} onClick={() => handleTabChange("all")} label="Tất cả" count={counts.all} />
           <TabButton active={currentTab === "pending"} onClick={() => handleTabChange("pending")} label="⏳ Chờ Shopee xác nhận" count={counts.pending} />
@@ -133,8 +236,6 @@ export function CustomerOrdersClient({ orders, totalPages, currentPage, counts }
           <TabButton active={currentTab === "completed"} onClick={() => handleTabChange("completed")} label="✅ Đã nhận tiền" count={counts.completed} />
           <TabButton active={currentTab === "cancelled"} onClick={() => handleTabChange("cancelled")} label="❌ Đã huỷ" count={counts.cancelled} />
         </div>
-        {/* Fade gradient to indicate scrollable */}
-        <div className="pointer-events-none absolute right-0 top-0 bottom-2 w-8 bg-gradient-to-l from-neutral-50 to-transparent md:hidden" />
       </div>
 
       {/* GIẢI THÍCH THEO TAB — giúp khách hiểu rõ từng trạng thái nghĩa là gì */}

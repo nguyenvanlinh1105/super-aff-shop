@@ -9,46 +9,57 @@ export default async function AdminCustomersPage({ searchParams }: { searchParam
   const skip = (page - 1) * limit;
   const q = searchParams.q || "";
   const tab = searchParams.tab || "all";
+  const sortBy = searchParams.sort || "createdAt";
+  const sortOrder = searchParams.order === "asc" ? "asc" : "desc";
 
   const where: any = {};
   if (q) {
     where.OR = [
-      { fullName: { contains: q } },
-      { customerCode: { contains: q } },
+      { fullName: { contains: q, mode: "insensitive" } },
+      { customerCode: { contains: q, mode: "insensitive" } },
       { phone: { contains: q } },
-      { telegramUsername: { contains: q } },
+      { telegramUsername: { contains: q, mode: "insensitive" } },
     ];
   }
   if (tab === "active") where.status = "active";
   if (tab === "locked") where.status = { not: "active" };
   if (tab === "partner") where.isPartner = true;
+  if (tab === "debt") {
+    where.orders = {
+      some: {
+        payoutStatus: { not: "paid" },
+        customerRewardAmount: { gt: 0 },
+      },
+    };
+  }
 
-  const orderByField = searchParams.sort || "createdAt";
-  const orderByDir = searchParams.order || "desc";
-  const orderBy = { [orderByField]: orderByDir };
-
-  const [totalCount, activeCount, lockedCount, partnerCount] = await Promise.all([
+  const [totalCount, activeCount, lockedCount, partnerCount, debtCount] = await Promise.all([
     prisma.customer.count(),
     prisma.customer.count({ where: { status: "active" } }),
     prisma.customer.count({ where: { status: { not: "active" } } }),
     prisma.customer.count({ where: { isPartner: true } }),
-  ]);
-
-  const [customers, filteredCount] = await Promise.all([
-    prisma.customer.findMany({
-      where,
-      orderBy,
-      skip,
-      take: limit,
-      include: {
-        _count: { select: { trackingLinks: true, orders: true } },
-        orders: { select: { customerRewardAmount: true, payoutStatus: true } },
+    prisma.customer.count({
+      where: {
+        orders: {
+          some: {
+            payoutStatus: { not: "paid" },
+            customerRewardAmount: { gt: 0 },
+          },
+        },
       },
     }),
-    prisma.customer.count({ where }),
   ]);
 
-  const rows = customers.map((c) => {
+  // Fetch all matching customers to calculate rewards, debt, and link count
+  const allMatching = await prisma.customer.findMany({
+    where,
+    include: {
+      _count: { select: { trackingLinks: true, orders: true } },
+      orders: { select: { customerRewardAmount: true, payoutStatus: true } },
+    },
+  });
+
+  const computedList = allMatching.map((c) => {
     const totalReward = c.orders.reduce((s, o) => s + Number(o.customerRewardAmount), 0);
     const debt = c.orders
       .filter((o) => o.payoutStatus !== "paid")
@@ -66,9 +77,39 @@ export default async function AdminCustomersPage({ searchParams }: { searchParam
       linkCount: c._count.trackingLinks,
       totalReward,
       debt,
+      createdAt: c.createdAt,
     };
   });
 
+  // Sắp xếp dữ liệu theo tiêu chí (reward, debt, link, name, createdAt) và chiều tăng/giảm (asc/desc)
+  computedList.sort((a, b) => {
+    if (sortBy === "reward") {
+      return sortOrder === "asc" ? a.totalReward - b.totalReward : b.totalReward - a.totalReward;
+    }
+    if (sortBy === "debt") {
+      return sortOrder === "asc" ? a.debt - b.debt : b.debt - a.debt;
+    }
+    if (sortBy === "link") {
+      return sortOrder === "asc" ? a.linkCount - b.linkCount : b.linkCount - a.linkCount;
+    }
+    if (sortBy === "name" || sortBy === "fullName") {
+      return sortOrder === "asc"
+        ? a.fullName.localeCompare(b.fullName, "vi")
+        : b.fullName.localeCompare(a.fullName, "vi");
+    }
+    if (sortBy === "customerCode") {
+      return sortOrder === "asc"
+        ? a.customerCode.localeCompare(b.customerCode)
+        : b.customerCode.localeCompare(a.customerCode);
+    }
+    // Mặc định sắp xếp theo ngày tạo (createdAt)
+    return sortOrder === "asc"
+      ? new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+      : new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+  });
+
+  const filteredCount = computedList.length;
+  const rows = computedList.slice(skip, skip + limit);
   const totalPages = Math.ceil(filteredCount / limit);
 
   return (
@@ -144,7 +185,7 @@ export default async function AdminCustomersPage({ searchParams }: { searchParam
         currentPage={page}
         totalItems={filteredCount}
         pageSize={limit}
-        counts={{ all: totalCount, active: activeCount, locked: lockedCount, debt: 0, partner: partnerCount }}
+        counts={{ all: totalCount, active: activeCount, locked: lockedCount, debt: debtCount, partner: partnerCount }}
       />
     </div>
   );

@@ -1,6 +1,6 @@
 import { buildTikTokAffiliateUrlViaAccessTrade } from "./accesstrade";
 
-export type DetectedPlatform = "shopee" | "tiktok" | "unknown";
+export type DetectedPlatform = "shopee" | "tiktok" | "lazada" | "unknown";
 export type AffiliateSubIds = {
   subId1?: string;
   subId2?: string;
@@ -18,10 +18,11 @@ export function detectPlatform(rawUrl: string): DetectedPlatform {
   // khong chua chuoi "shopee." nen phai kiem tra rieng.
   if (url.includes("shopee.") || url.includes("shp.ee")) return "shopee";
   if (url.includes("tiktok.") || url.includes("vt.tiktok") || url.includes("vm.tiktok")) return "tiktok";
+  if (url.includes("lazada.") || url.includes("lzd.co") || url.includes("s.lazada.")) return "lazada";
   return "unknown";
 }
 
-const SHORT_LINK_HOST_PATTERNS = [/(^|\.)shp\.ee$/, /(^|\.)s\.shopee\.vn$/, /(^|\.)vt\.tiktok\.com$/, /(^|\.)vm\.tiktok\.com$/];
+const SHORT_LINK_HOST_PATTERNS = [/(^|\.)shp\.ee$/, /(^|\.)s\.shopee\.vn$/, /(^|\.)vt\.tiktok\.com$/, /(^|\.)vm\.tiktok\.com$/, /(^|\.)lzd\.co$/];
 
 function isShortLinkHost(hostname: string): boolean {
   return SHORT_LINK_HOST_PATTERNS.some((pattern) => pattern.test(hostname.toLowerCase()));
@@ -135,6 +136,10 @@ export async function buildAffiliateUrl(
     if (accessTradeLink) return accessTradeLink;
   }
 
+  if (platformCode === "LAZADA") {
+    return buildLazadaAffiliateUrl(normalizedUrl, trackingCode, subIds);
+  }
+
   try {
     const url = new URL(normalizedUrl);
     const effectiveSubIds = subIds ?? { subId2: trackingCode };
@@ -189,4 +194,24 @@ function buildShopeeAffiliateUrl(
   if (effectiveSubIds.subId5) params.set("sub_id5", effectiveSubIds.subId5);
 
   return `https://s.shopee.vn/an_redir?${params.toString()}`;
+}
+
+function buildLazadaAffiliateUrl(
+  normalizedUrl: string,
+  trackingCode: string,
+  subIds?: AffiliateSubIds
+): string {
+  const effectiveSubIds = subIds ?? { subId2: trackingCode };
+  try {
+    const url = new URL(normalizedUrl);
+    url.searchParams.set("sub_id", effectiveSubIds.subId2 ?? trackingCode);
+    if (effectiveSubIds.subId1) url.searchParams.set("sub_id1", effectiveSubIds.subId1);
+    if (effectiveSubIds.subId2) url.searchParams.set("sub_id2", effectiveSubIds.subId2);
+    if (effectiveSubIds.subId3) url.searchParams.set("sub_id3", effectiveSubIds.subId3);
+    url.searchParams.set("aff_channel", "affiliate-hoantien");
+    return url.toString();
+  } catch {
+    const separator = normalizedUrl.includes("?") ? "&" : "?";
+    return `${normalizedUrl}${separator}sub_id=${effectiveSubIds.subId2 ?? trackingCode}&aff_channel=affiliate-hoantien`;
+  }
 }

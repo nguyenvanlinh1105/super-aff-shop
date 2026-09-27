@@ -208,14 +208,16 @@ export function AppNotificationBanner() {
         className="group relative flex items-start gap-3 rounded-2xl sm:rounded-3xl bg-white/95 backdrop-blur-xl p-3.5 sm:p-4 shadow-2xl border border-rose-300/80 hover:border-rose-400 transition-all duration-300 animate-in slide-in-from-top-4 fade-in cursor-pointer hover:scale-[1.01] active:scale-[0.99] ring-4 ring-rose-500/10"
       >
         {/* App Mascot Icon */}
-        <div className="relative flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-rose-500 via-pink-500 to-rose-600 text-white shadow-md shadow-rose-500/25 p-1 border-2 border-white">
-          <img
-            src="/meowback_lucky_cat_logo.png"
-            alt="MeowBack"
-            className="h-full w-full object-contain"
-          />
-          <span className="absolute -top-1 -right-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-rose-600 ring-2 ring-white">
-            <span className="h-2 w-2 rounded-full bg-white animate-pulse" />
+        <div className="relative h-11 w-11 shrink-0">
+          <div className="h-full w-full rounded-full overflow-hidden bg-gradient-to-br from-rose-400 via-pink-500 to-rose-500 p-[2px] shadow-md shadow-rose-500/20 border-2 border-white">
+            <img
+              src="/meow-back-mascot.png"
+              alt="MeowBack"
+              className="h-full w-full object-cover rounded-full"
+            />
+          </div>
+          <span className="absolute -top-0.5 -right-0.5 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-rose-600 ring-2 ring-white">
+            <span className="h-1.5 w-1.5 rounded-full bg-white animate-pulse" />
           </span>
         </div>
 

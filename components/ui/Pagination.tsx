@@ -53,7 +53,7 @@ export function Pagination({
 
   return (
     <div
-      className={`flex items-center justify-center sm:justify-end gap-1.5 pt-3 pb-1 select-none ${className}`}
+      className={`flex items-center justify-center gap-1.5 pt-4 pb-2 select-none ${className}`}
     >
       {/* First Page (chỉ hiện khi nhiều hơn 5 trang) */}
       {effectiveTotalPages > 5 && (

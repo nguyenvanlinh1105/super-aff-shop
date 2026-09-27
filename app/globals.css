@@ -230,10 +230,10 @@
     .responsive-table td[colspan] { display: block; text-align: center; }
   }
 
-  /* Vị trí nút hỗ trợ nổi: trên PC tự động căn sát container 960px thay vì dạt ra rìa màn hình */
+  /* Vị trí nút hỗ trợ nổi: trên Mobile nâng cao lên để không đè vào input chat/nút thao tác; trên PC giữ nguyên 32px */
   .customer-floating-support {
-    right: 12px;
-    bottom: calc(58px + env(safe-area-inset-bottom) + 12px);
+    right: 14px;
+    bottom: calc(110px + env(safe-area-inset-bottom));
   }
   @media (min-width: 768px) {
     .customer-floating-support {

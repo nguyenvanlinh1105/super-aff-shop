@@ -91,7 +91,7 @@ export function LoginForm({ next, googleError }: { next?: string; googleError?: 
       setTimeout(() => {
         router.push(next || data.redirectTo);
         router.refresh();
-      }, 450);
+      }, 150);
     } catch {
       setLoading(false);
       toast.error("Không thể kết nối tới máy chủ, vui lòng thử lại.", "Lỗi kết nối");
@@ -130,7 +130,7 @@ export function LoginForm({ next, googleError }: { next?: string; googleError?: 
       setTimeout(() => {
         router.push(next || data.redirectTo);
         router.refresh();
-      }, 450);
+      }, 150);
     } catch {
       setLoading(false);
       toast.error("Lỗi xác thực hệ thống, vui lòng thử lại.", "Lỗi kết nối");

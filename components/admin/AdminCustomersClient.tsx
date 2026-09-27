@@ -2,7 +2,18 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Users, Trash2, Handshake, RotateCcw, ShieldAlert } from "lucide-react";
+import {
+  Users,
+  Trash2,
+  Handshake,
+  RotateCcw,
+  ShieldAlert,
+  ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
+  ChevronDown,
+  Filter,
+} from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { Table, Thead, Tr, Th, Td } from "@/components/ui/Table";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -53,6 +64,9 @@ export function AdminCustomersClient({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const currentTab = searchParams.get("tab") || "all";
+  const currentSort = searchParams.get("sort") || "createdAt";
+  const currentOrder = searchParams.get("order") || "desc";
+
   const [confirmingAction, setConfirmingAction] = useState<{ id: string; type: "soft_delete" | "force_delete" } | null>(null);
   const [loadingId, setLoadingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -113,13 +127,26 @@ export function AdminCustomersClient({
     router.replace(`${pathname}?${params.toString()}`);
   };
 
-  const tabs = [
-    { id: "all", label: "Tất cả", count: counts.all },
-    { id: "active", label: "Đang hoạt động", count: counts.active },
-    { id: "debt", label: "Có công nợ", count: counts.debt },
-    { id: "partner", label: "🤝 Đối tác", count: counts.partner },
-    { id: "locked", label: "Bị khoá / Đã xoá", count: counts.locked },
-  ];
+  const handleSortChange = (field: string, dir: string) => {
+    const params = new URLSearchParams(searchParams);
+    if (field === "createdAt" && dir === "desc") {
+      params.delete("sort");
+      params.delete("order");
+    } else {
+      params.set("sort", field);
+      params.set("order", dir);
+    }
+    params.delete("page");
+    router.replace(`${pathname}?${params.toString()}`);
+  };
+
+  const toggleColumnSort = (field: string) => {
+    if (currentSort === field) {
+      handleSortChange(field, currentOrder === "asc" ? "desc" : "asc");
+    } else {
+      handleSortChange(field, field === "fullName" ? "asc" : "desc");
+    }
+  };
 
   return (
     <div className="flex flex-col gap-6">
@@ -133,33 +160,72 @@ export function AdminCustomersClient({
         </div>
       )}
 
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0 custom-scrollbar">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => handleTabChange(tab.id)}
-              className={`flex items-center gap-2 rounded-2xl px-4 py-2.5 text-xs font-extrabold whitespace-nowrap transition-all duration-200 ${
-                currentTab === tab.id
-                  ? "bg-gradient-to-r from-neutral-900 to-neutral-800 text-white shadow-md shadow-neutral-900/10 scale-[1.02]"
-                  : "bg-white text-neutral-600 hover:bg-rose-50/60 hover:text-neutral-900 border border-neutral-200/70"
-              }`}
-            >
-              {tab.label}
-              <span
-                className={`rounded-full px-2 py-0.5 text-[10px] font-black ${
-                  currentTab === tab.id
-                    ? "bg-white/20 text-white"
-                    : "bg-neutral-100 text-neutral-600"
-                }`}
+      {/* ── TOOLBAR: CUSTOMER SELECTION + SORT SELECTION + SEARCH ── */}
+      <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
+        {/* Left: Customer Selection Dropdown & Sort Selection Dropdown */}
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+          {/* Customer Selection Dropdown */}
+          <div className="relative min-w-[220px]">
+            <label className="sr-only">Phân loại khách hàng</label>
+            <div className="relative">
+              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-neutral-400">
+                <Users size={16} className="text-rose-500" />
+              </div>
+              <select
+                value={currentTab}
+                onChange={(e) => handleTabChange(e.target.value)}
+                className="w-full appearance-none rounded-2xl bg-white border border-neutral-200/80 pl-10 pr-9 py-2.5 text-xs font-extrabold text-neutral-800 shadow-2xs hover:border-rose-300 focus:outline-hidden focus:ring-2 focus:ring-rose-500/20 cursor-pointer transition-colors"
               >
-                {tab.count}
-              </span>
-            </button>
-          ))}
+                <option value="all">Tất cả khách hàng ({counts.all})</option>
+                <option value="active">Đang hoạt động ({counts.active})</option>
+                <option value="debt">Có công nợ ({counts.debt})</option>
+                <option value="partner">Đối tác affiliate ({counts.partner})</option>
+                <option value="locked">Bị khoá / Đã xoá ({counts.locked})</option>
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-neutral-400">
+                <ChevronDown size={14} strokeWidth={2.5} />
+              </div>
+            </div>
+          </div>
+
+          {/* Sort Selection Dropdown */}
+          <div className="relative min-w-[230px]">
+            <label className="sr-only">Sắp xếp khách hàng</label>
+            <div className="relative">
+              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-neutral-400">
+                <ArrowUpDown size={15} className="text-amber-500" />
+              </div>
+              <select
+                value={`${currentSort}_${currentOrder}`}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  const idx = val.lastIndexOf("_");
+                  const field = val.substring(0, idx);
+                  const dir = val.substring(idx + 1);
+                  handleSortChange(field, dir);
+                }}
+                className="w-full appearance-none rounded-2xl bg-white border border-neutral-200/80 pl-10 pr-9 py-2.5 text-xs font-extrabold text-neutral-800 shadow-2xs hover:border-rose-300 focus:outline-hidden focus:ring-2 focus:ring-rose-500/20 cursor-pointer transition-colors"
+              >
+                <option value="createdAt_desc">Mới nhất (Mặc định)</option>
+                <option value="createdAt_asc">Cũ nhất</option>
+                <option value="reward_desc">Tổng hoàn tiền: Cao → Thấp</option>
+                <option value="reward_asc">Tổng hoàn tiền: Thấp → Cao</option>
+                <option value="debt_desc">Công nợ: Cao → Thấp</option>
+                <option value="debt_asc">Công nợ: Thấp → Cao</option>
+                <option value="link_desc">Số lượng link: Nhiều → Ít</option>
+                <option value="link_asc">Số lượng link: Ít → Nhiều</option>
+                <option value="fullName_asc">Tên khách hàng: A → Z</option>
+                <option value="fullName_desc">Tên khách hàng: Z → A</option>
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-neutral-400">
+                <ChevronDown size={14} strokeWidth={2.5} />
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div className="w-full sm:w-[300px]">
+        {/* Right: Server Search Input */}
+        <div className="w-full lg:w-[320px] xl:w-[360px]">
           <ServerSearchInput placeholder="Tìm theo tên, mã KH, sđt..." />
         </div>
       </div>
@@ -176,12 +242,88 @@ export function AdminCustomersClient({
             <Table>
               <Thead>
                 <Tr>
-                  <Th>Khách hàng</Th>
+                  <Th>
+                    <button
+                      onClick={() => toggleColumnSort("fullName")}
+                      className={`group inline-flex items-center gap-1.5 font-extrabold transition-colors ${
+                        currentSort === "fullName" ? "text-rose-600" : "text-neutral-800 hover:text-rose-600"
+                      }`}
+                      title="Click để đổi chiều sắp xếp theo tên"
+                    >
+                      <span>Khách hàng</span>
+                      {currentSort === "fullName" ? (
+                        currentOrder === "asc" ? (
+                          <ArrowUp size={13} className="text-rose-600 shrink-0" />
+                        ) : (
+                          <ArrowDown size={13} className="text-rose-600 shrink-0" />
+                        )
+                      ) : (
+                        <ArrowUpDown size={12} className="text-neutral-400 group-hover:text-neutral-600 shrink-0 opacity-60" />
+                      )}
+                    </button>
+                  </Th>
                   <Th>Mã KH</Th>
                   <Th>Kênh Liên Hệ</Th>
-                  <Th align="right">Tổng Hoàn Tiền</Th>
-                  <Th align="right">Công Nợ</Th>
-                  <Th align="center">Link</Th>
+                  <Th align="right">
+                    <button
+                      onClick={() => toggleColumnSort("reward")}
+                      className={`group inline-flex items-center gap-1.5 font-extrabold transition-colors ml-auto ${
+                        currentSort === "reward" ? "text-rose-600" : "text-neutral-800 hover:text-rose-600"
+                      }`}
+                      title="Click để đổi chiều sắp xếp theo tổng tiền hoàn"
+                    >
+                      <span>Tổng Hoàn Tiền</span>
+                      {currentSort === "reward" ? (
+                        currentOrder === "asc" ? (
+                          <ArrowUp size={13} className="text-rose-600 shrink-0" />
+                        ) : (
+                          <ArrowDown size={13} className="text-rose-600 shrink-0" />
+                        )
+                      ) : (
+                        <ArrowUpDown size={12} className="text-neutral-400 group-hover:text-neutral-600 shrink-0 opacity-60" />
+                      )}
+                    </button>
+                  </Th>
+                  <Th align="right">
+                    <button
+                      onClick={() => toggleColumnSort("debt")}
+                      className={`group inline-flex items-center gap-1.5 font-extrabold transition-colors ml-auto ${
+                        currentSort === "debt" ? "text-rose-600" : "text-neutral-800 hover:text-rose-600"
+                      }`}
+                      title="Click để đổi chiều sắp xếp theo công nợ"
+                    >
+                      <span>Công Nợ</span>
+                      {currentSort === "debt" ? (
+                        currentOrder === "asc" ? (
+                          <ArrowUp size={13} className="text-rose-600 shrink-0" />
+                        ) : (
+                          <ArrowDown size={13} className="text-rose-600 shrink-0" />
+                        )
+                      ) : (
+                        <ArrowUpDown size={12} className="text-neutral-400 group-hover:text-neutral-600 shrink-0 opacity-60" />
+                      )}
+                    </button>
+                  </Th>
+                  <Th align="center">
+                    <button
+                      onClick={() => toggleColumnSort("link")}
+                      className={`group inline-flex items-center gap-1.5 font-extrabold transition-colors mx-auto ${
+                        currentSort === "link" ? "text-rose-600" : "text-neutral-800 hover:text-rose-600"
+                      }`}
+                      title="Click để đổi chiều sắp xếp theo số lượng link"
+                    >
+                      <span>Link</span>
+                      {currentSort === "link" ? (
+                        currentOrder === "asc" ? (
+                          <ArrowUp size={13} className="text-rose-600 shrink-0" />
+                        ) : (
+                          <ArrowDown size={13} className="text-rose-600 shrink-0" />
+                        )
+                      ) : (
+                        <ArrowUpDown size={12} className="text-neutral-400 group-hover:text-neutral-600 shrink-0 opacity-60" />
+                      )}
+                    </button>
+                  </Th>
                   <Th align="center">Trạng Thái</Th>
                   <Th align="center">Thao Tác</Th>
                 </Tr>

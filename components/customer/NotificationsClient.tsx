@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useRef, useEffect } from "react";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
@@ -14,6 +15,8 @@ import {
   Clock,
   CheckCheck,
   RefreshCw,
+  ChevronDown,
+  Filter,
 } from "lucide-react";
 import { Pagination } from "@/components/ui/Pagination";
 import { useToast } from "@/components/ui/Toast";
@@ -268,87 +271,146 @@ export function NotificationsClient({
     router.push(`${pathname}?${params.toString()}`);
   };
 
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setDropdownOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const activeCat = CATEGORIES.find((c) => c.id === currentCategory) || CATEGORIES[0];
+  const ActiveIcon = activeCat.icon;
+  const activeCount = categoryCounts[activeCat.id] || 0;
+
   return (
     <div className="flex flex-col gap-5">
-      {/* ═══ FILTER BAR (Dễ nhìn, không trượt ngang, hiển thị trọn vẹn) ═══ */}
-      <div className="bg-white p-4 sm:p-5 rounded-3xl border border-primary-100/90 shadow-cute flex flex-col gap-3.5">
-        {/* Header hàng lọc: Tiêu đề + Nút bật/tắt Chỉ tin chưa đọc */}
-        <div className="flex items-center justify-between gap-3 flex-wrap">
-          <div className="flex items-center gap-2">
-            <span className="text-[12px] font-black uppercase tracking-wider text-neutral-400">
-              Lọc theo danh mục
-            </span>
-            <span className="text-[11px] font-bold text-neutral-500 bg-neutral-100 px-2 py-0.5 rounded-full">
-              {CATEGORIES.length} nhóm tin
-            </span>
-          </div>
-
-          {/* Toggle Chỉ tin chưa đọc - Dạng pill switch bấm êm tay */}
+      {/* ═══ FILTER TOOLBAR: CUSTOMER SELECTION STYLE ═══ */}
+      <div className="bg-white p-2.5 sm:p-3 rounded-2xl border border-primary-100/90 shadow-2xs flex items-center gap-2">
+        {/* Custom Category Selection Dropdown */}
+        <div ref={dropdownRef} className="relative flex-1 min-w-0">
           <button
             type="button"
-            onClick={() => handleToggleUnread(!currentOnlyUnread)}
-            className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer select-none ${
-              currentOnlyUnread
-                ? "bg-rose-50 border border-rose-200 text-rose-600 shadow-2xs"
-                : "bg-neutral-50 hover:bg-neutral-100/80 border border-neutral-200/70 text-neutral-600"
-            }`}
+            onClick={() => setDropdownOpen(!dropdownOpen)}
+            className="w-full flex items-center justify-between gap-2 rounded-xl bg-neutral-50/80 hover:bg-neutral-100/80 border border-neutral-200/80 pl-2.5 pr-3 py-2 text-xs font-extrabold text-neutral-800 transition-all cursor-pointer"
           >
-            <span
-              className={`w-2 h-2 rounded-full transition-colors ${
-                currentOnlyUnread ? "bg-rose-500 animate-pulse" : "bg-neutral-300"
+            <div className="flex items-center gap-2 min-w-0">
+              <div className="w-6 h-6 rounded-lg bg-primary-100 text-primary-600 flex items-center justify-center shrink-0">
+                <ActiveIcon size={13} strokeWidth={2.2} />
+              </div>
+              <span className="truncate">{activeCat.label}</span>
+              {activeCount > 0 && (
+                <span className="flex h-4 min-w-[16px] items-center justify-center rounded-full bg-primary-200/80 text-primary-800 px-1 text-[9.5px] font-black shrink-0">
+                  {activeCount}
+                </span>
+              )}
+            </div>
+            <ChevronDown
+              size={14}
+              strokeWidth={2.5}
+              className={`text-neutral-400 shrink-0 transition-transform duration-200 ${
+                dropdownOpen ? "rotate-180 text-primary-600" : ""
               }`}
             />
-            <span>Chỉ tin chưa đọc</span>
-            {currentOnlyUnread && (
-              <span className="text-[10px] bg-rose-200/70 text-rose-700 px-1.5 py-0.2 rounded-full font-black">
-                Bật
-              </span>
-            )}
           </button>
+
+          {/* Dropdown Menu Popover */}
+          {dropdownOpen && (
+            <div className="absolute left-0 top-full mt-1.5 w-full min-w-[240px] bg-white/95 backdrop-blur-md rounded-2xl border border-primary-100 shadow-xl shadow-primary-500/10 p-1.5 z-40 animate-in fade-in slide-in-from-top-2 duration-150">
+              <div className="px-2.5 py-1 text-[10px] font-black uppercase tracking-wider text-neutral-400 border-b border-neutral-100 mb-1 flex items-center justify-between">
+                <span>Chọn danh mục tin</span>
+                <span>{CATEGORIES.length} nhóm</span>
+              </div>
+              <div className="flex flex-col gap-0.5">
+                {CATEGORIES.map((cat) => {
+                  const Icon = cat.icon;
+                  const isSelected = (currentCategory || "all") === cat.id;
+                  const count = categoryCounts[cat.id] || 0;
+                  return (
+                    <button
+                      key={cat.id}
+                      type="button"
+                      onClick={() => {
+                        handleCategoryChange(cat.id);
+                        setDropdownOpen(false);
+                      }}
+                      className={`flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                        isSelected
+                          ? "bg-primary-50 text-primary-700 font-black"
+                          : "text-neutral-700 hover:bg-neutral-50 hover:text-primary-600"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2 min-w-0">
+                        <div
+                          className={`w-5 h-5 rounded-md flex items-center justify-center shrink-0 ${
+                            isSelected
+                              ? "bg-primary-500 text-white shadow-2xs"
+                              : "bg-neutral-100 text-neutral-500"
+                          }`}
+                        >
+                          <Icon size={11} strokeWidth={2.2} />
+                        </div>
+                        <span className="truncate">{cat.label}</span>
+                      </div>
+                      <div className="flex items-center gap-1 shrink-0">
+                        {count > 0 && (
+                          <span
+                            className={`flex h-4 min-w-[16px] items-center justify-center rounded-full px-1 text-[9.5px] font-black ${
+                              isSelected
+                                ? "bg-primary-200/80 text-primary-800"
+                                : "bg-neutral-100 text-neutral-600"
+                            }`}
+                          >
+                            {count}
+                          </span>
+                        )}
+                        {isSelected && <Check size={13} className="text-primary-600 shrink-0" strokeWidth={2.5} />}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* Danh sách 6 nút danh mục - Hiển thị wrap tự nhiên trên mọi màn hình, không trượt ngang */}
-        <div className="flex flex-wrap items-center gap-2">
-          {CATEGORIES.map((cat) => {
-            const Icon = cat.icon;
-            const isActive = currentCategory === cat.id;
-            const count = categoryCounts[cat.id] || 0;
-            return (
-              <button
-                key={cat.id}
-                type="button"
-                onClick={() => handleCategoryChange(cat.id)}
-                className={`flex items-center gap-2 rounded-xl px-3.5 py-2 text-xs sm:text-[13px] font-bold transition-all cursor-pointer select-none ${
-                  isActive
-                    ? "bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-cute scale-[1.02]"
-                    : "bg-neutral-50 hover:bg-primary-50/60 text-neutral-600 hover:text-primary-600 border border-neutral-200/70 hover:border-primary-200"
-                }`}
-              >
-                <Icon size={14} className={isActive ? "text-white" : "text-neutral-400"} />
-                <span>{cat.label}</span>
-                {count > 0 && (
-                  <span
-                    className={`flex h-4 min-w-[18px] items-center justify-center rounded-full px-1 text-[10px] font-black ${
-                      isActive ? "bg-white/25 text-white" : "bg-neutral-200/80 text-neutral-700"
-                    }`}
-                  >
-                    {count}
-                  </span>
-                )}
-              </button>
-            );
-          })}
-        </div>
+        {/* Toggle Chỉ tin chưa đọc */}
+        <button
+          type="button"
+          onClick={() => handleToggleUnread(!currentOnlyUnread)}
+          className={`shrink-0 inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-extrabold transition-all cursor-pointer select-none ${
+            currentOnlyUnread
+              ? "bg-rose-50 border border-rose-300 text-rose-600 ring-2 ring-rose-200/40"
+              : "bg-neutral-50/80 hover:bg-neutral-100/80 border border-neutral-200/80 text-neutral-600"
+          }`}
+        >
+          <span
+            className={`w-2 h-2 rounded-full transition-colors ${
+              currentOnlyUnread ? "bg-rose-500 animate-pulse" : "bg-neutral-300"
+            }`}
+          />
+          <span className="whitespace-nowrap">Chưa đọc</span>
+          {currentOnlyUnread && (
+            <span className="text-[9.5px] bg-rose-200/80 text-rose-800 px-1 py-0.2 rounded-full font-black">
+              Bật
+            </span>
+          )}
+        </button>
       </div>
 
       {/* ═══ NOTIFICATION LIST ═══ */}
       {notifications.length === 0 ? (
         <div className="flex flex-col items-center justify-center gap-3 rounded-3xl bg-white py-14 px-6 text-center border border-neutral-200/80 shadow-sm">
-          <div className="relative">
+          <div className="relative w-24 h-24 sm:w-28 sm:h-28 mx-auto rounded-3xl overflow-hidden shadow-cute border-2 border-primary-100/80 bg-pink-50/60 p-1">
             <img
               src="/meow-back-mascot.png"
               alt="No notifications"
-              className="h-28 w-28 object-contain opacity-90 mx-auto"
+              className="w-full h-full object-contain rounded-2xl"
             />
           </div>
           <div className="max-w-md">
@@ -389,91 +451,88 @@ export function NotificationsClient({
               <div
                 key={n.id}
                 onClick={() => handleCardClick(n)}
-                className={`group relative flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 rounded-2xl p-4 sm:p-5 transition-all duration-200 cursor-pointer border ${
+                className={`group relative flex items-start gap-3 sm:gap-3.5 rounded-2xl p-3 sm:p-3.5 transition-all duration-150 cursor-pointer border ${
                   !n.isRead
-                    ? `${config.bgUnread} ${config.borderUnread} shadow-cute`
-                    : "bg-white border-neutral-200/80 hover:border-neutral-300 hover:bg-neutral-50/40 shadow-xs"
+                    ? `${config.bgUnread} ${config.borderUnread} shadow-2xs hover:shadow-cute-sm`
+                    : "bg-white border-neutral-200/80 hover:border-neutral-300 hover:bg-neutral-50/50 shadow-2xs"
                 }`}
               >
-                {/* Left Side: Icon + Details */}
-                <div className="flex items-start gap-3 sm:gap-4 flex-1 min-w-0">
-                  {/* Icon Box */}
-                  <div
-                    className={`flex h-11 w-11 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-2xl ${config.iconBg} ${config.iconColor} shadow-2xs border border-white`}
-                  >
-                    <Icon size={20} strokeWidth={2.3} />
-                  </div>
+                {/* Left Side: Icon Box */}
+                <div
+                  className={`flex h-10 w-10 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-2xl ${config.iconBg} ${config.iconColor} shadow-2xs border border-white mt-0.5`}
+                >
+                  <Icon size={18} strokeWidth={2.3} />
+                </div>
 
-                  {/* Body Content */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex flex-wrap items-center gap-2 mb-1">
-                      {/* Category Badge */}
+                {/* Right Side: Details & Actions */}
+                <div className="flex-1 min-w-0">
+                  {/* Row 1: Badges, Time & Mark Read */}
+                  <div className="flex items-center justify-between gap-2 mb-1">
+                    <div className="flex items-center gap-1.5 min-w-0">
                       <span
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10.5px] font-extrabold uppercase tracking-wider border ${config.badgeBg} ${config.badgeColor}`}
+                        className={`inline-flex items-center px-2 py-0.5 rounded-md text-[9.5px] sm:text-[10px] font-black uppercase tracking-wider border ${config.badgeBg} ${config.badgeColor}`}
                       >
                         {config.label}
                       </span>
-
-                      {/* Time ago */}
-                      <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-neutral-400">
-                        <Clock size={11} />
-                        {formatNotificationTime(n.createdAt)}
-                      </span>
-
-                      {/* Unread Glowing Dot */}
                       {!n.isRead && (
-                        <span className="flex items-center gap-1 text-[11px] font-black text-primary-600 bg-primary-100/90 px-2 py-0.5 rounded-full">
-                          <span className="h-2 w-2 rounded-full bg-primary-500 animate-pulse" />
+                        <span className="flex items-center gap-1 text-[10px] font-black text-rose-600 bg-rose-50 border border-rose-200 px-1.5 py-0.2 rounded-full">
+                          <span className="h-1.5 w-1.5 rounded-full bg-rose-500 animate-pulse" />
                           Mới
                         </span>
                       )}
                     </div>
 
-                    {/* Title */}
-                    <h4
-                      className={`text-sm sm:text-[15px] leading-snug tracking-tight ${
-                        !n.isRead ? "font-black text-neutral-900" : "font-bold text-neutral-800"
-                      }`}
-                    >
-                      {n.title}
-                    </h4>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className="inline-flex items-center gap-1 text-[10.5px] font-semibold text-neutral-400">
+                        <Clock size={10} />
+                        {formatNotificationTime(n.createdAt)}
+                      </span>
 
-                    {/* Message Body */}
-                    <p className="mt-1 text-xs sm:text-[13px] text-neutral-600 font-medium leading-relaxed break-words">
-                      {n.message}
-                    </p>
-
-                    {/* Action button showing destination */}
-                    {(() => {
-                      const targetUrl = getNotificationTargetUrl(n);
-                      const actionLabel = getNotificationActionLabel(targetUrl);
-                      return (
-                        <div className="mt-2.5 inline-flex items-center gap-1.5 text-xs font-extrabold text-primary-600 group-hover:text-primary-700 bg-primary-50/70 group-hover:bg-primary-100/80 px-2.5 py-1 rounded-xl border border-primary-200/70 transition-colors w-fit">
-                          <span>{actionLabel}</span>
-                          <ArrowRight size={13} className="group-hover:translate-x-1 transition-transform" />
-                        </div>
-                      );
-                    })()}
+                      {!n.isRead ? (
+                        <button
+                          type="button"
+                          onClick={(e) => handleSingleMarkReadBtn(e, n)}
+                          title="Đánh dấu đã đọc"
+                          className="flex items-center gap-1 px-1.5 py-0.5 rounded-lg text-[10.5px] font-bold text-neutral-400 hover:text-primary-600 hover:bg-white border border-transparent hover:border-primary-200 shadow-2xs transition-all cursor-pointer"
+                        >
+                          <Check size={12} strokeWidth={2.5} />
+                          <span className="hidden sm:inline">Đã đọc</span>
+                        </button>
+                      ) : (
+                        <span title="Đã xem" className="text-emerald-500/80">
+                          <CheckCheck size={13} strokeWidth={2.5} />
+                        </span>
+                      )}
+                    </div>
                   </div>
-                </div>
 
-                {/* Right Side: Mark Read Action */}
-                <div className="shrink-0 flex items-center justify-end gap-2 pt-2 sm:pt-0 border-t sm:border-t-0 border-neutral-100">
-                  {!n.isRead ? (
-                    <button
-                      onClick={(e) => handleSingleMarkReadBtn(e, n)}
-                      title="Đánh dấu đã đọc"
-                      className="flex items-center gap-1.5 rounded-xl bg-white hover:bg-primary-50 px-3 py-1.5 text-xs font-bold text-neutral-600 hover:text-primary-600 border border-neutral-200/80 hover:border-primary-300 shadow-2xs transition-all"
-                    >
-                      <Check size={13} strokeWidth={2.5} />
-                      <span>Đánh dấu đã đọc</span>
-                    </button>
-                  ) : (
-                    <span className="text-[11px] font-semibold text-neutral-400 flex items-center gap-1">
-                      <CheckCheck size={13} className="text-emerald-500" />
-                      <span>Đã xem</span>
-                    </span>
-                  )}
+                  {/* Title */}
+                  <h4
+                    className={`text-xs sm:text-[13.5px] leading-snug tracking-tight ${
+                      !n.isRead ? "font-black text-neutral-900" : "font-bold text-neutral-800"
+                    }`}
+                  >
+                    {n.title}
+                  </h4>
+
+                  {/* Message Body */}
+                  <p className="mt-0.5 text-[11.5px] sm:text-xs text-neutral-600 font-medium leading-relaxed line-clamp-2">
+                    {n.message}
+                  </p>
+
+                  {/* Row 3: Action Link Prompt */}
+                  {(() => {
+                    const targetUrl = getNotificationTargetUrl(n);
+                    const actionLabel = getNotificationActionLabel(targetUrl);
+                    return (
+                      <div className="mt-1.5 flex items-center justify-between">
+                        <span className="inline-flex items-center gap-1 text-[11px] font-extrabold text-primary-600 group-hover:text-primary-700 transition-colors">
+                          <span>{actionLabel}</span>
+                          <ArrowRight size={11} className="group-hover:translate-x-0.5 transition-transform" />
+                        </span>
+                      </div>
+                    );
+                  })()}
                 </div>
               </div>
             );

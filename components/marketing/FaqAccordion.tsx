@@ -86,9 +86,95 @@ export function FaqAccordion({ items }: { items: FaqItem[] }) {
   }, [filteredItems]);
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-      {/* ── LEFT SIDEBAR (4/12 width) ── */}
-      <div className="lg:col-span-4 space-y-6 lg:sticky lg:top-24">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-8 items-start">
+      {/* ── MOBILE HEADER CONTROLS (Chỉ hiện trên Mobile < lg: Tối ưu gọn gàng) ── */}
+      <div className="lg:hidden flex flex-col gap-3">
+        {/* Search Bar Mobile */}
+        <div className="relative">
+          <Search
+            size={17}
+            className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-primary-500"
+          />
+          <input
+            type="text"
+            value={query}
+            onChange={(e) => {
+              setQuery(e.target.value);
+              if (e.target.value.trim()) setSelectedGroup("ALL");
+            }}
+            placeholder="Tìm kiếm câu hỏi (rút tiền, hoàn tiền...)"
+            className="w-full rounded-2xl border border-primary-200/90 bg-white py-2.5 pl-10 pr-9 text-xs sm:text-[13px] font-bold text-neutral-900 placeholder:text-neutral-400 outline-none transition-all focus:border-primary-400 focus:ring-2 focus:ring-primary-100 shadow-2xs"
+          />
+          {query && (
+            <button
+              onClick={() => setQuery("")}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 p-1"
+            >
+              <X size={15} />
+            </button>
+          )}
+        </div>
+
+        {/* Mobile Horizontal Category Chips */}
+        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-hide -mx-1 px-1">
+          <button
+            type="button"
+            onClick={() => setSelectedGroup("ALL")}
+            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-black shrink-0 transition-all cursor-pointer ${
+              selectedGroup === "ALL"
+                ? "bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-cute"
+                : "bg-white text-neutral-700 border border-primary-100/90 hover:bg-neutral-50 shadow-2xs"
+            }`}
+          >
+            <Sparkles size={13} />
+            <span>Tất cả</span>
+            <span
+              className={`text-[10px] px-1.5 py-0.2 rounded-full font-black ${
+                selectedGroup === "ALL" ? "bg-white/25 text-white" : "bg-primary-100 text-primary-700"
+              }`}
+            >
+              {items.length}
+            </span>
+          </button>
+
+          {allGroups.map((g) => {
+            const conf = GROUP_CONFIG[g] || {
+              icon: MessageCircleQuestion,
+              color: "from-primary-400 to-primary-500",
+              label: g,
+            };
+            const IconComp = conf.icon;
+            const count = items.filter((i) => (i.group ?? "KHÁC") === g).length;
+            const isSelected = selectedGroup === g;
+
+            return (
+              <button
+                key={g}
+                type="button"
+                onClick={() => setSelectedGroup(g)}
+                className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-black shrink-0 transition-all cursor-pointer ${
+                  isSelected
+                    ? "bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-cute"
+                    : "bg-white text-neutral-700 border border-primary-100/90 hover:bg-neutral-50 shadow-2xs"
+                }`}
+              >
+                <IconComp size={13} />
+                <span>{conf.label || g}</span>
+                <span
+                  className={`text-[10px] px-1.5 py-0.2 rounded-full font-black ${
+                    isSelected ? "bg-white/25 text-white" : "bg-primary-100 text-primary-700"
+                  }`}
+                >
+                  {count}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* ── LEFT SIDEBAR TRÊN PC (hidden lg:block: Giữ nguyên 100% như cũ) ── */}
+      <div className="hidden lg:block lg:col-span-4 space-y-6 lg:sticky lg:top-24">
         {/* Search Bar */}
         <div className="relative bg-white rounded-3xl p-4 border-2 border-primary-100 shadow-cute">
           <label className="text-[12px] font-black uppercase tracking-wider text-primary-600 mb-2 block">
@@ -210,15 +296,15 @@ export function FaqAccordion({ items }: { items: FaqItem[] }) {
       </div>
 
       {/* ── RIGHT CONTENT PANEL (8/12 width) ── */}
-      <div className="lg:col-span-8 space-y-8">
+      <div className="lg:col-span-8 space-y-6 sm:space-y-8">
         {filteredItems.length === 0 ? (
-          <div className="py-16 text-center bg-white rounded-3xl border-2 border-primary-100 shadow-cute p-8">
-            <HelpCircle size={48} className="mx-auto text-primary-400 mb-3" />
-            <h3 className="text-[18px] font-black text-neutral-950 mb-1">
+          <div className="py-12 sm:py-16 text-center bg-white rounded-2xl sm:rounded-3xl border-2 border-primary-100 shadow-cute p-6 sm:p-8">
+            <HelpCircle size={40} className="sm:w-12 sm:h-12 mx-auto text-primary-400 mb-3" />
+            <h3 className="text-[16px] sm:text-[18px] font-black text-neutral-950 mb-1">
               Không tìm thấy câu hỏi phù hợp
             </h3>
-            <p className="text-[14px] text-neutral-600 font-medium">
-              Không tìm thấy câu hỏi chứa từ khóa "{query}". Thử chuyển chủ đề ở danh mục bên trái.
+            <p className="text-[13px] sm:text-[14px] text-neutral-600 font-medium">
+              Không tìm thấy câu hỏi chứa từ khóa "{query}". Thử chọn danh mục khác ở trên.
             </p>
           </div>
         ) : (
@@ -231,24 +317,24 @@ export function FaqAccordion({ items }: { items: FaqItem[] }) {
             const GroupIcon = conf.icon;
 
             return (
-              <div key={group} className="space-y-4">
+              <div key={group} className="space-y-3 sm:space-y-4">
                 {/* Category Header */}
-                <div className="flex items-center gap-3 bg-gradient-to-r from-primary-100/90 via-primary-50 to-white px-5 py-3 rounded-2xl border border-primary-200/80 shadow-sm">
-                  <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${conf.color} flex items-center justify-center text-white shadow-sm shrink-0`}>
-                    <GroupIcon size={20} strokeWidth={2.2} />
+                <div className="flex items-center gap-2.5 sm:gap-3 bg-gradient-to-r from-primary-100/90 via-primary-50 to-white px-3.5 sm:px-5 py-2 sm:py-3 rounded-xl sm:rounded-2xl border border-primary-200/80 shadow-sm">
+                  <div className={`w-7 h-7 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-gradient-to-br ${conf.color} flex items-center justify-center text-white shadow-sm shrink-0`}>
+                    <GroupIcon size={16} className="sm:w-5 sm:h-5" strokeWidth={2.2} />
                   </div>
                   <div>
-                    <h3 className="text-[16px] font-black text-neutral-950 uppercase tracking-wide">
+                    <h3 className="text-[13.5px] sm:text-[16px] font-black text-neutral-950 uppercase tracking-wide">
                       {group}
                     </h3>
-                    <span className="text-[11.5px] font-bold text-neutral-500">
+                    <span className="text-[11px] sm:text-[11.5px] font-bold text-neutral-500">
                       {groupItems.length} câu hỏi giải đáp chi tiết
                     </span>
                   </div>
                 </div>
 
                 {/* Question Accordion Cards */}
-                <div className="space-y-3.5">
+                <div className="space-y-2.5 sm:space-y-3.5">
                   {groupItems.map((item) => {
                     const key = `${group}-${item.question}`;
                     const isOpen = openKey === key || filteredItems.length === 1;
@@ -257,7 +343,7 @@ export function FaqAccordion({ items }: { items: FaqItem[] }) {
                     return (
                       <div
                         key={key}
-                        className={`rounded-3xl border-2 transition-all duration-300 overflow-hidden ${
+                        className={`rounded-2xl sm:rounded-3xl border-2 transition-all duration-300 overflow-hidden ${
                           isOpen
                             ? "bg-gradient-to-br from-primary-50/90 via-white to-primary-50/30 border-primary-300 shadow-cute-lg"
                             : "bg-white border-primary-100/90 hover:border-primary-300 hover:shadow-cute"
@@ -267,19 +353,19 @@ export function FaqAccordion({ items }: { items: FaqItem[] }) {
                           type="button"
                           onClick={() => setOpenKey(isOpen ? null : key)}
                           aria-expanded={isOpen}
-                          className="flex w-full items-center justify-between gap-4 px-6 py-5 text-left"
+                          className="flex w-full items-center justify-between gap-3 px-4 py-3.5 sm:px-6 sm:py-5 text-left"
                         >
-                          <span className="text-[16.5px] font-black text-neutral-950 leading-snug">
+                          <span className="text-[14px] sm:text-[16.5px] font-black text-neutral-950 leading-snug">
                             {item.question}
                           </span>
                           <div
-                            className={`w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 transition-all duration-300 ${
+                            className={`w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl flex items-center justify-center shrink-0 transition-all duration-300 ${
                               isOpen
                                 ? "bg-gradient-to-br from-primary-500 to-primary-600 text-white rotate-180 shadow-cute"
                                 : "bg-primary-100 text-primary-600"
                             }`}
                           >
-                            <ChevronDown size={20} strokeWidth={2.5} />
+                            <ChevronDown size={17} className="sm:w-5 sm:h-5" strokeWidth={2.5} />
                           </div>
                         </button>
 
@@ -290,13 +376,13 @@ export function FaqAccordion({ items }: { items: FaqItem[] }) {
                           }`}
                         >
                           <div className="overflow-hidden">
-                            <div className="px-6 pb-6 pt-2 border-t border-primary-100/80 space-y-4">
-                              <p className="text-[15px] font-semibold leading-relaxed text-neutral-800 whitespace-pre-line">
+                            <div className="px-4 pb-4 pt-1 sm:px-6 sm:pb-6 sm:pt-2 border-t border-primary-100/80 space-y-3 sm:space-y-4">
+                              <p className="text-[13px] sm:text-[15px] font-semibold leading-relaxed text-neutral-800 whitespace-pre-line">
                                 {item.answer}
                               </p>
 
                               {/* Feedback Bar */}
-                              <div className="pt-3 border-t border-primary-100/50 flex items-center justify-between flex-wrap gap-2 text-[12px] font-bold text-neutral-500">
+                              <div className="pt-2.5 sm:pt-3 border-t border-primary-100/50 flex items-center justify-between flex-wrap gap-2 text-[11px] sm:text-[12px] font-bold text-neutral-500">
                                 <span>Câu trả lời này có giúp ích cho bạn không?</span>
                                 <div className="flex items-center gap-2">
                                   <button
@@ -306,13 +392,13 @@ export function FaqAccordion({ items }: { items: FaqItem[] }) {
                                         [key]: true,
                                       }))
                                     }
-                                    className={`flex items-center gap-1 px-3 py-1 rounded-full border transition-all ${
+                                    className={`flex items-center gap-1 px-2.5 py-1 rounded-full border transition-all text-xs ${
                                       isHelpful
                                         ? "bg-emerald-500 text-white border-emerald-500"
                                         : "bg-white text-neutral-700 border-neutral-200 hover:border-emerald-400"
                                     }`}
                                   >
-                                    <ThumbsUp size={13} />
+                                    <ThumbsUp size={12} />
                                     <span>{isHelpful ? "Cảm ơn bạn!" : "Hữu ích"}</span>
                                   </button>
                                 </div>
@@ -328,6 +414,25 @@ export function FaqAccordion({ items }: { items: FaqItem[] }) {
             );
           })
         )}
+
+        {/* Quick Support Banner Mobile (Chỉ hiện trên mobile sau khi lướt danh sách câu hỏi) */}
+        <div className="lg:hidden bg-gradient-to-br from-primary-500 via-[#FF3B7B] to-primary-600 rounded-2xl p-4 text-white shadow-cute space-y-2 relative overflow-hidden mt-6">
+          <Headphones size={32} className="text-white/20 absolute right-3 bottom-3" />
+          <h4 className="font-black text-[15px] leading-snug">
+            Vẫn chưa tìm thấy câu trả lời? 🎧
+          </h4>
+          <p className="text-xs font-semibold text-white/90 leading-relaxed">
+            Đội ngũ CSKH MeowBack sẵn sàng hỗ trợ bạn 24/7 qua Zalo & Telegram.
+          </p>
+          <a
+            href="https://zalo.me/g/cgmmvw504"
+            target="_blank"
+            rel="noreferrer"
+            className="inline-block w-full text-center bg-white text-primary-600 font-extrabold py-2 rounded-xl text-xs shadow-sm active:scale-98 transition-transform"
+          >
+            Chat Zalo Ngay 💬
+          </a>
+        </div>
       </div>
     </div>
   );

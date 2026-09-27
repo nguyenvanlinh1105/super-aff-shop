@@ -7,12 +7,18 @@ import {
   TrendingUp,
   ArrowUpRight,
   Sparkles,
+  Store,
+  Activity,
+  Flame,
+  CheckCircle2,
+  Clock,
+  XCircle,
 } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { formatCurrency } from "@/lib/format";
 import { AdminRevenueChart } from "@/components/admin/AdminRevenueChart";
 import { IconBow } from "@/components/icons/CatRibbonIcons";
-import { ShopeeIcon, TiktokIcon } from "@/components/icons/PlatformIcons";
+import { ShopeeIcon, TiktokIcon, LazadaIcon } from "@/components/icons/PlatformIcons";
 
 export default async function AdminDashboardPage() {
   const [
@@ -94,29 +100,98 @@ export default async function AdminDashboardPage() {
     };
   });
 
-  // Tỷ trọng nền tảng
-  const platformMap = new Map<string, string>(platforms.map((p) => [p.id, p.name]));
-  const platformCounts = new Map<string, number>();
-  for (const o of orders) {
-    const name = (o.platformId && platformMap.get(o.platformId)) || "Khác";
-    platformCounts.set(name, (platformCounts.get(name) ?? 0) + 1);
-  }
-  if (platformCounts.size === 0) {
-    platformCounts.set("Shopee", 12);
-    platformCounts.set("TikTok Shop", 3);
-  }
-  const totalPlatformOrders = Array.from(platformCounts.values()).reduce((a, b) => a + b, 0) || 1;
-  const PLATFORM_COLORS = ["#EE4D2D", "#0F172A", "#0EA5E9", "#8B5CF6"];
-  const platformShare = Array.from(platformCounts.entries())
-    .sort(([, a], [, b]) => b - a)
-    .map(([name, count], i) => ({
-      name,
-      count,
-      pct: Math.round((count / totalPlatformOrders) * 100),
-      color: PLATFORM_COLORS[i % PLATFORM_COLORS.length],
-    }));
+  // ─── TỶ TRỌNG SÀN THƯƠNG MẠI ĐIỆN TỬ (SHOPEE, TIKTOK SHOP, LAZADA) ───
+  const PLATFORM_CONFIG: Record<
+    string,
+    {
+      name: string;
+      color: string;
+      barGradient: string;
+      badgeBg: string;
+      borderColor: string;
+      bgLight: string;
+      brandCode: "SHOPEE" | "TIKTOK" | "LAZADA" | "OTHER";
+    }
+  > = {
+    SHOPEE: {
+      name: "Shopee",
+      color: "#EE4D2D",
+      barGradient: "from-[#EE4D2D] to-[#FF6B4A]",
+      badgeBg: "bg-[#EE4D2D]",
+      borderColor: "border-orange-200/70",
+      bgLight: "bg-orange-50/50",
+      brandCode: "SHOPEE",
+    },
+    TIKTOK: {
+      name: "TikTok Shop",
+      color: "#0F172A",
+      barGradient: "from-neutral-900 to-neutral-700",
+      badgeBg: "bg-neutral-900",
+      borderColor: "border-neutral-200/80",
+      bgLight: "bg-neutral-50/80",
+      brandCode: "TIKTOK",
+    },
+    LAZADA: {
+      name: "Lazada",
+      color: "#0F146D",
+      barGradient: "from-[#0F146D] via-[#1054DE] to-[#F3006C]",
+      badgeBg: "bg-[#0F146D]",
+      borderColor: "border-blue-200/70",
+      bgLight: "bg-blue-50/50",
+      brandCode: "LAZADA",
+    },
+  };
 
-  // Trạng thái đơn hàng
+  // Khởi tạo trước tất cả các sàn có trong hệ thống (Shopee, TikTok, Lazada)
+  const platformStatsMap = new Map<
+    string,
+    {
+      id: string;
+      code: string;
+      name: string;
+      count: number;
+    }
+  >();
+
+  for (const p of platforms) {
+    const code = p.code.toUpperCase();
+    platformStatsMap.set(p.id, {
+      id: p.id,
+      code,
+      name: p.name,
+      count: 0,
+    });
+  }
+
+  for (const o of orders) {
+    if (o.platformId && platformStatsMap.has(o.platformId)) {
+      platformStatsMap.get(o.platformId)!.count += 1;
+    }
+  }
+
+  const totalPlatformOrders = Array.from(platformStatsMap.values()).reduce((sum, item) => sum + item.count, 0) || 1;
+
+  const platformShare = Array.from(platformStatsMap.values())
+    .map((item) => {
+      const config = PLATFORM_CONFIG[item.code] || {
+        name: item.name,
+        color: "#6B7280",
+        barGradient: "from-neutral-600 to-neutral-400",
+        badgeBg: "bg-neutral-700",
+        borderColor: "border-neutral-200",
+        bgLight: "bg-neutral-50",
+        brandCode: "OTHER" as const,
+      };
+      const pct = Math.round((item.count / totalPlatformOrders) * 100);
+      return {
+        ...item,
+        pct,
+        ...config,
+      };
+    })
+    .sort((a, b) => b.count - a.count);
+
+  // ─── SỨC KHOẺ ĐƠN HÀNG (TRẠNG THÁI DUYỆT & HOÀN TIỀN) ───
   const statusCounts = { approved: 0, pending: 0, cancelled: 0 };
   for (const o of orders) {
     if (o.orderStatus === "approved") statusCounts.approved += 1;
@@ -124,13 +199,56 @@ export default async function AdminDashboardPage() {
     else statusCounts.pending += 1;
   }
   const statusTotal = statusCounts.approved + statusCounts.pending + statusCounts.cancelled || 1;
+  const approvedPct = Math.round((statusCounts.approved / statusTotal) * 100);
+  const pendingPct = Math.round((statusCounts.pending / statusTotal) * 100);
+  const cancelledPct = Math.max(0, 100 - approvedPct - pendingPct);
+
   const statusRows = [
-    { label: "Đã duyệt", value: statusCounts.approved, color: "bg-emerald-500", text: "text-emerald-700", desc: "Đủ điều kiện hoàn tiền" },
-    { label: "Đang chờ", value: statusCounts.pending, color: "bg-amber-400", text: "text-amber-700", desc: "Chờ sàn đối soát" },
-    { label: "Đã huỷ", value: statusCounts.cancelled, color: "bg-neutral-300", text: "text-neutral-500", desc: "Đơn hoàn / huỷ" },
+    {
+      key: "approved",
+      label: "Đã duyệt",
+      sublabel: "Đủ điều kiện hoàn tiền",
+      value: statusCounts.approved,
+      pct: approvedPct,
+      color: "#10B981",
+      barGradient: "from-emerald-500 to-teal-500",
+      badgeClass: "bg-emerald-50 text-emerald-700 border-emerald-200/70",
+      dotBg: "bg-emerald-500",
+      icon: CheckCircle2,
+      iconColor: "text-emerald-600",
+      iconBg: "bg-emerald-50 border border-emerald-100",
+    },
+    {
+      key: "pending",
+      label: "Đang chờ",
+      sublabel: "Chờ sàn đối soát kỳ này",
+      value: statusCounts.pending,
+      pct: pendingPct,
+      color: "#F59E0B",
+      barGradient: "from-amber-400 to-amber-500",
+      badgeClass: "bg-amber-50 text-amber-700 border-amber-200/70",
+      dotBg: "bg-amber-400",
+      icon: Clock,
+      iconColor: "text-amber-600",
+      iconBg: "bg-amber-50 border border-amber-100",
+    },
+    {
+      key: "cancelled",
+      label: "Đã huỷ",
+      sublabel: "Đơn hoàn hoặc huỷ mua",
+      value: statusCounts.cancelled,
+      pct: cancelledPct,
+      color: "#94A3B8",
+      barGradient: "from-neutral-400 to-slate-400",
+      badgeClass: "bg-slate-50 text-slate-600 border-slate-200/70",
+      dotBg: "bg-slate-400",
+      icon: XCircle,
+      iconColor: "text-slate-500",
+      iconBg: "bg-slate-50 border border-slate-200",
+    },
   ];
 
-  // Phân tích khung giờ săn deal (Peak Shopping Hours)
+  // ─── PHÂN TÍCH KHUNG GIỜ SĂN DEAL (PEAK SHOPPING HOURS) ───
   const hourBuckets = { night: 0, morning: 0, afternoon: 0, evening: 0 };
   for (const o of orders) {
     const d = new Date(o.orderedAt ?? o.createdAt);
@@ -142,10 +260,50 @@ export default async function AdminDashboardPage() {
   }
   const peakTotal = orders.length || 1;
   const peakRows = [
-    { slot: "00:00 - 06:00", label: "Flash Sale Đêm", count: hourBuckets.night, pct: Math.round((hourBuckets.night / peakTotal) * 100), emoji: "🌙", color: "bg-indigo-500" },
-    { slot: "06:00 - 12:00", label: "Sáng Công Sở", count: hourBuckets.morning, pct: Math.round((hourBuckets.morning / peakTotal) * 100), emoji: "☕", color: "bg-sky-500" },
-    { slot: "12:00 - 18:00", label: "Chiều Mua Sắm", count: hourBuckets.afternoon, pct: Math.round((hourBuckets.afternoon / peakTotal) * 100), emoji: "🛍️", color: "bg-amber-500" },
-    { slot: "18:00 - 24:00", label: "Tối Giờ Vàng", count: hourBuckets.evening, pct: Math.round((hourBuckets.evening / peakTotal) * 100), emoji: "⚡", color: "bg-rose-500" },
+    {
+      slot: "12:00 - 18:00",
+      label: "Chiều Mua Sắm",
+      subtext: "Giờ nghỉ trưa & săn deal xế chiều",
+      count: hourBuckets.afternoon,
+      pct: Math.round((hourBuckets.afternoon / peakTotal) * 100),
+      emoji: "🛍️",
+      barGradient: "from-amber-400 to-orange-500",
+      badgeClass: "bg-amber-50 text-amber-800 border-amber-200/70",
+      color: "#F59E0B",
+    },
+    {
+      slot: "18:00 - 24:00",
+      label: "Tối Giờ Vàng",
+      subtext: "Livestream & flash sale tối",
+      count: hourBuckets.evening,
+      pct: Math.round((hourBuckets.evening / peakTotal) * 100),
+      emoji: "⚡",
+      barGradient: "from-rose-500 to-pink-500",
+      badgeClass: "bg-rose-50 text-rose-800 border-rose-200/70",
+      color: "#F43F5E",
+    },
+    {
+      slot: "06:00 - 12:00",
+      label: "Sáng Công Sở",
+      subtext: "Bắt đầu ngày mới & check giỏ hàng",
+      count: hourBuckets.morning,
+      pct: Math.round((hourBuckets.morning / peakTotal) * 100),
+      emoji: "☕",
+      barGradient: "from-sky-400 to-blue-500",
+      badgeClass: "bg-sky-50 text-sky-800 border-sky-200/70",
+      color: "#0EA5E9",
+    },
+    {
+      slot: "00:00 - 06:00",
+      label: "Flash Sale Đêm",
+      subtext: "Săn deal 0h cực hời",
+      count: hourBuckets.night,
+      pct: Math.round((hourBuckets.night / peakTotal) * 100),
+      emoji: "🌙",
+      barGradient: "from-indigo-400 to-violet-500",
+      badgeClass: "bg-indigo-50 text-indigo-800 border-indigo-200/70",
+      color: "#6366F1",
+    },
   ].sort((a, b) => b.count - a.count);
 
   const topPeak = peakRows[0];
@@ -241,50 +399,99 @@ export default async function AdminDashboardPage() {
       {/* ═══ 2. TỶ TRỌNG SÀN, SỨC KHOẺ ĐƠN HÀNG & KHUNG GIỜ SĂN DEAL (3 CARDS IN 1 ROW) ═══ */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-        {/* Bar: Tỷ trọng đơn theo sàn (Visual Comparison Bar Chart) */}
-        <div className="rounded-3xl bg-white p-6 sm:p-8 shadow-sm border border-neutral-200/70 flex flex-col justify-between overflow-hidden">
-          <div>
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 rounded-2xl bg-sky-50 flex items-center justify-center shadow-xs border border-sky-100 shrink-0 text-lg">
-                &#128722;
+        {/* ── CARD 1: TỶ TRỌNG ĐƠN THEO SÀN (SHOPEE, TIKTOK SHOP, LAZADA) ── */}
+        <div className="group relative rounded-3xl bg-white p-6 sm:p-7 shadow-sm border border-neutral-200/80 flex flex-col justify-between hover:shadow-md transition-all duration-300 overflow-hidden">
+          {/* Ambient soft glow */}
+          <div className="pointer-events-none absolute -top-12 -right-12 h-36 w-36 rounded-full bg-gradient-to-br from-orange-200/30 via-rose-100/20 to-transparent blur-2xl" />
+
+          <div className="relative z-10">
+            {/* Header */}
+            <div className="flex items-center gap-3 mb-5">
+              <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-orange-50 via-amber-50 to-pink-50 border border-orange-200/70 flex items-center justify-center shadow-xs shrink-0 text-orange-600">
+                <Store className="w-5 h-5 text-orange-600" />
               </div>
               <div>
-                <h2 className="text-base font-extrabold text-neutral-900 tracking-tight">Tỷ Trọng Đơn Theo Sàn</h2>
-                <p className="text-xs text-neutral-500 font-medium">Phân bố {totalPlatformOrders.toLocaleString()} đơn trên các sàn TMĐT</p>
+                <h2 className="text-base font-extrabold text-neutral-900 tracking-tight">
+                  Tỷ Trọng Đơn Theo Sàn
+                </h2>
+                <p className="text-xs text-neutral-500 font-medium">
+                  Phân bố {totalPlatformOrders.toLocaleString()} đơn trên 3 sàn TMĐT
+                </p>
               </div>
             </div>
 
-            <div className="flex flex-col gap-4">
+            {/* Visual Cumulative Multi-Segment Bar */}
+            <div className="mb-5">
+              <div className="flex items-center justify-between text-[11px] font-bold text-neutral-500 mb-1.5 px-0.5">
+                <span>Phân bố thị phần (3 sàn)</span>
+                <span>100% tổng đơn</span>
+              </div>
+              <div className="h-3 w-full rounded-full bg-neutral-100 flex gap-0.5 p-0.5 overflow-hidden border border-neutral-200/60 shadow-inner">
+                {platformShare.map((s) => (
+                  <div
+                    key={s.id}
+                    style={{ width: `${Math.max(s.pct, 3)}%` }}
+                    className={`h-full rounded-full bg-gradient-to-r ${s.barGradient} transition-all duration-500`}
+                    title={`${s.name}: ${s.pct}% (${s.count} đơn)`}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Platform List (Shopee, TikTok, Lazada) */}
+            <div className="flex flex-col gap-3">
               {platformShare.map((s) => {
-                const isShopee = s.name.toLowerCase().includes("shopee");
-                const isTiktok = s.name.toLowerCase().includes("tiktok");
+                const isShopee = s.brandCode === "SHOPEE";
+                const isTiktok = s.brandCode === "TIKTOK";
+                const isLazada = s.brandCode === "LAZADA";
+
                 return (
-                  <div key={s.name} className="flex flex-col gap-1.5 p-3 rounded-2xl bg-neutral-50/80 border border-neutral-200/50 hover:bg-neutral-100/60 transition-colors">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2.5 min-w-0">
-                        <div className="w-7 h-7 rounded-xl bg-white flex items-center justify-center shadow-2xs border border-neutral-200/60 shrink-0 p-1">
+                  <div
+                    key={s.id}
+                    className={`flex flex-col gap-2 p-3.5 rounded-2xl border ${s.borderColor} ${s.bgLight} hover:bg-white hover:shadow-xs transition-all duration-200`}
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="w-8 h-8 rounded-xl bg-white flex items-center justify-center shadow-xs border border-neutral-200/70 shrink-0 p-1">
                           {isShopee ? (
-                            <ShopeeIcon size={18} />
+                            <ShopeeIcon size={20} />
                           ) : isTiktok ? (
-                            <TiktokIcon size={18} />
+                            <TiktokIcon size={20} />
+                          ) : isLazada ? (
+                            <LazadaIcon size={20} />
                           ) : (
-                            <span className="w-3 h-3 rounded-full" style={{ backgroundColor: s.color }} />
+                            <span className="w-3.5 h-3.5 rounded-full" style={{ backgroundColor: s.color }} />
                           )}
                         </div>
-                        <span className="text-xs sm:text-sm font-extrabold text-neutral-800 truncate">{s.name}</span>
+                        <div className="flex flex-col min-w-0">
+                          <span className="text-sm font-extrabold text-neutral-900 leading-tight">
+                            {s.name}
+                          </span>
+                          <span className="text-[10px] text-neutral-400 font-medium leading-tight">
+                            {isShopee && "Chiết khấu cao & phổ biến"}
+                            {isTiktok && "Tăng trưởng qua livestream"}
+                            {isLazada && "Voucher & flash sale sàn"}
+                          </span>
+                        </div>
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
-                        <span className="text-xs font-bold text-neutral-500 tabular-nums">{s.count} đơn</span>
-                        <span className="text-xs font-black px-2 py-0.5 rounded-full text-white tabular-nums" style={{ backgroundColor: s.color }}>
+                        <span className="text-xs font-bold text-neutral-500 tabular-nums">
+                          {s.count} đơn
+                        </span>
+                        <span
+                          className="text-xs font-black px-2.5 py-0.5 rounded-full text-white tabular-nums shadow-xs"
+                          style={{ backgroundColor: s.color }}
+                        >
                           {s.pct}%
                         </span>
                       </div>
                     </div>
-                    {/* Visual Progress Bar */}
-                    <div className="h-2 w-full rounded-full bg-neutral-200/70 overflow-hidden">
+
+                    {/* Individual Visual Bar */}
+                    <div className="h-1.5 w-full rounded-full bg-neutral-200/60 overflow-hidden">
                       <div
-                        style={{ width: `${Math.max(s.pct, 3)}%`, backgroundColor: s.color }}
-                        className="h-full rounded-full transition-all duration-500"
+                        style={{ width: `${Math.max(s.pct, 3)}%` }}
+                        className={`h-full rounded-full bg-gradient-to-r ${s.barGradient} transition-all duration-500`}
                       />
                     </div>
                   </div>
@@ -293,42 +500,216 @@ export default async function AdminDashboardPage() {
             </div>
           </div>
 
-          <div className="mt-6 p-3.5 rounded-2xl bg-sky-50/70 border border-sky-200/70 flex items-center justify-between">
-            <span className="text-xs font-extrabold text-sky-900">Sàn Dẫn Đầu</span>
-            <span className="text-xs font-black text-sky-700 bg-white px-2.5 py-1 rounded-xl shadow-2xs border border-sky-200 flex items-center gap-1.5">
+          {/* Footer: Sàn Dẫn Đầu */}
+          <div className="relative z-10 mt-5 p-3.5 rounded-2xl bg-gradient-to-r from-orange-50/90 via-amber-50/70 to-pink-50/80 border border-orange-200/70 flex items-center justify-between shadow-2xs">
+            <div className="flex items-center gap-2">
+              <Sparkles size={16} className="text-amber-500 shrink-0" />
+              <span className="text-xs font-extrabold text-orange-950">Sàn Dẫn Đầu Doanh Số</span>
+            </div>
+            <span className="text-xs font-black text-orange-800 bg-white px-3 py-1 rounded-xl shadow-xs border border-orange-200 flex items-center gap-1.5">
               <span>🏆</span>
-              <span>{platformShare[0]?.name || "Shopee"} ({platformShare[0]?.pct || 0}%)</span>
+              <span>
+                {platformShare[0]?.name || "Shopee"} ({platformShare[0]?.pct || 0}% - {platformShare[0]?.count || 0} đơn)
+              </span>
             </span>
           </div>
         </div>
 
-        {/* Bar: Trang thai don hang */}
-        <div className="rounded-3xl bg-white p-6 sm:p-8 shadow-sm border border-neutral-200/70 flex flex-col justify-between">
-          <div>
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 rounded-2xl bg-emerald-50 flex items-center justify-center shadow-xs border border-emerald-100 shrink-0 text-lg">
-                &#128203;
+        {/* ── CARD 2: SỨC KHOẺ ĐƠN HÀNG (TRẠNG THÁI DUYỆT & TỶ LỆ HOÀN TIỀN) ── */}
+        <div className="group relative rounded-3xl bg-white p-6 sm:p-7 shadow-sm border border-neutral-200/80 flex flex-col justify-between hover:shadow-md transition-all duration-300 overflow-hidden">
+          {/* Ambient soft glow */}
+          <div className="pointer-events-none absolute -top-12 -right-12 h-36 w-36 rounded-full bg-gradient-to-br from-emerald-200/30 via-teal-100/20 to-transparent blur-2xl" />
+
+          <div className="relative z-10">
+            {/* Header */}
+            <div className="flex items-center gap-3 mb-5">
+              <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-emerald-50 via-teal-50 to-emerald-100/50 border border-emerald-200/70 flex items-center justify-center shadow-xs shrink-0 text-emerald-600">
+                <Activity className="w-5 h-5 text-emerald-600" />
               </div>
               <div>
-                <h2 className="text-base font-extrabold text-neutral-900 tracking-tight">Sức Khoẻ Đơn Hàng</h2>
-                <p className="text-xs text-neutral-500 font-medium">Tỷ lệ duyệt đơn quyết định dòng tiền hoàn</p>
+                <h2 className="text-base font-extrabold text-neutral-900 tracking-tight">
+                  Sức Khoẻ Đơn Hàng
+                </h2>
+                <p className="text-xs text-neutral-500 font-medium">
+                  Tỷ lệ duyệt đơn quyết định dòng tiền hoàn
+                </p>
               </div>
             </div>
 
-            <div className="flex flex-col gap-5">
-              {statusRows.map((row) => {
-                const pct = Math.round((row.value / statusTotal) * 100);
-                return (
-                  <div key={row.label}>
-                    <div className="flex items-center justify-between mb-1.5">
-                      <div className="flex items-baseline gap-2">
-                        <span className="text-sm font-extrabold text-neutral-800">{row.label}</span>
-                        <span className="text-[10px] font-medium text-neutral-400">{row.desc}</span>
+            {/* Visual Cumulative Stacked Health Bar */}
+            <div className="mb-5">
+              <div className="flex items-center justify-between text-[11px] font-bold text-neutral-500 mb-1.5 px-0.5">
+                <span>Trạng thái chuyển đổi</span>
+                <span>{statusTotal.toLocaleString()} đơn tổng</span>
+              </div>
+              <div className="h-3 w-full rounded-full bg-neutral-100 flex gap-0.5 p-0.5 overflow-hidden border border-neutral-200/60 shadow-inner">
+                <div
+                  style={{ width: `${Math.max(approvedPct, 3)}%` }}
+                  className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 transition-all duration-500"
+                  title={`Đã duyệt: ${approvedPct}%`}
+                />
+                <div
+                  style={{ width: `${Math.max(pendingPct, 3)}%` }}
+                  className="h-full rounded-full bg-gradient-to-r from-amber-400 to-amber-500 transition-all duration-500"
+                  title={`Đang chờ: ${pendingPct}%`}
+                />
+                <div
+                  style={{ width: `${Math.max(cancelledPct, 2)}%` }}
+                  className="h-full rounded-full bg-gradient-to-r from-neutral-400 to-slate-400 transition-all duration-500"
+                  title={`Đã huỷ: ${cancelledPct}%`}
+                />
+              </div>
+            </div>
+
+            {/* Status Breakdown List */}
+            <div className="flex flex-col gap-3">
+              {statusRows.map((row) => (
+                <div
+                  key={row.key}
+                  className="flex flex-col gap-2 p-3.5 rounded-2xl bg-neutral-50/70 border border-neutral-200/60 hover:bg-white hover:shadow-xs transition-all duration-200"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className={`w-8 h-8 rounded-xl ${row.iconBg} flex items-center justify-center shrink-0 shadow-2xs`}>
+                        <row.icon size={18} className={row.iconColor} />
                       </div>
-                      <span className={`text-sm font-black tabular-nums ${row.text}`}>{row.value} <span className="text-[10px] font-bold text-neutral-400">({pct}%)</span></span>
+                      <div className="flex flex-col min-w-0">
+                        <span className="text-xs sm:text-sm font-extrabold text-neutral-900 truncate">
+                          {row.label}
+                        </span>
+                        <span className="text-[10px] text-neutral-400 font-medium">
+                          {row.sublabel}
+                        </span>
+                      </div>
                     </div>
-                    <div className="h-2.5 w-full rounded-full bg-neutral-100 overflow-hidden">
-                      <div style={{ width: `${Math.max(pct, 2)}%` }} className={`h-full rounded-full ${row.color} transition-all duration-500`} />
+                    <div className="flex items-center gap-2.5 shrink-0">
+                      <span className="text-xs font-bold text-neutral-600 tabular-nums">
+                        {row.value} đơn
+                      </span>
+                      <span className={`text-xs font-black px-2.5 py-0.5 rounded-full border tabular-nums shadow-2xs ${row.badgeClass}`}>
+                        {row.pct}%
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Individual Bar */}
+                  <div className="h-1.5 w-full rounded-full bg-neutral-200/60 overflow-hidden">
+                    <div
+                      style={{ width: `${Math.max(row.pct, 3)}%` }}
+                      className={`h-full rounded-full bg-gradient-to-r ${row.barGradient} transition-all duration-500`}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Footer: Tỷ lệ duyệt */}
+          <div className="relative z-10 mt-5 p-3.5 rounded-2xl bg-gradient-to-r from-emerald-50/90 via-teal-50/70 to-emerald-50/90 border border-emerald-200/70 flex items-center justify-between shadow-2xs">
+            <div className="flex items-center gap-2">
+              <CheckCircle2 size={16} className="text-emerald-600 shrink-0" />
+              <span className="text-xs font-extrabold text-emerald-950">Tỷ Lệ Duyệt Thành Công</span>
+            </div>
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-lg font-black text-emerald-700 tabular-nums">
+                {approvedPct}%
+              </span>
+              <span className="text-[10px] font-extrabold text-emerald-700 bg-white px-2 py-0.5 rounded-lg border border-emerald-200 shadow-2xs">
+                Vận hành tốt
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* ── CARD 3: KHUNG GIỜ SĂN DEAL (PEAK HOURS) ── */}
+        <div className="group relative rounded-3xl bg-white p-6 sm:p-7 shadow-sm border border-neutral-200/80 flex flex-col justify-between hover:shadow-md transition-all duration-300 overflow-hidden">
+          {/* Ambient soft glow */}
+          <div className="pointer-events-none absolute -top-12 -right-12 h-36 w-36 rounded-full bg-gradient-to-br from-rose-200/30 via-pink-100/20 to-transparent blur-2xl" />
+
+          <div className="relative z-10">
+            {/* Header */}
+            <div className="flex items-center gap-3 mb-5">
+              <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-rose-50 via-pink-50 to-amber-50 border border-rose-200/70 flex items-center justify-center shadow-xs shrink-0 text-rose-600">
+                <Flame className="w-5 h-5 text-rose-600" />
+              </div>
+              <div>
+                <h2 className="text-base font-extrabold text-neutral-900 tracking-tight">
+                  Khung Giờ Săn Deal
+                </h2>
+                <p className="text-xs text-neutral-500 font-medium">
+                  Thời điểm người dùng chốt đơn nhiều nhất
+                </p>
+              </div>
+            </div>
+
+            {/* Visual Cumulative Stacked Peak Hour Bar */}
+            <div className="mb-5">
+              <div className="flex items-center justify-between text-[11px] font-bold text-neutral-500 mb-1.5 px-0.5">
+                <span>Phân bố theo chu kỳ 24h</span>
+                <span>4 khung giờ</span>
+              </div>
+              <div className="h-3 w-full rounded-full bg-neutral-100 flex gap-0.5 p-0.5 overflow-hidden border border-neutral-200/60 shadow-inner">
+                {peakRows.map((row) => (
+                  <div
+                    key={row.slot}
+                    style={{ width: `${Math.max(row.pct, 3)}%` }}
+                    className={`h-full rounded-full bg-gradient-to-r ${row.barGradient} transition-all duration-500`}
+                    title={`${row.label} (${row.slot}): ${row.pct}%`}
+                  />
+                ))}
+              </div>
+            </div>
+
+            {/* Time Slots List */}
+            <div className="flex flex-col gap-2.5">
+              {peakRows.map((row, idx) => {
+                const isTop = idx === 0;
+                return (
+                  <div
+                    key={row.slot}
+                    className={`flex flex-col gap-1.5 p-2.5 sm:p-3 rounded-2xl border transition-all duration-200 ${
+                      isTop
+                        ? "bg-rose-50/40 border-rose-200/90 shadow-xs"
+                        : "bg-neutral-50/70 border-neutral-200/60 hover:bg-white hover:shadow-xs"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between gap-1.5">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <div className="w-7 h-7 rounded-xl bg-white border border-neutral-200/80 shadow-2xs flex items-center justify-center text-sm shrink-0">
+                          {row.emoji}
+                        </div>
+                        <div className="flex flex-col min-w-0">
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span className="text-xs font-extrabold text-neutral-900 whitespace-nowrap">
+                              {row.label}
+                            </span>
+                            <span className="text-[10px] text-neutral-400 font-medium whitespace-nowrap">
+                              ({row.slot})
+                            </span>
+                            {isTop && (
+                              <span className="text-[9px] font-black uppercase tracking-wider px-1.5 py-0.2 rounded-full bg-rose-500 text-white shadow-2xs">
+                                HOT
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <span className="text-xs font-bold text-neutral-600 tabular-nums">
+                          {row.count} đơn
+                        </span>
+                        <span className={`text-[11px] font-black px-2 py-0.5 rounded-full border tabular-nums shadow-2xs ${row.badgeClass}`}>
+                          {row.pct}%
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Progress Bar */}
+                    <div className="h-1.5 w-full rounded-full bg-neutral-200/60 overflow-hidden">
+                      <div
+                        style={{ width: `${Math.max(row.pct, 3)}%` }}
+                        className={`h-full rounded-full bg-gradient-to-r ${row.barGradient} transition-all duration-500`}
+                      />
                     </div>
                   </div>
                 );
@@ -336,53 +717,17 @@ export default async function AdminDashboardPage() {
             </div>
           </div>
 
-          <div className="mt-6 p-4 rounded-2xl bg-emerald-50/60 border border-emerald-200/60 flex items-center justify-between">
-            <span className="text-xs font-extrabold text-emerald-900">Tỷ lệ duyệt thành công</span>
-            <span className="text-xl font-black text-emerald-700 tabular-nums">{Math.round((statusCounts.approved / statusTotal) * 100)}%</span>
-          </div>
-        </div>
-
-        {/* Bar: Khung gio san deal */}
-        <div className="rounded-3xl bg-white p-6 sm:p-8 shadow-sm border border-neutral-200/70 flex flex-col justify-between">
-          <div>
-            <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 rounded-2xl bg-rose-50 flex items-center justify-center shadow-xs border border-rose-100 shrink-0 text-lg">
-                &#9889;
-              </div>
-              <div>
-                <h2 className="text-base font-extrabold text-neutral-900 tracking-tight">Khung Giờ Săn Deal</h2>
-                <p className="text-xs text-neutral-500 font-medium">Thời điểm người dùng chốt đơn nhiều nhất</p>
-              </div>
-            </div>
-
-            <div className="flex flex-col gap-3.5">
-              {peakRows.map((row) => (
-                <div key={row.slot} className="flex flex-col gap-1">
-                  <div className="flex items-center justify-between text-xs">
-                    <span className="font-extrabold text-neutral-800 flex items-center gap-1.5">
-                      <span>{row.emoji}</span>
-                      <span>{row.label}</span>
-                      <span className="text-[10px] text-neutral-400 font-medium">({row.slot})</span>
-                    </span>
-                    <span className="font-black text-neutral-900 tabular-nums">
-                      {row.count} đơn <span className="text-rose-600 font-extrabold">({row.pct}%)</span>
-                    </span>
-                  </div>
-                  <div className="h-2 w-full rounded-full bg-neutral-100 overflow-hidden">
-                    <div style={{ width: `${Math.max(row.pct, 3)}%` }} className={`h-full rounded-full ${row.color} transition-all duration-500`} />
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="mt-6 p-3.5 rounded-2xl bg-rose-50/70 border border-rose-200/70 flex items-center justify-between">
+          {/* Footer: Khung giờ cao điểm */}
+          <div className="relative z-10 mt-5 p-3.5 rounded-2xl bg-gradient-to-r from-rose-50/90 via-amber-50/70 to-pink-50/80 border border-rose-200/70 flex items-center justify-between shadow-2xs">
             <div className="flex items-center gap-2">
               <TrendingUp size={16} className="text-rose-600 shrink-0" />
-              <span className="text-xs font-extrabold text-rose-900">Giờ Vàng Săn Deal</span>
+              <span className="text-xs font-extrabold text-rose-950">Giờ Vàng Săn Deal</span>
             </div>
-            <span className="text-xs font-black text-rose-600 bg-white px-2.5 py-1 rounded-xl shadow-2xs border border-rose-200">
-              {topPeak ? `${topPeak.emoji} ${topPeak.label}` : "18h - 24h"}
+            <span className="text-xs font-black text-rose-700 bg-white px-3 py-1 rounded-xl shadow-xs border border-rose-200 flex items-center gap-1.5">
+              <span>{topPeak?.emoji}</span>
+              <span>
+                {topPeak?.label} ({topPeak?.slot})
+              </span>
             </span>
           </div>
         </div>

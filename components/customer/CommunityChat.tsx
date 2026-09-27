@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Send, Trash2, Users, Sparkles, ShieldAlert, MessageCircle, Heart } from "lucide-react";
+import { Send, Trash2, Users, ShieldAlert, MessageCircle, Heart, X, Minus } from "lucide-react";
 import { IconBow } from "@/components/icons/CatRibbonIcons";
 import { useToast } from "@/components/ui/Toast";
 
@@ -12,13 +12,6 @@ type ChatMessage = {
   createdAt: string;
   user: { fullName: string; role: string };
 };
-
-const QUICK_PROMPTS = [
-  "Xin chào cả nhà 🐾",
-  "Shopee hôm nay có deal gì hot không mọi người? 🛍️",
-  "Đơn của mình vừa được duyệt hoàn tiền rồi! 🎀",
-  "Mọi người thường rút tiền vào thứ mấy thế ạ? 💳",
-];
 
 function formatTime(iso: string) {
   try {
@@ -41,15 +34,20 @@ export function CommunityChat({
   initialMessages,
   currentUserId,
   isAdmin,
+  isPopup = false,
+  onClose,
+  onMinimize,
 }: {
   initialMessages: ChatMessage[];
   currentUserId: string;
   isAdmin: boolean;
+  isPopup?: boolean;
+  onClose?: () => void;
+  onMinimize?: () => void;
 }) {
   const { toast } = useToast();
   const [messages, setMessages] = useState<ChatMessage[]>(initialMessages);
   const [input, setInput] = useState("");
-  const [isFocused, setIsFocused] = useState(false);
   const [sending, setSending] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
   const lastCreatedAtRef = useRef<string | null>(initialMessages.at(-1)?.createdAt ?? null);
@@ -127,32 +125,67 @@ export function CommunityChat({
   }
 
   return (
-    <div className="flex flex-col rounded-3xl bg-white shadow-cute border border-primary-200/70 overflow-hidden h-[620px]">
+    <div
+      className={`flex flex-col bg-white overflow-hidden ${
+        isPopup
+          ? "h-full w-full"
+          : "rounded-3xl shadow-cute border border-primary-200/70 h-[520px]"
+      }`}
+    >
       {/* ═══ LOUNGE HEADER ═══ */}
-      <div className="flex items-center justify-between border-b border-primary-100/80 px-5 sm:px-6 py-3.5 bg-gradient-to-r from-primary-50/90 via-pink-50/60 to-white">
-        <div className="flex items-center gap-3">
-          <div className="relative">
-            <img src="/meowback_lucky_cat_logo.png" alt="MeowBack" className="h-10 w-10 object-contain drop-shadow-sm" />
-            <span className="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 rounded-full bg-emerald-500 border-2 border-white" />
+      <div className="flex items-center justify-between border-b border-primary-100/80 px-4 sm:px-6 py-3 sm:py-3.5 bg-gradient-to-r from-primary-50/95 via-pink-50/70 to-white shrink-0">
+        <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+          <div className="relative shrink-0">
+            <img src="/meowback_lucky_cat_logo.png" alt="MeowBack" className="h-9 w-9 sm:h-10 sm:w-10 object-contain drop-shadow-sm" />
+            <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 sm:h-3.5 sm:w-3.5 rounded-full bg-emerald-500 border-2 border-white" />
           </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <span className="font-black text-neutral-900 text-sm sm:text-base tracking-tight">
+          <div className="min-w-0">
+            <div className="flex items-center gap-1.5">
+              <span className="font-black text-neutral-900 text-xs sm:text-[14.5px] tracking-tight whitespace-nowrap">
                 Cộng Đồng MeowBack 🐾
               </span>
-              <span className="hidden sm:inline-flex items-center gap-1 rounded-full bg-primary-100/80 px-2 py-0.5 text-[10px] font-black text-primary-700">
-                <Users size={10} /> Mở 24/7
-              </span>
+              {!isPopup && (
+                <span className="hidden sm:inline-flex items-center gap-1 rounded-full bg-primary-100/80 px-2 py-0.5 text-[10px] font-black text-primary-700 shrink-0">
+                  <Users size={10} /> Mở 24/7
+                </span>
+              )}
             </div>
-            <p className="text-[11.5px] text-neutral-500 font-medium">
-              Giao lưu bí kíp gom deal, voucher Shopee & kinh nghiệm tích tiền hoàn
+            <p className="text-[10px] sm:text-[11px] text-neutral-500 font-medium truncate">
+              Giao lưu bí kíp gom deal & hoàn tiền
             </p>
           </div>
         </div>
 
-        <div className="hidden sm:flex items-center gap-1.5 text-xs font-bold text-emerald-600 bg-emerald-50 border border-emerald-200/80 px-3 py-1 rounded-full">
-          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-          <span>Trực tuyến</span>
+        <div className="flex items-center gap-1.5 shrink-0">
+          <div className="flex items-center gap-1 text-[10.5px] font-bold text-emerald-600 bg-emerald-50 border border-emerald-200/80 px-2 py-0.5 rounded-full">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            <span>Online</span>
+          </div>
+
+          {isPopup && (
+            <div className="flex items-center gap-1 ml-0.5">
+              {onMinimize && (
+                <button
+                  type="button"
+                  onClick={onMinimize}
+                  title="Thu nhỏ cửa sổ chat"
+                  className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-xl text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 transition-colors cursor-pointer"
+                >
+                  <Minus size={15} strokeWidth={2.5} />
+                </button>
+              )}
+              {onClose && (
+                <button
+                  type="button"
+                  onClick={onClose}
+                  title="Đóng cửa sổ chat"
+                  className="flex h-7 w-7 sm:h-8 sm:w-8 items-center justify-center rounded-xl text-neutral-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
+                >
+                  <X size={15} strokeWidth={2.5} />
+                </button>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
@@ -168,7 +201,9 @@ export function CommunityChat({
       <div ref={listRef} className="flex-1 overflow-y-auto p-4 sm:p-5 flex flex-col gap-3.5 bg-neutral-50/40">
         {messages.length === 0 ? (
           <div className="flex flex-1 flex-col items-center justify-center gap-3 text-center my-auto py-10">
-            <img src="/meow-back-mascot.png" alt="" className="h-20 w-20 object-contain opacity-70" />
+            <div className="w-18 h-18 sm:w-20 sm:h-20 mx-auto rounded-3xl overflow-hidden shadow-cute border-2 border-primary-100/80 bg-pink-50/60 p-1">
+              <img src="/meow-back-mascot.png" alt="" className="w-full h-full object-contain rounded-2xl" />
+            </div>
             <div className="max-w-sm">
               <p className="text-sm font-extrabold text-neutral-700">Chưa có tin nhắn nào trong phòng chat</p>
               <p className="mt-1 text-xs text-neutral-400 font-medium">
@@ -245,35 +280,12 @@ export function CommunityChat({
         )}
       </div>
 
-      {/* ═══ QUICK PROMPT SUGGESTIONS (Chỉ hiện khi chưa nhập và chưa focus) ═══ */}
-      {!isFocused && !input.trim() && (
-        <div className="px-4 py-2 border-t border-neutral-100 bg-white flex flex-wrap items-center gap-1.5 animate-in fade-in duration-150">
-          <span className="text-[11px] font-bold text-neutral-400 shrink-0 flex items-center gap-1">
-            <Sparkles size={11} className="text-primary-400" /> Gợi ý:
-          </span>
-          {QUICK_PROMPTS.map((prompt, idx) => (
-            <button
-              key={idx}
-              type="button"
-              onMouseDown={(e) => e.preventDefault()}
-              onClick={() => send(prompt)}
-              disabled={sending}
-              className="text-[11px] font-bold text-neutral-600 hover:text-primary-600 bg-neutral-100 hover:bg-primary-50/80 border border-neutral-200/80 px-2.5 py-1 rounded-full transition-all disabled:opacity-50 cursor-pointer active:scale-95"
-            >
-              {prompt}
-            </button>
-          ))}
-        </div>
-      )}
-
       {/* ═══ MESSAGE COMPOSER ═══ */}
       <div className="flex items-center gap-2 sm:gap-3 border-t border-neutral-200/80 p-3 sm:p-4 bg-white">
         <input
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          onFocus={() => setIsFocused(true)}
-          onBlur={() => setTimeout(() => setIsFocused(false), 200)}
           onKeyDown={(e) => {
             if (e.key === "Enter" && !e.shiftKey) {
               e.preventDefault();

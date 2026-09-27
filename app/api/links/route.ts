@@ -90,6 +90,9 @@ export async function POST(req: NextRequest) {
   if (finalPlatformCode?.toUpperCase() === "TIKTOK" && detected !== "tiktok") {
     return NextResponse.json({ error: "Link không thuộc hệ thống TikTok. Vui lòng dán đúng link sản phẩm TikTok." }, { status: 400 });
   }
+  if (finalPlatformCode?.toUpperCase() === "LAZADA" && detected !== "lazada") {
+    return NextResponse.json({ error: "Link không thuộc hệ thống Lazada. Vui lòng dán đúng link sản phẩm Lazada." }, { status: 400 });
+  }
 
   const customerId = session.role === "customer" ? session.customerId : body.customerId;
   if (!customerId) {
