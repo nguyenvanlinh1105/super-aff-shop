@@ -34,6 +34,101 @@ export function FloatingQuickAccess({
   const [copied, setCopied] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
+  // Kéo thả nút hỗ trợ trên Mobile
+  const [mobilePos, setMobilePos] = useState<{ x: number; y: number } | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const dragStartRef = useRef<{ clientX: number; clientY: number; startX: number; startY: number } | null>(null);
+  const hasDraggedRef = useRef(false);
+
+  // Khôi phục vị trí đã lưu trong session (nếu có) trên mobile
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.innerWidth < 768) {
+      try {
+        const saved = sessionStorage.getItem("meowback-support-pos");
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (typeof parsed.x === "number" && typeof parsed.y === "number") {
+            const maxX = window.innerWidth - 56;
+            const maxY = window.innerHeight - 72;
+            setMobilePos({
+              x: Math.max(8, Math.min(parsed.x, maxX)),
+              y: Math.max(60, Math.min(parsed.y, maxY)),
+            });
+          }
+        }
+      } catch {}
+    }
+  }, []);
+
+  const handlePointerDown = (e: React.PointerEvent<HTMLButtonElement>) => {
+    // Chỉ kích hoạt kéo thả trên mobile/tablet (< 768px)
+    if (window.innerWidth >= 768) return;
+
+    const rect = containerRef.current?.getBoundingClientRect();
+    if (!rect) return;
+
+    dragStartRef.current = {
+      clientX: e.clientX,
+      clientY: e.clientY,
+      startX: rect.left,
+      startY: rect.top,
+    };
+    hasDraggedRef.current = false;
+    try {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    } catch {}
+  };
+
+  const handlePointerMove = (e: React.PointerEvent<HTMLButtonElement>) => {
+    if (!dragStartRef.current || window.innerWidth >= 768) return;
+
+    const dx = e.clientX - dragStartRef.current.clientX;
+    const dy = e.clientY - dragStartRef.current.clientY;
+
+    if (!hasDraggedRef.current && Math.hypot(dx, dy) > 6) {
+      hasDraggedRef.current = true;
+      setIsDragging(true);
+    }
+
+    if (hasDraggedRef.current) {
+      const buttonSize = 52;
+      const minX = 8;
+      const maxX = window.innerWidth - buttonSize - 8;
+      const minY = 60;
+      const maxY = window.innerHeight - buttonSize - 20;
+
+      const nextX = Math.max(minX, Math.min(dragStartRef.current.startX + dx, maxX));
+      const nextY = Math.max(minY, Math.min(dragStartRef.current.startY + dy, maxY));
+
+      setMobilePos({ x: nextX, y: nextY });
+    }
+  };
+
+  const handlePointerUp = (e: React.PointerEvent<HTMLButtonElement>) => {
+    if (!dragStartRef.current) return;
+    try {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    } catch {}
+
+    if (hasDraggedRef.current && mobilePos) {
+      try {
+        sessionStorage.setItem("meowback-support-pos", JSON.stringify(mobilePos));
+      } catch {}
+      // Giữ cờ hasDraggedRef một chút để onClick không kích hoạt bật tắt menu
+      setTimeout(() => {
+        hasDraggedRef.current = false;
+      }, 80);
+    }
+
+    dragStartRef.current = null;
+    setIsDragging(false);
+  };
+
+  const handleButtonClick = () => {
+    if (hasDraggedRef.current) return;
+    setIsOpen((prev) => !prev);
+  };
+
   useEffect(() => {
     setCount(unreadCount);
   }, [unreadCount]);
@@ -93,24 +188,57 @@ export function FloatingQuickAccess({
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const isTopHalf = mobilePos && typeof window !== "undefined"
+    ? mobilePos.y < window.innerHeight / 2
+    : false;
+  const isLeftHalf = mobilePos && typeof window !== "undefined"
+    ? mobilePos.x < window.innerWidth / 2
+    : false;
+
   return (
     <div
       ref={containerRef}
-      className="fixed z-40 flex flex-col items-end customer-floating-support"
+      style={
+        mobilePos && typeof window !== "undefined" && window.innerWidth < 768
+          ? {
+              left: `${mobilePos.x}px`,
+              top: `${mobilePos.y}px`,
+              right: "auto",
+              bottom: "auto",
+            }
+          : undefined
+      }
+      className={`fixed z-40 flex ${
+        isTopHalf ? "flex-col-reverse" : "flex-col"
+      } ${isLeftHalf ? "items-start" : "items-end"} ${
+        !mobilePos ? "customer-floating-support" : ""
+      }`}
     >
-      {/* Speed Dial Menu Stack — Nổi phía trên nút hỗ trợ giống UI Home */}
+      {/* Speed Dial Menu Stack — Nổi phía trên/dưới nút hỗ trợ tuỳ theo vị trí kéo */}
       {isOpen && (
-        <div className="mb-3 flex flex-col items-end gap-3 animate-in fade-in slide-in-from-bottom-4 duration-200 max-h-[calc(100vh-200px)] overflow-y-auto">
+        <div
+          className={`${
+            isTopHalf ? "mt-3" : "mb-3"
+          } flex flex-col ${
+            isLeftHalf ? "items-start" : "items-end"
+          } gap-3 animate-in fade-in ${
+            isTopHalf ? "slide-in-from-top-4" : "slide-in-from-bottom-4"
+          } duration-200 max-h-[calc(100vh-200px)] overflow-y-auto`}
+        >
           {enabledChannels.map((c, index) => {
+            const isReverse = isLeftHalf;
+
             if (c.key === "hotline") {
               const rawPhone = c.handle.replace(/\D/g, "");
               return (
                 <div
                   key={c.key}
-                  className="group flex items-center gap-2.5 transition-all hover:-translate-x-1"
+                  className={`group flex items-center gap-2.5 transition-all ${
+                    isReverse ? "flex-row-reverse hover:translate-x-1" : "hover:-translate-x-1"
+                  }`}
                   style={{ animationDelay: `${index * 40}ms` }}
                 >
-                  {/* Label badge bên trái */}
+                  {/* Label badge */}
                   <div className="flex items-center gap-2 rounded-2xl bg-white/95 px-3.5 py-2 shadow-cute border border-primary-100 backdrop-blur-md">
                     <span className="text-[13px] font-extrabold text-neutral-900">
                       {c.label}:{" "}
@@ -129,7 +257,7 @@ export function FloatingQuickAccess({
                     </button>
                   </div>
 
-                  {/* Circular Button bên phải */}
+                  {/* Circular Button */}
                   <a
                     href={c.href}
                     title="Gọi hotline ngay"
@@ -146,10 +274,12 @@ export function FloatingQuickAccess({
             return (
               <div
                 key={c.key}
-                className="group flex items-center gap-2.5 transition-all hover:-translate-x-1"
+                className={`group flex items-center gap-2.5 transition-all ${
+                  isReverse ? "flex-row-reverse hover:translate-x-1" : "hover:-translate-x-1"
+                }`}
                 style={{ animationDelay: `${index * 40}ms` }}
               >
-                {/* Label badge bên trái */}
+                {/* Label badge */}
                 <a
                   href={c.href}
                   target="_blank"
@@ -164,7 +294,7 @@ export function FloatingQuickAccess({
                   </span>
                 </a>
 
-                {/* Circular Button bên phải */}
+                {/* Circular Button */}
                 <a
                   href={c.href}
                   target="_blank"
@@ -187,11 +317,20 @@ export function FloatingQuickAccess({
       {/* Action Buttons Stack */}
       <div className="flex flex-col items-center gap-sm">
         <button
-          onClick={() => setIsOpen(!isOpen)}
-          title={isOpen ? "Đóng menu hỗ trợ" : "Liên hệ hỗ trợ MeowBack"}
-          className={`flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full shadow-cute border border-primary-200/80 transition-all hover:scale-105 active:scale-95 ${
+          onClick={handleButtonClick}
+          onPointerDown={handlePointerDown}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+          onPointerCancel={handlePointerUp}
+          style={{ touchAction: "none" }}
+          title={isOpen ? "Đóng menu hỗ trợ" : "Liên hệ hỗ trợ MeowBack (Kéo thả để di chuyển)"}
+          className={`flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full shadow-cute border border-primary-200/80 transition-transform ${
+            isDragging
+              ? "scale-110 shadow-cute-lg ring-4 ring-primary-300/60"
+              : "hover:scale-105 active:scale-95"
+          } ${
             isOpen ? "bg-gradient-to-r from-primary-400 to-primary-500 text-white" : "bg-white text-primary-500 hover:text-primary-600"
-          }`}
+          } cursor-grab active:cursor-grabbing select-none`}
         >
           <div className={`transition-transform duration-300 ${isOpen ? "rotate-90 text-white" : "rotate-0"}`}>
             {isOpen ? <X size={24} strokeWidth={2.5} /> : <Headphones size={24} strokeWidth={2.25} />}

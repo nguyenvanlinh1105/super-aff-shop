@@ -225,8 +225,12 @@ export function InviteSection({
               >
                 <X size={16} strokeWidth={2.5} />
               </button>
-              <div className="h-14 w-14 rounded-2xl bg-white p-1 mx-auto mb-2 shadow-lg">
-                <img src="/meowback_lucky_cat_logo.png" alt="MeowBack" className="h-full w-full object-contain" />
+              <div className="h-16 w-16 rounded-full overflow-hidden mx-auto mb-2.5 shadow-lg ring-2 ring-white/60">
+                <img
+                  src="/meow-back-mascot.png"
+                  alt="MeowBack"
+                  className="h-full w-full object-cover rounded-full"
+                />
               </div>
               <h3 className="text-base font-extrabold text-white">Mã QR Giới Thiệu 🎀</h3>
               <p className="text-xs text-white/85 mt-0.5">Quét bằng camera hoặc Zalo để đăng ký</p>

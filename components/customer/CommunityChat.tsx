@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { Send, Trash2, Users, ShieldAlert, MessageCircle, Heart, X, Minus } from "lucide-react";
 import { IconBow } from "@/components/icons/CatRibbonIcons";
 import { useToast } from "@/components/ui/Toast";
@@ -35,6 +35,7 @@ export function CommunityChat({
   currentUserId,
   isAdmin,
   isPopup = false,
+  isActive = true,
   onClose,
   onMinimize,
 }: {
@@ -42,6 +43,7 @@ export function CommunityChat({
   currentUserId: string;
   isAdmin: boolean;
   isPopup?: boolean;
+  isActive?: boolean;
   onClose?: () => void;
   onMinimize?: () => void;
 }) {
@@ -50,17 +52,71 @@ export function CommunityChat({
   const [input, setInput] = useState("");
   const [sending, setSending] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
+  const bottomAnchorRef = useRef<HTMLDivElement>(null);
   const lastCreatedAtRef = useRef<string | null>(initialMessages.at(-1)?.createdAt ?? null);
 
-  function scrollToBottom() {
+  const scrollToBottom = useCallback((behavior: ScrollBehavior = "smooth") => {
+    if (!listRef.current) return;
+    // 1. Direct assignment for instant jump
+    listRef.current.scrollTop = listRef.current.scrollHeight;
+    // 2. requestAnimationFrame for next paint cycle
     requestAnimationFrame(() => {
-      listRef.current?.scrollTo({ top: listRef.current.scrollHeight, behavior: "smooth" });
+      if (listRef.current) {
+        listRef.current.scrollTo({ top: listRef.current.scrollHeight, behavior });
+      }
+      bottomAnchorRef.current?.scrollIntoView({ behavior, block: "end" });
     });
-  }
-
-  useEffect(() => {
-    scrollToBottom();
   }, []);
+
+  // Cuộn ngay khi component mount
+  useEffect(() => {
+    scrollToBottom("auto");
+    const t1 = setTimeout(() => scrollToBottom("auto"), 60);
+    const t2 = setTimeout(() => scrollToBottom("smooth"), 200);
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+    };
+  }, [scrollToBottom]);
+
+  // Cuộn tức thì khi isActive chuyển sang true (người dùng bấm tab Cộng đồng trên mobile)
+  useEffect(() => {
+    if (isActive) {
+      scrollToBottom("auto");
+      const t1 = setTimeout(() => scrollToBottom("auto"), 50);
+      const t2 = setTimeout(() => scrollToBottom("smooth"), 180);
+      return () => {
+        clearTimeout(t1);
+        clearTimeout(t2);
+      };
+    }
+  }, [isActive, scrollToBottom]);
+
+  // Tự động phát hiện khi container chuyển từ display:none sang visible (IntersectionObserver)
+  useEffect(() => {
+    const el = listRef.current;
+    if (!el) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting && entry.intersectionRatio > 0) {
+            scrollToBottom("auto");
+            setTimeout(() => scrollToBottom("smooth"), 100);
+          }
+        }
+      },
+      { threshold: 0.05 }
+    );
+
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [scrollToBottom]);
+
+  // Cuộn khi danh sách tin nhắn có thêm tin mới
+  useEffect(() => {
+    scrollToBottom("smooth");
+  }, [messages.length, scrollToBottom]);
 
   useEffect(() => {
     const interval = setInterval(async () => {
@@ -262,12 +318,12 @@ export function CommunityChat({
                       {m.message}
                     </div>
 
-                    {/* Admin Delete Action */}
-                    {isAdmin && (
+                    {/* Only allow deleting own messages */}
+                    {isMine && (
                       <button
                         onClick={() => removeMessage(m.id)}
-                        title="Xoá tin nhắn"
-                        className="opacity-0 group-hover:opacity-100 flex h-7 w-7 items-center justify-center rounded-xl text-neutral-300 hover:text-red-500 hover:bg-red-50 transition-all shrink-0"
+                        title="Xoá tin nhắn của bạn"
+                        className="opacity-0 group-hover:opacity-100 flex h-7 w-7 items-center justify-center rounded-xl text-neutral-300 hover:text-red-500 hover:bg-red-50 transition-all shrink-0 cursor-pointer"
                       >
                         <Trash2 size={13} />
                       </button>
@@ -278,10 +334,18 @@ export function CommunityChat({
             );
           })
         )}
+        {/* Invisible anchor element to scroll into view */}
+        <div ref={bottomAnchorRef} className="h-0 w-0 shrink-0" />
       </div>
 
       {/* ═══ MESSAGE COMPOSER ═══ */}
-      <div className="flex items-center gap-2 sm:gap-3 border-t border-neutral-200/80 p-3 sm:p-4 bg-white">
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          send();
+        }}
+        className="flex items-center gap-2 sm:gap-3 border-t border-neutral-200/80 p-2.5 sm:p-4 bg-white shrink-0 w-full"
+      >
         <input
           type="text"
           value={input}
@@ -292,19 +356,21 @@ export function CommunityChat({
               send();
             }
           }}
+          enterKeyHint="send"
+          autoComplete="off"
           placeholder="Nhắn gì đó với cộng đồng săn sale MeowBack..."
           maxLength={1000}
-          className="h-11 flex-1 rounded-2xl bg-neutral-50 px-4 text-xs sm:text-sm font-medium text-neutral-900 border border-neutral-200 focus:outline-none focus:border-primary-400 focus:ring-2 focus:ring-primary-100 transition-all placeholder:text-neutral-400"
+          className="h-11 flex-1 min-w-0 rounded-2xl bg-neutral-50 px-4 text-[16px] sm:text-sm font-medium text-neutral-900 border border-neutral-200 focus:outline-none focus:border-primary-400 focus:ring-2 focus:ring-primary-100 transition-all placeholder:text-neutral-400"
         />
         <button
-          onClick={() => send()}
+          type="submit"
           disabled={!input.trim() || sending}
-          className="flex h-11 px-4 shrink-0 items-center justify-center gap-1.5 rounded-2xl bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-cute transition-all hover:scale-[1.02] active:scale-[0.96] disabled:opacity-40 disabled:scale-100 disabled:cursor-not-allowed text-xs sm:text-sm font-extrabold"
+          className="flex h-11 px-4 shrink-0 items-center justify-center gap-1.5 rounded-2xl bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-cute transition-all hover:scale-[1.02] active:scale-[0.96] disabled:opacity-40 disabled:scale-100 disabled:cursor-not-allowed text-xs sm:text-sm font-extrabold cursor-pointer"
         >
           <span>Gửi</span>
           <Send size={14} strokeWidth={2.5} />
         </button>
-      </div>
+      </form>
     </div>
   );
 }

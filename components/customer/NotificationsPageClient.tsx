@@ -223,6 +223,7 @@ export function NotificationsPageClient({
               currentUserId={currentUserId}
               isAdmin={isAdmin}
               isPopup={false}
+              isActive={mobileTab === "chat"}
             />
           </div>
         </div>
