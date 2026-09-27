@@ -4,6 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import {
   Users,
+  UserCheck,
+  CreditCard,
   Trash2,
   Handshake,
   RotateCcw,
@@ -20,6 +22,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { formatCurrency } from "@/lib/format";
 import { Pagination } from "@/components/ui/Pagination";
 import { ServerSearchInput } from "@/components/ui/ServerSearchInput";
+import { CustomSelect, type CustomSelectOption } from "@/components/ui/CustomSelect";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 type Customer = {
@@ -164,64 +167,74 @@ export function AdminCustomersClient({
       <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
         {/* Left: Customer Selection Dropdown & Sort Selection Dropdown */}
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
-          {/* Customer Selection Dropdown */}
-          <div className="relative min-w-[220px]">
-            <label className="sr-only">Phân loại khách hàng</label>
-            <div className="relative">
-              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-neutral-400">
-                <Users size={16} className="text-rose-500" />
-              </div>
-              <select
-                value={currentTab}
-                onChange={(e) => handleTabChange(e.target.value)}
-                className="w-full appearance-none rounded-2xl bg-white border border-neutral-200/80 pl-10 pr-9 py-2.5 text-xs font-extrabold text-neutral-800 shadow-2xs hover:border-rose-300 focus:outline-hidden focus:ring-2 focus:ring-rose-500/20 cursor-pointer transition-colors"
-              >
-                <option value="all">Tất cả khách hàng ({counts.all})</option>
-                <option value="active">Đang hoạt động ({counts.active})</option>
-                <option value="debt">Có công nợ ({counts.debt})</option>
-                <option value="partner">Đối tác affiliate ({counts.partner})</option>
-                <option value="locked">Bị khoá / Đã xoá ({counts.locked})</option>
-              </select>
-              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-neutral-400">
-                <ChevronDown size={14} strokeWidth={2.5} />
-              </div>
-            </div>
-          </div>
+          {/* Customer Selection Custom Dropdown */}
+          <CustomSelect
+            options={[
+              {
+                value: "all",
+                label: "Tất cả khách hàng",
+                count: counts.all,
+                icon: <Users size={14} className="text-rose-500" />,
+              },
+              {
+                value: "active",
+                label: "Đang hoạt động",
+                count: counts.active,
+                icon: <UserCheck size={14} className="text-emerald-500" />,
+              },
+              {
+                value: "debt",
+                label: "Có công nợ",
+                count: counts.debt,
+                icon: <CreditCard size={14} className="text-rose-500" />,
+              },
+              {
+                value: "partner",
+                label: "Đối tác affiliate",
+                count: counts.partner,
+                icon: <Handshake size={14} className="text-indigo-500" />,
+              },
+              {
+                value: "locked",
+                label: "Bị khoá / Đã xoá",
+                count: counts.locked,
+                icon: <ShieldAlert size={14} className="text-neutral-400" />,
+              },
+            ]}
+            value={currentTab}
+            onChange={(val) => handleTabChange(val)}
+            icon={<Users size={15} className="text-rose-500" />}
+            className="min-w-[210px] sm:min-w-[220px]"
+            menuClassName="min-w-[240px]"
+            ariaLabel="Phân loại khách hàng"
+          />
 
-          {/* Sort Selection Dropdown */}
-          <div className="relative min-w-[230px]">
-            <label className="sr-only">Sắp xếp khách hàng</label>
-            <div className="relative">
-              <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-neutral-400">
-                <ArrowUpDown size={15} className="text-amber-500" />
-              </div>
-              <select
-                value={`${currentSort}_${currentOrder}`}
-                onChange={(e) => {
-                  const val = e.target.value;
-                  const idx = val.lastIndexOf("_");
-                  const field = val.substring(0, idx);
-                  const dir = val.substring(idx + 1);
-                  handleSortChange(field, dir);
-                }}
-                className="w-full appearance-none rounded-2xl bg-white border border-neutral-200/80 pl-10 pr-9 py-2.5 text-xs font-extrabold text-neutral-800 shadow-2xs hover:border-rose-300 focus:outline-hidden focus:ring-2 focus:ring-rose-500/20 cursor-pointer transition-colors"
-              >
-                <option value="createdAt_desc">Mới nhất (Mặc định)</option>
-                <option value="createdAt_asc">Cũ nhất</option>
-                <option value="reward_desc">Tổng hoàn tiền: Cao → Thấp</option>
-                <option value="reward_asc">Tổng hoàn tiền: Thấp → Cao</option>
-                <option value="debt_desc">Công nợ: Cao → Thấp</option>
-                <option value="debt_asc">Công nợ: Thấp → Cao</option>
-                <option value="link_desc">Số lượng link: Nhiều → Ít</option>
-                <option value="link_asc">Số lượng link: Ít → Nhiều</option>
-                <option value="fullName_asc">Tên khách hàng: A → Z</option>
-                <option value="fullName_desc">Tên khách hàng: Z → A</option>
-              </select>
-              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-neutral-400">
-                <ChevronDown size={14} strokeWidth={2.5} />
-              </div>
-            </div>
-          </div>
+          {/* Sort Selection Custom Dropdown */}
+          <CustomSelect
+            options={[
+              { value: "createdAt_desc", label: "Mới nhất (Mặc định)" },
+              { value: "createdAt_asc", label: "Cũ nhất" },
+              { value: "reward_desc", label: "Tổng hoàn tiền: Cao → Thấp" },
+              { value: "reward_asc", label: "Tổng hoàn tiền: Thấp → Cao" },
+              { value: "debt_desc", label: "Công nợ: Cao → Thấp" },
+              { value: "debt_asc", label: "Công nợ: Thấp → Cao" },
+              { value: "link_desc", label: "Số lượng link: Nhiều → Ít" },
+              { value: "link_asc", label: "Số lượng link: Ít → Nhiều" },
+              { value: "fullName_asc", label: "Tên khách hàng: A → Z" },
+              { value: "fullName_desc", label: "Tên khách hàng: Z → A" },
+            ]}
+            value={`${currentSort}_${currentOrder}`}
+            onChange={(val) => {
+              const idx = val.lastIndexOf("_");
+              const field = val.substring(0, idx);
+              const dir = val.substring(idx + 1);
+              handleSortChange(field, dir);
+            }}
+            icon={<ArrowUpDown size={15} className="text-amber-500" />}
+            className="min-w-[210px] sm:min-w-[230px]"
+            menuClassName="min-w-[250px]"
+            ariaLabel="Sắp xếp khách hàng"
+          />
         </div>
 
         {/* Right: Server Search Input */}
