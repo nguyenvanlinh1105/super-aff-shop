@@ -1,4 +1,5 @@
 import { prisma } from "./prisma";
+import { sendPushToUser, sendPushToAll } from "./webPush";
 
 export type NotificationType = "order_approved" | "payment_paid" | "referral_bonus" | "broadcast" | "system";
 
@@ -9,20 +10,35 @@ type NotificationInput = {
   link?: string;
 };
 
-/** Tạo thông báo trong app cho 1 khách hàng cụ thể — bỏ qua nếu khách chưa có tài khoản đăng nhập web. */
+/** Tạo thông báo trong app cho 1 khách hàng cụ thể — đồng thời gửi Web Push ra màn hình khóa nếu có đăng ký. */
 export async function notifyCustomerInApp(customerId: string, data: NotificationInput) {
   const user = await prisma.user.findUnique({ where: { customerId }, select: { id: true } });
   if (!user) return;
   await prisma.notification.create({ data: { userId: user.id, ...data } });
+
+  // Gửi Web Push ra màn hình khóa ngầm không chặn luồng chính
+  sendPushToUser(user.id, {
+    title: data.title,
+    body: data.message,
+    url: data.link || "/app",
+  }).catch((err) => console.error("Auto push error in notifyCustomerInApp:", err));
 }
 
-/** Gửi thông báo hệ thống cho toàn bộ khách hàng đang có tài khoản đăng nhập web. */
+/** Gửi thông báo hệ thống cho toàn bộ khách hàng đang có tài khoản đăng nhập web — đồng thời phát Web Push. */
 export async function broadcastNotification(data: NotificationInput) {
   const users = await prisma.user.findMany({ where: { role: "customer" }, select: { id: true } });
   if (users.length === 0) return 0;
   await prisma.notification.createMany({
     data: users.map((u) => ({ userId: u.id, ...data })),
   });
+
+  // Phát sóng Web Push tới toàn bộ thiết bị
+  sendPushToAll({
+    title: data.title,
+    body: data.message,
+    url: data.link || "/app",
+  }).catch((err) => console.error("Auto push error in broadcastNotification:", err));
+
   return users.length;
 }
 
@@ -34,5 +50,17 @@ export async function notifyAdminsInApp(data: NotificationInput) {
   await prisma.notification.createMany({
     data: admins.map((u) => ({ userId: u.id, ...data })),
   });
+
+  // Gửi Web Push tới các admin
+  Promise.allSettled(
+    admins.map((a) =>
+      sendPushToUser(a.id, {
+        title: data.title,
+        body: data.message,
+        url: data.link || "/admin",
+      })
+    )
+  ).catch((err) => console.error("Admin push error:", err));
+
   return admins.length;
 }

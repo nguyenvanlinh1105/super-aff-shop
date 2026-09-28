@@ -1,9 +1,7 @@
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { ProfileSummaryCard } from "@/components/account/ProfileSummaryCard";
 import { CustomerSettingsClient } from "@/components/account/CustomerSettingsClient";
-import { PaymentPinSettings } from "@/components/account/PaymentPinSettings";
 import { FloatingElement } from "@/components/ui/FloatingElement";
 import { ShieldCheck, Sparkles, KeyRound } from "lucide-react";
 import { IconBow } from "@/components/icons/CatRibbonIcons";
@@ -12,9 +10,7 @@ export default async function CustomerSettingsPage({ searchParams }: { searchPar
   const session = await getSession();
   if (!session?.customerId) redirect("/admin");
 
-  const defaultTab = (searchParams?.tab === "security" || searchParams?.tab === "integrations") 
-    ? searchParams.tab 
-    : "profile";
+  const defaultTab = searchParams?.tab || "profile";
 
   const customer = await prisma.customer.findUnique({
     where: { id: session.customerId },
@@ -44,11 +40,8 @@ export default async function CustomerSettingsPage({ searchParams }: { searchPar
     <div className="flex w-full flex-col gap-6 sm:gap-7">
       {/* ═══════════════════════════════════════════════════════════
           HERO BANNER: Hồ sơ cá nhân & Cài đặt
-          - Padding rộng rãi, không bị che khuất bởi navbar sticky
-          - Màu sắc pastel MeowBack chuẩn chỉnh, mascot nơ mèo sinh động
          ═══════════════════════════════════════════════════════════ */}
       <div className="relative overflow-hidden rounded-3xl p-6 sm:p-7 border border-primary-200/70 shadow-cute bg-gradient-to-br from-pink-50/90 via-white to-primary-50/40">
-        {/* Subtle background texture */}
         <div className="absolute -right-8 -bottom-8 w-44 h-44 rounded-full bg-primary-200/20 blur-2xl pointer-events-none" />
         <div className="absolute top-3 right-8 opacity-10 text-primary-500 pointer-events-none">
           <IconBow className="w-24 h-24" />
@@ -80,7 +73,7 @@ export default async function CustomerSettingsPage({ searchParams }: { searchPar
                 </span>
               </div>
               <h1 className="text-2xl sm:text-3xl font-black text-neutral-900 tracking-tight leading-snug">
-                Thông tin cá nhân & Bảo mật
+                Thông tin cá nhân &amp; Bảo mật
               </h1>
               <p className="mt-0.5 text-xs sm:text-sm text-neutral-600 font-medium leading-relaxed max-w-xl">
                 Cập nhật thông tin cá nhân, thiết lập mã PIN rút tiền và quản lý tiện ích tài khoản MeowBack
@@ -91,71 +84,31 @@ export default async function CustomerSettingsPage({ searchParams }: { searchPar
       </div>
 
       {/* ═══════════════════════════════════════════════════════════
-          BODY CONTENT: 2 Cột (Desktop) / 1 Cột (Mobile)
-          - Cột 1 (lg:col-span-5): Thẻ thành viên VIP MeowBack + Mã PIN rút tiền
-          - Cột 2 (lg:col-span-7): Chi tiết hồ sơ, Đổi mật khẩu, Tiện ích
+          BODY CONTENT: 2 Cột Cân Bằng Đồng Đều (50% - 50% Desktop)
+          - Cột 1 (Trái): Thẻ thành viên VIP MeowBack + Chi tiết hồ sơ + Cài app
+          - Cột 2 (Phải): Mã PIN rút tiền + Đổi mật khẩu + Nhận thông báo + Telegram Bot
          ═══════════════════════════════════════════════════════════ */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 w-full items-start">
-        {/* Left Side (Cột 1): VIP Member Summary Card + Khối Mã PIN rút tiền */}
-        <div className="lg:col-span-5 flex flex-col gap-6 w-full">
-          <ProfileSummaryCard 
-            customer={{
-              id: customer.id,
-              fullName: customer.fullName || "",
-              email: customer.user?.email || "",
-              createdAt: customer.createdAt,
-              isPartner: customer.isPartner,
-              hasPaymentPin: hasPin,
-              hasBankInfo: hasBank,
-              hasTelegram: hasTelegram,
-              phone: customer.phone,
-            }}
-          />
-
-          {/* Khối Cài đặt / Đổi Mã PIN rút tiền (Được đưa sang cột 1 giúp trang cân đối, đỡ dài) */}
-          <div id="pin-security" className="bg-white rounded-3xl border border-primary-100/90 shadow-cute p-6 sm:p-7 scroll-mt-24">
-            <div className="flex items-center gap-3 pb-5 mb-5 border-b border-neutral-100">
-              <div className="w-11 h-11 rounded-2xl bg-emerald-50 border border-emerald-100 text-emerald-600 flex items-center justify-center shrink-0 shadow-2xs">
-                <KeyRound size={20} strokeWidth={2.3} />
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <h2 className="text-base sm:text-lg font-black text-neutral-900 tracking-tight">
-                    Mã PIN rút tiền (6 số)
-                  </h2>
-                  <span
-                    className={`text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full ${
-                      hasPin
-                        ? "bg-emerald-100/80 text-emerald-700"
-                        : "bg-amber-100/80 text-amber-800"
-                    }`}
-                  >
-                    {hasPin ? "Đã bật bảo vệ" : "Chưa cài PIN"}
-                  </span>
-                </div>
-                <p className="text-[12px] text-neutral-500 font-medium mt-0.5 leading-snug">
-                  Bảo vệ số dư ví khi thực hiện các yêu cầu rút tiền về tài khoản ngân hàng
-                </p>
-              </div>
-            </div>
-
-            <PaymentPinSettings hasPin={hasPin} />
-          </div>
-        </div>
-
-        {/* Right Side (Cột 2): Form hồ sơ, Đổi mật khẩu, Tiện ích */}
-        <div className="lg:col-span-7 flex flex-col gap-6 w-full">
-          <CustomerSettingsClient 
-            initialProfile={{
-              fullName: customer.fullName || "",
-              phone: customer.phone || "",
-              address: customer.address || "",
-              email: customer.user?.email || "",
-            }}
-            defaultTab={defaultTab}
-          />
-        </div>
-      </div>
+      <CustomerSettingsClient 
+        initialProfile={{
+          fullName: customer.fullName || "",
+          phone: customer.phone || "",
+          address: customer.address || "",
+          email: customer.user?.email || "",
+        }}
+        customer={{
+          id: customer.id,
+          fullName: customer.fullName || "",
+          email: customer.user?.email || "",
+          createdAt: customer.createdAt,
+          isPartner: customer.isPartner,
+          hasPaymentPin: hasPin,
+          hasBankInfo: hasBank,
+          hasTelegram: hasTelegram,
+          phone: customer.phone,
+        }}
+        hasPin={hasPin}
+        defaultTab={defaultTab}
+      />
     </div>
   );
 }

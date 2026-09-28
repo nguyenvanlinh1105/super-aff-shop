@@ -5,6 +5,7 @@ import { Bell, MessagesSquare, CheckCheck } from "lucide-react";
 import { NotificationsClient } from "./NotificationsClient";
 import { CommunityChat } from "./CommunityChat";
 import { useToast } from "@/components/ui/Toast";
+import { PushNotificationPrompt } from "@/components/pwa/PushNotificationPrompt";
 
 type Notification = {
   id: string;
@@ -119,6 +120,9 @@ export function NotificationsPageClient({
 
   return (
     <div className="flex w-full flex-col gap-5 fade-in pb-12">
+      {/* ═══ 0. WEB PUSH NOTIFICATION PROMPT ═══ */}
+      <PushNotificationPrompt />
+
       {/* ═══ 1. MOBILE SEGMENTED TAB SWITCHER (Chỉ hiển thị trên mobile < lg) ═══ */}
       <div className="lg:hidden grid grid-cols-2 gap-2 p-1.5 bg-white rounded-3xl border border-primary-100/90 shadow-cute">
         <button
