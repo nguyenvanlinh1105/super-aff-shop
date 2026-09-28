@@ -226,11 +226,13 @@ export function FloatingQuickAccess({
       style={
         mobilePos && typeof window !== "undefined" && window.innerWidth < 768
           ? {
-              left: `${mobilePos.x}px`,
               top: `${mobilePos.y}px`,
-              right: "auto",
               bottom: "auto",
-              ...(isSnapping ? { transition: "left 0.3s cubic-bezier(0.25, 1, 0.5, 1), top 0.3s cubic-bezier(0.25, 1, 0.5, 1)" } : {}),
+              ...(isLeftHalf
+                ? { left: `${mobilePos.x}px`, right: "auto" }
+                : { right: `${Math.max(8, window.innerWidth - mobilePos.x - BUTTON_SIZE)}px`, left: "auto" }
+              ),
+              ...(isSnapping ? { transition: "left 0.3s cubic-bezier(0.25, 1, 0.5, 1), right 0.3s cubic-bezier(0.25, 1, 0.5, 1), top 0.3s cubic-bezier(0.25, 1, 0.5, 1)" } : {}),
             }
           : undefined
       }
@@ -247,7 +249,7 @@ export function FloatingQuickAccess({
             isTopHalf ? "mt-3" : "mb-3"
           } flex flex-col ${
             isLeftHalf ? "items-start" : "items-end"
-          } gap-3 animate-in fade-in ${
+          } gap-2.5 animate-in fade-in ${
             isTopHalf ? "slide-in-from-top-4" : "slide-in-from-bottom-4"
           } duration-200 max-h-[calc(100vh-200px)] overflow-y-auto`}
         >
@@ -259,26 +261,26 @@ export function FloatingQuickAccess({
               return (
                 <div
                   key={c.key}
-                  className={`group flex items-center gap-2.5 transition-all ${
+                  className={`group flex items-center gap-2 transition-all ${
                     isReverse ? "flex-row-reverse hover:translate-x-1" : "hover:-translate-x-1"
                   }`}
                   style={{ animationDelay: `${index * 40}ms` }}
                 >
-                  {/* Label badge */}
-                  <div className="flex items-center gap-2 rounded-2xl bg-white/95 px-3.5 py-2 shadow-cute border border-primary-100 backdrop-blur-md">
-                    <span className="text-[13px] font-extrabold text-neutral-900">
-                      {c.label}:{" "}
-                      <span className="text-primary-600 font-black">
-                        {c.handle}
-                      </span>
-                    </span>
+                  {/* Label badge — chỉ hiển thị số điện thoại + nút copy */}
+                  <div className="flex items-center gap-1.5 rounded-2xl bg-white/95 px-3 py-1.5 shadow-cute border border-primary-200/90 backdrop-blur-md">
+                    <a
+                      href={c.href}
+                      className="text-[13px] font-black text-primary-600 tracking-tight whitespace-nowrap hover:underline"
+                    >
+                      {c.handle}
+                    </a>
                     <button
                       type="button"
                       onClick={(e) => handleCopyHotline(e, rawPhone)}
-                      title="Copy số Hotline"
-                      className="flex h-7 items-center gap-1 rounded-full bg-primary-100 px-2 text-[11px] font-bold text-primary-600 hover:bg-primary-200 transition-colors"
+                      title="Copy số điện thoại"
+                      className="flex h-6 items-center gap-1 rounded-full bg-primary-100 px-2 text-[10.5px] font-bold text-primary-700 hover:bg-primary-200 transition-colors whitespace-nowrap cursor-pointer"
                     >
-                      {copied ? <Check size={12} /> : <Copy size={12} />}
+                      {copied ? <Check size={11} /> : <Copy size={11} />}
                       {copied ? "Đã copy" : "Copy"}
                     </button>
                   </div>
@@ -287,9 +289,9 @@ export function FloatingQuickAccess({
                   <a
                     href={c.href}
                     title="Gọi hotline ngay"
-                    className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-rose-500 to-pink-600 text-white shadow-cute hover:shadow-cute-lg transition-transform hover:scale-110 active:scale-95 border-2 border-white"
+                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-rose-500 to-pink-600 text-white shadow-cute hover:shadow-cute-lg transition-transform hover:scale-110 active:scale-95 border-2 border-white"
                   >
-                    <Phone size={20} className="animate-pulse text-white" />
+                    <Phone size={18} className="animate-pulse text-white" />
                   </a>
                 </div>
               );
@@ -300,22 +302,19 @@ export function FloatingQuickAccess({
             return (
               <div
                 key={c.key}
-                className={`group flex items-center gap-2.5 transition-all ${
+                className={`group flex items-center gap-2 transition-all ${
                   isReverse ? "flex-row-reverse hover:translate-x-1" : "hover:-translate-x-1"
                 }`}
                 style={{ animationDelay: `${index * 40}ms` }}
               >
-                {/* Label badge */}
+                {/* Label badge — chỉ hiển thị tên ngắn gọn như Cộng đồng Zalo, @meowback.official */}
                 <a
                   href={c.href}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 rounded-2xl bg-white/95 px-3.5 py-2 shadow-cute border border-primary-100/90 hover:border-primary-300 transition-colors backdrop-blur-md"
+                  className="flex items-center rounded-2xl bg-white/95 px-3 py-1.5 shadow-cute border border-primary-200/90 hover:border-primary-400 transition-colors backdrop-blur-md"
                 >
-                  <span className="text-[13px] font-extrabold text-neutral-800">
-                    {c.label}
-                  </span>
-                  <span className="text-[11px] font-bold text-primary-500 bg-primary-50 px-2 py-0.5 rounded-full">
+                  <span className="text-[12.5px] font-black text-neutral-800 whitespace-nowrap">
                     {c.handle}
                   </span>
                 </a>
@@ -326,12 +325,12 @@ export function FloatingQuickAccess({
                   target="_blank"
                   rel="noopener noreferrer"
                   title={c.label}
-                  className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-white shadow-cute hover:shadow-cute-lg transition-transform hover:scale-110 active:scale-95 border-2 border-primary-100 p-2 text-neutral-800"
+                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white shadow-cute hover:shadow-cute-lg transition-transform hover:scale-110 active:scale-95 border-2 border-primary-100 p-2 text-neutral-800"
                 >
                   {IconComponent ? (
-                    <IconComponent size={28} />
+                    <IconComponent size={24} />
                   ) : (
-                    <Headphones size={20} className="text-primary-500" />
+                    <Headphones size={18} className="text-primary-500" />
                   )}
                 </a>
               </div>
