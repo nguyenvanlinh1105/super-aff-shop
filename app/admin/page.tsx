@@ -13,6 +13,7 @@ import {
   CheckCircle2,
   Clock,
   XCircle,
+  BarChart3,
 } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { formatCurrency } from "@/lib/format";
@@ -99,6 +100,20 @@ export default async function AdminDashboardPage() {
       profit: Number(o.systemProfitAmount),
     };
   });
+
+  // ─── TỔNG HỢP HOA HỒNG & LỢI NHUẬN THEO THÁNG (TÀI CHÍNH TOÀN DIỆN) ───
+  const byMonth = new Map<string, { count: number; commission: number; reward: number; profit: number }>();
+  for (const o of orders) {
+    const d = new Date(o.orderedAt ?? o.createdAt);
+    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+    const cur = byMonth.get(key) ?? { count: 0, commission: 0, reward: 0, profit: 0 };
+    cur.count += 1;
+    cur.commission += Number(o.commissionAmount);
+    cur.reward += Number(o.customerRewardAmount);
+    cur.profit += Number(o.systemProfitAmount);
+    byMonth.set(key, cur);
+  }
+  const monthRows = Array.from(byMonth.entries()).sort((a, b) => b[0].localeCompare(a[0]));
 
   // ─── TỶ TRỌNG SÀN THƯƠNG MẠI ĐIỆN TỬ (SHOPEE, TIKTOK SHOP, LAZADA) ───
   const PLATFORM_CONFIG: Record<
@@ -801,12 +816,108 @@ export default async function AdminDashboardPage() {
               </div>
             </div>
             <div className="text-2xl font-black text-emerald-900 tabular-nums">{formatCurrency(paid)}</div>
-            <a href="/admin/reports" className="mt-4 inline-flex items-center gap-1.5 text-xs font-bold text-rose-600 hover:text-rose-700 transition-colors group">
-              <span>Xem báo cáo tài chính</span>
+            <a href="#monthly-financial-breakdown" className="mt-4 inline-flex items-center gap-1.5 text-xs font-bold text-rose-600 hover:text-rose-700 transition-colors group">
+              <span>Xem bảng chi tiết theo tháng ↓</span>
               <ArrowUpRight size={14} strokeWidth={2.5} className="group-hover:translate-x-0.5 transition-transform" />
             </a>
           </div>
         </div>
+      </div>
+
+      {/* ═══ BẢNG BÁO CÁO HOA HỒNG & LỢI NHUẬN THEO THÁNG (TỔNG HỢP TÀI CHÍNH TOÀN DIỆN) ═══ */}
+      <div id="monthly-financial-breakdown" className="rounded-3xl bg-white shadow-sm border border-neutral-200/80 overflow-hidden flex flex-col">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-5 sm:px-6 border-b border-neutral-100 bg-gradient-to-r from-neutral-50/80 via-rose-50/20 to-neutral-50/50">
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 rounded-2xl bg-indigo-50 text-indigo-600 border border-indigo-100 flex items-center justify-center font-black shadow-xs">
+              <BarChart3 size={18} strokeWidth={2.2} />
+            </div>
+            <div>
+              <h2 className="text-sm font-extrabold text-neutral-900 tracking-tight">
+                Báo Cáo Hoa Hồng & Lợi Nhuận Chi Tiết Theo Tháng
+              </h2>
+              <p className="text-[11px] text-neutral-500 font-medium">
+                Dữ liệu tài chính tổng hợp đối soát hoa hồng sàn, hoàn tiền khách và lợi nhuận thực tế
+              </p>
+            </div>
+          </div>
+          <span className="text-[10px] font-black uppercase text-indigo-700 bg-indigo-50 border border-indigo-200 px-2.5 py-1 rounded-full w-fit">
+            {monthRows.length} kỳ đối soát
+          </span>
+        </div>
+
+        {monthRows.length === 0 ? (
+          <div className="p-8 text-center text-xs font-semibold text-neutral-400">
+            Chưa có dữ liệu báo cáo tài chính
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead>
+                <tr className="border-b border-neutral-100 bg-neutral-50/60">
+                  <th className="px-5 py-3.5 text-[10px] font-black uppercase tracking-wider text-neutral-400">Tháng Báo Cáo</th>
+                  <th className="px-5 py-3.5 text-[10px] font-black uppercase tracking-wider text-neutral-400 text-center">Số Đơn</th>
+                  <th className="px-5 py-3.5 text-[10px] font-black uppercase tracking-wider text-neutral-400 text-right">Hoa Hồng Sàn Trả</th>
+                  <th className="px-5 py-3.5 text-[10px] font-black uppercase tracking-wider text-neutral-400 text-right">Hoàn Cho Khách</th>
+                  <th className="px-5 py-3.5 text-[10px] font-black uppercase tracking-wider text-neutral-400 text-right">Lợi Nhuận Giữ Lại</th>
+                  <th className="px-5 py-3.5 text-[10px] font-black uppercase tracking-wider text-neutral-400 text-right">Tỷ Lệ Giữ</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-neutral-100">
+                {monthRows.map(([month, v]) => {
+                  const profitRatio = v.commission > 0 ? Math.round((v.profit / v.commission) * 100) : 0;
+                  return (
+                    <tr key={month} className="transition-colors hover:bg-neutral-50/60">
+                      <td className="px-5 py-3.5 whitespace-nowrap">
+                        <span className="font-mono text-xs font-black text-neutral-900 bg-neutral-100 px-2 py-0.5 rounded-md">
+                          Tháng {month}
+                        </span>
+                      </td>
+                      <td className="px-5 py-3.5 text-center whitespace-nowrap">
+                        <span className="inline-flex items-center justify-center px-2 py-0.5 rounded-lg bg-neutral-100 font-mono text-[11px] font-bold text-neutral-700">
+                          {v.count.toLocaleString()} đơn
+                        </span>
+                      </td>
+                      <td className="px-5 py-3.5 text-right font-extrabold text-neutral-900 tabular-nums whitespace-nowrap">
+                        {formatCurrency(v.commission)}
+                      </td>
+                      <td className="px-5 py-3.5 text-right font-extrabold text-rose-600 tabular-nums whitespace-nowrap">
+                        {formatCurrency(v.reward)}
+                      </td>
+                      <td className="px-5 py-3.5 text-right font-black text-emerald-700 tabular-nums whitespace-nowrap">
+                        {formatCurrency(v.profit)}
+                      </td>
+                      <td className="px-5 py-3.5 text-right whitespace-nowrap">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-black bg-emerald-50 text-emerald-700 border border-emerald-200 tabular-nums">
+                          {profitRatio}%
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+              <tfoot>
+                <tr className="border-t-2 border-neutral-200 bg-neutral-50/90 font-black">
+                  <td className="px-5 py-3.5 uppercase text-[10px] tracking-wider text-neutral-600">TỔNG CỘNG HỆ THỐNG</td>
+                  <td className="px-5 py-3.5 text-center font-mono text-[11px] text-neutral-800">
+                    {orders.length.toLocaleString()} đơn
+                  </td>
+                  <td className="px-5 py-3.5 text-right tabular-nums text-neutral-900">
+                    {formatCurrency(commission)}
+                  </td>
+                  <td className="px-5 py-3.5 text-right tabular-nums text-rose-600">
+                    {formatCurrency(orders.reduce((s, o) => s + Number(o.customerRewardAmount), 0))}
+                  </td>
+                  <td className="px-5 py-3.5 text-right tabular-nums text-emerald-700">
+                    {formatCurrency(profit)}
+                  </td>
+                  <td className="px-5 py-3.5 text-right tabular-nums text-emerald-800">
+                    {commission > 0 ? `${Math.round((profit / commission) * 100)}%` : "0%"}
+                  </td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        )}
       </div>
 
       {/* ═══ 4. TOP THÀNH VIÊN MUA NHIỀU NHẤT & CHỈ SỐ VẬN HÀNH (KẾT HỢP DƯỚI CÙNG THÀNH 1 HÀNG) ═══ */}

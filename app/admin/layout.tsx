@@ -6,7 +6,6 @@ import {
   Package,
   Download,
   Wallet,
-  BarChart3,
   Send,
   Settings,
   Flame,
@@ -46,7 +45,6 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         { href: "/admin/orders",        label: "Đơn hàng",       emoji: "📦", icon: <Package  size={16} strokeWidth={1.75} />, badge: unmappedOrdersCount },
         { href: "/admin/orders/import", label: "Import đối soát", emoji: "📥", icon: <Download size={16} strokeWidth={1.75} /> },
         { href: "/admin/payments",      label: "Thanh toán",      emoji: "💳", icon: <Wallet   size={16} strokeWidth={1.75} />, badge: pendingPaymentsCount },
-        { href: "/admin/reports",       label: "Báo cáo",         emoji: "📊", icon: <BarChart3 size={16} strokeWidth={1.75} /> },
       ],
     },
     {

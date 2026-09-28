@@ -40,7 +40,7 @@ const COMMAND_ITEMS: CommandItem[] = [
   { id: "orders", title: "Đối soát Đơn hàng", category: "Tài chính", href: "/admin/orders", icon: <Package size={18} />, keywords: "don hang order doi soat csv gan khach" },
   { id: "import", title: "Import File CSV Đơn hàng", category: "Tài chính", href: "/admin/orders/import", icon: <Download size={18} />, keywords: "import excel csv shopee tiktok accestrade" },
   { id: "payments", title: "Duyệt Thanh toán & Rút tiền", category: "Tài chính", href: "/admin/payments", icon: <Wallet size={18} />, keywords: "thanh toan rut tien vi rut ve ngan hang bank" },
-  { id: "reports", title: "Báo cáo Doanh thu & Lợi nhuận", category: "Tài chính", href: "/admin/reports", icon: <BarChart3 size={18} />, keywords: "bao cao doanh thu loi nhuan analytics report" },
+  { id: "reports", title: "Báo cáo Doanh thu & Lợi nhuận", category: "Tài chính", href: "/admin#monthly-financial-breakdown", icon: <BarChart3 size={18} />, keywords: "bao cao doanh thu loi nhuan analytics report" },
   { id: "telegram", title: "Tích hợp Telegram Bot", category: "Hệ thống", href: "/admin/telegram", icon: <Send size={18} />, keywords: "telegram bot webhook message chat" },
   { id: "settings", title: "Cài đặt Tỷ lệ Hoa hồng", category: "Hệ thống", href: "/admin/settings", icon: <Settings size={18} />, keywords: "cai dat setting tỷ le hoa hong nganh hang % commission" },
 ];

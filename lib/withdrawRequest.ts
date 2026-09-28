@@ -55,6 +55,34 @@ export async function createWithdrawRequest(customerId: string): Promise<CreateW
     data: { customerId: customer.id, amount: available },
   });
 
+  // Tự động tạo phiếu thanh toán (PaymentBatch) ngay khi khách gửi yêu cầu rút tiền
+  const unpaidOrders = customer.orders.filter(
+    (o) => o.orderStatus === "approved" && o.payoutStatus === "unpaid"
+  );
+  if (unpaidOrders.length > 0) {
+    const paymentCode = `PB${Date.now()}`;
+    await prisma.paymentBatch.create({
+      data: {
+        paymentCode,
+        periodLabel: new Date().toLocaleDateString("vi-VN"),
+        customerId: customer.id,
+        totalAmount: available,
+        status: "pending",
+        items: {
+          create: unpaidOrders.map((o) => ({
+            orderId: o.id,
+            amount: o.customerRewardAmount,
+          })),
+        },
+      },
+    });
+
+    await prisma.order.updateMany({
+      where: { id: { in: unpaidOrders.map((o) => o.id) } },
+      data: { payoutStatus: "processing" },
+    });
+  }
+
   // ── Email notifications ──────────────────────────────────────────────
   const adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL;
   if (adminEmail) {

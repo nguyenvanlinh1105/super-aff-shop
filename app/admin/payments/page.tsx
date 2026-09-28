@@ -4,6 +4,53 @@ import { AdminPaymentsClient } from "@/components/admin/AdminPaymentsClient";
 import { Clock, Receipt, CheckCircle2, Hourglass } from "lucide-react";
 
 export default async function AdminPaymentsPage() {
+  // Tự động chuyển đổi bất kỳ yêu cầu rút tiền đang chờ thành phiếu thanh toán
+  const pendingRequests = await prisma.withdrawRequest.findMany({
+    where: { status: "pending" },
+    include: {
+      customer: {
+        include: {
+          orders: {
+            where: { payoutStatus: "unpaid", orderStatus: "approved" },
+          },
+        },
+      },
+    },
+  });
+
+  for (const wr of pendingRequests) {
+    if (wr.customer?.orders && wr.customer.orders.length > 0) {
+      const totalAmount = wr.customer.orders.reduce((sum, o) => sum + Number(o.customerRewardAmount), 0);
+      const paymentCode = `PB${Date.now()}_${Math.floor(100 + Math.random() * 900)}`;
+
+      await prisma.paymentBatch.create({
+        data: {
+          paymentCode,
+          periodLabel: new Date().toLocaleDateString("vi-VN"),
+          customerId: wr.customerId,
+          totalAmount,
+          status: "pending",
+          items: {
+            create: wr.customer.orders.map((o) => ({
+              orderId: o.id,
+              amount: o.customerRewardAmount,
+            })),
+          },
+        },
+      });
+
+      await prisma.order.updateMany({
+        where: { id: { in: wr.customer.orders.map((o) => o.id) } },
+        data: { payoutStatus: "processing" },
+      });
+    }
+
+    await prisma.withdrawRequest.update({
+      where: { id: wr.id },
+      data: { status: "fulfilled", resolvedAt: new Date() },
+    });
+  }
+
   const [
     withdrawRequests,
     approvedUnpaidOrders,
@@ -13,9 +60,6 @@ export default async function AdminPaymentsPage() {
     batchPendingCount,
     allCustomers,
   ] = await Promise.all([
-    // ✅ LẤY TRỰC TIẾP từ bảng WithdrawRequest — đây là nguồn sự thật duy nhất
-    // cho việc "khách nào đã chủ động yêu cầu rút tiền", bất kể đơn hàng
-    // của họ ở trạng thái gì (pending/approved).
     prisma.withdrawRequest.findMany({
       where: { status: "pending" },
       include: {
