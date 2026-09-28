@@ -46,10 +46,38 @@ export function BroadcastForm() {
     if (!title.trim() || !message.trim()) return;
 
     const confirmed = await modal.confirm({
-      title: "Gửi thông báo cho toàn bộ khách hàng?",
-      message: `Tiêu đề: "${title}". Chuyển hướng khi click: "${link || "Trang chủ"}". Thông báo này sẽ xuất hiện ngay lập tức trong mục Thông Báo của tất cả khách hàng.`,
+      title: "Phát thông báo cho toàn bộ khách hàng?",
+      message: (
+        <div className="flex flex-col gap-3 text-left w-full my-1.5">
+          <p className="text-[13px] text-neutral-600 text-center font-medium leading-relaxed">
+            Thông báo này sẽ gửi tức thì tới <strong>tất cả thành viên</strong> qua chuông thông báo trên app và web.
+          </p>
+
+          <div className="rounded-2xl bg-white/95 border border-primary-200/80 p-3.5 flex flex-col gap-2.5 shadow-2xs">
+            <div className="flex items-start gap-2">
+              <span className="shrink-0 text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-rose-100 text-rose-700 mt-0.5">
+                Tiêu đề
+              </span>
+              <span className="text-[13px] font-black text-neutral-900 line-clamp-2">{title}</span>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span className="shrink-0 text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-purple-100 text-purple-700">
+                Khi bấm
+              </span>
+              <span className="text-[11.5px] font-mono font-bold text-neutral-600 truncate">{link || "/app (Trang chủ)"}</span>
+            </div>
+
+            {message && (
+              <div className="pt-2 border-t border-neutral-100 text-[12px] text-neutral-600 font-medium line-clamp-3 leading-relaxed bg-neutral-50/70 p-2.5 rounded-xl border border-neutral-100">
+                &ldquo;{message}&rdquo;
+              </div>
+            )}
+          </div>
+        </div>
+      ),
       confirmText: "Gửi thông báo ngay",
-      cancelText: "Hủy",
+      cancelText: "Hủy bỏ",
       iconType: "warning",
     });
     if (!confirmed) return;

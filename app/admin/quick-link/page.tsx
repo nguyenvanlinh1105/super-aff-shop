@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { QuickLinkForm } from "@/components/admin/QuickLinkForm";
-import { Zap, Sparkles, ArrowLeft, History, Clock, CheckCircle, ExternalLink } from "lucide-react";
+import { QuickLinksHistoryClient } from "@/components/admin/QuickLinksHistoryClient";
+import { Zap, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
 export default async function AdminQuickLinkPage() {
@@ -9,10 +10,36 @@ export default async function AdminQuickLinkPage() {
     prisma.platform.findMany({ where: { status: "active" }, orderBy: { name: "asc" } }),
     prisma.trackingLink.findMany({
       orderBy: { createdAt: "desc" },
-      take: 5,
-      include: { customer: true, platform: true },
+      take: 200,
+      include: {
+        customer: { select: { id: true, fullName: true, customerCode: true } },
+        platform: { select: { id: true, name: true, code: true } },
+      },
     }),
   ]);
+
+  const mappedLinks = recentLinks.map((l) => ({
+    id: l.id,
+    trackingCode: l.trackingCode,
+    shortCode: l.shortCode,
+    shortUrl: l.shortUrl,
+    affiliateUrl: l.affiliateUrl,
+    originalUrl: l.originalUrl,
+    productTitle: l.productTitle,
+    productImage: l.productImage,
+    clicks: l.clicks,
+    createdAt: l.createdAt.toISOString(),
+    customer: {
+      id: l.customer.id,
+      fullName: l.customer.fullName,
+      customerCode: l.customer.customerCode,
+    },
+    platform: {
+      id: l.platform.id,
+      name: l.platform.name,
+      code: l.platform.code,
+    },
+  }));
 
   return (
     <div className="flex flex-col gap-6 fade-in pb-10">
@@ -89,79 +116,8 @@ export default async function AdminQuickLinkPage() {
         platforms={platforms.map((p) => ({ id: p.id, label: p.name }))}
       />
 
-      {/* ── RECENT CREATED LINKS PREVIEW ── */}
-      {recentLinks.length > 0 && (
-        <div className="rounded-3xl bg-white shadow-sm border border-neutral-200/70 overflow-hidden">
-          <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-neutral-200/70 bg-gradient-to-r from-neutral-50 via-white to-neutral-50">
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl bg-rose-50 border border-rose-100 flex items-center justify-center">
-                <History size={16} className="text-rose-500" />
-              </div>
-              <div>
-                <h2 className="text-sm font-extrabold text-neutral-900 tracking-tight">5 Link Vừa Tạo Gần Đây</h2>
-                <p className="text-[11px] text-neutral-500 font-medium">Lịch sử realtime cập nhật tức thì</p>
-              </div>
-            </div>
-            <span className="text-[10px] font-black uppercase tracking-wider text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full flex items-center gap-1.5">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              Live Updates
-            </span>
-          </div>
-
-          <div className="divide-y divide-neutral-100">
-            {recentLinks.map((link) => (
-              <div key={link.id} className="p-4 sm:px-6 flex items-center justify-between gap-4 hover:bg-rose-50/20 transition-colors">
-                <div className="flex items-center gap-3.5 min-w-0">
-                  <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-rose-100 to-pink-50 border border-rose-200/60 flex items-center justify-center shrink-0 overflow-hidden">
-                    {link.productImage ? (
-                      <img src={link.productImage} alt={link.productTitle || ""} className="w-full h-full object-cover" />
-                    ) : (
-                      <img src="/meow-back-quick-link.png" alt="" className="w-6 h-6 object-contain" />
-                    )}
-                  </div>
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-xs font-black text-neutral-900">{link.customer.fullName}</span>
-                      <span className="text-[10px] font-mono font-bold bg-neutral-100 text-neutral-600 px-2 py-0.5 rounded-md">
-                        {link.customer.customerCode}
-                      </span>
-                    </div>
-                    {link.productTitle && (
-                      <div className="text-[11px] font-semibold text-neutral-700 truncate max-w-xs sm:max-w-md mt-0.5" title={link.productTitle}>
-                        {link.productTitle}
-                      </div>
-                    )}
-                    <div className="text-xs font-mono text-rose-600 font-bold truncate mt-0.5">
-                      {link.shortUrl || link.shortCode}
-                    </div>
-                  </div>
-                </div>
-
-                <div className="text-right shrink-0 flex items-center gap-3">
-                  <div>
-                    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-rose-50 text-rose-700 border border-rose-200 text-[10px] font-black">
-                      {link.platform.name}
-                    </span>
-                    <div className="text-[10px] text-neutral-400 font-medium mt-1">
-                      {new Date(link.createdAt).toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })}
-                    </div>
-                  </div>
-
-                  <a
-                    href={link.shortUrl || link.affiliateUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="w-8 h-8 rounded-xl bg-neutral-100 hover:bg-rose-100 hover:text-rose-600 text-neutral-600 flex items-center justify-center transition-colors"
-                    title="Mở link"
-                  >
-                    <ExternalLink size={14} />
-                  </a>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+      {/* ── LỊCH SỬ LINK AFFILIATE (TÌM KIẾM, LỌC SÀN, PHÂN TRANG) ── */}
+      <QuickLinksHistoryClient initialLinks={mappedLinks} />
     </div>
   );
 }

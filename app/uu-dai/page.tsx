@@ -113,6 +113,7 @@ export default async function PublicDealsPage({
     discountPercent: d.discountPercent,
     category: d.category,
     linkType: d.linkType,
+    platformCode: d.platformCode || "SHOPEE",
     expiresAt: d.expiresAt ? d.expiresAt.toISOString() : null,
     imageUrl: d.uploadedImageUrl || d.shopeeImageUrl || null,
     shortUrl: d.shortUrl,

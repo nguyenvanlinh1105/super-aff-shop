@@ -17,6 +17,7 @@ type Deal = {
   discountPercent: number | null;
   category: string | null;
   linkType: string;
+  platformCode?: string;
   expiresAt: string | null;
   imageUrl: string | null;
   shortUrl: string | null;
@@ -32,117 +33,144 @@ function formatExpiry(iso: string) {
   return new Date(iso).toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit" });
 }
 
+function getPlatformBadge(code?: string) {
+  const c = (code || "SHOPEE").toUpperCase();
+  if (c.includes("TIKTOK")) {
+    return { name: "TikTok", icon: "🎵", color: "text-neutral-900", bg: "bg-white/95" };
+  }
+  if (c.includes("LAZADA")) {
+    return { name: "Lazada", icon: "🔷", color: "text-blue-600", bg: "bg-white/95" };
+  }
+  return { name: "Shopee", icon: "🛒", color: "text-primary-600", bg: "bg-white/95" };
+}
+
 function DealCard({ deal }: { deal: Deal }) {
   const [clicked, setClicked] = useState(false);
   const isShop = deal.linkType === "shop";
+  const platform = getPlatformBadge(deal.platformCode);
 
   function handleClick() {
     setClicked(true);
-    // Dùng short URL trên domain của mình nếu có, fallback về API redirect
     const target = deal.shortUrl || `/api/deals/${deal.id}/click`;
     window.open(target, "_blank");
     setTimeout(() => setClicked(false), 2200);
   }
 
   const discount = deal.discountPercent
-    ?? (deal.originalPrice && deal.salePrice
+    ?? (deal.originalPrice && deal.salePrice && deal.originalPrice > deal.salePrice
       ? Math.round((1 - deal.salePrice / deal.originalPrice) * 100)
       : null);
 
   return (
     <div
       onClick={handleClick}
-      className="group relative flex flex-col overflow-hidden rounded-3xl bg-white shadow-cute border border-primary-100/80 cursor-pointer transition-all duration-300 hover:-translate-y-1.5 hover:shadow-cute-lg hover:border-primary-300 active:scale-[0.98]"
+      className="group relative flex flex-col min-w-0 overflow-hidden rounded-2xl sm:rounded-3xl bg-white shadow-[0_2px_12px_rgba(255,109,158,0.06)] border border-primary-100/80 cursor-pointer transition-all duration-200 hover:-translate-y-1 hover:shadow-cute hover:border-primary-300 active:scale-[0.985]"
     >
-      {/* Image */}
-      <div className="relative aspect-square overflow-hidden bg-primary-50/50">
+      {/* Product Image & Badges */}
+      <div className="relative aspect-square w-full overflow-hidden bg-primary-50/40">
         {deal.imageUrl ? (
           <img
             src={deal.imageUrl}
             alt={deal.title}
+            loading="lazy"
             className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary-50 to-pink-50">
-            <Flame size={36} className="text-primary-300" strokeWidth={1.5} />
+          <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary-50 via-rose-50/30 to-pink-50">
+            <Flame size={32} className="text-primary-300" strokeWidth={1.5} />
           </div>
         )}
 
-        {/* Discount badge */}
-        {discount && discount > 0 && (
-          <div className="absolute top-2 left-2 flex flex-col items-center justify-center rounded-2xl bg-gradient-to-r from-rose-500 to-pink-500 px-2 py-1 shadow-sm">
-            <span className="text-[10px] font-medium text-white/90 leading-none">Giảm</span>
-            <span className="text-[13px] font-black text-white leading-tight">{discount}%</span>
+        {/* Discount badge: sleek top-left tag */}
+        {discount && discount > 0 ? (
+          <div className="absolute top-2 left-2 z-10 flex items-center gap-0.5 rounded-lg bg-gradient-to-r from-rose-500 to-pink-500 px-1.5 py-0.5 text-white shadow-xs">
+            <Flame size={10} className="fill-white shrink-0" />
+            <span className="text-[11px] font-black tracking-tight leading-none">-{discount}%</span>
           </div>
-        )}
+        ) : null}
 
-        {/* Expiry badge */}
+        {/* Expiry badge: compact glassmorphic top-right */}
         {deal.expiresAt && (
-          <div className="absolute top-2 right-2 rounded-xl bg-neutral-900/70 px-2 py-1 text-[10px] font-bold text-white backdrop-blur-sm">
-            HH: {formatExpiry(deal.expiresAt)}
+          <div className="absolute top-2 right-2 z-10 rounded-md bg-neutral-900/65 backdrop-blur-[2px] px-1.5 py-0.5 text-[9.5px] font-bold text-white/95 shadow-xs">
+            HSD: {formatExpiry(deal.expiresAt)}
           </div>
         )}
 
-        {/* Hot badge */}
-        <div className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-          {isShop ? (
-            <span className="flex items-center gap-1 rounded-full bg-neutral-900/70 px-2.5 py-1 text-[10px] font-bold text-white backdrop-blur-sm">
-              <Store size={10} /> Xem Shop
-            </span>
-          ) : (
-            <span className="flex items-center gap-1 rounded-full bg-neutral-900/70 px-2.5 py-1 text-[10px] font-bold text-white backdrop-blur-sm">
-              <MousePointerClick size={10} /> Mua ngay
-            </span>
-          )}
+        {/* Platform pill: bottom-left of image */}
+        <div className="absolute bottom-2 left-2 z-10 flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[9.5px] font-extrabold shadow-xs backdrop-blur-xs bg-white/95 text-neutral-800 border border-white/70">
+          <span>{platform.icon}</span>
+          <span className={platform.color}>{platform.name}</span>
         </div>
 
-        {/* Click overlay */}
+        {/* Shop badge: bottom-right if linkType is shop */}
+        {isShop && (
+          <div className="absolute bottom-2 right-2 z-10 flex items-center gap-1 rounded-md bg-purple-600/90 backdrop-blur-xs px-1.5 py-0.5 text-[9.5px] font-extrabold text-white shadow-xs">
+            <Store size={10} />
+            <span>Cả Shop</span>
+          </div>
+        )}
+
+        {/* Click loading overlay */}
         {clicked && (
-          <div className="absolute inset-0 bg-primary-500/20 backdrop-blur-[2px] flex items-center justify-center animate-in fade-in zoom-in-95 duration-150 p-sm text-center">
-            <div className="rounded-2xl bg-white/95 px-md py-sm text-[12px] font-bold text-primary-600 shadow-lg leading-snug border border-primary-100">
-              {isShop ? "Đang mở Shop... 🏬 Chọn SP rồi tạo link riêng ở mục Hoàn tiền nhé!" : "Đang mở Shopee... 🛒"}
+          <div className="absolute inset-0 z-20 bg-neutral-950/40 backdrop-blur-[2px] flex items-center justify-center animate-in fade-in zoom-in-95 duration-150 p-2 text-center">
+            <div className="rounded-2xl bg-white/95 px-3 py-2 text-[11px] font-bold text-primary-600 shadow-xl leading-snug border border-primary-100 flex items-center gap-1.5">
+              <span className="animate-spin text-xs">⏳</span>
+              <span>{isShop ? "Đang mở Shop..." : "Đang mở sàn..."}</span>
             </div>
           </div>
         )}
       </div>
 
-      {/* Info */}
-      <div className="flex flex-1 flex-col gap-xs p-md">
-        {isShop && (
-          <span className="inline-flex w-fit items-center gap-1 rounded-md bg-purple-50 px-1.5 py-0.5 text-[10px] font-bold text-purple-600">
-            <Store size={10} /> Cả Shop — cần tạo link riêng
-          </span>
-        )}
-        <p className="text-[13px] font-semibold text-neutral-800 leading-snug line-clamp-2 min-h-[40px]">
-          {deal.title}
-        </p>
+      {/* Card Info */}
+      <div className="flex flex-1 flex-col justify-between p-2.5 sm:p-3 gap-1.5 min-w-0 bg-white">
+        {/* Title container: exactly 2 lines without line 3 bleed */}
+        <div className="min-w-0">
+          <h3
+            className="text-[12px] sm:text-[13px] font-bold text-neutral-800 leading-[1.25rem] line-clamp-2 h-[2.5rem] sm:h-[2.6rem] overflow-hidden group-hover:text-primary-600 transition-colors"
+            title={deal.title}
+          >
+            {deal.title}
+          </h3>
+        </div>
 
-        {/* Pricing */}
-        <div className="mt-auto">
+        {/* Cash back incentive pill */}
+        <div className="flex items-center gap-1 min-w-0">
+          <span className="inline-flex items-center gap-1 rounded-md bg-rose-50/90 px-1.5 py-0.5 text-[10px] font-extrabold text-rose-600 border border-rose-100/80 truncate">
+            <span>🎀</span>
+            <span className="truncate">Hoàn tiền vào ví</span>
+          </span>
+        </div>
+
+        {/* Price row */}
+        <div className="mt-auto pt-0.5 min-w-0">
           {deal.salePrice ? (
-            <div className="flex flex-col">
-              <span className="text-[16px] font-black text-primary-600 tabular-nums">
+            <div className="flex items-baseline gap-1.5 flex-wrap">
+              <span className="text-[14.5px] sm:text-[16px] font-black text-primary-600 tabular-nums tracking-tight">
                 {formatPrice(deal.salePrice)}
               </span>
-              {deal.originalPrice && (
-                <span className="text-[12px] text-neutral-400 line-through tabular-nums">
+              {deal.originalPrice && deal.originalPrice > deal.salePrice && (
+                <span className="text-[10.5px] sm:text-xs text-neutral-400 line-through tabular-nums">
                   {formatPrice(deal.originalPrice)}
                 </span>
               )}
             </div>
           ) : (
-            <span className="text-[13px] font-bold text-primary-500">Xem giá trên Shopee</span>
+            <span className="text-[11.5px] sm:text-[12.5px] font-black text-primary-600 flex items-center gap-0.5">
+              <span>Xem giá trên sàn</span>
+              <ArrowRight size={11} strokeWidth={2.5} />
+            </span>
           )}
         </div>
 
-        {/* Footer: clicks + platform */}
-        <div className="flex items-center justify-between border-t border-primary-50 pt-xs mt-xs">
-          <span className="flex items-center gap-1 text-[11px] text-neutral-400">
-            <MousePointerClick size={11} />
-            {deal.clicks > 0 ? `${deal.clicks.toLocaleString()} lượt` : "Mới đăng"}
+        {/* Footer: Clicks count + Mua action */}
+        <div className="flex items-center justify-between border-t border-primary-50/80 pt-1.5 mt-0.5 text-[10px] sm:text-[11px] text-neutral-400 min-w-0">
+          <span className="flex items-center gap-1 truncate font-medium text-neutral-500">
+            <MousePointerClick size={11} className="shrink-0 text-primary-400" />
+            <span className="truncate">{deal.clicks > 0 ? `${deal.clicks} lượt` : "Mới đăng"}</span>
           </span>
-          <span className="rounded-lg bg-primary-50 px-2 py-0.5 text-[10px] font-bold text-primary-600 border border-primary-100/60 uppercase">
-            Shopee
+          <span className="inline-flex items-center gap-0.5 rounded-lg bg-primary-50 px-2 py-0.5 font-extrabold text-primary-600 border border-primary-100 group-hover:bg-primary-500 group-hover:text-white group-hover:border-primary-500 transition-colors shrink-0">
+            <span>Mua</span>
+            <ArrowRight size={10} strokeWidth={2.5} className="group-hover:translate-x-0.5 transition-transform" />
           </span>
         </div>
       </div>
@@ -203,19 +231,19 @@ function LinkTypeTabs({ counts }: { counts: { product: number; shop: number } })
             key={t.value}
             type="button"
             onClick={() => select(t.value)}
-            className={`flex h-9 sm:h-10 items-center justify-center gap-1 sm:gap-1.5 rounded-2xl px-1.5 sm:px-3 text-[11.5px] xs:text-[12.5px] sm:text-[13px] font-bold transition-all cursor-pointer select-none ${
+            className={`min-w-0 flex h-9 sm:h-10 items-center justify-center gap-1 sm:gap-1.5 rounded-2xl px-1 sm:px-3 text-[11px] sm:text-[13px] font-bold transition-all cursor-pointer select-none ${
               isActive
                 ? "bg-gradient-to-r from-primary-500 to-rose-500 text-white shadow-cute"
                 : "bg-white text-neutral-600 border border-neutral-200/80 hover:border-primary-300 hover:text-primary-600 hover:bg-primary-50/40"
             }`}
           >
-            <span className={isActive ? "text-white" : "text-primary-500"}>{t.icon}</span>
+            <span className={`shrink-0 ${isActive ? "text-white" : "text-primary-500"}`}>{t.icon}</span>
             <span className="truncate">
               <span className="inline sm:hidden">{t.mobileLabel}</span>
               <span className="hidden sm:inline">{t.label}</span>
             </span>
             <span
-              className={`flex h-4.5 min-w-[18px] sm:h-5 sm:min-w-[20px] items-center justify-center rounded-full px-1 text-[10px] sm:text-[10.5px] font-black shrink-0 ${
+              className={`flex h-4 min-w-[16px] sm:h-5 sm:min-w-[20px] items-center justify-center rounded-full px-1 text-[9.5px] sm:text-[10.5px] font-black shrink-0 ${
                 isActive ? "bg-white/25 text-white" : "bg-primary-50 text-primary-600 border border-primary-100"
               }`}
             >
@@ -249,41 +277,41 @@ function FilterBar() {
   }
 
   const selectClass =
-    "w-full sm:w-auto h-9 sm:h-10 rounded-2xl bg-white pl-8 pr-7 text-[12.5px] font-semibold text-neutral-700 border border-neutral-200/80 shadow-2xs hover:border-primary-300 focus:outline-none focus:border-primary-500 transition-all cursor-pointer appearance-none";
+    "w-full h-9 sm:h-10 rounded-2xl bg-white pl-7 sm:pl-8 pr-6 text-[12px] sm:text-[12.5px] font-semibold text-neutral-700 border border-neutral-200/80 shadow-2xs hover:border-primary-300 focus:outline-none focus:border-primary-500 transition-all cursor-pointer appearance-none truncate";
 
   return (
-    <div className="my-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+    <div className="my-2.5 sm:my-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-2.5 w-full">
       <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 w-full sm:w-auto">
-        <div className="relative">
+        <div className="relative min-w-0">
           <SlidersHorizontal size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-primary-400 pointer-events-none" />
           <select value={platform} onChange={(e) => updateParam("platform", e.target.value)} className={selectClass}>
             <option value="all">Tất cả sàn</option>
             <option value="SHOPEE">Shopee</option>
             <option value="TIKTOK">TikTok Shop</option>
           </select>
-          <ChevronDown size={13} strokeWidth={2.2} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none" />
+          <ChevronDown size={13} strokeWidth={2.2} className="absolute right-2 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none" />
         </div>
 
-        <div className="relative">
+        <div className="relative min-w-0">
           <Tag size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-primary-400 pointer-events-none" />
           <select value={category} onChange={(e) => updateParam("category", e.target.value)} className={selectClass}>
-            <option value="all">Tất cả danh mục</option>
+            <option value="all">Tất cả mục</option>
             {DEAL_CATEGORIES.map((c) => (
               <option key={c} value={c}>{c}</option>
             ))}
           </select>
-          <ChevronDown size={13} strokeWidth={2.2} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none" />
+          <ChevronDown size={13} strokeWidth={2.2} className="absolute right-2 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none" />
         </div>
       </div>
 
-      <div className="relative w-full sm:w-auto">
+      <div className="relative w-full sm:w-auto min-w-0">
         <ArrowUpDown size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-primary-400 pointer-events-none" />
         <select value={sort} onChange={(e) => updateParam("sort", e.target.value)} className={selectClass}>
           {SORT_OPTIONS.map((o) => (
             <option key={o.value} value={o.value}>{o.label}</option>
           ))}
         </select>
-        <ChevronDown size={13} strokeWidth={2.2} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none" />
+        <ChevronDown size={13} strokeWidth={2.2} className="absolute right-2 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none" />
       </div>
     </div>
   );
@@ -375,7 +403,7 @@ export function DealGrid({
       ) : (
         <>
           {/* Grid danh sách deal tối ưu cho màn hình 960px và mobile */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3.5 sm:gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5 sm:gap-4">
             {deals.map((deal) => (
               <DealCard key={deal.id} deal={deal} />
             ))}
