@@ -275,14 +275,14 @@ export function CustomerOrdersClient({ orders, totalPages, currentPage, counts }
             <div className="text-[14px] font-bold text-gray-400">Chưa có đơn hàng</div>
           </div>
         ) : (
-          <div className="flex flex-col gap-sm">
+          <div className="flex flex-col gap-3.5">
             {orders.map((o) => (
               <div
                 key={o.id}
-                className={`group flex flex-col sm:flex-row sm:items-center justify-between gap-md rounded-2xl border p-md transition-colors ${
+                className={`group flex flex-col sm:flex-row sm:items-center justify-between gap-md rounded-2xl p-4 sm:p-5 transition-all shadow-2xs ${
                   o.sourceType === "referral"
-                    ? "border-purple-100 bg-purple-50/30 hover:border-purple-200"
-                    : "border-primary-100/60 hover:border-primary-300 hover:bg-primary-50/30"
+                    ? "border-[1.5px] border-purple-300 bg-purple-50/40 hover:border-purple-400 hover:shadow-cute"
+                    : "border-[1.5px] border-primary-300 bg-white hover:border-primary-400 hover:shadow-cute hover:bg-primary-50/20"
                 }`}
               >
                   <div className="flex items-start gap-md">
@@ -325,7 +325,7 @@ export function CustomerOrdersClient({ orders, totalPages, currentPage, counts }
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-xl sm:text-right mt-sm sm:mt-0 pt-sm border-t border-gray-50 sm:border-0 sm:pt-0">
+                  <div className="flex items-center gap-xl sm:text-right mt-sm sm:mt-0 pt-3 border-t border-primary-100/90 sm:border-0 sm:pt-0">
                     <div>
                       <div className="text-[11px] font-bold uppercase tracking-wider text-gray-400">
                         {o.sourceType === "referral" ? "Giá trị đơn (của bạn F1)" : "Giá trị đơn"}

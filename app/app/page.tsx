@@ -418,7 +418,7 @@ export default async function CustomerHomePage() {
                       <Link
                         key={order.id}
                         href="/app/orders"
-                        className="group flex items-center justify-between gap-3 p-3 rounded-2xl bg-neutral-50/70 hover:bg-primary-50/40 border border-neutral-200/60 hover:border-primary-200 transition-all"
+                        className="group flex items-center justify-between gap-3 p-3 rounded-2xl bg-white hover:bg-primary-50/40 border-[1.5px] border-primary-200/90 hover:border-primary-300 shadow-2xs transition-all"
                       >
                         {/* Thumbnail & Title */}
                         <div className="flex items-center gap-3 min-w-0 flex-1">
