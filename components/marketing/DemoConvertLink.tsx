@@ -100,7 +100,22 @@ export function DemoConvertLink() {
 
   async function handlePreview(e: React.FormEvent) {
     e.preventDefault();
-    if (!url.trim()) return;
+    let targetUrl = url.trim();
+    if (!targetUrl) {
+      try {
+        if (typeof navigator !== "undefined" && navigator.clipboard) {
+          const clipText = await navigator.clipboard.readText();
+          if (clipText && clipText.trim()) {
+            targetUrl = clipText.trim();
+            setUrl(targetUrl);
+          }
+        }
+      } catch {}
+    }
+    if (!targetUrl) {
+      setError("Vui lòng dán link Shopee, Lazada hoặc TikTok để kiểm tra hoàn tiền nhé");
+      return;
+    }
     setLoading(true);
     setError(null);
     setPreview(null);
@@ -108,7 +123,7 @@ export function DemoConvertLink() {
       const res = await fetch("/api/links/preview", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url: url.trim() }),
+        body: JSON.stringify({ url: targetUrl }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Không phân tích được link");
@@ -140,32 +155,32 @@ export function DemoConvertLink() {
   }
 
   return (
-    <div className="relative w-full max-w-[1200px] mx-auto group">
+    <div className="relative w-full max-w-[760px] mx-auto group">
       {/* Ambient glowing aura behind the card */}
-      <div className="absolute -inset-1 bg-gradient-to-r from-primary-400/25 via-[#FF3B7B]/25 to-primary-500/25 rounded-[36px] blur-xl opacity-60 group-hover:opacity-100 transition-all duration-700 animate-pulse-glow pointer-events-none" />
+      <div className="absolute -inset-1.5 bg-gradient-to-r from-primary-400/30 via-[#FF3B7B]/30 to-primary-500/30 rounded-[36px] blur-xl opacity-70 group-hover:opacity-100 transition-all duration-700 animate-pulse-glow pointer-events-none" />
 
       {/* Main Glass Card synchronized with lower sections */}
-      <div className="relative z-10 w-full rounded-3xl bg-white/95 backdrop-blur-xl p-3.5 sm:p-6 md:p-8 shadow-cute border-2 border-primary-200/90 text-left transition-all">
+      <div className="relative z-10 w-full rounded-3xl bg-white/95 backdrop-blur-xl p-3.5 sm:p-6 md:p-7 shadow-[0_20px_50px_-12px_rgba(255,109,158,0.22)] border-2 border-primary-200/90 text-left transition-all">
         {/* Top Header of Converter Box */}
         <div className="flex items-center justify-between gap-2 mb-2.5 sm:mb-4">
-          <div className="flex items-center gap-2">
-            <span className="text-sm sm:text-base">🐾</span>
-            <span className="text-[13px] sm:text-[15.5px] font-black text-neutral-900 tracking-tight">
-              Dán link kiểm tra hoàn tiền 80%
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="text-base sm:text-lg shrink-0">🐾</span>
+            <span className="text-[13px] sm:text-[15.5px] font-black text-neutral-900 tracking-tight whitespace-nowrap">
+              Dán link kiểm tra hoàn tiền
             </span>
           </div>
-          <div className="flex items-center gap-2 shrink-0">
-            <span className="hidden sm:inline-flex text-[11px] font-black text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
-              ⚡ Rút từ 10.000đ
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+            <span className="text-[10px] sm:text-[11.5px] font-black text-emerald-700 bg-emerald-50 px-2 sm:px-2.5 py-0.5 rounded-full border border-emerald-200/80 whitespace-nowrap shadow-2xs">
+              ⚡ Rút từ 10k
             </span>
-            <span className="text-[10px] sm:text-[11.5px] font-black text-primary-600 bg-primary-50 px-2 sm:px-2.5 py-0.5 rounded-full border border-primary-200 shrink-0">
-              Hoàn 80%
+            <span className="text-[10px] sm:text-[11.5px] font-black text-primary-700 bg-primary-50 px-2 sm:px-2.5 py-0.5 rounded-full border border-primary-200/80 shrink-0 whitespace-nowrap shadow-2xs">
+              Hoàn tới 80%
             </span>
           </div>
         </div>
 
         {/* Input Form with quick paste & clear button */}
-        <form onSubmit={handlePreview} className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+        <form onSubmit={handlePreview} className="flex flex-col sm:flex-row gap-2 sm:gap-2.5">
           <div className="relative flex-1 min-w-0">
             <Link2 size={17} className="pointer-events-none absolute left-3.5 sm:left-4 top-1/2 -translate-y-1/2 text-neutral-400" />
             <input
@@ -177,7 +192,7 @@ export function DemoConvertLink() {
                 setError(null);
               }}
               placeholder="Dán link Shopee, Lazada, TikTok..."
-              className="h-11 sm:h-13 w-full rounded-2xl bg-white pl-9 sm:pl-11 pr-16 sm:pr-20 text-[13px] sm:text-[14.5px] font-bold text-neutral-900 placeholder:font-medium placeholder:text-neutral-400 border-2 border-primary-200 focus:border-primary-500 focus:outline-none focus:ring-4 focus:ring-primary-100 transition-all shadow-inner"
+              className="h-11 sm:h-12 w-full rounded-2xl bg-white pl-9 sm:pl-11 pr-16 sm:pr-20 text-[13px] sm:text-[14.5px] font-bold text-neutral-900 placeholder:font-medium placeholder:text-neutral-400 border-2 border-primary-200 focus:border-primary-500 focus:outline-none focus:ring-4 focus:ring-primary-100 transition-all shadow-inner"
             />
             {url ? (
               <button
@@ -205,7 +220,7 @@ export function DemoConvertLink() {
                     }
                   } catch {}
                 }}
-                className="absolute right-2 sm:right-2.5 top-1/2 -translate-y-1/2 text-[11px] sm:text-[11.5px] font-black text-primary-600 hover:text-primary-700 bg-primary-50 hover:bg-primary-100 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg border border-primary-200/80 transition-all active:scale-95 shadow-xs"
+                className="absolute right-2 sm:right-2.5 top-1/2 -translate-y-1/2 text-[11px] sm:text-[11.5px] font-black text-primary-600 hover:text-primary-700 bg-primary-50 hover:bg-primary-100 px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-lg border border-primary-200/80 transition-all active:scale-95 shadow-xs whitespace-nowrap"
                 title="Dán link đã copy"
               >
                 📋 Dán
@@ -216,8 +231,8 @@ export function DemoConvertLink() {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.96 }}
             type="submit"
-            disabled={loading || !url.trim()}
-            className="btn-shine-effect h-11 sm:h-13 shrink-0 rounded-2xl bg-gradient-to-r from-primary-500 via-[#FF3B7B] to-primary-600 hover:shadow-cute-lg px-5 sm:px-7 text-[13.5px] sm:text-[14.5px] font-black text-white shadow-cute transition-all disabled:opacity-50 flex items-center justify-center gap-1.5"
+            disabled={loading}
+            className="btn-shine-effect h-11 sm:h-12 shrink-0 rounded-2xl bg-gradient-to-r from-primary-500 via-[#FF3B7B] to-primary-600 hover:shadow-cute-lg px-5 sm:px-6 text-[13px] sm:text-[14px] font-black text-white shadow-cute transition-all disabled:opacity-60 flex items-center justify-center gap-1.5 whitespace-nowrap active:scale-98"
           >
             {loading ? <Loader2 size={16} className="animate-spin" /> : <span>🐾</span>}
             {loading ? "Đang đọc..." : "Kiểm tra hoàn tiền"}
@@ -225,8 +240,8 @@ export function DemoConvertLink() {
         </form>
 
         {/* Quick sample chips */}
-        <div className="mt-2.5 sm:mt-3.5 flex items-center gap-1.5 sm:gap-2 flex-wrap">
-          <span className="text-[11px] sm:text-[12px] font-bold text-neutral-400">Thử nhanh:</span>
+        <div className="mt-2.5 sm:mt-3 flex items-center gap-1.5 sm:gap-2 flex-wrap">
+          <span className="text-[11px] sm:text-[12px] font-bold text-neutral-400 whitespace-nowrap shrink-0">Thử nhanh:</span>
           <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
             {SAMPLE_LINKS.map((s) => {
               const Icon = s.icon;
@@ -238,7 +253,7 @@ export function DemoConvertLink() {
                   whileHover={{ scale: 1.05, y: -1 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => handleQuickSample(s)}
-                  className={`inline-flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-full text-[11px] sm:text-[12px] font-black border transition-all ${
+                  className={`inline-flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full text-[11px] sm:text-[12px] font-black border transition-all whitespace-nowrap shrink-0 ${
                     isMatch ? s.activeColor : "border-neutral-200 text-neutral-600 bg-neutral-50 hover:bg-primary-50 hover:text-primary-600"
                   } ${s.color}`}
                 >
@@ -303,20 +318,19 @@ export function DemoConvertLink() {
           )}
         </AnimatePresence>
 
-        {/* Trust points footer — single clean line on mobile */}
-        <div className="mt-3 sm:mt-4 pt-2.5 sm:pt-3.5 border-t border-primary-100/70 flex items-center justify-center sm:justify-between text-[11px] sm:text-[12px] font-bold text-neutral-500 gap-2 sm:gap-4 flex-wrap">
-          <span className="inline-flex items-center gap-1">
-            <CheckCircle2 size={13} className="text-emerald-500" /> Tự động 100%
+        {/* Trust points footer — 2x2 grid on mobile for ZERO orphan words */}
+        <div className="mt-3 sm:mt-3.5 pt-2.5 sm:pt-3 border-t border-primary-100/70 grid grid-cols-2 sm:flex sm:items-center sm:justify-between gap-1.5 sm:gap-3 text-[11px] sm:text-[12px] font-bold text-neutral-500">
+          <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
+            <CheckCircle2 size={13} className="text-emerald-500 shrink-0" /> Tự động 100%
           </span>
-          <span className="text-neutral-300 sm:hidden">•</span>
-          <span className="inline-flex items-center gap-1">
-            <CheckCircle2 size={13} className="text-emerald-500" /> Rút từ 10k về ngân hàng
+          <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
+            <CheckCircle2 size={13} className="text-emerald-500 shrink-0" /> Rút từ 10k về ví
           </span>
-          <span className="hidden sm:inline-flex items-center gap-1.5">
-            <CheckCircle2 size={14} className="text-emerald-500" /> Nhận link trong 1 giây
+          <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
+            <CheckCircle2 size={13} className="text-emerald-500 shrink-0" /> Nhận link trong 1s
           </span>
-          <span className="hidden sm:inline-flex items-center gap-1.5">
-            <CheckCircle2 size={14} className="text-emerald-500" /> Miễn phí trọn đời
+          <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
+            <CheckCircle2 size={13} className="text-emerald-500 shrink-0" /> Miễn phí 100%
           </span>
         </div>
       </div>

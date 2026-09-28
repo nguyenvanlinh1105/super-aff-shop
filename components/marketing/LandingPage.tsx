@@ -98,41 +98,65 @@ export function LandingPage({
 
       <main className="pt-16">
         {/* Hero Section */}
-        <section className="relative overflow-hidden bg-gradient-to-b from-primary-50 via-neutral-bg to-white">
-          {/* Subtle background ribbons */}
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-gradient-to-b from-primary-200/35 via-primary-100/20 to-transparent rounded-full blur-[90px] pointer-events-none" />
-          <div className="absolute top-20 right-10 w-72 h-72 bg-secondary-100/40 rounded-full blur-[80px] pointer-events-none" />
+        <section className="relative overflow-hidden bg-gradient-to-b from-[#FFF0F5] via-[#FFF7FA] to-white pt-4 sm:pt-8 md:pt-12 pb-10 sm:pb-16 md:pb-20">
+          {/* Desktop 3D Canvas Background (Cat on left, bags on right, center open) */}
+          <div
+            className="hidden md:block absolute inset-0 bg-cover bg-center bg-no-repeat pointer-events-none opacity-95 transition-opacity"
+            style={{ backgroundImage: "url('/hero_banner_desktop.jpg')" }}
+          />
 
-          <div className="relative z-10 max-w-[1200px] mx-auto px-4 md:px-8 py-4 sm:py-10 md:py-16 text-center">
-            <div className="space-y-2.5 sm:space-y-4 fade-in">
-              {/* Main Hero Headline */}
-              <h1 className="text-[24px] sm:text-[40px] md:text-[52px] font-black leading-[1.2] text-neutral-900 tracking-tight max-w-4xl mx-auto">
-                Mua sắm đa sàn,{" "}
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#EE4D2D] via-[#FF3B7B] to-[#0F146D] animate-text-shimmer">
+          {/* Mobile 3D Artwork Top Backdrop */}
+          <div
+            className="block md:hidden absolute top-0 left-0 right-0 h-[280px] bg-cover bg-top bg-no-repeat pointer-events-none opacity-50"
+            style={{
+              backgroundImage: "url('/hero_banner_mobile.jpg')",
+              maskImage: "linear-gradient(to bottom, rgba(0,0,0,1) 45%, rgba(0,0,0,0) 100%)",
+              WebkitMaskImage: "linear-gradient(to bottom, rgba(0,0,0,1) 45%, rgba(0,0,0,0) 100%)",
+            }}
+          />
+
+          {/* Center radiant spotlight aura */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[720px] h-[450px] bg-gradient-to-b from-white/80 via-white/50 to-transparent rounded-full blur-[70px] pointer-events-none" />
+
+          <div className="relative z-10 max-w-[1200px] mx-auto px-3.5 sm:px-6 md:px-8 text-center">
+            <div className="max-w-[760px] mx-auto space-y-2.5 sm:space-y-4 fade-in">
+              {/* Cute Badge on Mobile */}
+              <div className="md:hidden inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/90 border border-primary-200/80 shadow-xs backdrop-blur-md mx-auto mb-0.5">
+                <span className="text-xs">🎀</span>
+                <span className="text-[11px] font-black text-primary-700 whitespace-nowrap">
+                  MeowBack • Hoàn tiền đa sàn
+                </span>
+              </div>
+
+              {/* Main Hero Headline — Engineered for ZERO orphan words */}
+              <h1 className="text-[25px] xs:text-[28px] sm:text-[38px] md:text-[46px] lg:text-[50px] font-black leading-[1.22] text-neutral-900 tracking-tight">
+                <span className="block sm:inline whitespace-nowrap drop-shadow-xs">Mua sắm đa sàn,</span>{" "}
+                <span className="block sm:inline whitespace-nowrap text-transparent bg-clip-text bg-gradient-to-r from-[#EE4D2D] via-[#FF3B7B] to-[#0F146D] animate-text-shimmer drop-shadow-xs">
                   hoàn tiền tới {customerRate}% 🎀
                 </span>
               </h1>
 
-              {/* Short, direct value statement — hidden on mobile to avoid text overload */}
-              <p className="hidden sm:block text-[15px] md:text-[17px] text-neutral-600 max-w-2xl mx-auto font-semibold leading-relaxed">
-                Dán link sản phẩm Shopee, Lazada hoặc TikTok Shop để kiểm tra ngay số tiền hoàn nhận về ví!
+              {/* Subtitle with guaranteed balanced lines */}
+              <p className="text-[13px] sm:text-[15.5px] text-neutral-600 font-semibold leading-relaxed px-1">
+                <span className="block sm:inline whitespace-nowrap">Dán link Shopee, Lazada hoặc TikTok Shop</span>{" "}
+                <span className="block sm:inline whitespace-nowrap">— Nhận hoàn tiền tự động về ví!</span>
               </p>
 
-              {/* Platform & Benefit Badges — Single compact row on mobile */}
+              {/* Platform & Benefit Badges */}
               <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 pt-0.5">
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 sm:px-3.5 sm:py-1 rounded-full text-[11px] sm:text-[12.5px] font-black bg-[#EE4D2D]/10 text-[#EE4D2D] border border-[#EE4D2D]/20 shadow-xs">
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 sm:px-3 sm:py-1 rounded-full text-[11px] sm:text-[12px] font-black bg-white/95 text-[#EE4D2D] border border-[#EE4D2D]/30 shadow-xs whitespace-nowrap backdrop-blur-xs">
                   <ShopeeIcon size={13} /> Shopee
                 </span>
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 sm:px-3.5 sm:py-1 rounded-full text-[11px] sm:text-[12.5px] font-black bg-[#0F146D]/10 text-[#0F146D] border border-[#0F146D]/20 shadow-xs">
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 sm:px-3 sm:py-1 rounded-full text-[11px] sm:text-[12px] font-black bg-white/95 text-[#0F146D] border border-[#0F146D]/30 shadow-xs whitespace-nowrap backdrop-blur-xs">
                   <LazadaIcon size={13} /> Lazada
                 </span>
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 sm:px-3.5 sm:py-1 rounded-full text-[11px] sm:text-[12.5px] font-black bg-neutral-900/10 text-neutral-900 border border-neutral-300 shadow-xs">
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 sm:px-3 sm:py-1 rounded-full text-[11px] sm:text-[12px] font-black bg-white/95 text-neutral-900 border border-neutral-300 shadow-xs whitespace-nowrap backdrop-blur-xs">
                   <TiktokIcon size={13} /> TikTok Shop
                 </span>
-                <span className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-[12.5px] font-black bg-emerald-50 text-emerald-700 border border-emerald-200/80 shadow-xs">
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 sm:px-3 sm:py-1 rounded-full text-[11px] sm:text-[12px] font-black bg-emerald-50/95 text-emerald-700 border border-emerald-300 shadow-xs whitespace-nowrap backdrop-blur-xs">
                   ⚡ Rút từ 10.000đ
                 </span>
-                <span className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-[12.5px] font-black bg-amber-50 text-amber-700 border border-amber-200/80 shadow-xs">
+                <span className="hidden sm:inline-flex items-center gap-1 px-2.5 py-1 sm:px-3 sm:py-1 rounded-full text-[11px] sm:text-[12px] font-black bg-amber-50/95 text-amber-700 border border-amber-300 shadow-xs whitespace-nowrap backdrop-blur-xs">
                   ✨ Miễn phí 100%
                 </span>
               </div>
