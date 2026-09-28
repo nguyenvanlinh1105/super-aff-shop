@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { LogoMeowBack } from "@/components/icons/CatRibbonIcons";
 
 const NAV_LINKS = [
@@ -13,6 +13,18 @@ const NAV_LINKS = [
 
 export function MarketingHeader({ activePath = "/" }: { activePath?: string }) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/auth/me")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.authenticated) {
+          setIsLoggedIn(true);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   return (
     <header className="fixed top-0 w-full z-50 bg-white/90 backdrop-blur-md border-b border-primary-100/80 shadow-cute">
@@ -47,12 +59,21 @@ export function MarketingHeader({ activePath = "/" }: { activePath?: string }) {
 
         {/* ── CTA + Hamburger ── */}
         <div className="flex items-center gap-3">
-          <Link
-            href="/login"
-            className="bg-gradient-to-r from-primary-400 to-primary-500 text-white rounded-full px-3 py-2 font-bold text-[14px] whitespace-nowrap shadow-cute hover:shadow-cute-lg hover:scale-[1.02] transition-all duration-200 active:scale-95 flex items-center gap-1.5"
-          >
-            Đăng nhập 
-          </Link>
+          {isLoggedIn ? (
+            <Link
+              href="/app"
+              className="bg-gradient-to-r from-primary-400 to-primary-500 text-white rounded-full px-4 py-2 font-bold text-[14px] whitespace-nowrap shadow-cute hover:shadow-cute-lg hover:scale-[1.02] transition-all duration-200 active:scale-95 flex items-center gap-1.5"
+            >
+              <span>Vào ứng dụng 🐾</span>
+            </Link>
+          ) : (
+            <Link
+              href="/login"
+              className="bg-gradient-to-r from-primary-400 to-primary-500 text-white rounded-full px-3 py-2 font-bold text-[14px] whitespace-nowrap shadow-cute hover:shadow-cute-lg hover:scale-[1.02] transition-all duration-200 active:scale-95 flex items-center gap-1.5"
+            >
+              Đăng nhập 
+            </Link>
+          )}
 
           {/* Hamburger (mobile only) */}
           <button
@@ -106,13 +127,23 @@ export function MarketingHeader({ activePath = "/" }: { activePath?: string }) {
           })}
 
           <div className="mt-2 pt-3 border-t border-primary-100">
-            <Link
-              href="/login"
-              onClick={() => setMenuOpen(false)}
-              className="block w-full text-center bg-gradient-to-r from-primary-400 to-primary-500 text-white rounded-full px-3 py-2.5 font-bold text-[14px] shadow-cute hover:shadow-cute-lg transition-all duration-200"
-            >
-              Đăng nhập 
-            </Link>
+            {isLoggedIn ? (
+              <Link
+                href="/app"
+                onClick={() => setMenuOpen(false)}
+                className="block w-full text-center bg-gradient-to-r from-primary-400 to-primary-500 text-white rounded-full px-3 py-2.5 font-bold text-[14px] shadow-cute hover:shadow-cute-lg transition-all duration-200"
+              >
+                Vào ứng dụng MeowBack 🐾
+              </Link>
+            ) : (
+              <Link
+                href="/login"
+                onClick={() => setMenuOpen(false)}
+                className="block w-full text-center bg-gradient-to-r from-primary-400 to-primary-500 text-white rounded-full px-3 py-2.5 font-bold text-[14px] shadow-cute hover:shadow-cute-lg transition-all duration-200"
+              >
+                Đăng nhập 
+              </Link>
+            )}
           </div>
         </div>
       </div>

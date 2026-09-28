@@ -314,7 +314,7 @@ export function PwaInstallBanner() {
           <div>
             <h3 className="text-[14px] font-bold text-gray-900 sm:text-[15px]">Cài đặt ứng dụng MeowBack</h3>
             <p className="mt-0.5 text-[12px] text-gray-600 sm:text-[13px]">
-              Cài lên {platform === "ios" ? "iPhone" : "điện thoại"} để mở nhanh hơn, dùng mượt mà như app thật.
+              Cài lên điện thoại (iPhone &amp; Android) để mở nhanh hơn, dùng mượt mà như app thật.
             </p>
           </div>
         </div>
@@ -323,7 +323,7 @@ export function PwaInstallBanner() {
             onClick={handleInstallClick}
             className="rounded-xl bg-primary px-4 py-2 text-[13px] font-bold text-white shadow-sm hover:bg-primary-600 cursor-pointer"
           >
-            {platform === "ios" ? "Xem hướng dẫn" : "Cài đặt ngay"}
+            Xem hướng dẫn
           </button>
           <button onClick={dismiss} className="rounded-full p-2 text-gray-400 hover:bg-black/5 hover:text-gray-600 cursor-pointer">
             <X size={18} />
@@ -352,11 +352,14 @@ export function PwaInstallSettingsCard() {
   const [platform, setPlatform] = useState<Platform>("other");
   const [installed, setInstalled] = useState(false);
   const [showGuideModal, setShowGuideModal] = useState(false);
+  const [modalInitialTab, setModalInitialTab] = useState<"ios" | "android">("ios");
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
 
   useEffect(() => {
     setInstalled(isStandalone());
-    setPlatform(detectPlatform());
+    const detected = detectPlatform();
+    setPlatform(detected);
+    setModalInitialTab(detected === "android" ? "android" : "ios");
 
     const handler = (e: Event) => {
       e.preventDefault();
@@ -366,21 +369,8 @@ export function PwaInstallSettingsCard() {
     return () => window.removeEventListener("beforeinstallprompt", handler);
   }, []);
 
-  async function handleInstallClick() {
-    if (platform === "ios") {
-      setShowGuideModal(true);
-      return;
-    }
-    if (deferredPrompt) {
-      deferredPrompt.prompt();
-      try {
-        const choice = await deferredPrompt.userChoice;
-        if (choice.outcome === "accepted") {
-          setDeferredPrompt(null);
-          return;
-        }
-      } catch {}
-    }
+  function handleOpenGuide(target: "ios" | "android") {
+    setModalInitialTab(target);
     setShowGuideModal(true);
   }
 
@@ -402,21 +392,23 @@ export function PwaInstallSettingsCard() {
       ) : (
         <div className="flex flex-col gap-4">
           <p className="text-[13.5px] leading-relaxed text-neutral-600 font-medium">
-            Cài đặt MeowBack lên {platform === "ios" ? "iPhone" : "điện thoại"} giúp bạn mở ứng dụng nhanh chóng chỉ với 1 chạm, nhận thông báo tiền hoàn và mua sắm tiện lợi hơn.
+            Cài đặt MeowBack lên điện thoại (hỗ trợ cả <strong>iPhone</strong> &amp; <strong>Android</strong>) giúp bạn mở ứng dụng nhanh chóng chỉ với 1 chạm, nhận thông báo tiền hoàn và mua sắm tiện lợi hơn.
           </p>
-          <div>
+
+          <div className="pt-1">
             <button
-              onClick={handleInstallClick}
+              type="button"
+              onClick={() => setShowGuideModal(true)}
               className="rounded-full bg-gradient-to-r from-primary-400 to-primary-500 px-7 py-3 text-[14px] font-bold text-white shadow-cute hover:shadow-cute-lg transition-all active:scale-[0.98] cursor-pointer"
             >
-              Xem hướng dẫn cài đặt ({platform === "ios" ? "iPhone 🍎" : "Android 🤖"})
+              <span>Hướng dẫn cài đặt</span>
             </button>
           </div>
         </div>
       )}
       {showGuideModal && (
         <PwaInstallGuideModal
-          initialPlatform={platform}
+          initialPlatform={modalInitialTab}
           deferredPrompt={deferredPrompt}
           onClose={() => setShowGuideModal(false)}
         />
@@ -476,7 +468,7 @@ export function PwaInstallHorizontalCard() {
           <div>
             <h3 className="text-[15px] font-extrabold text-gray-900 tracking-tight">Cài đặt ứng dụng MeowBack</h3>
             <p className="mt-0.5 text-[13px] text-gray-500 font-medium">
-              Cài lên {platform === "ios" ? "iPhone" : "điện thoại"} để mở nhanh hơn, dùng như app thật.
+              Cài lên điện thoại (iPhone &amp; Android) để mở nhanh hơn, dùng như app thật.
             </p>
           </div>
         </div>
@@ -485,7 +477,7 @@ export function PwaInstallHorizontalCard() {
             onClick={handleInstallClick}
             className="rounded-2xl bg-gradient-to-r from-primary to-primary-active px-5 py-2.5 text-[14px] font-bold text-white shadow-md shadow-primary/20 hover:scale-105 transition-transform cursor-pointer"
           >
-            Hướng dẫn
+            Hướng dẫn cài đặt
           </button>
         </div>
       </div>

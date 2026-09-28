@@ -323,65 +323,43 @@ export function CustomerHeader({
             ))}
           </nav>
 
-          {/* ── Footer Drawer: Pháp lý & Trợ giúp (Dưới cùng) ── */}
-          <div className="mt-8 pt-4 border-t border-primary-100/70 shrink-0">
-            <div className="rounded-2xl bg-gradient-to-br from-primary-50/60 via-white to-pink-50/40 p-2.5 border border-primary-100/80 shadow-2xs">
-              <div className="px-2 pb-1.5 flex items-center justify-between">
-                <span className="text-[10.5px] font-black uppercase tracking-wider text-neutral-400">
-                  Pháp lý & Trợ giúp
-                </span>
-                <span className="text-[9.5px] font-bold text-primary-500 bg-white px-2 py-0.5 rounded-full border border-primary-100 shadow-2xs">
-                  MeowBack 🐾
-                </span>
-              </div>
-
-              <div className="flex flex-col gap-0.5">
-                <Link
-                  href="/faq"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={() => setIsOpen(false)}
-                  className="flex items-center justify-between px-2.5 py-2 rounded-xl text-[12.5px] font-bold text-neutral-600 hover:text-primary-600 hover:bg-white/80 transition-all group"
-                >
-                  <div className="flex items-center gap-2">
-                    <HelpCircle size={15} className="text-primary-400 group-hover:text-primary-600 transition-colors" />
-                    <span>Trung tâm trợ giúp</span>
-                  </div>
-                  <ExternalLink size={12} className="text-neutral-300 group-hover:text-primary-400 group-hover:translate-x-0.5 transition-all" />
-                </Link>
-
-                <Link
-                  href="/dieu-khoan-su-dung"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={() => setIsOpen(false)}
-                  className="flex items-center justify-between px-2.5 py-2 rounded-xl text-[12.5px] font-bold text-neutral-600 hover:text-primary-600 hover:bg-white/80 transition-all group"
-                >
-                  <div className="flex items-center gap-2">
-                    <FileText size={15} className="text-primary-400 group-hover:text-primary-600 transition-colors" />
-                    <span>Điều khoản sử dụng</span>
-                  </div>
-                  <ExternalLink size={12} className="text-neutral-300 group-hover:text-primary-400 group-hover:translate-x-0.5 transition-all" />
-                </Link>
-
-                <Link
-                  href="/chinh-sach-bao-mat"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={() => setIsOpen(false)}
-                  className="flex items-center justify-between px-2.5 py-2 rounded-xl text-[12.5px] font-bold text-neutral-600 hover:text-primary-600 hover:bg-white/80 transition-all group"
-                >
-                  <div className="flex items-center gap-2">
-                    <ShieldCheck size={15} className="text-primary-400 group-hover:text-primary-600 transition-colors" />
-                    <span>Chính sách bảo mật</span>
-                  </div>
-                  <ExternalLink size={12} className="text-neutral-300 group-hover:text-primary-400 group-hover:translate-x-0.5 transition-all" />
-                </Link>
-              </div>
+          {/* ── Thông tin & Điều khoản: Dạng danh sách mộc mạc, tinh tế, không đóng khung nổi bật ── */}
+          <div className="mt-4 pt-3 border-t border-neutral-100 shrink-0">
+            <div className="mb-1.5 px-3 text-[11px] font-black uppercase tracking-wider text-neutral-400">
+              Thông tin &amp; Điều khoản
             </div>
 
-            <p className="mt-2.5 text-center text-[10.5px] font-medium text-neutral-400">
-              © {new Date().getFullYear()} MeowBack • Nền tảng hoàn tiền
+            <div className="flex flex-col gap-0.5">
+              <Link
+                href="/app/faq"
+                onClick={() => setIsOpen(false)}
+                className="flex items-center gap-3 px-3.5 py-2 rounded-xl text-[13.5px] font-bold text-neutral-600 hover:text-primary-600 hover:bg-primary-50/60 transition-colors"
+              >
+                <HelpCircle size={18} className="text-neutral-400 shrink-0" />
+                <span>Trung tâm trợ giúp</span>
+              </Link>
+
+              <Link
+                href="/app/terms"
+                onClick={() => setIsOpen(false)}
+                className="flex items-center gap-3 px-3.5 py-2 rounded-xl text-[13.5px] font-bold text-neutral-600 hover:text-primary-600 hover:bg-primary-50/60 transition-colors"
+              >
+                <FileText size={18} className="text-neutral-400 shrink-0" />
+                <span>Điều khoản sử dụng</span>
+              </Link>
+
+              <Link
+                href="/app/privacy"
+                onClick={() => setIsOpen(false)}
+                className="flex items-center gap-3 px-3.5 py-2 rounded-xl text-[13.5px] font-bold text-neutral-600 hover:text-primary-600 hover:bg-primary-50/60 transition-colors"
+              >
+                <ShieldCheck size={18} className="text-neutral-400 shrink-0" />
+                <span>Chính sách bảo mật</span>
+              </Link>
+            </div>
+
+            <p className="mt-2.5 px-3 text-[11px] font-medium text-neutral-400">
+              © {new Date().getFullYear()} MeowBack
             </p>
           </div>
         </div>
