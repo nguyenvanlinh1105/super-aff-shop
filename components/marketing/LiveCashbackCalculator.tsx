@@ -24,6 +24,12 @@ const PRESET_SPENDS = [
   { label: "20 Triệu", value: 20000000 },
 ];
 
+const MOBILE_PRESETS = [
+  { label: "2 Triệu", spend: 2000000, note: "Đủ trả tiền cà phê, trà sữa mỗi tuần hoàn toàn miễn phí 🧋" },
+  { label: "5 Triệu", spend: 5000000, note: "Tích lũy đủ đi ăn nhà hàng hay tự thưởng món đồ yêu thích 🎁" },
+  { label: "10 Triệu", spend: 10000000, note: "Khoản tiết kiệm lớn đủ đổi điện thoại hoặc du lịch thả ga ✈️" },
+];
+
 export function LiveCashbackCalculator({
   customerRate = 80,
   taxRate = 10.98,
@@ -33,6 +39,7 @@ export function LiveCashbackCalculator({
 }) {
   const [monthlySpend, setMonthlySpend] = useState<number>(3500000);
   const [selectedCatId, setSelectedCatId] = useState<string>("tech");
+  const [mobileSpendIndex, setMobileSpendIndex] = useState<number>(1);
   const [effectiveCustomerRate, setEffectiveCustomerRate] = useState<number>(customerRate);
   const [effectiveTaxRate, setEffectiveTaxRate] = useState<number>(taxRate);
 
@@ -64,6 +71,14 @@ export function LiveCashbackCalculator({
   // 5. Tích lũy 1 năm (12 tháng)
   const yearlyCashback = monthlyCashback * 12;
 
+  // Tính toán nhanh cho mobile
+  const currentMobileSpend = MOBILE_PRESETS[mobileSpendIndex].spend;
+  const mobileGross = Math.round(currentMobileSpend * 0.08); // avg 8%
+  const mobileTax = Math.round(mobileGross * (effectiveTaxRate / 100));
+  const mobileNet = mobileGross - mobileTax;
+  const mobileMonthly = Math.round(mobileNet * (effectiveCustomerRate / 100));
+  const mobileYearly = mobileMonthly * 12;
+
   const formatCurrency = (val: number) =>
     new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(val);
 
@@ -81,12 +96,108 @@ export function LiveCashbackCalculator({
   };
 
   return (
-    <section className="relative pt-10 pb-12 md:pt-14 md:pb-16 bg-gradient-to-b from-white via-primary-50/30 to-white overflow-hidden">
+    <section className="relative pt-8 pb-10 sm:pt-10 sm:pb-12 md:pt-14 md:pb-16 bg-gradient-to-b from-white via-primary-50/30 to-white overflow-hidden">
       {/* Glow hiệu ứng nền */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[650px] h-[650px] bg-primary-200/25 rounded-full blur-[130px] pointer-events-none" />
 
-      <div className="relative z-10 max-w-[1100px] mx-auto px-4 md:px-8">
-        {/* Header đối thoại trực tiếp cá nhân */}
+      <div className="relative z-10 max-w-[1100px] mx-auto px-3.5 sm:px-6 md:px-8">
+        
+        {/* =================================================================== */}
+        {/* MOBILE VIEW (< md): GỌN GÀNG, TRỰC QUAN, ĐÁNH TRÚNG TÂM LÝ (1 MÀN HÌNH) */}
+        {/* =================================================================== */}
+        <div className="block md:hidden">
+          <div className="text-center space-y-1.5 mb-3.5">
+            <div className="inline-flex items-center gap-1.5 bg-primary-100 text-[#8A0B37] px-3 py-1 rounded-full text-[11px] font-black border border-primary-200 shadow-2xs">
+              <Sparkles size={13} className="text-primary-600" />
+              <span>Góc tính tiền hoàn thực tế 🎀</span>
+            </div>
+            <h2 className="text-[21px] xs:text-[23px] font-black text-neutral-900 tracking-tight leading-snug">
+              Mỗi năm bạn tích lũy được bao nhiêu?
+            </h2>
+            <p className="text-[12px] text-neutral-600 font-semibold max-w-xs mx-auto">
+              Chỉ cần mua sắm bình thường qua MeowBack, tiền hoàn tự động chảy về ví bạn:
+            </p>
+          </div>
+
+          {/* 3 Nút chọn mức chi tiêu nhanh */}
+          <div className="grid grid-cols-3 gap-1.5 p-1 bg-neutral-100/90 rounded-2xl border border-neutral-200/80 mb-3">
+            {MOBILE_PRESETS.map((p, idx) => (
+              <button
+                key={p.spend}
+                type="button"
+                onClick={() => setMobileSpendIndex(idx)}
+                className={`py-2 px-1 rounded-xl text-[12px] font-black transition-all flex flex-col items-center justify-center ${
+                  mobileSpendIndex === idx
+                    ? "bg-white text-primary-700 shadow-xs border border-primary-200/90 scale-[1.02]"
+                    : "text-neutral-600 hover:text-neutral-900"
+                }`}
+              >
+                <span className="whitespace-nowrap">{p.label}</span>
+                <span className="text-[9.5px] font-bold text-neutral-400 whitespace-nowrap">/ tháng</span>
+              </button>
+            ))}
+          </div>
+
+          {/* Thẻ Kết quả Pocket Card */}
+          <div className="rounded-3xl bg-gradient-to-br from-[#8A0B37] via-primary-600 to-rose-600 p-4 text-white shadow-cute border border-primary-300/40 relative overflow-hidden space-y-2.5">
+            <div className="flex items-center justify-between border-b border-white/20 pb-2">
+              <span className="text-[11px] font-black uppercase tracking-wider text-primary-100 flex items-center gap-1">
+                <Gift size={13} className="text-amber-300" /> Nhận về sau 1 năm
+              </span>
+              <span className="bg-white/20 text-white text-[10px] font-black px-2 py-0.5 rounded-full backdrop-blur-md whitespace-nowrap">
+                Hoàn {effectiveCustomerRate}% sau thuế
+              </span>
+            </div>
+
+            <div className="space-y-0.5">
+              <div className="text-[11px] font-extrabold text-primary-100">Tiền hoàn tích lũy cả năm:</div>
+              <div className="text-[28px] xs:text-[32px] font-black tracking-tight text-white leading-tight">
+                ~ {formatCurrency(mobileYearly)}
+              </div>
+              <div className="text-[11.5px] font-semibold text-amber-200">
+                Tương đương ~ <strong>{formatCurrency(mobileMonthly)}</strong> / tháng
+              </div>
+            </div>
+
+            {/* Gợi ý gần gũi */}
+            <div className="bg-white/15 backdrop-blur-md rounded-xl p-2.5 border border-white/20">
+              <p className="text-[11.5px] font-bold text-white/95 leading-relaxed">
+                &ldquo;{MOBILE_PRESETS[mobileSpendIndex].note}&rdquo;
+              </p>
+            </div>
+
+            {/* 3 Cam kết siêu ngắn */}
+            <div className="space-y-1.5 text-[11px] font-bold text-white/90 pt-0.5">
+              <div className="flex items-center gap-1.5">
+                <CheckCircle2 size={13} className="text-emerald-300 shrink-0" />
+                <span className="whitespace-nowrap">Giữ nguyên 100% voucher, freeship của sàn</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <CheckCircle2 size={13} className="text-emerald-300 shrink-0" />
+                <span className="whitespace-nowrap">Rút từ 10.000đ về mọi ngân hàng, miễn phí</span>
+              </div>
+              <div className="flex items-center gap-1.5">
+                <CheckCircle2 size={13} className="text-emerald-300 shrink-0" />
+                <span className="whitespace-nowrap">Tự động cộng ví, không cần chụp bill hoá đơn</span>
+              </div>
+            </div>
+
+            <div className="pt-1">
+              <Link
+                href="/register"
+                className="btn-shine-effect w-full flex items-center justify-center gap-1.5 py-3 px-4 rounded-2xl bg-white text-[#8A0B37] font-black text-[13.5px] shadow-md hover:bg-rose-50 transition-all active:scale-98"
+              >
+                <span>Nhận tiền hoàn ngay 🎀</span>
+                <ArrowRight size={15} />
+              </Link>
+            </div>
+          </div>
+        </div>
+
+        {/* =================================================================== */}
+        {/* DESKTOP VIEW (>= md): BẢNG TÍNH TƯƠNG TÁC ĐẦY ĐỦ CHO PC              */}
+        {/* =================================================================== */}
+        <div className="hidden md:block">
         <div className="text-center space-y-3 mb-8 md:mb-10">
           <div className="inline-flex items-center gap-2 bg-primary-100/90 text-[#8A0B37] px-4 py-1.5 rounded-full text-xs font-black shadow-sm border border-primary-200">
             <HeartHandshake size={16} className="text-primary-600" />
@@ -277,6 +388,7 @@ export function LiveCashbackCalculator({
               </div>
             </div>
           </div>
+        </div>
         </div>
       </div>
     </section>
