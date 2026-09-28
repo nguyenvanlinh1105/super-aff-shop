@@ -27,6 +27,9 @@ self.addEventListener("push", (event) => {
   }
 
   const title = data.title || "MeowBack 🎀";
+  // Tag định danh để trình duyệt và hệ điều hành tự động gộp (collapse) các thông báo trùng
+  const notifTag = data.tag || (data.id ? `meowback-${data.id}` : `meowback-${encodeURIComponent(title)}`);
+
   const options = {
     body: data.body || data.message || "Bạn có thông báo mới từ MeowBack 🐾",
     icon: data.icon || "/meowback_lucky_cat_logo.png",
@@ -36,11 +39,27 @@ self.addEventListener("push", (event) => {
       dateOfArrival: Date.now(),
     },
     vibrate: [100, 50, 100],
-    tag: data.tag || "meowback-push",
-    renotify: true,
+    tag: notifTag,
+    renotify: false, // Không re-notify nếu nhận lại cùng 1 tag
   };
 
-  event.waitUntil(self.registration.showNotification(title, options));
+  event.waitUntil(
+    (async () => {
+      // 1. Gửi thông điệp tới tất cả các tab MeowBack đang mở để hiển thị In-App banner tức thì
+      try {
+        const clientList = await self.clients.matchAll({ type: "window", includeUncontrolled: true });
+        for (const client of clientList) {
+          client.postMessage({
+            type: "MEOWBACK_PUSH_RECEIVED",
+            data,
+          });
+        }
+      } catch (_) {}
+
+      // 2. Hiển thị thông báo màn hình khóa / Notification Tray của hệ thống
+      return self.registration.showNotification(title, options);
+    })()
+  );
 });
 
 // ─── CHẠM VÀO THÔNG BÁO -> MỞ TRANG TƯƠNG ỨNG ─────────────────────────

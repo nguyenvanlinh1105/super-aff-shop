@@ -103,10 +103,15 @@ export async function sendPushToUser(userId: string, payload: PushPayload): Prom
     `;
   }
 
-  if (subscriptions.length === 0) return 0;
+  // Khử trùng lặp endpoint để 1 thiết bị không bao giờ nhận 2 lần
+  const uniqueSubs = Array.from(
+    new Map(subscriptions.map((s) => [s.endpoint, s])).values()
+  );
+
+  if (uniqueSubs.length === 0) return 0;
 
   const results = await Promise.allSettled(
-    subscriptions.map((sub) => sendWebPush(sub, payload))
+    uniqueSubs.map((sub) => sendWebPush(sub, payload))
   );
 
   return results.filter((r) => r.status === "fulfilled" && r.value).length;
@@ -127,14 +132,19 @@ export async function sendPushToAll(payload: PushPayload): Promise<number> {
     `;
   }
 
-  if (subscriptions.length === 0) return 0;
+  // Khử trùng lặp endpoint để 1 thiết bị không bao giờ nhận 2 lần
+  const uniqueSubs = Array.from(
+    new Map(subscriptions.map((s) => [s.endpoint, s])).values()
+  );
+
+  if (uniqueSubs.length === 0) return 0;
 
   // Gửi song song tối đa theo lô để tối ưu hiệu năng
   const batchSize = 25;
   let successCount = 0;
 
-  for (let i = 0; i < subscriptions.length; i += batchSize) {
-    const batch = subscriptions.slice(i, i + batchSize);
+  for (let i = 0; i < uniqueSubs.length; i += batchSize) {
+    const batch = uniqueSubs.slice(i, i + batchSize);
     const results = await Promise.allSettled(
       batch.map((sub) => sendWebPush(sub, payload))
     );

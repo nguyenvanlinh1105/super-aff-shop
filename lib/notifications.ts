@@ -14,13 +14,14 @@ type NotificationInput = {
 export async function notifyCustomerInApp(customerId: string, data: NotificationInput) {
   const user = await prisma.user.findUnique({ where: { customerId }, select: { id: true } });
   if (!user) return;
-  await prisma.notification.create({ data: { userId: user.id, ...data } });
+  const created = await prisma.notification.create({ data: { userId: user.id, ...data } });
 
-  // Gửi Web Push ra màn hình khóa ngầm không chặn luồng chính
+  // Gửi Web Push ra màn hình khóa ngầm không chặn luồng chính (kèm tag để tránh duplicate trên thiết bị)
   sendPushToUser(user.id, {
     title: data.title,
     body: data.message,
     url: data.link || "/app",
+    tag: `meowback-notif-${created.id}`,
   }).catch((err) => console.error("Auto push error in notifyCustomerInApp:", err));
 }
 
@@ -32,11 +33,15 @@ export async function broadcastNotification(data: NotificationInput) {
     data: users.map((u) => ({ userId: u.id, ...data })),
   });
 
+  // Tag đồng nhất cho đợt phát sóng này giúp OS tự động deduplicate nếu nhận lại
+  const broadcastTag = `meowback-broadcast-${Date.now()}`;
+
   // Phát sóng Web Push tới toàn bộ thiết bị
   sendPushToAll({
     title: data.title,
     body: data.message,
     url: data.link || "/app",
+    tag: broadcastTag,
   }).catch((err) => console.error("Auto push error in broadcastNotification:", err));
 
   return users.length;
@@ -51,6 +56,7 @@ export async function notifyAdminsInApp(data: NotificationInput) {
     data: admins.map((u) => ({ userId: u.id, ...data })),
   });
 
+  const adminTag = `meowback-admin-${Date.now()}`;
   // Gửi Web Push tới các admin
   Promise.allSettled(
     admins.map((a) =>
@@ -58,6 +64,7 @@ export async function notifyAdminsInApp(data: NotificationInput) {
         title: data.title,
         body: data.message,
         url: data.link || "/admin",
+        tag: adminTag,
       })
     )
   ).catch((err) => console.error("Admin push error:", err));

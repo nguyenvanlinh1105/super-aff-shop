@@ -62,22 +62,15 @@ export function AppNotificationBanner() {
   const lastKnownIdRef = useRef<string | null>(null);
   const dismissTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Hiển thị thông báo dạng App Push Banner
+  // Hiển thị thông báo dạng App Push Banner (chỉ hiển thị trên giao diện In-App của website)
   const showBanner = useCallback((notif: NotificationItem) => {
     setActiveNotification(notif);
     setVisible(true);
     playNotificationChime();
 
-    // Đồng thời kích hoạt Web Notification của trình duyệt (nếu người dùng cho phép)
-    try {
-      if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "granted") {
-        new Notification(notif.title, {
-          body: notif.message,
-          icon: "/meowback_lucky_cat_logo.png",
-          badge: "/meowback_lucky_cat_logo.png",
-        });
-      }
-    } catch {}
+    // LƯU Ý: KHÔNG gọi `new Notification()` ở đây!
+    // Hệ thống đã có Web Push Service Worker (`sw.js`) chịu trách nhiệm gửi thông báo màn hình khóa / OS.
+    // Nếu gọi thêm `new Notification()`, người dùng sẽ nhận 2 thông báo trên cùng 1 thiết bị.
 
     if (dismissTimerRef.current) clearTimeout(dismissTimerRef.current);
     // Tự động đóng sau 7 giây
@@ -115,17 +108,6 @@ export function AppNotificationBanner() {
   // Khởi tạo & Polling kiểm tra thông báo mới
   useEffect(() => {
     let isMounted = true;
-
-    // Yêu cầu quyền thông báo trình duyệt nhẹ nhàng nếu chưa hỏi
-    try {
-      if (typeof window !== "undefined" && "Notification" in window && Notification.permission === "default") {
-        // Hỏi quyền sau 5 giây để không làm phiền ngay khi vừa vào web
-        const permTimer = setTimeout(() => {
-          void Notification.requestPermission();
-        }, 5000);
-        return () => clearTimeout(permTimer);
-      }
-    } catch {}
 
     async function checkNewNotifications(isInitial = false) {
       try {
@@ -177,10 +159,37 @@ export function AppNotificationBanner() {
     };
     window.addEventListener("meowback-notification" as any, handleLocalBroadcast);
 
+    // Lắng nghe thông điệp từ Service Worker (khi nhận được Web Push từ server)
+    const handleSwMessage = (event: MessageEvent) => {
+      if (event.data && event.data.type === "MEOWBACK_PUSH_RECEIVED" && event.data.data) {
+        const d = event.data.data;
+        const item: NotificationItem = {
+          id: d.id || `push-${Date.now()}`,
+          type: d.type || "system",
+          title: d.title || "MeowBack 🎀",
+          message: d.body || d.message || "",
+          link: d.url || null,
+          isRead: false,
+          createdAt: new Date().toISOString(),
+        };
+        lastKnownIdRef.current = item.id;
+        if (isMounted) {
+          showBanner(item);
+        }
+      }
+    };
+
+    if (typeof navigator !== "undefined" && "serviceWorker" in navigator) {
+      navigator.serviceWorker.addEventListener("message", handleSwMessage);
+    }
+
     return () => {
       isMounted = false;
       clearInterval(interval);
       window.removeEventListener("meowback-notification" as any, handleLocalBroadcast);
+      if (typeof navigator !== "undefined" && "serviceWorker" in navigator) {
+        navigator.serviceWorker.removeEventListener("message", handleSwMessage);
+      }
       if (dismissTimerRef.current) clearTimeout(dismissTimerRef.current);
     };
   }, [showBanner]);
