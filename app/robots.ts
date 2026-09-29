@@ -11,6 +11,6 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ["/admin", "/app", "/api"],
       },
     ],
-    sitemap: "https://meowback.vn/sitemap.xml",
+    sitemap: "https://meowback.shop/sitemap.xml",
   };
 }

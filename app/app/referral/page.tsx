@@ -155,7 +155,7 @@ export default async function ReferralPage() {
     };
   });
 
-  const inviteUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? "https://meowback.vn"}/register?ref=${customer.customerCode}`;
+  const inviteUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? "https://meowback.shop"}/register?ref=${customer.customerCode}`;
   let qrDataUrl = "";
   try {
     qrDataUrl = await QRCode.toDataURL(inviteUrl, {

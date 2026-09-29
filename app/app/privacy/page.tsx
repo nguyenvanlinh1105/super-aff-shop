@@ -4,7 +4,7 @@ const SECTIONS = [
   {
     title: "1. Phạm vi áp dụng",
     body: [
-      "Chính sách bảo mật này áp dụng cho toàn bộ thông tin cá nhân mà MeowBack thu thập khi bạn sử dụng website meowback.vn và bot Telegram chính thức của MeowBack. Bằng việc sử dụng dịch vụ, bạn đồng ý với cách thức thu thập và xử lý dữ liệu được mô tả dưới đây.",
+      "Chính sách bảo mật này áp dụng cho toàn bộ thông tin cá nhân mà MeowBack thu thập khi bạn sử dụng website meowback.shop và bot Telegram chính thức của MeowBack. Bằng việc sử dụng dịch vụ, bạn đồng ý với cách thức thu thập và xử lý dữ liệu được mô tả dưới đây.",
     ],
   },
   {

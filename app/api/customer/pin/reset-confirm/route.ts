@@ -3,6 +3,7 @@ import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { isValidPin, setPaymentPin } from "@/lib/paymentPin";
 import { verifyPassword } from "@/lib/password";
+import { sendMail, buildPinChangedEmail } from "@/lib/mailer";
 
 /** POST /api/customer/pin/reset-confirm — Xác nhận OTP và đặt PIN mới */
 export async function POST(request: Request) {
@@ -29,7 +30,7 @@ export async function POST(request: Request) {
     // Get stored OTP hash
     const user = await prisma.user.findUnique({
       where: { customerId: session.customerId },
-      select: { mfaResetToken: true, mfaResetExpiresAt: true },
+      select: { mfaResetToken: true, mfaResetExpiresAt: true, email: true },
     });
 
     if (!user?.mfaResetToken || !user?.mfaResetExpiresAt) {
@@ -55,6 +56,19 @@ export async function POST(request: Request) {
       where: { customerId: session.customerId },
       data: { mfaResetToken: null, mfaResetExpiresAt: null },
     });
+
+    // Gửi email thông báo bảo mật
+    const customer = await prisma.customer.findUnique({
+      where: { id: session.customerId },
+      select: { fullName: true },
+    });
+    if (user.email && customer) {
+      void sendMail({
+        to: user.email,
+        subject: "Đặt lại mã PIN rút tiền thành công — MeowBack",
+        html: buildPinChangedEmail({ fullName: customer.fullName }),
+      });
+    }
 
     return NextResponse.json({ success: true, message: "Đặt lại mã PIN thành công" });
   } catch (error: any) {

@@ -27,13 +27,13 @@ const breadcrumbJsonLd = {
       "@type": "ListItem",
       position: 1,
       name: "Trang chủ",
-      item: "https://meowback.vn/",
+      item: "https://meowback.shop/",
     },
     {
       "@type": "ListItem",
       position: 2,
       name: "Chính sách bảo mật",
-      item: "https://meowback.vn/chinh-sach-bao-mat",
+      item: "https://meowback.shop/chinh-sach-bao-mat",
     },
   ],
 };
@@ -42,7 +42,7 @@ const SECTIONS = [
   {
     title: "1. Phạm vi áp dụng",
     body: [
-      "Chính sách bảo mật này áp dụng cho toàn bộ thông tin cá nhân mà MeowBack thu thập khi bạn sử dụng website meowback.vn và bot Telegram chính thức của MeowBack. Bằng việc sử dụng dịch vụ, bạn đồng ý với cách thức thu thập và xử lý dữ liệu được mô tả dưới đây.",
+      "Chính sách bảo mật này áp dụng cho toàn bộ thông tin cá nhân mà MeowBack thu thập khi bạn sử dụng website meowback.shop và bot Telegram chính thức của MeowBack. Bằng việc sử dụng dịch vụ, bạn đồng ý với cách thức thu thập và xử lý dữ liệu được mô tả dưới đây.",
     ],
   },
   {
@@ -71,7 +71,7 @@ const SECTIONS = [
     title: "4. Cookie và công nghệ theo dõi",
     body: [
       "MeowBack sử dụng cookie thiết yếu để duy trì phiên đăng nhập của bạn một cách an toàn (mã hoá, chỉ truyền qua kết nối HTTPS). Chúng tôi không sử dụng cookie quảng cáo của bên thứ ba.",
-      "Khi bạn truy cập hệ thống từ một link mời (dạng meowback.vn/register?ref=...), một cookie ref_code được lưu trong 30 ngày để ghi nhận đúng người đã giới thiệu bạn nếu bạn đăng ký tài khoản trong khoảng thời gian đó.",
+      "Khi bạn truy cập hệ thống từ một link mời (dạng meowback.shop/register?ref=...), một cookie ref_code được lưu trong 30 ngày để ghi nhận đúng người đã giới thiệu bạn nếu bạn đăng ký tài khoản trong khoảng thời gian đó.",
     ],
   },
   {

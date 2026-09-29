@@ -203,7 +203,7 @@ export function buildUnsupportedPlatformMessage(rawUrl: string): string {
 export function buildTikTokDisabledOnTelegramMessage(): string {
   return [
     "🙁 Bot hiện <b>chưa hỗ trợ đổi link TikTok Shop</b> qua Telegram.",
-    "Vui lòng dùng website meowback.vn để đổi link TikTok, hoặc gửi link Shopee vào đây nhé.",
+    "Vui lòng dùng website meowback.shop để đổi link TikTok, hoặc gửi link Shopee vào đây nhé.",
   ].join("\n");
 }
 

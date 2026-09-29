@@ -11,7 +11,7 @@ function getPrisma() {
 
 const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
 const vapidPrivateKey = process.env.VAPID_PRIVATE_KEY;
-const vapidSubject = process.env.VAPID_SUBJECT || "mailto:support@meowback.vn";
+const vapidSubject = process.env.VAPID_SUBJECT || "mailto:support@meowback.shop";
 
 if (vapidPublicKey && vapidPrivateKey) {
   try {

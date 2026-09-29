@@ -282,7 +282,7 @@ export async function POST(req: NextRequest) {
 
     const referralRate = activeRule?.referralRate ? Number(activeRule.referralRate) : 0.05;
     const totalBonusEarned = referralOrders.reduce((s, o) => s + Number(o.customerRewardAmount), 0);
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://meowback.vn";
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://meowback.shop";
 
     replyText = buildReferralInfoMessage({
       inviteUrl: `${appUrl}/register?ref=${customer.customerCode}`,
@@ -335,7 +335,7 @@ export async function POST(req: NextRequest) {
       : null;
 
     if (customCmd && customCmd.isActive) {
-      const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://meowback.vn";
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "https://meowback.shop";
       replyText = customCmd.replyText
         .replace(/\{fullName\}/g, customer.fullName || "")
         .replace(/\{customerCode\}/g, customer.customerCode || "")

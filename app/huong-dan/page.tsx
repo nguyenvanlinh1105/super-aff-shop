@@ -35,13 +35,13 @@ const breadcrumbJsonLd = {
       "@type": "ListItem",
       position: 1,
       name: "Trang chủ",
-      item: "https://meowback.vn/",
+      item: "https://meowback.shop/",
     },
     {
       "@type": "ListItem",
       position: 2,
       name: "Hướng Dẫn",
-      item: "https://meowback.vn/huong-dan",
+      item: "https://meowback.shop/huong-dan",
     },
   ],
 };

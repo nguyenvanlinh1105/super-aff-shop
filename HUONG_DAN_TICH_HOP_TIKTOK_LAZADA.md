@@ -27,6 +27,41 @@ Chức năng "Đồng bộ đơn TikTok" (nhập tay `order_id`) trên giao di�
 - Webhook bị lỗi/mạng rớt khiến hệ thống không nhận được tin nhắn tự động.
 - Lúc này, bạn có thể vào trang quản lý affiliate của TikTok hoặc RioHub, copy các ID đơn hàng bị thiếu (ngăn cách bằng dấu phẩy) và dán vào ô nhập tay để hệ thống chủ động gọi API lấy lại dữ liệu đơn đó.
 
+### D. Cơ chế tính phí của RioHub (Mỗi đơn mất bao nhiêu tiền?)
+- **Hoàn toàn miễn phí duy trì**: Bạn không mất bất kỳ khoản phí đăng ký, phí duy trì hàng tháng hay phí tạo API/Webhook nào.
+- **Trừ % hoa hồng khi đơn thành công**: RioHub hoạt động theo mô hình MCN được TikTok ủy quyền. RioHub **không trừ tiền túi của bạn**, mà trích lại một phần phí quản lý MCN (thường từ **5% – 10%**) trên **khoản tiền hoa hồng** mà nhà bán hàng (Seller) trả cho đơn thành công. Đơn bị hủy / hoàn hàng = không mất đồng nào.
+- **Ví dụ phân bổ dòng tiền**:
+  1. Khách mua chiếc áo **300.000đ** qua link MeowBack.
+  2. Shop cài hoa hồng Affiliate là **10%** (= **30.000đ**).
+  3. TikTok chuyển hoa hồng về RioHub: RioHub giữ phí quản lý (ví dụ 10% của 30k = **3.000đ**).
+  4. Bạn nhận về ví RioHub: **27.000đ**.
+  5. Hệ thống MeowBack tự động tính hoàn tiền cho khách (ví dụ trích 70% hoàn lại = **18.900đ**), bạn giữ lại phần lợi nhuận ròng (**8.100đ**).
+
+### E. Chưa có kênh TikTok hoặc chưa đủ 1.000 followers thì làm sao?
+
+Nếu chưa có kênh TikTok đạt điều kiện mở giỏ hàng Affiliate (1.000 follow), bạn có 4 giải pháp sau:
+
+1. **Mẹo mở giỏ hàng với 0 Follower (Chính thống bằng TikTok Seller)**:
+   - Tải app **TikTok Seller** (hoặc truy cập [seller-vn.tiktok.com](https://seller-vn.tiktok.com)).
+   - Đăng ký tài khoản người bán bằng CCCD (duyệt tự động trong vài phút).
+   - Vào mục **Cài đặt** ➔ **Tài khoản TikTok được liên kết** ➔ chọn tab **Tài khoản tiếp thị (Marketing Account)**.
+   - Nhập ID nick TikTok cá nhân của bạn (dù là nick mới tạo 0 follower).
+   - Mở app TikTok cá nhân bấm chấp nhận liên kết ➔ Kênh sẽ lập tức có biểu tượng **Giỏ hàng Affiliate** mà không cần 1.000 follower. Sau đó mang nick này kết nối vào RioHub.
+
+2. **Mượn kênh của bạn bè / người thân**:
+   - Bạn bè chỉ cần bấm chấp nhận lời mời liên kết vào RioHub (bạn **không cần mật khẩu** tài khoản TikTok của họ).
+   - **Vì sao không ảnh hưởng đến bạn bè?**
+     - **Dòng tiền**: Theo luật MCN của TikTok, toàn bộ tiền hoa hồng phát sinh qua link API sẽ được TikTok trả thẳng về **Ví RioHub của bạn**. Tiền **không bao giờ chạy vào app TikTok của bạn bè**, bạn chỉ việc điền STK ngân hàng của mình trên RioHub để rút tiền về.
+     - **Không bị can thiệp nội dung**: Bạn bè vẫn lướt TikTok, nhắn tin, đăng clip bình thường. MeowBack chỉ dùng ID kênh như một cầu nối kỹ thuật để sinh link Affiliate.
+
+3. **Mua nick TikTok đã bật giỏ hàng**:
+   - Mua nick TikTok trắng đã đủ điều kiện bật giỏ hàng trên các cộng đồng KOC/Affiliate (giá thị trường chỉ khoảng 50.000đ – 100.000đ/nick).
+
+4. **Tạm thời tắt TikTok, chỉ chạy Shopee (và Lazada)**:
+   - Shopee chiếm tới 80% – 90% doanh số mua sắm hoàn tiền tại Việt Nam.
+   - Trong file `.env`, bạn cứ để trống các biến `RIOHUB_*`.
+   - Vào trang quản trị MeowBack (`/admin/settings`), chuyển trạng thái TikTok sang **Tạm tắt (Inactive)**. Hệ thống vẫn vận hành mượt mà 100% cho Shopee!
+
 ---
 
 ## 2. Tích hợp Lazada (thông qua Lazada Open API)

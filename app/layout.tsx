@@ -22,7 +22,7 @@ const beVietnamPro = Be_Vietnam_Pro({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://meowback.vn"),
+  metadataBase: new URL("https://meowback.shop"),
   title: {
     default: "MeowBack — Hoàn Tiền Mua Sắm Shopee, Lazada & TikTok Shop",
     template: "%s | MeowBack",

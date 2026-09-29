@@ -79,7 +79,7 @@ export default async function CustomerHomePage() {
   const maxReferralOrders = activeRule?.maxReferralOrders ?? 5;
   const referralValidityMonths = activeRule?.referralValidityMonths ?? 6;
 
-  const inviteUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? "https://meowback.vn"}/register?ref=${customerCode}`;
+  const inviteUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? "https://meowback.shop"}/register?ref=${customerCode}`;
   let qrDataUrl = "";
   try {
     qrDataUrl = await QRCode.toDataURL(inviteUrl, {

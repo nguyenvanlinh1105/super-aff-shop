@@ -25,8 +25,8 @@ const breadcrumbJsonLd = {
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
   itemListElement: [
-    { "@type": "ListItem", position: 1, name: "Trang chủ", item: "https://meowback.vn/" },
-    { "@type": "ListItem", position: 2, name: "Cửa Hàng", item: "https://meowback.vn/cua-hang" },
+    { "@type": "ListItem", position: 1, name: "Trang chủ", item: "https://meowback.shop/" },
+    { "@type": "ListItem", position: 2, name: "Cửa Hàng", item: "https://meowback.shop/cua-hang" },
   ],
 };
 

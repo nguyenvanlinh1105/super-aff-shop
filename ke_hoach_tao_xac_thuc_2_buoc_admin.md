@@ -20,7 +20,7 @@
 ### 📱 B. Quy Trình Khởi Tạo & Kích Hoạt 2MFA Lần Đầu (Google Authenticator)
 1. Admin đăng nhập vào trang Cài đặt `/admin/settings` (hoặc màn hình Setup bắt buộc cho Admin mới).
 2. Hệ thống tự động sinh một mã khóa bí mật duy nhất `mfaSecret` ngẫu nhiên bằng thư viện `otplib`.
-3. Chuyển `mfaSecret` thành chuỗi URI theo chuẩn Google Authenticator (`otpauth://totp/MeowBack:admin@meowback.vn?secret=...`).
+3. Chuyển `mfaSecret` thành chuỗi URI theo chuẩn Google Authenticator (`otpauth://totp/MeowBack:admin@meowback.shop?secret=...`).
 4. Dùng thư viện `qrcode` chuyển chuỗi này thành **Hình ảnh QR Code sắc nét**.
 5. Admin mở ứng dụng Google Authenticator / Authy trên điện thoại ➔ Quét mã QR Code.
 6. Admin nhập 1 mã 6 số chạy thử trên điện thoại ➔ Bấm **Xác nhận kích hoạt**.

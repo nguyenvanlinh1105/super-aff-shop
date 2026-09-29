@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
 import { isValidPin, verifyPaymentPin, setPaymentPin } from "@/lib/paymentPin";
+import { sendMail, buildPinChangedEmail } from "@/lib/mailer";
 
 /** POST /api/customer/pin/change — Đổi mã PIN (cần nhập PIN cũ) */
 export async function POST(request: Request) {
@@ -35,6 +37,19 @@ export async function POST(request: Request) {
     }
 
     await setPaymentPin(session.customerId, newPin);
+
+    // Gửi email thông báo bảo mật
+    const customer = await prisma.customer.findUnique({
+      where: { id: session.customerId },
+      include: { user: { select: { email: true } } },
+    });
+    if (customer?.user?.email) {
+      void sendMail({
+        to: customer.user.email,
+        subject: "Mã PIN rút tiền đã được thay đổi — MeowBack",
+        html: buildPinChangedEmail({ fullName: customer.fullName }),
+      });
+    }
 
     return NextResponse.json({ success: true, message: "Đổi mã PIN thành công" });
   } catch (error: any) {

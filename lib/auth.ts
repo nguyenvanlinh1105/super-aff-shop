@@ -12,7 +12,7 @@ import {
 } from "./session";
 
 // Cookie "Secure" chỉ nên bật khi request THỰC SỰ qua HTTPS — không phải cứ
-// production là bật cứng. Trong giai đoạn domain mới (meowback.vn) chưa kịp
+// production là bật cứng. Trong giai đoạn domain mới (meowback.shop) chưa kịp
 // cấp SSL, nếu ép Secure=true, trình duyệt sẽ âm thầm từ chối lưu cookie khi
 // truy cập qua HTTP, khiến đăng nhập/Google OAuth báo "hết hạn phiên" dù mọi
 // thứ khác đều đúng. Dùng header x-forwarded-proto (Nginx set) để biết chính

@@ -33,13 +33,13 @@ const breadcrumbJsonLd = {
       "@type": "ListItem",
       position: 1,
       name: "Trang chủ",
-      item: "https://meowback.vn/",
+      item: "https://meowback.shop/",
     },
     {
       "@type": "ListItem",
       position: 2,
       name: "Ưu đãi",
-      item: "https://meowback.vn/uu-dai",
+      item: "https://meowback.shop/uu-dai",
     },
   ],
 };
@@ -131,7 +131,7 @@ export default async function PublicDealsPage({
           itemListElement: formattedDeals.map((d, idx) => ({
             "@type": "ListItem",
             position: idx + 1,
-            url: d.shortUrl || "https://meowback.vn/uu-dai",
+            url: d.shortUrl || "https://meowback.shop/uu-dai",
             name: d.title,
           })),
         }

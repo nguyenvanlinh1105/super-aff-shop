@@ -27,13 +27,13 @@ const breadcrumbJsonLd = {
       "@type": "ListItem",
       position: 1,
       name: "Trang chủ",
-      item: "https://meowback.vn/",
+      item: "https://meowback.shop/",
     },
     {
       "@type": "ListItem",
       position: 2,
       name: "Điều khoản sử dụng",
-      item: "https://meowback.vn/dieu-khoan-su-dung",
+      item: "https://meowback.shop/dieu-khoan-su-dung",
     },
   ],
 };

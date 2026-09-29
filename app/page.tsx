@@ -41,8 +41,8 @@ const jsonLd = {
   "@graph": [
     {
       "@type": "WebSite",
-      "@id": "https://meowback.vn/#website",
-      url: "https://meowback.vn",
+      "@id": "https://meowback.shop/#website",
+      url: "https://meowback.shop",
       name: "MeowBack",
       description:
         "Nền tảng affiliate hoàn tiền cho Shopee, Lazada và TikTok Shop tại Việt Nam.",
@@ -50,10 +50,10 @@ const jsonLd = {
     },
     {
       "@type": "Organization",
-      "@id": "https://meowback.vn/#organization",
+      "@id": "https://meowback.shop/#organization",
       name: "MeowBack",
-      url: "https://meowback.vn",
-      logo: "https://meowback.vn/meowback_lucky_cat_logo.png",
+      url: "https://meowback.shop",
+      logo: "https://meowback.shop/meowback_lucky_cat_logo.png",
       telephone: "+84965965439",
       contactPoint: {
         "@type": "ContactPoint",

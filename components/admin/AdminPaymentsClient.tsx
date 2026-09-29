@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, Fragment } from "react";
 import {
   Search,
   Wallet,
@@ -26,6 +26,8 @@ import {
   FileImage,
   ArrowRight,
   Zap,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/Toast";
@@ -732,6 +734,225 @@ function BatchPaymentModal({
   );
 }
 
+// ── BADGE HIỂN THỊ SÀN TMĐT ──────────────────────────────────────────────────
+function PlatformBadge({ platform }: { platform: string }) {
+  const p = (platform || "").toUpperCase();
+  if (p.includes("SHOPEE")) {
+    return (
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-black bg-orange-50 text-orange-600 border border-orange-200">
+        Shopee
+      </span>
+    );
+  }
+  if (p.includes("LAZADA")) {
+    return (
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-black bg-blue-50 text-blue-600 border border-blue-200">
+        Lazada
+      </span>
+    );
+  }
+  if (p.includes("TIKTOK")) {
+    return (
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-black bg-neutral-900 text-white border border-neutral-700">
+        TikTok Shop
+      </span>
+    );
+  }
+  return (
+    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-black bg-neutral-100 text-neutral-700 border border-neutral-200">
+      {platform || "Sàn khác"}
+    </span>
+  );
+}
+
+// ── MODAL POPUP CHI TIẾT ĐƠN HÀNG CHỜ DUYỆT CỦA KHÁCH HÀNG ──────────────────
+function WaitingCustomerOrdersModal({
+  customer,
+  onClose,
+}: {
+  customer: CustomerWaiting;
+  onClose: () => void;
+}) {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [modalPage, setModalPage] = useState(1);
+  const modalPageSize = 10;
+
+  const filteredOrders = customer.orders.filter((o) => {
+    if (!searchTerm) return true;
+    const q = searchTerm.toLowerCase();
+    return (
+      o.orderExternalId.toLowerCase().includes(q) ||
+      (o.productTitle && o.productTitle.toLowerCase().includes(q)) ||
+      o.platformName.toLowerCase().includes(q)
+    );
+  });
+
+  const totalModalPages = Math.ceil(filteredOrders.length / modalPageSize) || 1;
+  const paginatedOrders = filteredOrders.slice(
+    (modalPage - 1) * modalPageSize,
+    modalPage * modalPageSize
+  );
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-neutral-900/60 backdrop-blur-sm animate-in fade-in duration-200"
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-4xl max-h-[90vh] flex flex-col rounded-3xl bg-white shadow-2xl border border-neutral-200 overflow-hidden"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Modal Header */}
+        <div className="flex items-center justify-between p-5 sm:px-6 border-b border-neutral-100 bg-neutral-50/70">
+          <div className="flex items-center gap-3.5">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-400 to-sky-600 text-white font-black text-base shadow-xs">
+              {customer.name.charAt(0).toUpperCase()}
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="font-extrabold text-neutral-900 text-base">{customer.name}</h3>
+                <span className="font-mono text-xs text-neutral-500 font-bold bg-neutral-100 px-2 py-0.5 rounded-md">
+                  {customer.code}
+                </span>
+              </div>
+              <p className="text-xs text-neutral-500 mt-0.5">
+                Chi tiết các đơn hàng đang chờ sàn đối soát & duyệt hoa hồng
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <div className="text-right hidden sm:block">
+              <div className="text-[10px] text-neutral-400 font-bold uppercase tracking-wider">
+                {customer.count} đơn chờ duyệt
+              </div>
+              <div className="text-base font-black text-sky-600 tabular-nums">
+                {formatCurrency(customer.amount)}
+              </div>
+            </div>
+            <button
+              onClick={onClose}
+              className="flex h-9 w-9 items-center justify-center rounded-xl bg-neutral-100 hover:bg-neutral-200 text-neutral-600 transition-colors cursor-pointer"
+            >
+              <X size={18} />
+            </button>
+          </div>
+        </div>
+
+        {/* Search bar inside modal */}
+        <div className="p-4 border-b border-neutral-100 bg-white">
+          <div className="relative">
+            <Search size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none" />
+            <input
+              type="text"
+              placeholder="Tìm theo mã đơn hàng, tên sản phẩm hoặc tên sàn..."
+              value={searchTerm}
+              onChange={(e) => {
+                setSearchTerm(e.target.value);
+                setModalPage(1);
+              }}
+              className="h-10 w-full rounded-xl bg-neutral-50 pl-10 pr-4 text-xs font-semibold border border-neutral-200 focus:outline-none focus:border-sky-400 focus:bg-white focus:ring-2 focus:ring-sky-100 transition-all"
+            />
+          </div>
+        </div>
+
+        {/* Modal Body: Table of Orders */}
+        <div className="overflow-y-auto flex-1 p-0">
+          <table className="w-full text-left text-xs">
+            <thead className="sticky top-0 bg-neutral-50/95 backdrop-blur-xs border-b border-neutral-200/80 z-10">
+              <tr>
+                <th className="px-4 py-3 text-[10px] font-black uppercase tracking-wider text-neutral-400">Sản phẩm</th>
+                <th className="px-4 py-3 text-[10px] font-black uppercase tracking-wider text-neutral-400">Mã đơn sàn</th>
+                <th className="px-4 py-3 text-[10px] font-black uppercase tracking-wider text-neutral-400">Sàn TMĐT</th>
+                <th className="px-4 py-3 text-[10px] font-black uppercase tracking-wider text-neutral-400">Thời gian đặt</th>
+                <th className="px-4 py-3 text-[10px] font-black uppercase tracking-wider text-neutral-400">Trạng thái sàn</th>
+                <th className="px-4 py-3 text-[10px] font-black uppercase tracking-wider text-neutral-400 text-right">Hoa hồng dự kiến</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-neutral-100">
+              {filteredOrders.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="py-12 text-center text-xs text-neutral-400 font-semibold">
+                    Không tìm thấy đơn hàng phù hợp
+                  </td>
+                </tr>
+              ) : (
+                paginatedOrders.map((o) => (
+                  <tr key={o.id} className="hover:bg-neutral-50/80 transition-colors">
+                    <td className="px-4 py-3 max-w-[280px]">
+                      <div className="flex items-center gap-3">
+                        {o.productImage ? (
+                          <img
+                            src={o.productImage}
+                            alt=""
+                            className="h-10 w-10 rounded-xl object-cover border border-neutral-200/80 shrink-0"
+                          />
+                        ) : (
+                          <div className="h-10 w-10 rounded-xl bg-neutral-100 flex items-center justify-center shrink-0 text-neutral-400">
+                            <ShoppingBag size={16} />
+                          </div>
+                        )}
+                        <p className="truncate text-xs font-bold text-neutral-800" title={o.productTitle ?? o.orderExternalId}>
+                          {o.productTitle ?? o.orderExternalId}
+                        </p>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      <div className="flex items-center gap-1">
+                        <span className="font-mono text-xs font-bold text-neutral-700">{o.orderExternalId}</span>
+                        <CopyBtn value={o.orderExternalId} />
+                      </div>
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      <PlatformBadge platform={o.platformName} />
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap text-neutral-500 font-medium">
+                      {o.orderedAt ? formatDate(new Date(o.orderedAt)) : "—"}
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap">
+                      <span className="inline-flex items-center gap-1 text-[10px] font-black text-amber-700 bg-amber-50 rounded-full px-2 py-0.5 border border-amber-200">
+                        {o.productAffiliateStatus || "Chờ đối soát"}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 whitespace-nowrap text-right font-black text-xs text-sky-600 tabular-nums">
+                      {formatCurrency(o.customerRewardAmount)}
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Modal Footer with Pagination */}
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-4 px-6 border-t border-neutral-100 bg-neutral-50/70">
+          <div className="text-xs text-neutral-500 font-medium">
+            Hiển thị <strong>{paginatedOrders.length}</strong> / <strong>{filteredOrders.length}</strong> đơn hàng
+            {totalModalPages > 1 && ` (Trang ${modalPage}/${totalModalPages})`}
+          </div>
+
+          <div className="flex items-center gap-3">
+            {totalModalPages > 1 && (
+              <Pagination
+                currentPage={modalPage}
+                totalPages={totalModalPages}
+                onPageChange={(p) => setModalPage(p)}
+                showSinglePage={false}
+              />
+            )}
+            <button
+              onClick={onClose}
+              className="flex h-9 items-center gap-1.5 rounded-xl bg-neutral-900 hover:bg-neutral-800 text-white px-4 text-xs font-bold transition-all cursor-pointer"
+            >
+              Đóng
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── MAIN ADMIN PAYMENTS CLIENT ────────────────────────────────────────────────
 export function AdminPaymentsClient({
   pendingList,
@@ -746,6 +967,8 @@ export function AdminPaymentsClient({
   const [currentPage, setCurrentPage] = useState(1);
   const [viewingBatch, setViewingBatch] = useState<string | null>(null);
   const [autoCreatingAll, setAutoCreatingAll] = useState(false);
+  const [expandedWaitingCustomerId, setExpandedWaitingCustomerId] = useState<string | null>(null);
+  const [viewingWaitingCustomer, setViewingWaitingCustomer] = useState<CustomerWaiting | null>(null);
   const itemsPerPage = 10;
 
   const paidBatches = batches.filter((b) => b.status === "paid");
@@ -845,6 +1068,14 @@ export function AdminPaymentsClient({
           batchId={viewingBatch}
           onClose={() => setViewingBatch(null)}
           onPaidSuccess={() => router.refresh()}
+        />
+      )}
+
+      {/* Detail Modal for Waiting Customer Orders */}
+      {viewingWaitingCustomer && (
+        <WaitingCustomerOrdersModal
+          customer={viewingWaitingCustomer}
+          onClose={() => setViewingWaitingCustomer(null)}
         />
       )}
 
@@ -1105,13 +1336,21 @@ export function AdminPaymentsClient({
               </div>
             )}
 
-            {filteredPendingBatches.length > itemsPerPage && (
-              <div className="p-4 border-t border-neutral-100 bg-neutral-50/40">
-                <Pagination
-                  currentPage={currentPage}
-                  totalPages={totalPagesPending}
-                  onPageChange={(p) => setCurrentPage(p)}
-                />
+            {filteredPendingBatches.length > 0 && (
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-4 px-6 border-t border-neutral-100 bg-neutral-50/40">
+                <div className="text-xs text-neutral-500 font-medium">
+                  Hiển thị <strong>{paginatedPendingBatches.length}</strong> / <strong>{filteredPendingBatches.length}</strong> phiếu chờ chi trả
+                  {totalPagesPending > 1 && ` (Trang ${currentPage}/${totalPagesPending})`}
+                </div>
+
+                {totalPagesPending > 1 && (
+                  <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPagesPending}
+                    onPageChange={(p) => setCurrentPage(p)}
+                    showSinglePage={false}
+                  />
+                )}
               </div>
             )}
           </div>
@@ -1330,112 +1569,256 @@ export function AdminPaymentsClient({
             </div>
           )}
 
-          {filteredPaidBatches.length > itemsPerPage && (
-            <div className="p-4 border-t border-neutral-100 bg-neutral-50/40">
-              <Pagination
-                currentPage={currentPage}
-                totalPages={totalPagesHistory}
-                onPageChange={(p) => setCurrentPage(p)}
-              />
+          {filteredPaidBatches.length > 0 && (
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-4 px-6 border-t border-neutral-100 bg-neutral-50/40">
+              <div className="text-xs text-neutral-500 font-medium">
+                Hiển thị <strong>{paginatedPaidBatches.length}</strong> / <strong>{filteredPaidBatches.length}</strong> phiếu đã thanh toán
+                {totalPagesHistory > 1 && ` (Trang ${currentPage}/${totalPagesHistory})`}
+              </div>
+
+              {totalPagesHistory > 1 && (
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPagesHistory}
+                  onPageChange={(p) => setCurrentPage(p)}
+                  showSinglePage={false}
+                />
+              )}
             </div>
           )}
         </div>
       )}
 
-      {/* ── TAB 3: CHỜ SHOPEE DUYỆT ── */}
+      {/* ── TAB 3: CHỜ SÀN DUYỆT (HIỂN THỊ DẠNG BẢNG - TABLE) ── */}
       {activeTab === "waiting" && (
         <div className="flex flex-col gap-6">
-          {filteredWaiting.length === 0 ? (
-            <div className="flex flex-col items-center gap-2 rounded-3xl bg-white py-16 shadow-sm border border-neutral-200/70">
-              <img
-                src="/meow-back-mascot.png"
-                alt="MeowBack"
-                className="h-16 w-16 object-contain"
-              />
-              <span className="text-xs font-bold text-neutral-400">
-                Không có đơn nào đang chờ Shopee duyệt 🎉
-              </span>
-            </div>
-          ) : (
-            <div className="flex flex-col gap-4">
-              {paginatedWaiting.map((c) => (
-                <div
-                  key={c.id}
-                  className="rounded-3xl bg-white shadow-sm border border-neutral-200/70 overflow-hidden"
-                >
-                  <div className="flex items-center justify-between p-4 bg-neutral-50/70 border-b border-neutral-200/70">
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-400 to-sky-600 text-white font-black text-sm shadow-xs">
-                        {c.name.charAt(0).toUpperCase()}
-                      </div>
-                      <div>
-                        <div className="font-extrabold text-neutral-900 text-xs">{c.name}</div>
-                        <div className="font-mono text-[10px] text-neutral-400 font-bold">{c.code}</div>
-                      </div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-[10px] text-neutral-400 font-bold uppercase tracking-wider">
-                        {c.count} đơn chưa đối soát
-                      </div>
-                      <div className="text-base font-black text-sky-600 tabular-nums">
-                        {formatCurrency(c.amount)}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col divide-y divide-neutral-100">
-                    {c.orders.map((o) => (
-                      <div key={o.id} className="flex items-center gap-3 p-3.5">
-                        {o.productImage ? (
-                          <img
-                            src={o.productImage}
-                            alt=""
-                            className="h-10 w-10 rounded-xl object-cover border border-primary-100 shrink-0"
-                          />
-                        ) : (
-                          <div className="h-10 w-10 rounded-xl bg-neutral-100 flex items-center justify-center shrink-0">
-                            <ShoppingBag size={15} className="text-neutral-400" />
-                          </div>
-                        )}
-                        <div className="flex-1 min-w-0">
-                          <p className="truncate text-xs font-bold text-neutral-800">
-                            {o.productTitle ?? o.orderExternalId}
-                          </p>
-                          <div className="flex items-center gap-1.5 mt-0.5">
-                            <span className="text-[9px] font-black text-neutral-500 uppercase">
-                              {o.platformName}
-                            </span>
-                            <span className="text-neutral-300">•</span>
-                            <span className="font-mono text-[10px] text-neutral-400">{o.orderExternalId}</span>
-                          </div>
-                        </div>
-                        <div className="text-right shrink-0">
-                          <div className="text-xs font-black text-neutral-900 tabular-nums">
-                            {formatCurrency(o.customerRewardAmount)}
-                          </div>
-                          {o.productAffiliateStatus && (
-                            <span className="text-[9px] font-black text-amber-700 bg-amber-50 rounded-full px-2 py-0.5 border border-amber-200">
-                              {o.productAffiliateStatus}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+          <div className="rounded-3xl bg-white shadow-sm border border-neutral-200/80 overflow-hidden flex flex-col">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-5 sm:px-6 border-b border-neutral-100 bg-neutral-50/50">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-sky-400 to-sky-600 text-white flex items-center justify-center font-black shadow-xs">
+                  <Clock size={16} />
                 </div>
-              ))}
+                <div>
+                  <h3 className="text-sm font-extrabold text-neutral-900 tracking-tight">
+                    Bảng Khách Hàng Chờ Sàn Đối Soát ({filteredWaiting.length})
+                  </h3>
+                  <p className="text-[11px] text-neutral-500 font-medium">
+                    Các đơn hàng đang trong thời gian chờ sàn đối soát. Bấm "Chi tiết" hoặc nhấp vào dòng để xem danh sách đơn hàng.
+                  </p>
+                </div>
+              </div>
+            </div>
 
-              {filteredWaiting.length > itemsPerPage && (
-                <div className="p-4 bg-white rounded-2xl shadow-xs border border-neutral-200/70">
+            {filteredWaiting.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-16 text-center gap-2">
+                <img
+                  src="/meow-back-mascot.png"
+                  alt="MeowBack"
+                  className="h-16 w-16 object-contain opacity-70"
+                />
+                <p className="text-xs font-bold text-neutral-400">Không có đơn nào đang chờ sàn đối soát</p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead>
+                    <tr className="border-b border-neutral-100 bg-neutral-50/80">
+                      {[
+                        "Khách hàng",
+                        "Số đơn chờ duyệt",
+                        "Sàn thương mại",
+                        "Tổng tiền hoa hồng dự kiến",
+                        "Thao tác",
+                      ].map((h) => (
+                        <th
+                          key={h}
+                          className="px-4 py-3.5 text-[10px] font-black uppercase tracking-wider text-neutral-400 whitespace-nowrap"
+                        >
+                          {h}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-neutral-100">
+                    {paginatedWaiting.map((c) => {
+                      const isExpanded = expandedWaitingCustomerId === c.id;
+                      const platforms = Array.from(new Set(c.orders.map((o) => o.platformName).filter(Boolean)));
+
+                      return (
+                        <Fragment key={c.id}>
+                          <tr
+                            onClick={() => setExpandedWaitingCustomerId(isExpanded ? null : c.id)}
+                            className={`transition-colors cursor-pointer ${
+                              isExpanded ? "bg-sky-50/40" : "hover:bg-neutral-50/80"
+                            }`}
+                          >
+                            {/* Cột 1: Khách hàng */}
+                            <td className="px-4 py-3.5 whitespace-nowrap">
+                              <div className="flex items-center gap-2.5">
+                                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-sky-400 to-sky-600 text-white font-black text-xs shadow-xs">
+                                  {c.name.charAt(0).toUpperCase()}
+                                </div>
+                                <div>
+                                  <p className="font-extrabold text-neutral-900 text-xs">{c.name}</p>
+                                  <p className="font-mono text-[10px] text-neutral-400 font-bold">{c.code}</p>
+                                </div>
+                              </div>
+                            </td>
+
+                            {/* Cột 2: Số đơn chờ duyệt */}
+                            <td className="px-4 py-3.5 whitespace-nowrap">
+                              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-black bg-sky-50 text-sky-700 border border-sky-200">
+                                {c.count} đơn chưa đối soát
+                              </span>
+                            </td>
+
+                            {/* Cột 3: Sàn thương mại */}
+                            <td className="px-4 py-3.5 whitespace-nowrap">
+                              <div className="flex items-center gap-1.5 flex-wrap">
+                                {platforms.map((p) => (
+                                  <PlatformBadge key={p} platform={p} />
+                                ))}
+                              </div>
+                            </td>
+
+                            {/* Cột 4: Tổng tiền dự kiến */}
+                            <td className="px-4 py-3.5 whitespace-nowrap">
+                              <span className="text-sm font-black text-sky-600 tabular-nums">
+                                {formatCurrency(c.amount)}
+                              </span>
+                            </td>
+
+                            {/* Cột 5: Thao tác */}
+                            <td className="px-4 py-3.5 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+                              <div className="flex items-center gap-2">
+                                <button
+                                  onClick={() => setViewingWaitingCustomer(c)}
+                                  className="flex h-7 items-center gap-1.5 rounded-xl bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200/80 px-2.5 text-[11px] font-bold transition-all shadow-xs cursor-pointer"
+                                  title="Xem modal chi tiết"
+                                >
+                                  <Eye size={12} />
+                                  <span>Chi tiết</span>
+                                </button>
+                                <button
+                                  onClick={() => setExpandedWaitingCustomerId(isExpanded ? null : c.id)}
+                                  className="flex h-7 w-7 items-center justify-center rounded-xl bg-neutral-100 hover:bg-neutral-200 text-neutral-600 transition-colors cursor-pointer"
+                                  title={isExpanded ? "Thu gọn danh sách" : "Mở rộng nhanh"}
+                                >
+                                  {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                                </button>
+                              </div>
+                            </td>
+                          </tr>
+
+                          {/* DÒNG MỞ RỘNG (INLINE DETAIL ACCORDION) */}
+                          {isExpanded && (
+                            <tr className="bg-sky-50/20 border-b border-sky-100/80">
+                              <td colSpan={5} className="p-4 sm:px-6">
+                                <div className="rounded-2xl bg-white border border-neutral-200/80 shadow-xs overflow-hidden">
+                                  <div className="flex items-center justify-between p-3 px-4 bg-neutral-50/80 border-b border-neutral-100">
+                                    <div className="flex items-center gap-2">
+                                      <ShoppingBag size={14} className="text-sky-600" />
+                                      <span className="text-xs font-bold text-neutral-800">
+                                        Danh sách {c.orders.length} đơn hàng của {c.name}
+                                      </span>
+                                    </div>
+                                    <button
+                                      onClick={() => setViewingWaitingCustomer(c)}
+                                      className="inline-flex items-center gap-1 text-[11px] font-bold text-sky-700 hover:underline cursor-pointer"
+                                    >
+                                      <span>Mở popup đầy đủ</span>
+                                      <ArrowRight size={12} />
+                                    </button>
+                                  </div>
+
+                                  <div className="overflow-x-auto max-h-[300px]">
+                                    <table className="w-full text-left text-[11px]">
+                                      <thead className="sticky top-0 bg-neutral-50 border-b border-neutral-100">
+                                        <tr>
+                                          <th className="px-3.5 py-2 font-black text-neutral-400 uppercase text-[9.5px]">Sản phẩm</th>
+                                          <th className="px-3.5 py-2 font-black text-neutral-400 uppercase text-[9.5px]">Mã đơn sàn</th>
+                                          <th className="px-3.5 py-2 font-black text-neutral-400 uppercase text-[9.5px]">Sàn TMĐT</th>
+                                          <th className="px-3.5 py-2 font-black text-neutral-400 uppercase text-[9.5px]">Thời gian đặt</th>
+                                          <th className="px-3.5 py-2 font-black text-neutral-400 uppercase text-[9.5px]">Trạng thái</th>
+                                          <th className="px-3.5 py-2 font-black text-neutral-400 uppercase text-[9.5px] text-right">Hoa hồng dự kiến</th>
+                                        </tr>
+                                      </thead>
+                                      <tbody className="divide-y divide-neutral-100">
+                                        {c.orders.map((o) => (
+                                          <tr key={o.id} className="hover:bg-neutral-50/60">
+                                            <td className="px-3.5 py-2 max-w-[240px]">
+                                              <div className="flex items-center gap-2">
+                                                {o.productImage ? (
+                                                  <img
+                                                    src={o.productImage}
+                                                    alt=""
+                                                    className="h-8 w-8 rounded-lg object-cover border border-neutral-200 shrink-0"
+                                                  />
+                                                ) : (
+                                                  <div className="h-8 w-8 rounded-lg bg-neutral-100 flex items-center justify-center shrink-0 text-neutral-400">
+                                                    <ShoppingBag size={13} />
+                                                  </div>
+                                                )}
+                                                <p className="truncate font-semibold text-neutral-800" title={o.productTitle ?? o.orderExternalId}>
+                                                  {o.productTitle ?? o.orderExternalId}
+                                                </p>
+                                              </div>
+                                            </td>
+                                            <td className="px-3.5 py-2 whitespace-nowrap font-mono text-neutral-700 font-bold">
+                                              <div className="flex items-center gap-1">
+                                                <span>{o.orderExternalId}</span>
+                                                <CopyBtn value={o.orderExternalId} />
+                                              </div>
+                                            </td>
+                                            <td className="px-3.5 py-2 whitespace-nowrap">
+                                              <PlatformBadge platform={o.platformName} />
+                                            </td>
+                                            <td className="px-3.5 py-2 whitespace-nowrap text-neutral-500">
+                                              {o.orderedAt ? formatDate(new Date(o.orderedAt)) : "—"}
+                                            </td>
+                                            <td className="px-3.5 py-2 whitespace-nowrap">
+                                              <span className="text-[9.5px] font-bold text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">
+                                                {o.productAffiliateStatus || "Chờ đối soát"}
+                                              </span>
+                                            </td>
+                                            <td className="px-3.5 py-2 whitespace-nowrap text-right font-black text-sky-600 tabular-nums">
+                                              {formatCurrency(o.customerRewardAmount)}
+                                            </td>
+                                          </tr>
+                                        ))}
+                                      </tbody>
+                                    </table>
+                                  </div>
+                                </div>
+                              </td>
+                            </tr>
+                          )}
+                        </Fragment>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            {filteredWaiting.length > 0 && (
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-3 p-4 px-6 border-t border-neutral-100 bg-neutral-50/40">
+                <div className="text-xs text-neutral-500 font-medium">
+                  Hiển thị <strong>{paginatedWaiting.length}</strong> / <strong>{filteredWaiting.length}</strong> khách hàng chờ đối soát
+                  {totalPagesWaiting > 1 && ` (Trang ${currentPage}/${totalPagesWaiting})`}
+                </div>
+
+                {totalPagesWaiting > 1 && (
                   <Pagination
                     currentPage={currentPage}
                     totalPages={totalPagesWaiting}
                     onPageChange={(p) => setCurrentPage(p)}
+                    showSinglePage={false}
                   />
-                </div>
-              )}
-            </div>
-          )}
+                )}
+              </div>
+            )}
+          </div>
         </div>
       )}
 
