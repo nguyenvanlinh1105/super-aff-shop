@@ -1,0 +1,14 @@
+node_modules
+.next
+.git
+.vscode
+.claude
+*.log
+.env.local
+.env*.local
+storage/temp
+test_vid
+video_recordings
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

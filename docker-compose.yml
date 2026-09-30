@@ -1,0 +1,67 @@
+version: '3.8'
+
+services:
+  # ─── 1. CƠ SỞ DỮ LIỆU POSTGRESQL ───
+  postgres:
+    image: postgres:16-alpine
+    container_name: meowback_db
+    restart: always
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-meowback_shop}
+      POSTGRES_USER: ${POSTGRES_USER:-meowuser}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-meowpassword_secret}
+    ports:
+      # Chỉ lắng nghe trên localhost VPS (127.0.0.1) để an toàn tuyệt đối
+      # Có thể dùng A5:SQL Mk-2 hoặc DBeaver kết nối qua SSH Tunnel
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - meowback_net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-meowuser} -d ${POSTGRES_DB:-meowback_shop}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ─── 2. ỨNG DỤNG MEOWBACK (NEXT.JS 14) ───
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ${APP_IMAGE:-meowback_app:latest}
+    container_name: meowback_app
+    restart: always
+    ports:
+      # Lắng nghe tại localhost VPS cổng 3000, Nginx làm reverse proxy đón domain meowback.shop
+      - "127.0.0.1:3000:3000"
+    env_file:
+      - path: .env
+        required: false
+      - path: .env.production
+        required: false
+    environment:
+      # Ghi đè kết nối DB để trỏ vào container postgres nội bộ
+      DATABASE_URL: "postgresql://${POSTGRES_USER:-meowuser}:${POSTGRES_PASSWORD:-meowpassword_secret}@postgres:5432/${POSTGRES_DB:-meowback_shop}?schema=public"
+      NODE_ENV: production
+      PORT: 3000
+      HOSTNAME: "0.0.0.0"
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-https://meowback.shop}
+    volumes:
+      # Lưu trữ ảnh upload, hóa đơn vĩnh viễn không bị mất khi build lại container
+      - uploads_data:/app/public/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - meowback_net
+
+volumes:
+  postgres_data:
+    driver: local
+  uploads_data:
+    driver: local
+
+networks:
+  meowback_net:
+    driver: bridge

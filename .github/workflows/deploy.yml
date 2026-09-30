@@ -1,0 +1,44 @@
+name: CI/CD Pipeline - Deploy MeowBack to VPS
+
+on:
+  push:
+    branches:
+      - master # Tự động kích hoạt khi push trực tiếp hoặc merge PR vào nhánh master
+  workflow_dispatch: # Cho phép nhấn nút "Run workflow" thủ công trên giao diện GitHub
+
+jobs:
+  deploy:
+    name: 🚀 Deploy to VPS Production
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📡 SSH to VPS & Auto Deploy
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT || 22 }}
+          script: |
+            set -e
+            echo "🚀 [CI/CD] Bắt đầu quá trình cập nhật MeowBack..."
+            cd /var/www/meowback
+
+            # 1. Kéo mã nguồn mới nhất từ nhánh master (dùng SSH Deploy Key cho Private Repo)
+            echo "📥 [1/4] Kéo mã nguồn mới nhất từ GitHub..."
+            git fetch origin master
+            git reset --hard origin/master
+
+            # 2. Build lại container app và cập nhật chạy ngầm
+            echo "🔨 [2/4] Build ứng dụng Next.js và khởi động lại container..."
+            docker compose up -d --build app
+
+            # 3. Chạy Prisma Migrate đồng bộ database
+            echo "🗄️ [3/4] Cập nhật Database schema nếu có migration mới..."
+            docker compose exec -T app npx prisma migrate deploy
+
+            # 4. Dọn dẹp Docker images cũ để tiết kiệm dung lượng ổ cứng VPS
+            echo "🧹 [4/4] Dọn dẹp Docker images rác..."
+            docker image prune -f
+
+            echo "✅ [CI/CD] Triển khai thành công lên https://meowback.shop!"
