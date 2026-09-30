@@ -22,6 +22,44 @@ const ICON_MAP = {
   threads: ThreadsIcon,
 };
 
+const CHANNEL_STYLE: Record<string, { bg: string; iconSize: number; pure: boolean }> = {
+  hotline: {
+    bg: "bg-gradient-to-br from-rose-500 to-pink-600 text-white",
+    iconSize: 18,
+    pure: true,
+  },
+  zalo: {
+    bg: "bg-gradient-to-br from-[#0068FF] to-[#0084FF] text-white",
+    iconSize: 26,
+    pure: true,
+  },
+  tiktok: {
+    bg: "bg-black text-white",
+    iconSize: 22,
+    pure: true,
+  },
+  facebook: {
+    bg: "bg-[#1877F2] text-white",
+    iconSize: 22,
+    pure: true,
+  },
+  youtube: {
+    bg: "bg-[#FF0000] text-white",
+    iconSize: 22,
+    pure: true,
+  },
+  instagram: {
+    bg: "bg-gradient-to-tr from-[#f09433] via-[#e6683c] to-[#bc1888] text-white",
+    iconSize: 22,
+    pure: true,
+  },
+  threads: {
+    bg: "bg-black text-white",
+    iconSize: 20,
+    pure: true,
+  },
+};
+
 export function FloatingQuickAccess({
   unreadCount,
   showBell = false,
@@ -221,162 +259,178 @@ export function FloatingQuickAccess({
     : false;
 
   return (
-    <div
-      ref={containerRef}
-      style={
-        mobilePos && typeof window !== "undefined" && window.innerWidth < 768
-          ? {
-              top: `${mobilePos.y}px`,
-              bottom: "auto",
-              ...(isLeftHalf
-                ? { left: `${mobilePos.x}px`, right: "auto" }
-                : { right: `${Math.max(8, window.innerWidth - mobilePos.x - BUTTON_SIZE)}px`, left: "auto" }
-              ),
-              ...(isSnapping ? { transition: "left 0.3s cubic-bezier(0.25, 1, 0.5, 1), right 0.3s cubic-bezier(0.25, 1, 0.5, 1), top 0.3s cubic-bezier(0.25, 1, 0.5, 1)" } : {}),
-            }
-          : undefined
-      }
-      className={`fixed z-40 flex ${
-        isTopHalf ? "flex-col-reverse" : "flex-col"
-      } ${isLeftHalf ? "items-start" : "items-end"} ${
-        !mobilePos ? "customer-floating-support" : ""
-      }`}
-    >
-      {/* Speed Dial Menu Stack — Nổi phía trên/dưới nút hỗ trợ tuỳ theo vị trí kéo */}
+    <>
+      {/* Backdrop overlay khi mở menu — chạm ra ngoài đóng ngay */}
       {isOpen && (
         <div
-          className={`${
-            isTopHalf ? "mt-3" : "mb-3"
-          } flex flex-col ${
-            isLeftHalf ? "items-start" : "items-end"
-          } gap-2.5 animate-in fade-in ${
-            isTopHalf ? "slide-in-from-top-4" : "slide-in-from-bottom-4"
-          } duration-200 max-h-[calc(100vh-200px)] overflow-y-auto`}
-        >
-          {enabledChannels.map((c, index) => {
-            const isReverse = isLeftHalf;
-
-            if (c.key === "hotline") {
-              const rawPhone = c.handle.replace(/\D/g, "");
-              return (
-                <div
-                  key={c.key}
-                  className={`group flex items-center gap-2 transition-all ${
-                    isReverse ? "flex-row-reverse hover:translate-x-1" : "hover:-translate-x-1"
-                  }`}
-                  style={{ animationDelay: `${index * 40}ms` }}
-                >
-                  {/* Label badge — chỉ hiển thị số điện thoại + nút copy */}
-                  <div className="flex items-center gap-1.5 rounded-2xl bg-white/95 px-3 py-1.5 shadow-cute border border-primary-200/90 backdrop-blur-md">
-                    <a
-                      href={c.href}
-                      className="text-[13px] font-black text-primary-600 tracking-tight whitespace-nowrap hover:underline"
-                    >
-                      {c.handle}
-                    </a>
-                    <button
-                      type="button"
-                      onClick={(e) => handleCopyHotline(e, rawPhone)}
-                      title="Copy số điện thoại"
-                      className="flex h-6 items-center gap-1 rounded-full bg-primary-100 px-2 text-[10.5px] font-bold text-primary-700 hover:bg-primary-200 transition-colors whitespace-nowrap cursor-pointer"
-                    >
-                      {copied ? <Check size={11} /> : <Copy size={11} />}
-                      {copied ? "Đã copy" : "Copy"}
-                    </button>
-                  </div>
-
-                  {/* Circular Button */}
-                  <a
-                    href={c.href}
-                    title="Gọi hotline ngay"
-                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-rose-500 to-pink-600 text-white shadow-cute hover:shadow-cute-lg transition-transform hover:scale-110 active:scale-95 border-2 border-white"
-                  >
-                    <Phone size={18} className="animate-pulse text-white" />
-                  </a>
-                </div>
-              );
-            }
-
-            const IconComponent = ICON_MAP[c.iconType as keyof typeof ICON_MAP];
-
-            return (
-              <div
-                key={c.key}
-                className={`group flex items-center gap-2 transition-all ${
-                  isReverse ? "flex-row-reverse hover:translate-x-1" : "hover:-translate-x-1"
-                }`}
-                style={{ animationDelay: `${index * 40}ms` }}
-              >
-                {/* Label badge — chỉ hiển thị tên ngắn gọn như Cộng đồng Zalo, @meowback.official */}
-                <a
-                  href={c.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center rounded-2xl bg-white/95 px-3 py-1.5 shadow-cute border border-primary-200/90 hover:border-primary-400 transition-colors backdrop-blur-md"
-                >
-                  <span className="text-[12.5px] font-black text-neutral-800 whitespace-nowrap">
-                    {c.handle}
-                  </span>
-                </a>
-
-                {/* Circular Button */}
-                <a
-                  href={c.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  title={c.label}
-                  className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white shadow-cute hover:shadow-cute-lg transition-transform hover:scale-110 active:scale-95 border-2 border-primary-100 p-2 text-neutral-800"
-                >
-                  {IconComponent ? (
-                    <IconComponent size={24} />
-                  ) : (
-                    <Headphones size={18} className="text-primary-500" />
-                  )}
-                </a>
-              </div>
-            );
-          })}
-        </div>
+          className="fixed inset-0 z-40 bg-black/15 backdrop-blur-[1px] transition-opacity animate-in fade-in duration-150"
+          onClick={() => setIsOpen(false)}
+          aria-hidden="true"
+        />
       )}
 
-      {/* Action Buttons Stack */}
-      <div className="flex flex-col items-center gap-sm">
-        <button
-          onClick={handleButtonClick}
-          onPointerDown={handlePointerDown}
-          onPointerMove={handlePointerMove}
-          onPointerUp={handlePointerUp}
-          onPointerCancel={handlePointerUp}
-          style={{ touchAction: "none" }}
-          title={isOpen ? "Đóng menu hỗ trợ" : "Liên hệ hỗ trợ MeowBack (Kéo thả để di chuyển)"}
-          className={`flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full shadow-cute border border-primary-200/80 transition-transform ${
-            isDragging
-              ? "scale-110 shadow-cute-lg ring-4 ring-primary-300/60"
-              : "hover:scale-105 active:scale-95"
-          } ${
-            isOpen ? "bg-gradient-to-r from-primary-400 to-primary-500 text-white" : "bg-white text-primary-500 hover:text-primary-600"
-          } cursor-grab active:cursor-grabbing select-none`}
-        >
-          <div className={`transition-transform duration-300 ${isOpen ? "rotate-90 text-white" : "rotate-0"}`}>
-            {isOpen ? <X size={24} strokeWidth={2.5} /> : <Headphones size={24} strokeWidth={2.25} />}
-          </div>
-        </button>
+      <div
+        ref={containerRef}
+        style={
+          mobilePos && typeof window !== "undefined" && window.innerWidth < 768
+            ? {
+                top: `${mobilePos.y}px`,
+                bottom: "auto",
+                ...(isLeftHalf
+                  ? { left: `${mobilePos.x}px`, right: "auto" }
+                  : { right: `${Math.max(8, window.innerWidth - mobilePos.x - BUTTON_SIZE)}px`, left: "auto" }
+                ),
+                ...(isSnapping ? { transition: "left 0.3s cubic-bezier(0.25, 1, 0.5, 1), right 0.3s cubic-bezier(0.25, 1, 0.5, 1), top 0.3s cubic-bezier(0.25, 1, 0.5, 1)" } : {}),
+              }
+            : undefined
+        }
+        className={`fixed z-50 ${
+          !mobilePos ? "customer-floating-support" : ""
+        }`}
+      >
+        {/* Action Buttons Stack — Vị trí cố định, neo menu tuyệt đối vào đây */}
+        <div className="relative flex flex-col items-center gap-sm">
+          {/* Speed Dial Menu Stack — Nổi tuyệt đối phía trên/dưới nút hỗ trợ, KHÔNG BAO GIỜ đẩy nút lặn xuống đáy */}
+          {isOpen && (
+            <div
+              className={`absolute z-50 flex flex-col gap-2.5 ${
+                isTopHalf
+                  ? "top-full mt-3 animate-in fade-in slide-in-from-top-3"
+                  : "bottom-full mb-3 animate-in fade-in slide-in-from-bottom-3"
+              } ${
+                isLeftHalf ? "left-0 items-start" : "right-0 items-end"
+              } max-h-[calc(100vh-140px)] overflow-y-auto duration-200 pointer-events-auto [scrollbar-width:none]`}
+              style={{ width: "max-content", maxWidth: "calc(100vw - 20px)" }}
+            >
+              {enabledChannels.map((c, index) => {
+                const isReverse = isLeftHalf;
 
-        {showBell && (
-          <Link
-            href="/app/notifications"
-            title="Thông báo"
-            className="relative flex h-14 w-14 items-center justify-center rounded-full bg-white shadow-cute border border-primary-200/80 transition-transform hover:scale-105 active:scale-95 text-primary-500 hover:text-primary-600"
+                if (c.key === "hotline") {
+                  const rawPhone = c.handle.replace(/\D/g, "");
+                  return (
+                    <div
+                      key={c.key}
+                      className={`group flex items-center gap-2 transition-all ${
+                        isReverse ? "flex-row-reverse hover:translate-x-1" : "hover:-translate-x-1"
+                      }`}
+                      style={{ animationDelay: `${index * 40}ms` }}
+                    >
+                      {/* Label badge — chỉ hiển thị số điện thoại + nút copy */}
+                      <div className="flex items-center gap-1.5 rounded-2xl bg-white/95 px-3 py-1.5 shadow-cute border border-primary-200/90 backdrop-blur-md">
+                        <a
+                          href={c.href}
+                          className="text-[13px] font-black text-primary-600 tracking-tight whitespace-nowrap hover:underline"
+                        >
+                          {c.handle}
+                        </a>
+                        <button
+                          type="button"
+                          onClick={(e) => handleCopyHotline(e, rawPhone)}
+                          title="Copy số điện thoại"
+                          className="flex h-6 items-center gap-1 rounded-full bg-primary-100 px-2 text-[10.5px] font-bold text-primary-700 hover:bg-primary-200 transition-colors whitespace-nowrap cursor-pointer"
+                        >
+                          {copied ? <Check size={11} /> : <Copy size={11} />}
+                          {copied ? "Đã copy" : "Copy"}
+                        </button>
+                      </div>
+
+                      {/* Circular Button */}
+                      <a
+                        href={c.href}
+                        title="Gọi hotline ngay"
+                        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-rose-500 to-pink-600 text-white shadow-cute hover:shadow-cute-lg transition-transform hover:scale-110 active:scale-95 border-2 border-white"
+                      >
+                        <Phone size={18} className="animate-pulse text-white" />
+                      </a>
+                    </div>
+                  );
+                }
+
+                const IconComponent = ICON_MAP[c.iconType as keyof typeof ICON_MAP];
+                const channelStyle = CHANNEL_STYLE[c.key] ?? {
+                  bg: "bg-neutral-900 text-white",
+                  iconSize: 22,
+                  pure: true,
+                };
+
+                return (
+                  <div
+                    key={c.key}
+                    className={`group flex items-center gap-2 transition-all ${
+                      isReverse ? "flex-row-reverse hover:translate-x-1" : "hover:-translate-x-1"
+                    }`}
+                    style={{ animationDelay: `${index * 40}ms` }}
+                  >
+                    {/* Label badge */}
+                    <a
+                      href={c.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center rounded-2xl bg-white/95 px-3 py-1.5 shadow-cute border border-primary-200/90 hover:border-primary-400 transition-colors backdrop-blur-md"
+                    >
+                      <span className="text-[12.5px] font-black text-neutral-800 whitespace-nowrap">
+                        {c.handle}
+                      </span>
+                    </a>
+
+                    {/* Circular Button */}
+                    <a
+                      href={c.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      title={c.label}
+                      className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full shadow-cute hover:shadow-cute-lg transition-transform hover:scale-110 active:scale-95 border-2 border-white ${channelStyle.bg}`}
+                    >
+                      {IconComponent ? (
+                        <IconComponent size={channelStyle.iconSize} pure={channelStyle.pure} />
+                      ) : (
+                        <Headphones size={18} className="text-white" />
+                      )}
+                    </a>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Nút chính Headphones */}
+          <button
+            onClick={handleButtonClick}
+            onPointerDown={handlePointerDown}
+            onPointerMove={handlePointerMove}
+            onPointerUp={handlePointerUp}
+            onPointerCancel={handlePointerUp}
+            style={{ touchAction: "none" }}
+            title={isOpen ? "Đóng menu hỗ trợ" : "Liên hệ hỗ trợ MeowBack (Kéo thả để di chuyển)"}
+            className={`flex h-12 w-12 sm:h-14 sm:w-14 items-center justify-center rounded-full shadow-cute border border-primary-200/80 transition-transform ${
+              isDragging
+                ? "scale-110 shadow-cute-lg ring-4 ring-primary-300/60"
+                : "hover:scale-105 active:scale-95"
+            } ${
+              isOpen ? "bg-gradient-to-r from-primary-400 to-primary-500 text-white" : "bg-white text-primary-500 hover:text-primary-600"
+            } cursor-grab active:cursor-grabbing select-none`}
           >
-            <Bell size={24} strokeWidth={2.25} />
-            {count > 0 && (
-              <span className="absolute -top-1 -right-1 flex h-6 min-w-[24px] items-center justify-center rounded-full bg-rose-500 px-1.5 text-[11px] font-extrabold text-white ring-2 ring-white shadow-sm">
-                {count > 99 ? "99+" : count}
-              </span>
-            )}
-          </Link>
-        )}
+            <div className={`transition-transform duration-300 ${isOpen ? "rotate-90 text-white" : "rotate-0"}`}>
+              {isOpen ? <X size={24} strokeWidth={2.5} /> : <Headphones size={24} strokeWidth={2.25} />}
+            </div>
+          </button>
+
+          {showBell && (
+            <Link
+              href="/app/notifications"
+              title="Thông báo"
+              className="relative flex h-14 w-14 items-center justify-center rounded-full bg-white shadow-cute border border-primary-200/80 transition-transform hover:scale-105 active:scale-95 text-primary-500 hover:text-primary-600"
+            >
+              <Bell size={24} strokeWidth={2.25} />
+              {count > 0 && (
+                <span className="absolute -top-1 -right-1 flex h-6 min-w-[24px] items-center justify-center rounded-full bg-rose-500 px-1.5 text-[11px] font-extrabold text-white ring-2 ring-white shadow-sm">
+                  {count > 99 ? "99+" : count}
+                </span>
+              )}
+            </Link>
+          )}
+        </div>
       </div>
-    </div>
+    </>
   );
 }

@@ -96,13 +96,15 @@ export async function GET(req: NextRequest) {
       return failRedirect("account_inactive");
     }
   } else {
-    const refCode = req.cookies.get("ref_code")?.value;
+    const refCode = req.cookies.get("ref_code")?.value?.trim();
     let referredById: string | null = null;
     let referrerName: string | null = null;
     let referrerEmail: string | null = null;
     if (refCode) {
-      const referrer = await prisma.customer.findUnique({
-        where: { customerCode: refCode },
+      const referrer = await prisma.customer.findFirst({
+        where: {
+          customerCode: { equals: refCode, mode: "insensitive" },
+        },
         select: { id: true, fullName: true, user: { select: { email: true } } },
       });
       if (referrer) {

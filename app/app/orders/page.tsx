@@ -58,7 +58,10 @@ export default async function CustomerOrdersPage({ searchParams }: { searchParam
       orderBy: { createdAt: "desc" },
       skip,
       take: limit,
-      include: { platform: true },
+      include: {
+        platform: true,
+        trackingLink: { select: { productImage: true, productTitle: true } },
+      },
     }),
     prisma.order.count({ where })
   ]);
@@ -81,6 +84,7 @@ export default async function CustomerOrdersPage({ searchParams }: { searchParam
       id: o.id,
       orderExternalId: o.orderExternalId,
       platformName: o.platform.name,
+      platformCode: o.platform.code,
       sourceType: o.sourceType,
       createdAt: formatDate(o.createdAt),
       orderAmount: formatCurrency(Number(o.orderAmount ?? 0)),
@@ -90,6 +94,8 @@ export default async function CustomerOrdersPage({ searchParams }: { searchParam
       daysLeft,
       completedAtText,
       readyAtText,
+      productTitle: o.trackingLink?.productTitle ?? o.itemName ?? null,
+      productImage: o.trackingLink?.productImage ?? null,
     };
   });
 

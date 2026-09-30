@@ -21,6 +21,44 @@ const ICON_MAP = {
   threads: ThreadsIcon,
 };
 
+const CHANNEL_STYLE: Record<string, { bg: string; iconSize: number; pure: boolean }> = {
+  hotline: {
+    bg: "bg-gradient-to-br from-rose-500 to-pink-600 text-white",
+    iconSize: 18,
+    pure: true,
+  },
+  zalo: {
+    bg: "bg-gradient-to-br from-[#0068FF] to-[#0084FF] text-white",
+    iconSize: 26,
+    pure: true,
+  },
+  tiktok: {
+    bg: "bg-black text-white",
+    iconSize: 22,
+    pure: true,
+  },
+  facebook: {
+    bg: "bg-[#1877F2] text-white",
+    iconSize: 22,
+    pure: true,
+  },
+  youtube: {
+    bg: "bg-[#FF0000] text-white",
+    iconSize: 22,
+    pure: true,
+  },
+  instagram: {
+    bg: "bg-gradient-to-tr from-[#f09433] via-[#e6683c] to-[#bc1888] text-white",
+    iconSize: 22,
+    pure: true,
+  },
+  threads: {
+    bg: "bg-black text-white",
+    iconSize: 20,
+    pure: true,
+  },
+};
+
 export function PublicFloatingSupport() {
   const [isOpen, setIsOpen] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -105,6 +143,11 @@ export function PublicFloatingSupport() {
               }
 
               const IconComponent = ICON_MAP[c.iconType as keyof typeof ICON_MAP];
+              const channelStyle = CHANNEL_STYLE[c.key] ?? {
+                bg: "bg-neutral-900 text-white",
+                iconSize: 22,
+                pure: true,
+              };
 
               return (
                 <div
@@ -124,18 +167,18 @@ export function PublicFloatingSupport() {
                     </span>
                   </a>
 
-                  {/* Circular Button bên phải */}
+                  {/* Circular Button bên phải — đồng bộ kích thước và viền trắng với Hotline */}
                   <a
                     href={c.href}
                     target="_blank"
                     rel="noopener noreferrer"
                     title={c.label}
-                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-white shadow-cute hover:shadow-cute-lg transition-transform hover:scale-110 active:scale-95 border-2 border-primary-100 p-2 text-neutral-800"
+                    className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full shadow-cute hover:shadow-cute-lg transition-transform hover:scale-110 active:scale-95 border-2 border-white ${channelStyle.bg}`}
                   >
                     {IconComponent ? (
-                      <IconComponent size={24} />
+                      <IconComponent size={channelStyle.iconSize} pure={channelStyle.pure} />
                     ) : (
-                      <Headphones size={18} className="text-primary-500" />
+                      <Headphones size={18} className="text-white" />
                     )}
                   </a>
                 </div>

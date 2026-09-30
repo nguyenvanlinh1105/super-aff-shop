@@ -171,17 +171,8 @@ export function CustomerLinkForm({ platforms }: { platforms: Option[] }) {
                     </div>
                   )}
 
-                  <div
-                    className={`flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center rounded-xl shrink-0 transition-transform ${
-                      active ? "scale-105" : ""
-                    }`}
-                    style={{
-                      color: pm.color,
-                      backgroundColor: active ? "#ffffff" : `${pm.color}15`,
-                      boxShadow: active ? "0 2px 8px rgba(0,0,0,0.06)" : "none",
-                    }}
-                  >
-                    <Icon size={22} />
+                  <div className="flex h-9 w-9 sm:h-10 sm:w-10 items-center justify-center shrink-0 transition-transform">
+                    <Icon size={34} />
                   </div>
 
                   <div className="flex flex-col text-center sm:text-left min-w-0">
@@ -189,8 +180,8 @@ export function CustomerLinkForm({ platforms }: { platforms: Option[] }) {
                       {p.label}
                     </span>
                     {p.code === "SHOPEE" && (
-                      <span className="text-[10px] text-primary-600 font-semibold hidden sm:inline leading-tight mt-0.5">
-                        Mặc định ⭐
+                      <span className="text-[10px] text-primary-700 bg-primary-100/70 px-1.5 py-0.5 rounded font-bold hidden sm:inline leading-tight mt-0.5 w-fit">
+                        Mặc định
                       </span>
                     )}
                   </div>
@@ -224,12 +215,17 @@ export function CustomerLinkForm({ platforms }: { platforms: Option[] }) {
               whileTap={{ scale: 0.98 }}
               transition={{ type: "spring", stiffness: 400, damping: 17 }}
               disabled={loading || !platformId}
-              className="flex items-center justify-center gap-2 h-12 rounded-2xl bg-gradient-to-r from-primary-500 to-pink-500 hover:from-primary-600 hover:to-pink-600 text-white shadow-lg shadow-primary-500/25 px-6 font-bold disabled:opacity-70 disabled:cursor-not-allowed shrink-0 transition-all cursor-pointer"
+              className="flex items-center justify-center gap-2 h-12 rounded-2xl bg-gradient-to-r from-primary-500 to-rose-500 hover:from-primary-600 hover:to-rose-600 text-white shadow-md shadow-primary-500/20 px-6 font-bold disabled:opacity-70 disabled:cursor-not-allowed shrink-0 transition-all cursor-pointer"
             >
-              {loading ? "Đang tạo..." : (
+              {loading ? (
+                <span className="flex items-center gap-2">
+                  <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  Đang tạo...
+                </span>
+              ) : (
                 <>
-                  <Plus size={16} strokeWidth={2.5} />
-                  Tạo link hoàn tiền 🧶
+                  <Sparkles size={16} strokeWidth={2.5} className="text-white fill-white/40" />
+                  <span>Tạo link hoàn tiền</span>
                 </>
               )}
             </motion.button>

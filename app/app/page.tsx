@@ -14,6 +14,13 @@ import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { formatCurrency, formatDate } from "@/lib/format";
 import { IconBow } from "@/components/icons/CatRibbonIcons";
+import {
+  IconPaidSuccessBadge,
+  IconAccumulatedBag,
+  IconPendingHourglass,
+  IconReadyToWithdraw,
+} from "@/components/icons/FinanceBadgeIcons";
+import { ShopeeIcon, TiktokIcon, LazadaIcon } from "@/components/icons/PlatformIcons";
 import { InviteSection } from "@/components/customer/InviteSection";
 import { PhoneNumberPrompt } from "@/components/customer/PhoneNumberPrompt";
 import { PwaInstallHorizontalCard } from "@/components/pwa/PwaInstallPrompt";
@@ -151,15 +158,15 @@ export default async function CustomerHomePage() {
           <HoverCard>
             <div className="group h-full relative overflow-hidden rounded-3xl bg-white p-5 sm:p-6 shadow-sm border border-neutral-200/80 hover:border-amber-300 hover:shadow-md transition-all duration-300 flex flex-col justify-between gap-3.5">
               {/* Watermark mờ nghệ thuật trang trí góc dưới phải */}
-              <div className="absolute -right-2 -bottom-2 text-7xl select-none opacity-[0.06] pointer-events-none transition-transform duration-500 group-hover:scale-110 group-hover:rotate-6">
-                ⏳
+              <div className="absolute -right-3 -bottom-3 opacity-[0.07] pointer-events-none transition-transform duration-500 group-hover:scale-110 group-hover:rotate-6">
+                <IconPendingHourglass size={96} />
               </div>
 
               {/* Tầng 1: Icon + Phân loại + Badge trạng thái */}
               <div className="relative z-10 flex items-center justify-between gap-2">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-amber-50 text-amber-600 font-black text-xl border border-amber-100 group-hover:scale-105 transition-transform">
-                    ⏳
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-amber-50/80 border border-amber-100/90 shadow-2xs group-hover:scale-105 transition-transform p-1">
+                    <IconPendingHourglass size={38} />
                   </div>
                   <div>
                     <div className="text-[11.5px] font-bold uppercase tracking-wider text-neutral-400">Chờ duyệt</div>
@@ -191,9 +198,9 @@ export default async function CustomerHomePage() {
               </div>
 
               {/* Tầng 3: Dòng trạng thái ngữ cảnh */}
-              <div className="relative z-10 flex items-center gap-2 text-[11px] text-neutral-400 font-medium">
+              <div className="relative z-10 flex items-center gap-2 text-[11px] text-neutral-500 font-medium">
                 <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse shrink-0" />
-                <span className="truncate">Chờ sàn xác nhận hoàn tất</span>
+                <span className="leading-snug">Chờ sàn xác nhận hoàn tất</span>
               </div>
             </div>
           </HoverCard>
@@ -204,15 +211,15 @@ export default async function CustomerHomePage() {
           <HoverCard>
             <div className="group h-full relative overflow-hidden rounded-3xl bg-white p-5 sm:p-6 shadow-sm border border-neutral-200/80 hover:border-emerald-300 hover:shadow-md transition-all duration-300 flex flex-col justify-between gap-3.5">
               {/* Watermark mờ nghệ thuật trang trí góc dưới phải */}
-              <div className="absolute -right-2 -bottom-2 text-7xl select-none opacity-[0.06] pointer-events-none transition-transform duration-500 group-hover:scale-110 group-hover:rotate-6">
-                💰
+              <div className="absolute -right-3 -bottom-3 opacity-[0.08] pointer-events-none transition-transform duration-500 group-hover:scale-110 group-hover:rotate-6">
+                <IconReadyToWithdraw size={96} />
               </div>
 
               {/* Tầng 1: Icon + Phân loại + Badge trạng thái */}
               <div className="relative z-10 flex items-center justify-between gap-2">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 font-black text-xl border border-emerald-100 group-hover:scale-105 transition-transform">
-                    💰
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-50/80 border border-emerald-100/90 shadow-2xs group-hover:scale-105 transition-transform p-1">
+                    <IconReadyToWithdraw size={38} />
                   </div>
                   <div>
                     <div className="text-[11.5px] font-bold uppercase tracking-wider text-neutral-400">Sẵn sàng rút</div>
@@ -244,28 +251,28 @@ export default async function CustomerHomePage() {
               </div>
 
               {/* Tầng 3: Dòng trạng thái ngữ cảnh */}
-              <div className="relative z-10 flex items-center gap-2 text-[11px] text-neutral-400 font-medium">
+              <div className="relative z-10 flex items-center gap-2 text-[11px] text-neutral-500 font-medium">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
-                <span className="truncate">Rút về tài khoản ngân hàng bất kỳ lúc nào</span>
+                <span className="leading-snug">Rút về ngân hàng 24/7 bất kỳ lúc nào</span>
               </div>
             </div>
           </HoverCard>
         </FadeUp>
 
-        {/* CARD 3: ĐÃ RÚT VỀ VÍ */}
+        {/* CARD 3: ĐÃ RÚT VỀ VÍ (XANH LÁ NGỌC VỚI TIỀN & ĐỒNG XU & CHECKMARK) */}
         <FadeUp delay={0.4}>
           <HoverCard>
-            <div className="group h-full relative overflow-hidden rounded-3xl bg-white p-5 sm:p-6 shadow-sm border border-neutral-200/80 hover:border-indigo-300 hover:shadow-md transition-all duration-300 flex flex-col justify-between gap-3.5">
+            <div className="group h-full relative overflow-hidden rounded-3xl bg-white p-5 sm:p-6 shadow-sm border border-neutral-200/80 hover:border-emerald-300 hover:shadow-md transition-all duration-300 flex flex-col justify-between gap-3.5">
               {/* Watermark mờ nghệ thuật trang trí góc dưới phải */}
-              <div className="absolute -right-2 -bottom-2 text-7xl select-none opacity-[0.06] pointer-events-none transition-transform duration-500 group-hover:scale-110 group-hover:rotate-6">
-                🏦
+              <div className="absolute -right-3 -bottom-3 opacity-[0.09] pointer-events-none transition-transform duration-500 group-hover:scale-110 group-hover:rotate-6">
+                <IconPaidSuccessBadge size={96} />
               </div>
 
               {/* Tầng 1: Icon + Phân loại + Badge trạng thái */}
               <div className="relative z-10 flex items-center justify-between gap-2">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-indigo-50 text-indigo-600 font-black text-xl border border-indigo-100 group-hover:scale-105 transition-transform">
-                    🏦
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-50/80 border border-emerald-100/90 shadow-2xs group-hover:scale-105 transition-transform p-1">
+                    <IconPaidSuccessBadge size={40} />
                   </div>
                   <div>
                     <div className="text-[11.5px] font-bold uppercase tracking-wider text-neutral-400">Đã rút về ví</div>
@@ -274,7 +281,7 @@ export default async function CustomerHomePage() {
                     </div>
                   </div>
                 </div>
-                <span className="shrink-0 rounded-full bg-indigo-50 border border-indigo-200/80 px-2.5 py-0.5 text-[10.5px] font-black uppercase text-indigo-700 tracking-wider">
+                <span className="shrink-0 rounded-full bg-emerald-50 border border-emerald-200/80 px-2.5 py-0.5 text-[10.5px] font-black uppercase text-emerald-700 tracking-wider">
                   Đã nhận
                 </span>
               </div>
@@ -289,7 +296,7 @@ export default async function CustomerHomePage() {
                 </div>
                 <Link
                   href="/app/wallet"
-                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-indigo-50/80 hover:bg-indigo-100 text-indigo-700 text-[12px] font-bold border border-indigo-200/60 transition-all hover:translate-x-0.5 shrink-0 shadow-2xs"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-2xl bg-emerald-50/80 hover:bg-emerald-100 text-emerald-700 text-[12px] font-bold border border-emerald-200/60 transition-all hover:translate-x-0.5 shrink-0 shadow-2xs"
                 >
                   <span>Lịch sử ví</span>
                   <ChevronRight size={14} strokeWidth={2.5} />
@@ -297,28 +304,28 @@ export default async function CustomerHomePage() {
               </div>
 
               {/* Tầng 3: Dòng trạng thái ngữ cảnh */}
-              <div className="relative z-10 flex items-center gap-2 text-[11px] text-neutral-400 font-medium">
-                <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 shrink-0" />
-                <span className="truncate">Tiền đã được chuyển vào tài khoản ngân hàng</span>
+              <div className="relative z-10 flex items-center gap-2 text-[11px] text-neutral-500 font-medium">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+                <span className="leading-snug">Đã giải ngân thành công về ngân hàng</span>
               </div>
             </div>
           </HoverCard>
         </FadeUp>
 
-        {/* CARD 4: TỔNG TÍCH LUỸ */}
+        {/* CARD 4: TỔNG TÍCH LUỸ (TÚI TIỀN VÀNG KIM ĐẦY ĐẶN) */}
         <FadeUp delay={0.5}>
           <HoverCard>
             <div className="group h-full relative overflow-hidden rounded-3xl bg-gradient-to-br from-white via-[#FFF5F8] to-[#FFE8F0] p-5 sm:p-6 shadow-sm border border-primary-200/80 hover:border-primary-300 hover:shadow-md transition-all duration-300 flex flex-col justify-between gap-3.5">
               {/* Watermark mờ nghệ thuật trang trí góc dưới phải */}
-              <div className="absolute -right-2 -bottom-2 text-7xl select-none opacity-[0.09] pointer-events-none transition-transform duration-500 group-hover:scale-110 group-hover:rotate-6">
-                🎀
+              <div className="absolute -right-3 -bottom-3 opacity-[0.09] pointer-events-none transition-transform duration-500 group-hover:scale-110 group-hover:rotate-6">
+                <IconAccumulatedBag size={96} />
               </div>
 
               {/* Tầng 1: Icon + Phân loại + Badge trạng thái */}
               <div className="relative z-10 flex items-center justify-between gap-2">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-primary-100 text-primary-600 font-black text-xl border border-primary-200 group-hover:scale-105 transition-transform">
-                    🎀
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-amber-50/90 border border-amber-200/70 shadow-2xs group-hover:scale-105 transition-transform p-1">
+                    <IconAccumulatedBag size={40} />
                   </div>
                   <div>
                     <div className="text-[11.5px] font-bold uppercase tracking-wider text-primary-800/60">Tổng tích luỹ</div>
@@ -350,9 +357,9 @@ export default async function CustomerHomePage() {
               </div>
 
               {/* Tầng 3: Dòng trạng thái ngữ cảnh */}
-              <div className="relative z-10 flex items-center gap-2 text-[11px] text-primary-600/80 font-medium">
-                <IconBow className="w-3.5 h-3.5 text-accent-bow shrink-0" />
-                <span className="truncate">Càng mua sắm nhiều càng tích luỹ nhiều nơ hoàn tiền</span>
+              <div className="relative z-10 flex items-center gap-2 text-[11px] text-primary-700/85 font-medium">
+                <span className="w-1.5 h-1.5 rounded-full bg-rose-500 shrink-0" />
+                <span className="leading-snug">Tích luỹ trọn đời từ mọi đơn mua</span>
               </div>
             </div>
           </HoverCard>
@@ -364,25 +371,30 @@ export default async function CustomerHomePage() {
         
         {/* CỘT 1: LỊCH SỬ ĐƠN HÀNG */}
         <FadeUp delay={0.6}>
-          <div className="h-full rounded-3xl bg-white border border-neutral-200/80 shadow-sm p-5 sm:p-6 flex flex-col justify-between gap-4">
+          <div className="h-full rounded-3xl bg-white border border-neutral-200/80 shadow-sm p-4 sm:p-6 flex flex-col justify-between gap-4">
             <div>
               {/* Header */}
-              <div className="flex items-center justify-between gap-3 mb-4">
-                <div className="flex items-center gap-2.5">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-primary-100 text-primary-600 shadow-2xs">
+              <div className="flex items-center justify-between gap-2.5 mb-3.5 sm:mb-4">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-primary-100 text-primary-600 shadow-2xs shrink-0">
                     <ShoppingBag size={18} strokeWidth={2.5} />
                   </div>
-                  <div>
-                    <div className="text-[10px] font-extrabold uppercase tracking-widest text-neutral-400">Hoạt động mua sắm</div>
-                    <h2 className="text-base font-extrabold text-neutral-900 tracking-tight">Đơn hàng gần đây</h2>
+                  <div className="min-w-0">
+                    <div className="text-[10px] font-extrabold uppercase tracking-wide text-neutral-400 whitespace-nowrap">
+                      Hoạt động mua sắm
+                    </div>
+                    <h2 className="text-sm sm:text-base font-extrabold text-neutral-900 tracking-tight whitespace-nowrap">
+                      Đơn hàng gần đây
+                    </h2>
                   </div>
                 </div>
 
                 <Link
                   href="/app/orders"
-                  className="flex items-center gap-1 text-xs font-bold text-neutral-500 hover:text-primary-600 bg-neutral-100 hover:bg-primary-50 px-3 py-1.5 rounded-full transition-all"
+                  className="flex items-center gap-1 text-[11.5px] sm:text-xs font-bold text-neutral-500 hover:text-primary-600 bg-neutral-100 hover:bg-primary-50 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full transition-all shrink-0 whitespace-nowrap"
                 >
-                  <span>Xem tất cả ({allOrders.length})</span>
+                  <span className="hidden sm:inline">Xem tất cả ({allOrders.length})</span>
+                  <span className="sm:hidden">Tất cả ({allOrders.length})</span>
                   <ChevronRight size={13} strokeWidth={2.5} />
                 </Link>
               </div>
@@ -430,8 +442,16 @@ export default async function CustomerHomePage() {
                                 className="h-11 w-11 rounded-xl object-cover border border-neutral-200"
                               />
                             ) : (
-                              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white border border-primary-100 text-primary-500 shadow-2xs font-extrabold text-xs">
-                                {platformCode === "SHOPEE" ? "🛍️" : platformCode === "TIKTOK" ? "🎵" : "📦"}
+                              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-neutral-50/80 border border-neutral-200/80 shadow-2xs shrink-0">
+                                {platformCode === "SHOPEE" ? (
+                                  <ShopeeIcon className="w-6 h-6" />
+                                ) : platformCode === "TIKTOK" ? (
+                                  <TiktokIcon className="w-6 h-6" />
+                                ) : platformCode === "LAZADA" ? (
+                                  <LazadaIcon className="w-6 h-6" />
+                                ) : (
+                                  <Package size={20} className="text-primary-500" />
+                                )}
                               </div>
                             )}
                           </div>

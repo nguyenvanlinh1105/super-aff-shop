@@ -71,24 +71,24 @@ export function InviteSection({
   }
 
   return (
-    <div className="h-full rounded-3xl bg-gradient-to-b from-white via-primary-50/20 to-white p-5 sm:p-6 shadow-cute border border-primary-200/80 flex flex-col justify-between gap-4">
+    <div className="h-full rounded-3xl bg-gradient-to-b from-white via-primary-50/20 to-white p-4 sm:p-6 shadow-cute border border-primary-200/80 flex flex-col justify-between gap-4">
       {/* ═══ 1. HEADER ═══ */}
       <div>
-        <div className="flex items-center justify-between gap-3 mb-2">
-          <div className="flex items-center gap-2">
-            <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-gradient-to-br from-primary-400 to-pink-500 text-white shadow-sm">
+        <div className="flex items-center justify-between gap-2.5 mb-2.5">
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-gradient-to-br from-primary-400 to-pink-500 text-white shadow-sm shrink-0">
               <Gift size={18} strokeWidth={2.4} />
             </div>
-            <div>
-              <div className="text-[10px] font-extrabold uppercase tracking-widest text-primary-500">Giới thiệu bạn bè</div>
-              <h3 className="text-base font-extrabold text-neutral-900 tracking-tight flex items-center gap-1.5">
+            <div className="min-w-0">
+              <div className="text-[10px] font-extrabold uppercase tracking-wide text-primary-500 whitespace-nowrap">Giới thiệu bạn bè</div>
+              <h3 className="text-sm sm:text-base font-extrabold text-neutral-900 tracking-tight flex items-center gap-1.5 whitespace-nowrap">
                 Nhận {referralPercent}% Hoa Hồng 🎀
               </h3>
             </div>
           </div>
           <Link
             href="/app/referral"
-            className="flex items-center gap-0.5 text-xs font-extrabold text-primary-600 hover:text-primary-700 transition-colors shrink-0 bg-primary-50 px-2.5 py-1 rounded-full border border-primary-200/60"
+            className="flex items-center gap-0.5 text-[11.5px] sm:text-xs font-extrabold text-primary-600 hover:text-primary-700 transition-colors shrink-0 bg-primary-50 px-2.5 py-1 rounded-full border border-primary-200/60 whitespace-nowrap"
           >
             <span>Chi tiết</span>
             <ChevronRight size={13} strokeWidth={2.5} />

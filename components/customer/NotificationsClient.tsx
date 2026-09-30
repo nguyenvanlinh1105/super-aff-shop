@@ -144,25 +144,43 @@ function formatNotificationTime(iso: string) {
   try {
     const date = new Date(iso);
     const now = new Date();
-    const diffMs = now.getTime() - date.getTime();
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMins / 60);
-    const diffDays = Math.floor(diffHours / 24);
-
-    if (diffMins < 1) return "Vừa xong";
-    if (diffMins < 60) return `${diffMins} phút trước`;
-    if (diffHours < 24) return `${diffHours} giờ trước`;
-    if (diffDays === 1) {
-      return `Hôm qua, ${date.toLocaleTimeString("vi-VN", { hour: "2-digit", minute: "2-digit" })}`;
-    }
-    if (diffDays < 7) return `${diffDays} ngày trước`;
-    return date.toLocaleDateString("vi-VN", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
+    const timeStr = date.toLocaleTimeString("vi-VN", {
       hour: "2-digit",
       minute: "2-digit",
     });
+
+    const isToday =
+      date.getDate() === now.getDate() &&
+      date.getMonth() === now.getMonth() &&
+      date.getFullYear() === now.getFullYear();
+
+    if (isToday) {
+      const diffMs = now.getTime() - date.getTime();
+      const diffMins = Math.floor(diffMs / 60000);
+      if (diffMins < 1) return `${timeStr} (vừa xong)`;
+      if (diffMins < 60) return `${timeStr} (${diffMins}p trước)`;
+      return `${timeStr} hôm nay`;
+    }
+
+    const yesterday = new Date(now);
+    yesterday.setDate(yesterday.getDate() - 1);
+    const isYesterday =
+      date.getDate() === yesterday.getDate() &&
+      date.getMonth() === yesterday.getMonth() &&
+      date.getFullYear() === yesterday.getFullYear();
+
+    if (isYesterday) {
+      return `${timeStr} hôm qua`;
+    }
+
+    const d = String(date.getDate()).padStart(2, "0");
+    const m = String(date.getMonth() + 1).padStart(2, "0");
+    const y = date.getFullYear();
+
+    if (y === now.getFullYear()) {
+      return `${timeStr} · ${d}/${m}`;
+    }
+    return `${timeStr} · ${d}/${m}/${y}`;
   } catch {
     return iso;
   }
@@ -656,41 +674,44 @@ export function NotificationsClient({
               <div
                 key={n.id}
                 onClick={() => handleCardClick(n)}
-                className={`group relative flex items-start gap-3 sm:gap-3.5 rounded-2xl p-3 sm:p-3.5 transition-all duration-150 cursor-pointer border ${
+                className={`group relative flex items-start gap-2.5 sm:gap-3 rounded-2xl p-2.5 sm:p-3.5 transition-all duration-150 cursor-pointer border ${
                   !n.isRead
                     ? `${config.bgUnread} ${config.borderUnread} shadow-2xs hover:shadow-cute-sm`
                     : "bg-white border-neutral-200/80 hover:border-neutral-300 hover:bg-neutral-50/50 shadow-2xs"
                 }`}
               >
-                {/* Left Side: Icon Box */}
+                {/* Left Side: Icon Box — Nhỏ gọn, thanh thoát */}
                 <div
-                  className={`flex h-10 w-10 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-2xl ${config.iconBg} ${config.iconColor} shadow-2xs border border-white mt-0.5`}
+                  className={`flex h-8 w-8 sm:h-9 sm:w-9 shrink-0 items-center justify-center rounded-xl ${config.iconBg} ${config.iconColor} shadow-2xs border border-white mt-0.5`}
                 >
-                  <Icon size={18} strokeWidth={2.3} />
+                  <Icon size={15} strokeWidth={2.4} />
                 </div>
 
                 {/* Right Side: Details & Actions */}
                 <div className="flex-1 min-w-0">
-                  {/* Row 1: Badges, Time & Mark Read */}
-                  <div className="flex items-center justify-between gap-2 mb-1">
-                    <div className="flex items-center gap-1.5 min-w-0">
+                  {/* Row 1: Badges, Time & Mark Read — Luôn nằm gọn gàng trên 1 dòng, không xuống dòng */}
+                  <div className="flex items-center justify-between gap-1.5 sm:gap-2 mb-1 min-w-0">
+                    <div className="flex items-center gap-1.5 min-w-0 shrink-0">
                       <span
-                        className={`inline-flex items-center px-2 py-0.5 rounded-md text-[9.5px] sm:text-[10px] font-black uppercase tracking-wider border ${config.badgeBg} ${config.badgeColor}`}
+                        className={`inline-flex items-center px-1.5 py-0.5 rounded-md text-[9px] sm:text-[9.5px] font-black uppercase tracking-wider border ${config.badgeBg} ${config.badgeColor}`}
                       >
                         {config.label}
                       </span>
                       {!n.isRead && (
-                        <span className="flex items-center gap-1 text-[10px] font-black text-rose-600 bg-rose-50 border border-rose-200 px-1.5 py-0.2 rounded-full">
+                        <span className="inline-flex items-center gap-1 text-[9px] sm:text-[9.5px] font-extrabold text-rose-600 bg-rose-50/90 border border-rose-200/80 px-1.5 py-0.2 rounded-full shrink-0 shadow-2xs">
                           <span className="h-1.5 w-1.5 rounded-full bg-rose-500 animate-pulse" />
-                          Mới
+                          <span>Mới</span>
                         </span>
                       )}
                     </div>
 
-                    <div className="flex items-center gap-2 shrink-0">
-                      <span className="inline-flex items-center gap-1 text-[10.5px] font-semibold text-neutral-400">
-                        <Clock size={10} />
-                        {formatNotificationTime(n.createdAt)}
+                    <div className="flex items-center gap-1 sm:gap-1.5 shrink-0 ml-auto">
+                      <span
+                        title={formatNotificationTimeFull(n.createdAt)}
+                        className="inline-flex items-center gap-1 text-[10px] sm:text-[10.5px] font-semibold text-neutral-400 whitespace-nowrap"
+                      >
+                        <Clock size={10} className="shrink-0 text-neutral-400" />
+                        <span>{formatNotificationTime(n.createdAt)}</span>
                       </span>
 
                       {!n.isRead ? (
@@ -698,14 +719,14 @@ export function NotificationsClient({
                           type="button"
                           onClick={(e) => handleSingleMarkReadBtn(e, n)}
                           title="Đánh dấu đã đọc"
-                          className="flex items-center gap-1 px-1.5 py-0.5 rounded-lg text-[10.5px] font-bold text-neutral-400 hover:text-primary-600 hover:bg-white border border-transparent hover:border-primary-200 shadow-2xs transition-all cursor-pointer"
+                          className="flex items-center justify-center h-5 w-5 sm:h-auto sm:w-auto sm:px-1.5 sm:py-0.5 rounded-md text-[10px] sm:text-[10.5px] font-bold text-neutral-400 hover:text-primary-600 hover:bg-white border border-transparent hover:border-primary-200 shadow-2xs transition-all cursor-pointer shrink-0"
                         >
-                          <Check size={12} strokeWidth={2.5} />
-                          <span className="hidden sm:inline">Đã đọc</span>
+                          <Check size={11} strokeWidth={2.5} />
+                          <span className="hidden sm:inline ml-0.5">Đã đọc</span>
                         </button>
                       ) : (
-                        <span title="Đã xem" className="text-emerald-500/80">
-                          <CheckCheck size={13} strokeWidth={2.5} />
+                        <span title="Đã xem" className="text-emerald-500/80 shrink-0 flex items-center">
+                          <CheckCheck size={12} strokeWidth={2.5} />
                         </span>
                       )}
                     </div>

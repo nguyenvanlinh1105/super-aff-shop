@@ -60,7 +60,7 @@ export function CustomerSettingsClient({
   }, [defaultTab]);
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full items-start">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full items-start pb-28 sm:pb-14">
       {/* ═══════════════════════════════════════════════════════════
           CỘT 1 (BÊN TRÁI): HỒ SƠ, THÔNG TIN CÁ NHÂN & ỨNG DỤNG
          ═══════════════════════════════════════════════════════════ */}
@@ -71,22 +71,22 @@ export function CustomerSettingsClient({
         {/* Khối 1.2: Chi tiết hồ sơ cá nhân */}
         <section
           id="profile"
-          className="bg-white rounded-3xl border border-primary-100/90 shadow-cute p-6 sm:p-7 scroll-mt-24"
+          className="bg-white rounded-3xl border border-primary-100/90 shadow-cute p-4 sm:p-6 lg:p-7 scroll-mt-24"
         >
-          <div className="flex items-center gap-3 pb-5 mb-5 border-b border-neutral-100">
-            <div className="w-11 h-11 rounded-2xl bg-primary-50 border border-primary-100 text-primary-500 flex items-center justify-center shrink-0 shadow-2xs">
-              <User size={20} strokeWidth={2.3} />
+          <div className="flex items-start sm:items-center gap-3 pb-4 mb-4 sm:pb-5 sm:mb-5 border-b border-neutral-100">
+            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-primary-50 border border-primary-100 text-primary-500 flex items-center justify-center shrink-0 shadow-2xs">
+              <User size={19} strokeWidth={2.3} />
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h2 className="text-base sm:text-lg font-black text-neutral-900 tracking-tight">
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h2 className="text-base sm:text-lg font-black text-neutral-900 tracking-tight leading-snug">
                   Chi tiết hồ sơ
                 </h2>
-                <span className="text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full bg-primary-100/80 text-primary-700">
+                <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md bg-primary-100/80 text-primary-700 whitespace-nowrap shrink-0">
                   Cá nhân
                 </span>
               </div>
-              <p className="text-xs text-neutral-500 font-medium mt-0.5">
+              <p className="text-xs text-neutral-500 font-medium mt-0.5 leading-relaxed">
                 Cập nhật họ và tên, số điện thoại và nơi ở hiện tại
               </p>
             </div>
@@ -108,19 +108,19 @@ export function CustomerSettingsClient({
         {/* Khối 2.1: Mã PIN rút tiền 6 số */}
         <section
           id="pin-security"
-          className="bg-white rounded-3xl border border-primary-100/90 shadow-cute p-6 sm:p-7 scroll-mt-24"
+          className="bg-white rounded-3xl border border-primary-100/90 shadow-cute p-4 sm:p-6 lg:p-7 scroll-mt-24"
         >
-          <div className="flex items-center gap-3 pb-5 mb-5 border-b border-neutral-100">
-            <div className="w-11 h-11 rounded-2xl bg-emerald-50 border border-emerald-100 text-emerald-600 flex items-center justify-center shrink-0 shadow-2xs">
-              <KeyRound size={20} strokeWidth={2.3} />
+          <div className="flex items-start sm:items-center gap-3 pb-4 mb-4 sm:pb-5 sm:mb-5 border-b border-neutral-100">
+            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-emerald-50 border border-emerald-100 text-emerald-600 flex items-center justify-center shrink-0 shadow-2xs">
+              <KeyRound size={19} strokeWidth={2.3} />
             </div>
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2 flex-wrap">
-                <h2 className="text-base sm:text-lg font-black text-neutral-900 tracking-tight">
+                <h2 className="text-base sm:text-lg font-black text-neutral-900 tracking-tight leading-snug">
                   Mã PIN rút tiền (6 số)
                 </h2>
                 <span
-                  className={`text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full ${
+                  className={`text-[10px] font-black uppercase px-2 py-0.5 rounded-md whitespace-nowrap shrink-0 ${
                     hasPin
                       ? "bg-emerald-100/80 text-emerald-700"
                       : "bg-amber-100/80 text-amber-800"
@@ -129,7 +129,7 @@ export function CustomerSettingsClient({
                   {hasPin ? "Đã bật bảo vệ" : "Chưa cài PIN"}
                 </span>
               </div>
-              <p className="text-xs text-neutral-500 font-medium mt-0.5 leading-snug">
+              <p className="text-xs text-neutral-500 font-medium mt-0.5 leading-relaxed">
                 Bảo vệ số dư ví khi thực hiện các yêu cầu rút tiền về ngân hàng
               </p>
             </div>
@@ -141,18 +141,18 @@ export function CustomerSettingsClient({
         {/* Khối 2.2: Đổi mật khẩu tài khoản */}
         <section
           id="password-security"
-          className="bg-white rounded-3xl border border-primary-100/90 shadow-cute p-6 sm:p-7 scroll-mt-24"
+          className="bg-white rounded-3xl border border-primary-100/90 shadow-cute p-4 sm:p-6 lg:p-7 scroll-mt-24"
         >
-          <div className="flex items-center gap-3 pb-5 mb-5 border-b border-neutral-100">
-            <div className="w-11 h-11 rounded-2xl bg-primary-50 border border-primary-100 text-primary-500 flex items-center justify-center shrink-0 shadow-2xs">
-              <Lock size={20} strokeWidth={2.3} />
+          <div className="flex items-start sm:items-center gap-3 pb-4 mb-4 sm:pb-5 sm:mb-5 border-b border-neutral-100">
+            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-primary-50 border border-primary-100 text-primary-500 flex items-center justify-center shrink-0 shadow-2xs">
+              <Lock size={19} strokeWidth={2.3} />
             </div>
-            <div>
-              <h2 className="text-base sm:text-lg font-black text-neutral-900 tracking-tight">
+            <div className="flex-1 min-w-0">
+              <h2 className="text-base sm:text-lg font-black text-neutral-900 tracking-tight leading-snug">
                 Đổi mật khẩu tài khoản
               </h2>
-              <p className="text-xs text-neutral-500 font-medium mt-0.5">
-                Nên đổi mật khẩu định kỳ để giữ tài khoản luôn trong trạng thái an toàn
+              <p className="text-xs text-neutral-500 font-medium mt-0.5 leading-relaxed">
+                Nên đổi mật khẩu định kỳ để giữ tài khoản luôn an toàn
               </p>
             </div>
           </div>
@@ -163,22 +163,22 @@ export function CustomerSettingsClient({
         {/* Khối 2.3: Cài đặt nhận thông báo thiết bị (Bật / Tắt thông báo) */}
         <section
           id="notifications"
-          className="bg-white rounded-3xl border border-primary-100/90 shadow-cute p-6 sm:p-7 scroll-mt-24"
+          className="bg-white rounded-3xl border border-primary-100/90 shadow-cute p-4 sm:p-6 lg:p-7 scroll-mt-24"
         >
-          <div className="flex items-center gap-3 pb-5 mb-5 border-b border-neutral-100">
-            <div className="w-11 h-11 rounded-2xl bg-rose-50 border border-rose-100 text-rose-600 flex items-center justify-center shrink-0 shadow-2xs">
-              <Bell size={20} strokeWidth={2.3} />
+          <div className="flex items-start sm:items-center gap-3 pb-4 mb-4 sm:pb-5 sm:mb-5 border-b border-neutral-100">
+            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-rose-50 border border-rose-100 text-rose-600 flex items-center justify-center shrink-0 shadow-2xs">
+              <Bell size={19} strokeWidth={2.3} />
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h2 className="text-base sm:text-lg font-black text-neutral-900 tracking-tight">
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h2 className="text-base sm:text-lg font-black text-neutral-900 tracking-tight leading-snug">
                   Cài đặt nhận thông báo
                 </h2>
-                <span className="text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full bg-rose-100/80 text-rose-700">
+                <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md bg-rose-100/80 text-rose-700 whitespace-nowrap shrink-0">
                   Thiết bị
                 </span>
               </div>
-              <p className="text-xs text-neutral-500 font-medium mt-0.5">
+              <p className="text-xs text-neutral-500 font-medium mt-0.5 leading-relaxed">
                 Quản lý bật hoặc tắt nhận thông báo hoàn tiền &amp; đơn hàng trên thiết bị này
               </p>
             </div>
@@ -190,23 +190,23 @@ export function CustomerSettingsClient({
         {/* Khối 2.4: Tiện ích Telegram Bot */}
         <section
           id="telegram-integration"
-          className="bg-white rounded-3xl border border-primary-100/90 shadow-cute p-6 sm:p-7 scroll-mt-24"
+          className="bg-white rounded-3xl border border-primary-100/90 shadow-cute p-4 sm:p-6 lg:p-7 scroll-mt-24"
         >
-          <div className="flex items-center gap-3 pb-5 mb-5 border-b border-neutral-100">
-            <div className="w-11 h-11 rounded-2xl bg-blue-50 border border-blue-100 text-blue-600 flex items-center justify-center shrink-0 shadow-2xs">
-              <Send size={20} strokeWidth={2.3} />
+          <div className="flex items-start sm:items-center gap-3 pb-4 mb-4 sm:pb-5 sm:mb-5 border-b border-neutral-100">
+            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-sky-50 border border-sky-100 text-sky-600 flex items-center justify-center shrink-0 shadow-2xs">
+              <Send size={19} strokeWidth={2.3} />
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h2 className="text-base sm:text-lg font-black text-neutral-900 tracking-tight">
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 flex-wrap">
+                <h2 className="text-base sm:text-lg font-black text-neutral-900 tracking-tight leading-snug">
                   Liên kết Telegram Bot
                 </h2>
-                <span className="text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full bg-blue-100/80 text-blue-700">
+                <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md bg-sky-100/80 text-sky-700 whitespace-nowrap shrink-0">
                   Thông báo tức thì
                 </span>
               </div>
-              <p className="text-xs text-neutral-500 font-medium mt-0.5">
-                Nhận thông báo hoa hồng tức thì và tra cứu số dư nhanh chóng trực tiếp qua Telegram
+              <p className="text-xs text-neutral-500 font-medium mt-0.5 leading-relaxed">
+                Nhận tin nhắn hoa hồng tức thì và tra cứu số dư trực tiếp qua Telegram
               </p>
             </div>
           </div>

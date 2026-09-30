@@ -6,7 +6,7 @@ import { formatDate } from "@/lib/format";
 import { CustomerLinkForm } from "@/components/customer/CustomerLinkForm";
 import { RefundHistoryClient } from "@/components/customer/RefundHistoryClient";
 import { FloatingElement } from "@/components/ui/FloatingElement";
-import { AlertTriangle } from "lucide-react";
+import { Sparkles, ChevronRight, Lightbulb } from "lucide-react";
 
 export default async function CustomerRefundsPage({ searchParams }: { searchParams: { q?: string; page?: string; tab?: string; period?: string } }) {
   const session = await getSession();
@@ -83,43 +83,53 @@ export default async function CustomerRefundsPage({ searchParams }: { searchPara
 
   return (
     <div className="flex w-full flex-col gap-xl fade-in pb-2xl">
-      {/* ── HEADER CARD (Đơn giản, không background rườm rà, nút Lưu ý màu hồng nổi bật) ── */}
-      <div className="relative rounded-3xl border border-primary-100/90 shadow-sm sm:shadow-md bg-white p-6 sm:p-7">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-5">
-          <div className="flex items-center gap-4 sm:gap-5">
-            <FloatingElement duration={4}>
-              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br from-primary-400 via-primary-500 to-pink-500 text-white flex items-center justify-center shadow-md shadow-primary-500/20 shrink-0 border border-white/60 overflow-hidden p-1">
-                <img src="/meowback_lucky_cat_logo.png" alt="MeowBack" className="w-full h-full object-contain rounded-xl" />
-              </div>
-            </FloatingElement>
+      {/* ── HEADER CARD (Thiết kế thanh lịch, gọn gàng, chuẩn responsive mobile) ── */}
+      <div className="relative rounded-3xl border border-rose-100/80 bg-white p-4 sm:p-6 shadow-sm overflow-hidden flex flex-col gap-3.5">
+        <div className="flex items-center justify-between gap-3">
+          {/* Khối tiêu đề + Icon */}
+          <div className="flex items-center gap-3 sm:gap-3.5 min-w-0">
+            <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-br from-rose-500 to-pink-500 text-white flex items-center justify-center shadow-sm shadow-rose-500/20 shrink-0">
+              <Sparkles size={22} className="text-white fill-white/30" />
+            </div>
             <div className="min-w-0">
-              <h1 className="text-xl sm:text-2xl lg:text-3xl font-extrabold leading-tight text-neutral-900 tracking-tight whitespace-nowrap">
+              <h1 className="text-lg sm:text-2xl font-black text-neutral-900 tracking-tight leading-snug">
                 Tạo link hoàn tiền
               </h1>
-              <p className="mt-1 text-xs sm:text-sm text-neutral-500 font-medium leading-relaxed">
-                Chọn sàn và dán link sản phẩm để lấy hoàn tiền
+              <p className="mt-0.5 text-xs sm:text-sm text-neutral-500 font-medium">
+                Kích hoạt hoàn tiền tự động khi mua sắm
               </p>
             </div>
           </div>
 
-          {/* Nút 6 Lưu ý quan trọng - Màu hồng nổi bật thu hút sự chú ý */}
+          {/* Nút lưu ý nhỏ gọn trên desktop */}
           <Link
             href="/app/guide#luu-y"
-            className="group relative flex items-center justify-center gap-2.5 shrink-0 rounded-2xl bg-gradient-to-r from-primary-500 via-pink-500 to-primary-500 hover:from-primary-600 hover:to-pink-600 px-5 py-3 text-[13px] sm:text-sm font-extrabold text-white shadow-lg shadow-primary-500/25 transition-all duration-200 hover:scale-105 hover:shadow-xl hover:shadow-primary-500/35 active:scale-[0.98]"
+            className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-50 hover:bg-amber-100/80 text-amber-900 border border-amber-200/70 text-xs font-bold transition-all shadow-2xs shrink-0 group"
           >
-            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white/20 text-white backdrop-blur-xs">
-              <AlertTriangle size={14} strokeWidth={2.6} />
-            </span>
+            <Lightbulb size={14} className="text-amber-600" />
             <span>6 Lưu ý quan trọng</span>
-            <span className="rounded-full bg-white/25 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-white">
-              Đọc ngay ⚡
-            </span>
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
-            </span>
+            <ChevronRight size={13} className="text-amber-700 group-hover:translate-x-0.5 transition-transform" />
           </Link>
         </div>
+
+        {/* Smart Tip Bar: Đẹp, thanh lịch, chuẩn mobile, không bao giờ bị gãy dòng */}
+        <Link
+          href="/app/guide#luu-y"
+          className="group flex items-center justify-between gap-2 px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-2xl bg-gradient-to-r from-amber-50/90 via-orange-50/50 to-amber-50/90 border border-amber-200/70 hover:border-amber-300 shadow-2xs transition-all active:scale-[0.99]"
+        >
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-amber-500/20 text-amber-700">
+              <Lightbulb size={12} className="stroke-[2.5]" />
+            </span>
+            <p className="text-[11.5px] sm:text-xs text-neutral-700 font-medium truncate">
+              <strong className="font-bold text-amber-950">Mẹo:</strong> 6 lưu ý để không bị huỷ hoàn tiền
+            </p>
+          </div>
+          <span className="inline-flex items-center gap-0.5 text-[11px] sm:text-xs font-bold text-amber-900 shrink-0 group-hover:translate-x-0.5 transition-transform">
+            <span>Đọc ngay</span>
+            <ChevronRight size={12} strokeWidth={2.5} />
+          </span>
+        </Link>
       </div>
 
       {/* FORM: CHỌN NỀN TẢNG & TẠO LINK */}

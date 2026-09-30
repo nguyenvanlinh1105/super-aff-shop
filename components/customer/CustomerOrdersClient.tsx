@@ -6,13 +6,17 @@ import { Pagination } from "@/components/ui/Pagination";
 import { FloatingElement } from "@/components/ui/FloatingElement";
 import { ServerSearchInput } from "@/components/ui/ServerSearchInput";
 import { PeriodSelect } from "@/components/ui/PeriodSelect";
+import { CustomSelect } from "@/components/ui/CustomSelect";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+
+import { ShopeeIcon, TiktokIcon, LazadaIcon } from "@/components/icons/PlatformIcons";
 
 type Order = {
   id: string;
   orderExternalId: string;
   platformName: string;
+  platformCode?: string;
   sourceType: string;
   createdAt: string;
   orderAmount: string;
@@ -22,6 +26,8 @@ type Order = {
   daysLeft: number | null;
   completedAtText: string | null;
   readyAtText: string | null;
+  productTitle?: string | null;
+  productImage?: string | null;
 };
 
 type Props = {
@@ -57,18 +63,6 @@ export function CustomerOrdersClient({ orders, totalPages, currentPage, counts }
   const searchParams = useSearchParams();
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const currentTab = searchParams.get("tab") || "all";
-  const [mobileDropdownOpen, setMobileDropdownOpen] = useState(false);
-  const mobileDropdownRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (mobileDropdownRef.current && !mobileDropdownRef.current.contains(event.target as Node)) {
-        setMobileDropdownOpen(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, []);
 
   const handleTabChange = (tab: string) => {
     const params = new URLSearchParams(searchParams);
@@ -136,109 +130,34 @@ export function CustomerOrdersClient({ orders, totalPages, currentPage, counts }
         </div>
       </div>
 
-      {/* TOOLBAR */}
-      <div className="flex flex-col gap-sm sm:flex-row sm:items-center">
-        <PeriodSelect className="w-full sm:w-[200px] shrink-0" />
-        <div className="relative flex-1">
-          <ServerSearchInput placeholder="Tìm mã đơn hàng..." />
+
+      {/* ─── BỘ LỌC TẬP TRUNG (CUSTOM SELECT TRẠNG THÁI + THỜI GIAN + TÌM KIẾM TRÊN CẢ PC & MOBILE) ─── */}
+      <div className="flex flex-col md:flex-row items-stretch md:items-center gap-2.5 rounded-3xl bg-white p-3.5 sm:p-4 shadow-2xs border border-primary-100">
+        {/* Lọc trạng thái đơn hàng */}
+        <CustomSelect
+          value={currentTab}
+          onChange={handleTabChange}
+          options={ORDER_STATUS_TABS.map((t) => ({
+            value: t.id,
+            label: t.label,
+            icon: <span className="text-base shrink-0">{t.emoji}</span>,
+            count: counts[t.id as keyof typeof counts] ?? 0,
+          }))}
+          className="w-full md:w-[230px] shrink-0"
+          buttonClassName="h-10 text-xs font-bold"
+          ariaLabel="Lọc trạng thái đơn hàng"
+        />
+
+        {/* Lọc thời gian */}
+        <PeriodSelect className="w-full md:w-[190px] shrink-0" />
+
+        {/* Ô tìm kiếm mã đơn hàng */}
+        <div className="relative flex-1 min-w-[200px]">
+          <ServerSearchInput placeholder="Tìm theo mã đơn hàng..." />
         </div>
       </div>
 
-      {/* ─── STATUS FILTER: CUSTOM-SELECTION TRÊN MOBILE, TABS TRÊN PC ─── */}
-      {/* 1. MOBILE CUSTOM SELECTION DROPDOWN (md:hidden) */}
-      {(() => {
-        const activeTabObj = ORDER_STATUS_TABS.find((t) => t.id === currentTab) || ORDER_STATUS_TABS[0];
-        const activeCount = counts[activeTabObj.id as keyof typeof counts] ?? 0;
-        return (
-          <div ref={mobileDropdownRef} className="relative md:hidden w-full">
-            <button
-              type="button"
-              onClick={() => setMobileDropdownOpen(!mobileDropdownOpen)}
-              className="w-full flex items-center justify-between gap-2.5 rounded-2xl bg-white border border-primary-200/90 px-4 py-3 shadow-2xs text-xs font-black text-neutral-900 transition-all cursor-pointer active:scale-[0.99]"
-            >
-              <div className="flex items-center gap-2.5 min-w-0">
-                <span className="text-base shrink-0">{activeTabObj.emoji}</span>
-                <span className="truncate">{activeTabObj.label}</span>
-                {activeCount > 0 && (
-                  <span className="flex h-5 min-w-[20px] items-center justify-center rounded-full bg-primary-100 text-primary-700 px-1.5 text-[10px] font-black shrink-0">
-                    {activeCount}
-                  </span>
-                )}
-              </div>
-              <ChevronDown
-                size={16}
-                strokeWidth={2.5}
-                className={`text-neutral-400 shrink-0 transition-transform duration-200 ${
-                  mobileDropdownOpen ? "rotate-180 text-primary-600" : ""
-                }`}
-              />
-            </button>
-
-            {mobileDropdownOpen && (
-              <div className="absolute left-0 top-full mt-1.5 w-full bg-white/95 backdrop-blur-md rounded-2xl border border-primary-100 shadow-xl shadow-primary-500/10 p-1.5 z-40 animate-in fade-in slide-in-from-top-2 duration-150">
-                <div className="px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-neutral-400 border-b border-neutral-100 mb-1 flex items-center justify-between">
-                  <span>Lọc trạng thái đơn</span>
-                  <span>{ORDER_STATUS_TABS.length} mục</span>
-                </div>
-                <div className="flex flex-col gap-0.5">
-                  {ORDER_STATUS_TABS.map((tab) => {
-                    const isSelected = currentTab === tab.id;
-                    const count = counts[tab.id as keyof typeof counts] ?? 0;
-                    return (
-                      <button
-                        key={tab.id}
-                        type="button"
-                        onClick={() => {
-                          handleTabChange(tab.id);
-                          setMobileDropdownOpen(false);
-                        }}
-                        className={`flex items-center justify-between gap-2.5 px-3 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
-                          isSelected
-                            ? "bg-primary-50 text-primary-700 font-black"
-                            : "text-neutral-700 hover:bg-neutral-50 hover:text-primary-600"
-                        }`}
-                      >
-                        <div className="flex items-center gap-2.5 min-w-0">
-                          <span className="text-sm shrink-0">{tab.emoji}</span>
-                          <span className="truncate">{tab.label}</span>
-                        </div>
-                        <div className="flex items-center gap-1.5 shrink-0">
-                          {count > 0 && (
-                            <span
-                              className={`flex h-4.5 min-w-[18px] items-center justify-center rounded-full px-1.5 text-[10px] font-black ${
-                                isSelected
-                                  ? "bg-primary-500 text-white shadow-2xs"
-                                  : "bg-neutral-100 text-neutral-600"
-                              }`}
-                            >
-                              {count}
-                            </span>
-                          )}
-                          {isSelected && <Check size={14} strokeWidth={3} className="text-primary-600" />}
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-          </div>
-        );
-      })()}
-
-      {/* 2. PC STATUS TABS (hidden md:block — giữ nguyên 100% như cũ) */}
-      <div className="relative hidden md:block">
-        <div className="flex flex-nowrap items-center gap-sm overflow-x-auto pb-2 -mx-md px-md md:mx-0 md:px-0 scrollbar-hide w-full max-w-[100vw]">
-          <TabButton active={currentTab === "all"} onClick={() => handleTabChange("all")} label="Tất cả" count={counts.all} />
-          <TabButton active={currentTab === "pending"} onClick={() => handleTabChange("pending")} label="⏳ Chờ sàn xác nhận" count={counts.pending} />
-          <TabButton active={currentTab === "reconciling"} onClick={() => handleTabChange("reconciling")} label="🕐 Đang đối soát" count={counts.reconciling} />
-          <TabButton active={currentTab === "processing"} onClick={() => handleTabChange("processing")} label="💰 Chờ chuyển khoản" count={counts.processing} />
-          <TabButton active={currentTab === "completed"} onClick={() => handleTabChange("completed")} label="✅ Đã nhận tiền" count={counts.completed} />
-          <TabButton active={currentTab === "cancelled"} onClick={() => handleTabChange("cancelled")} label="❌ Đã huỷ" count={counts.cancelled} />
-        </div>
-      </div>
-
-      {/* GIẢI THÍCH THEO TAB — giúp khách hiểu rõ từng trạng thái nghĩa là gì */}
+      {/* GIẢI THÍCH THEO TRẠNG THÁI (Hiển thị ngay dưới khi chọn lọc trạng thái cụ thể) */}
       {currentTab === "pending" && (
         <InfoBox tone="amber">
           Sàn TMĐT <strong>chưa xác nhận</strong> bạn đã nhận hàng/hoàn tất đơn. Số tiền hoàn hiển thị chỉ là{" "}
@@ -285,62 +204,103 @@ export function CustomerOrdersClient({ orders, totalPages, currentPage, counts }
                     : "border-[1.5px] border-primary-300 bg-white hover:border-primary-400 hover:shadow-cute hover:bg-primary-50/20"
                 }`}
               >
-                  <div className="flex items-start gap-md">
-                    <div
-                      className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ring-1 ${
-                        o.sourceType === "referral"
-                          ? "bg-purple-100 text-purple-500 ring-purple-100"
-                          : "bg-neutral-50 text-neutral-400 ring-neutral-100 group-hover:bg-white group-hover:text-primary-500"
-                      }`}
-                    >
-                      {o.sourceType === "referral" ? <Gift size={20} strokeWidth={2.5} /> : <Package size={20} strokeWidth={2.5} />}
+                  <div className="flex items-start gap-3 min-w-0 flex-1">
+                    {/* Thumbnail: Image or Platform Icon */}
+                    <div className="relative shrink-0">
+                      {o.sourceType === "referral" ? (
+                        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-purple-100 text-purple-600 ring-1 ring-purple-200">
+                          <Gift size={22} strokeWidth={2.4} />
+                        </div>
+                      ) : o.productImage ? (
+                        <img
+                          src={o.productImage}
+                          alt={o.productTitle ?? ""}
+                          className="h-12 w-12 rounded-2xl object-cover border border-neutral-200 shadow-2xs"
+                        />
+                      ) : (
+                        <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-neutral-50/80 border border-neutral-200/80 shadow-2xs">
+                          {o.platformCode === "SHOPEE" ? (
+                            <ShopeeIcon className="w-7 h-7" />
+                          ) : o.platformCode === "TIKTOK" ? (
+                            <TiktokIcon className="w-7 h-7" />
+                          ) : o.platformCode === "LAZADA" ? (
+                            <LazadaIcon className="w-7 h-7" />
+                          ) : (
+                            <Package size={22} className="text-primary-500" />
+                          )}
+                        </div>
+                      )}
                     </div>
-                    <div>
-                      <div className="flex items-center gap-xs">
-                        <span className={`text-[11px] font-bold uppercase tracking-wider ${o.sourceType === "referral" ? "text-purple-600" : "text-gray-500"}`}>
+
+                    {/* Content */}
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className={`text-[10.5px] font-extrabold uppercase px-1.5 py-0.2 rounded border ${
+                          o.sourceType === "referral"
+                            ? "bg-purple-50 text-purple-600 border-purple-200"
+                            : "bg-neutral-50 text-neutral-600 border-neutral-200"
+                        }`}>
                           {o.sourceType === "referral" ? "🎁 Hoa hồng giới thiệu" : o.platformName}
                         </span>
-                        <span className="text-gray-300">•</span>
-                        <span className="text-[12px] font-medium text-gray-400 flex items-center gap-1">
+                        <span className="text-neutral-300">•</span>
+                        <span className="text-[11.5px] font-medium text-neutral-400 flex items-center gap-1">
                           <CalendarDays size={12} />
                           {o.createdAt}
                         </span>
                       </div>
-                      <div className="mt-[2px] text-[14px] font-bold text-gray-900 font-mono">
-                        {o.orderExternalId}
+
+                      {/* Tên sản phẩm */}
+                      <div className="mt-1 text-[13.5px] sm:text-[14.5px] font-bold text-neutral-900 group-hover:text-primary-600 transition-colors line-clamp-2 leading-snug">
+                        {o.productTitle || `Đơn hàng ${o.orderExternalId}`}
                       </div>
+
+                      {/* Mã đơn hàng */}
+                      <div className="mt-0.5 text-[11px] font-medium text-neutral-400 font-mono">
+                        Mã đơn: {o.orderExternalId}
+                      </div>
+
                       {o.sourceType === "referral" && (
-                        <div className="mt-1 max-w-[280px] text-[11px] leading-snug text-purple-500/90">
+                        <div className="mt-1 max-w-[280px] text-[11px] leading-snug text-purple-500/90 font-medium">
                           Không phải đơn bạn mua — đây là tiền thưởng vì bạn đã giới thiệu người này cho MeowBack. Xem chi tiết tại mục "Mời bạn".
                         </div>
                       )}
-                      <div className="mt-1 flex items-center gap-xs">
+
+                      <div className="mt-1.5 flex items-center gap-xs">
                         {getStatusBadge(o)}
                       </div>
+
                       {getStatusHint(o) && (
-                        <div className="mt-1 max-w-[280px] text-[11px] leading-snug text-amber-600/80">
+                        <div className="mt-1 max-w-[320px] text-[11px] leading-snug text-amber-600/90 font-medium">
                           {getStatusHint(o)}
                         </div>
                       )}
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-xl sm:text-right mt-sm sm:mt-0 pt-3 border-t border-primary-100/90 sm:border-0 sm:pt-0">
-                    <div>
-                      <div className="text-[11px] font-bold uppercase tracking-wider text-gray-400">
-                        {o.sourceType === "referral" ? "Giá trị đơn (của bạn F1)" : "Giá trị đơn"}
+                  <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-6 mt-3 sm:mt-0 pt-3 border-t border-primary-100/90 sm:border-0 sm:pt-0">
+                    <div className="flex items-center gap-4 sm:gap-6">
+                      <div>
+                        <div className="text-[10.5px] font-bold uppercase tracking-wider text-neutral-400">
+                          {o.sourceType === "referral" ? "Đơn F1" : "Giá trị đơn"}
+                        </div>
+                        <div className="text-[13.5px] sm:text-[14px] font-bold text-neutral-900">{o.orderAmount}</div>
                       </div>
-                      <div className="text-[14px] font-bold text-gray-900">{o.orderAmount}</div>
-                    </div>
-                    <div>
-                      <div className={`text-[11px] font-bold uppercase tracking-wider ${o.sourceType === "referral" ? "text-purple-600" : "text-primary-500"}`}>
-                        {o.sourceType === "referral" ? "Hoa hồng nhận" : "Tiền hoàn"}
+                      <div>
+                        <div className={`text-[10.5px] font-bold uppercase tracking-wider ${o.sourceType === "referral" ? "text-purple-600" : "text-primary-500"}`}>
+                          {o.sourceType === "referral" ? "Hoa hồng" : "Tiền hoàn"}
+                        </div>
+                        <div className={`text-[14.5px] sm:text-[15px] font-black ${o.sourceType === "referral" ? "text-purple-600" : "text-primary-600"}`}>
+                          {o.customerRewardAmount}
+                        </div>
                       </div>
-                      <div className={`text-[15px] font-black ${o.sourceType === "referral" ? "text-purple-600" : "text-primary-600"}`}>{o.customerRewardAmount}</div>
                     </div>
+
                     <button
+                      type="button"
                       onClick={() => setExpandedId(expandedId === o.id ? null : o.id)}
-                      className="hidden sm:flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gray-50 text-gray-400 transition-colors hover:bg-primary-100 hover:text-primary-600"
+                      className="flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-xl bg-neutral-100/80 hover:bg-primary-100 text-neutral-500 hover:text-primary-600 transition-colors cursor-pointer"
+                      title={expandedId === o.id ? "Thu gọn hành trình" : "Xem hành trình đơn hàng"}
+                      aria-label="Xem hành trình đơn hàng"
                     >
                       <motion.div animate={{ rotate: expandedId === o.id ? 180 : 0 }} transition={{ duration: 0.2 }}>
                         <ChevronDown size={16} strokeWidth={2.5} />
@@ -407,25 +367,5 @@ function InfoBox({ tone, children }: { tone: keyof typeof INFO_BOX_TONES; childr
     <div className={`rounded-2xl border px-lg py-md text-[13px] font-medium leading-relaxed ${INFO_BOX_TONES[tone]}`}>
       {children}
     </div>
-  );
-}
-
-function TabButton({ active, onClick, label, count }: { active: boolean; onClick: () => void; label: string; count: number }) {
-  return (
-    <button
-      onClick={onClick}
-      className={`flex h-9 shrink-0 items-center gap-xs whitespace-nowrap rounded-full px-4 text-[13px] font-bold transition-all ${
-        active
-          ? "border-2 border-primary-500 bg-white text-primary-600 shadow-md shadow-primary-500/10"
-          : "border-2 border-transparent bg-white text-neutral-500 shadow-sm ring-1 ring-primary-100/50 hover:bg-primary-50/50 hover:text-neutral-900"
-      }`}
-    >
-      {label}
-      <span className={`flex h-5 min-w-[20px] items-center justify-center rounded-full px-1.5 text-[11px] ${
-        active ? "bg-primary-100 text-primary-600" : "bg-neutral-100 text-neutral-400"
-      }`}>
-        {count}
-      </span>
-    </button>
   );
 }

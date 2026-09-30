@@ -460,22 +460,22 @@ export function PwaInstallHorizontalCard() {
 
   return (
     <>
-      <div className="flex items-center justify-between gap-md rounded-3xl border border-primary-100/80 bg-white p-4 shadow-cute sm:p-5 hover:border-primary-300 transition-colors">
-        <div className="flex items-center gap-md">
-          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-primary-400 to-primary-500 shadow-cute ring-2 ring-white p-1">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 sm:gap-4 rounded-3xl border border-primary-100/80 bg-white p-4 shadow-cute sm:p-5 hover:border-primary-300 transition-colors">
+        <div className="flex items-center gap-3.5">
+          <div className="flex h-12 w-12 sm:h-14 sm:w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-primary-400 to-primary-500 shadow-cute ring-2 ring-white p-1">
             <img src={versionedAsset("/meowback_lucky_cat_logo.png")} alt="MeowBack" className="h-full w-full object-cover rounded-xl" />
           </div>
-          <div>
-            <h3 className="text-[15px] font-extrabold text-gray-900 tracking-tight">Cài đặt ứng dụng MeowBack</h3>
-            <p className="mt-0.5 text-[13px] text-gray-500 font-medium">
-              Cài lên điện thoại (iPhone &amp; Android) để mở nhanh hơn, dùng như app thật.
+          <div className="min-w-0 flex-1">
+            <h3 className="text-[15px] font-extrabold text-neutral-900 tracking-tight">Cài đặt ứng dụng MeowBack</h3>
+            <p className="mt-0.5 text-[12.5px] sm:text-[13px] text-neutral-500 font-medium leading-relaxed">
+              Cài lên điện thoại (iPhone &amp; Android) để mở nhanh hơn, dùng mượt mà như app thật.
             </p>
           </div>
         </div>
-        <div className="flex shrink-0 items-center gap-sm">
+        <div className="flex shrink-0 w-full sm:w-auto">
           <button
             onClick={handleInstallClick}
-            className="rounded-2xl bg-gradient-to-r from-primary to-primary-active px-5 py-2.5 text-[14px] font-bold text-white shadow-md shadow-primary/20 hover:scale-105 transition-transform cursor-pointer"
+            className="w-full sm:w-auto rounded-2xl bg-gradient-to-r from-primary to-primary-active px-5 py-2.5 text-[13.5px] sm:text-[14px] font-bold text-white shadow-md shadow-primary/20 hover:scale-[1.02] sm:hover:scale-105 active:scale-98 transition-all cursor-pointer text-center"
           >
             Hướng dẫn cài đặt
           </button>

@@ -1,12 +1,12 @@
 import Link from "next/link";
-import { AlertTriangle, ArrowLeft, Sparkles } from "lucide-react";
+import { AlertTriangle, ArrowLeft, Sparkles, ChevronRight } from "lucide-react";
 
 const steps = [
   {
     step: 1,
     title: "Chọn sàn & Dán link sản phẩm",
     tagline: "Shopee • TikTok Shop • Lazada",
-    body: "Mở ứng dụng Shopee, TikTok Shop hoặc Lazada, tìm sản phẩm bạn muốn mua và bấm biểu tượng Chia sẻ để Sao chép liên kết. Sau đó quay lại MeowBack, chọn đúng biểu tượng sàn mua sắm, dán link vào ô và bấm nút \"Tạo link hoàn tiền 🧶\".",
+    body: "Mở ứng dụng Shopee, TikTok Shop hoặc Lazada, tìm sản phẩm bạn muốn mua và bấm biểu tượng Chia sẻ để Sao chép liên kết. Sau đó quay lại MeowBack, chọn đúng biểu tượng sàn mua sắm, dán link vào ô và bấm nút \"Tạo link hoàn tiền\".",
     tips: "Hệ thống hỗ trợ mọi định dạng link: link rút gọn s.shopee.vn, vt.tiktok.com, lazada.vn hoặc link web đầy đủ.",
     imageDesktop: "/guide-step-1.png",
     imageMobile: "/guide-step-1-mobile.png",
@@ -103,24 +103,24 @@ export default function CustomerGuidePage() {
   return (
     <div className="flex flex-col gap-6 sm:gap-8 pb-16">
       {/* ── HEADER TRANG HƯỚNG DẪN (Tối ưu cho cả Mobile & PC) ── */}
-      <div className="relative overflow-hidden rounded-3xl border border-primary-100/90 shadow-sm sm:shadow-md bg-white p-5 sm:p-8">
+      <div className="relative overflow-hidden rounded-3xl border border-rose-100 bg-white p-4 sm:p-7 shadow-sm">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-5">
-          <div className="flex items-center gap-3.5 sm:gap-5">
-            <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl bg-gradient-to-br from-primary-400 via-primary-500 to-pink-500 text-white flex items-center justify-center shadow-md shadow-primary-500/20 shrink-0 border border-white/60 overflow-hidden p-1">
-              <img src="/meowback_lucky_cat_logo.png" alt="MeowBack" className="w-full h-full object-contain rounded-xl" />
+          <div className="flex items-center gap-3.5 sm:gap-4 min-w-0">
+            <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br from-rose-50 via-pink-50 to-amber-50/50 border border-rose-200/70 p-1 flex items-center justify-center shadow-xs shrink-0">
+              <img src="/meow-back-mascot.png" alt="MeowBack" className="w-full h-full object-contain" />
             </div>
-            <div className="min-w-0">
+            <div className="min-w-0 flex-1">
               <div className="flex items-center gap-1.5 flex-wrap mb-1">
-                <span className="rounded-full bg-primary-50 border border-primary-200 px-2.5 py-0.5 text-[10px] sm:text-[11px] font-extrabold text-primary-600 uppercase tracking-wide">
+                <span className="rounded-full bg-rose-50 border border-rose-200 px-2.5 py-0.5 text-[10px] sm:text-[11px] font-extrabold text-rose-600 uppercase tracking-wide">
                   Cẩm nang MeowBack 📖
                 </span>
                 <span className="text-[11px] font-bold text-neutral-400 hidden sm:inline">•</span>
                 <span className="text-[11px] sm:text-[12px] font-bold text-neutral-500 hidden sm:inline">Shopee • TikTok Shop • Lazada</span>
               </div>
-              <h1 className="text-xl sm:text-2xl lg:text-3xl font-extrabold leading-tight text-neutral-900 tracking-tight">
+              <h1 className="text-lg sm:text-2xl font-black text-neutral-900 tracking-tight leading-snug">
                 Hướng Dẫn Sử Dụng
               </h1>
-              <p className="mt-0.5 text-xs sm:text-sm text-neutral-500 font-medium leading-relaxed">
+              <p className="mt-0.5 text-xs sm:text-sm text-neutral-500 font-medium leading-relaxed truncate">
                 5 bước đơn giản để mua sắm và nhận hoàn tiền tự động về ví 🎀
               </p>
             </div>
@@ -128,10 +128,13 @@ export default function CustomerGuidePage() {
 
           <Link
             href="#luu-y"
-            className="flex items-center justify-center gap-2 shrink-0 rounded-2xl bg-gradient-to-r from-primary-500 to-pink-500 hover:from-primary-600 hover:to-pink-600 text-white px-5 py-2.5 sm:py-3 text-[13px] font-extrabold shadow-md shadow-primary-500/25 transition-all hover:scale-105 active:scale-[0.98] w-full sm:w-auto"
+            className="group inline-flex items-center justify-between sm:justify-start gap-2 rounded-xl bg-amber-50 hover:bg-amber-100/80 text-amber-900 border border-amber-200/70 px-3.5 py-2 text-xs font-bold transition-all shadow-2xs shrink-0"
           >
-            <AlertTriangle size={15} strokeWidth={2.5} />
-            6 Lưu ý quan trọng ⚡
+            <div className="flex items-center gap-1.5 min-w-0">
+              <Sparkles size={13} className="text-amber-600 shrink-0" />
+              <span className="whitespace-nowrap">6 Lưu ý quan trọng</span>
+            </div>
+            <ChevronRight size={13} className="text-amber-700 group-hover:translate-x-0.5 transition-transform" />
           </Link>
         </div>
       </div>

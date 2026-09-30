@@ -3,8 +3,10 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { MousePointerClick, Flame, Tag, SlidersHorizontal, Store, ArrowRight, ChevronDown, ArrowUpDown } from "lucide-react";
+import { MousePointerClick, Flame, Tag, SlidersHorizontal, Store, ArrowRight, ArrowUpDown } from "lucide-react";
 import { Pagination } from "@/components/ui/Pagination";
+import { CustomSelect, CustomSelectOption } from "@/components/ui/CustomSelect";
+import { ShopeeIcon, TiktokIcon, LazadaIcon } from "@/components/icons/PlatformIcons";
 import { DEAL_CATEGORIES } from "@/lib/dealCategories";
 import { DEAL_LINK_TYPES } from "@/lib/dealLinkTypes";
 
@@ -36,12 +38,12 @@ function formatExpiry(iso: string) {
 function getPlatformBadge(code?: string) {
   const c = (code || "SHOPEE").toUpperCase();
   if (c.includes("TIKTOK")) {
-    return { name: "TikTok", icon: "🎵", color: "text-neutral-900", bg: "bg-white/95" };
+    return { name: "TikTok", icon: <TiktokIcon size={12} className="shrink-0" />, color: "text-neutral-900", bg: "bg-white/95" };
   }
   if (c.includes("LAZADA")) {
-    return { name: "Lazada", icon: "🔷", color: "text-blue-600", bg: "bg-white/95" };
+    return { name: "Lazada", icon: <LazadaIcon size={12} className="shrink-0" />, color: "text-blue-600", bg: "bg-white/95" };
   }
-  return { name: "Shopee", icon: "🛒", color: "text-primary-600", bg: "bg-white/95" };
+  return { name: "Shopee", icon: <ShopeeIcon size={12} className="shrink-0" />, color: "text-[#EE4D2D]", bg: "bg-white/95" };
 }
 
 function DealCard({ deal }: { deal: Deal }) {
@@ -276,42 +278,55 @@ function FilterBar() {
     router.replace(`${pathname}?${params.toString()}`);
   }
 
-  const selectClass =
-    "w-full h-9 sm:h-10 rounded-2xl bg-white pl-7 sm:pl-8 pr-6 text-[12px] sm:text-[12.5px] font-semibold text-neutral-700 border border-neutral-200/80 shadow-2xs hover:border-primary-300 focus:outline-none focus:border-primary-500 transition-all cursor-pointer appearance-none truncate";
+  const platformOptions: CustomSelectOption[] = [
+    { value: "all", label: "Tất cả sàn", icon: <SlidersHorizontal size={13} className="text-primary-500" /> },
+    { value: "SHOPEE", label: "Shopee", icon: <ShopeeIcon size={14} className="shrink-0" /> },
+    { value: "TIKTOK", label: "TikTok Shop", icon: <TiktokIcon size={14} className="shrink-0" /> },
+  ];
+
+  const categoryOptions: CustomSelectOption[] = [
+    { value: "all", label: "Tất cả mục", icon: <Tag size={13} className="text-primary-500" /> },
+    ...DEAL_CATEGORIES.map((c) => ({ value: c, label: c })),
+  ];
+
+  const sortOptions: CustomSelectOption[] = SORT_OPTIONS.map((o) => ({
+    value: o.value,
+    label: o.label,
+    icon: <ArrowUpDown size={13} className="text-primary-500" />,
+  }));
 
   return (
     <div className="my-2.5 sm:my-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-2.5 w-full">
       <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 w-full sm:w-auto">
-        <div className="relative min-w-0">
-          <SlidersHorizontal size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-primary-400 pointer-events-none" />
-          <select value={platform} onChange={(e) => updateParam("platform", e.target.value)} className={selectClass}>
-            <option value="all">Tất cả sàn</option>
-            <option value="SHOPEE">Shopee</option>
-            <option value="TIKTOK">TikTok Shop</option>
-          </select>
-          <ChevronDown size={13} strokeWidth={2.2} className="absolute right-2 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none" />
-        </div>
+        <CustomSelect
+          value={platform}
+          onChange={(val) => updateParam("platform", val)}
+          options={platformOptions}
+          className="w-full sm:w-[155px]"
+          buttonClassName="h-9 sm:h-10 text-[12px] sm:text-[12.5px] rounded-2xl"
+          ariaLabel="Lọc theo sàn mua sắm"
+        />
 
-        <div className="relative min-w-0">
-          <Tag size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-primary-400 pointer-events-none" />
-          <select value={category} onChange={(e) => updateParam("category", e.target.value)} className={selectClass}>
-            <option value="all">Tất cả mục</option>
-            {DEAL_CATEGORIES.map((c) => (
-              <option key={c} value={c}>{c}</option>
-            ))}
-          </select>
-          <ChevronDown size={13} strokeWidth={2.2} className="absolute right-2 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none" />
-        </div>
+        <CustomSelect
+          value={category}
+          onChange={(val) => updateParam("category", val)}
+          options={categoryOptions}
+          className="w-full sm:w-[165px]"
+          buttonClassName="h-9 sm:h-10 text-[12px] sm:text-[12.5px] rounded-2xl"
+          ariaLabel="Lọc theo danh mục"
+        />
       </div>
 
-      <div className="relative w-full sm:w-auto min-w-0">
-        <ArrowUpDown size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-primary-400 pointer-events-none" />
-        <select value={sort} onChange={(e) => updateParam("sort", e.target.value)} className={selectClass}>
-          {SORT_OPTIONS.map((o) => (
-            <option key={o.value} value={o.value}>{o.label}</option>
-          ))}
-        </select>
-        <ChevronDown size={13} strokeWidth={2.2} className="absolute right-2 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none" />
+      <div className="w-full sm:w-[175px]">
+        <CustomSelect
+          value={sort}
+          onChange={(val) => updateParam("sort", val)}
+          options={sortOptions}
+          className="w-full"
+          buttonClassName="h-9 sm:h-10 text-[12px] sm:text-[12.5px] rounded-2xl"
+          align="right"
+          ariaLabel="Sắp xếp ưu đãi"
+        />
       </div>
     </div>
   );

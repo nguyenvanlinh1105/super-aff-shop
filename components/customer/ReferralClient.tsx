@@ -17,10 +17,15 @@ import {
   ShieldCheck,
   HeartHandshake,
   Award,
+  ShoppingBag,
+  Package,
+  Clock,
+  UserCheck,
 } from "lucide-react";
 import { useToast } from "@/components/ui/Toast";
 import { IconBow } from "@/components/icons/CatRibbonIcons";
 import { FloatingElement } from "@/components/ui/FloatingElement";
+import { ShopeeIcon, TiktokIcon, LazadaIcon } from "@/components/icons/PlatformIcons";
 
 type Friend = {
   id: string;
@@ -35,6 +40,7 @@ type FriendOrderTimelineEntry = {
   id: string;
   friendName: string;
   friendCode: string;
+  platformId?: string;
   orderExternalId: string;
   itemName: string | null;
   shopName: string | null;
@@ -132,7 +138,7 @@ export function ReferralClient({
   };
 
   return (
-    <div className="flex w-full flex-col gap-6 fade-in pb-12">
+    <div className="flex w-full flex-col gap-6 fade-in pb-28 sm:pb-14">
       {/* ═══ 1. BANNER HEADER ═══ */}
       <div className="relative overflow-hidden rounded-3xl p-5 sm:p-7 border border-primary-200/60 shadow-xl shadow-primary-500/5 bg-white">
         <img src="/welcome-bg.png" alt="" className="absolute inset-0 w-full h-full object-cover opacity-80" />
@@ -141,8 +147,8 @@ export function ReferralClient({
         <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-4 sm:gap-5">
             <FloatingElement duration={4}>
-              <div className="w-14 h-14 sm:w-18 sm:h-18 rounded-3xl bg-gradient-to-br from-primary-400 via-primary-500 to-pink-600 text-white flex items-center justify-center shadow-lg shadow-primary-500/25 shrink-0 border-2 border-white overflow-hidden p-1">
-                <img src="/meow-back-community.png" alt="Community" className="w-full h-full object-contain rounded-2xl" />
+              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-3xl bg-gradient-to-br from-primary-400 via-primary-500 to-pink-600 text-white flex items-center justify-center shadow-lg shadow-primary-500/25 shrink-0 border-2 border-white">
+                <Users size={28} strokeWidth={2.3} className="text-white drop-shadow-sm" />
               </div>
             </FloatingElement>
             <div>
@@ -165,8 +171,8 @@ export function ReferralClient({
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {/* Card 1: Bạn bè */}
         <div className="group relative overflow-hidden rounded-3xl bg-gradient-to-b from-white via-primary-50/25 to-white p-5 sm:p-6 shadow-cute border border-primary-200/80 hover:border-primary-400 hover:shadow-cute-lg transition-all duration-300 flex flex-col justify-between gap-3">
-          <div className="absolute -right-2 -bottom-2 text-6xl select-none opacity-[0.06] pointer-events-none group-hover:scale-110 transition-transform">
-            👥
+          <div className="absolute -right-3 -bottom-3 text-primary-400/10 pointer-events-none group-hover:scale-110 transition-transform">
+            <Users size={80} strokeWidth={1.5} />
           </div>
           <div className="relative z-10 flex items-center justify-between">
             <div className="flex items-center gap-2.5">
@@ -196,8 +202,8 @@ export function ReferralClient({
 
         {/* Card 2: Hoa hồng tích luỹ */}
         <div className="group relative overflow-hidden rounded-3xl bg-white p-5 sm:p-6 shadow-sm border border-neutral-200/80 hover:border-emerald-300 hover:shadow-md transition-all duration-300 flex flex-col justify-between gap-3">
-          <div className="absolute -right-2 -bottom-2 text-6xl select-none opacity-[0.06] pointer-events-none group-hover:scale-110 transition-transform">
-            💰
+          <div className="absolute -right-3 -bottom-3 text-emerald-500/10 pointer-events-none group-hover:scale-110 transition-transform">
+            <TrendingUp size={80} strokeWidth={1.5} />
           </div>
           <div className="relative z-10 flex items-center justify-between">
             <div className="flex items-center gap-2.5">
@@ -227,8 +233,8 @@ export function ReferralClient({
 
         {/* Card 3: Chính sách thưởng */}
         <div className="group relative overflow-hidden rounded-3xl bg-white p-5 sm:p-6 shadow-sm border border-neutral-200/80 hover:border-amber-300 hover:shadow-md transition-all duration-300 flex flex-col justify-between gap-3">
-          <div className="absolute -right-2 -bottom-2 text-6xl select-none opacity-[0.06] pointer-events-none group-hover:scale-110 transition-transform">
-            🎁
+          <div className="absolute -right-3 -bottom-3 text-amber-500/10 pointer-events-none group-hover:scale-110 transition-transform">
+            <Gift size={80} strokeWidth={1.5} />
           </div>
           <div className="relative z-10 flex items-center justify-between">
             <div className="flex items-center gap-2.5">
@@ -379,8 +385,8 @@ export function ReferralClient({
             {/* Checklist 4 quyền lợi vàng */}
             <div className="flex flex-col gap-3.5">
               <div className="flex items-start gap-3 p-3 rounded-2xl bg-neutral-50/80 border border-neutral-200/60">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-primary-100 text-primary-600 font-bold">
-                  🎁
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-primary-100 text-primary-600 shadow-2xs">
+                  <Gift size={16} strokeWidth={2.3} />
                 </div>
                 <div>
                   <h3 className="text-[13.5px] font-bold text-neutral-900">
@@ -393,8 +399,8 @@ export function ReferralClient({
               </div>
 
               <div className="flex items-start gap-3 p-3 rounded-2xl bg-neutral-50/80 border border-neutral-200/60">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600 font-bold">
-                  🛡️
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600 shadow-2xs">
+                  <ShieldCheck size={16} strokeWidth={2.3} />
                 </div>
                 <div>
                   <h3 className="text-[13.5px] font-bold text-neutral-900">
@@ -407,8 +413,8 @@ export function ReferralClient({
               </div>
 
               <div className="flex items-start gap-3 p-3 rounded-2xl bg-neutral-50/80 border border-neutral-200/60">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-600 font-bold">
-                  🛍️
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-600 shadow-2xs">
+                  <ShoppingBag size={16} strokeWidth={2.3} />
                 </div>
                 <div>
                   <h3 className="text-[13.5px] font-bold text-neutral-900">
@@ -423,8 +429,8 @@ export function ReferralClient({
               </div>
 
               <div className="flex items-start gap-3 p-3 rounded-2xl bg-neutral-50/80 border border-neutral-200/60">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-blue-100 text-blue-600 font-bold">
-                  ⏳
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-blue-100 text-blue-600 shadow-2xs">
+                  <Clock size={16} strokeWidth={2.3} />
                 </div>
                 <div>
                   <h3 className="text-[13.5px] font-bold text-neutral-900">
@@ -438,21 +444,27 @@ export function ReferralClient({
             </div>
           </div>
 
-          {/* 3 bước đơn giản */}
-          <div className="rounded-2xl bg-primary-50/60 p-3.5 border border-primary-100 flex items-center justify-between text-center gap-2">
-            <div className="flex-1">
-              <div className="text-[11px] font-bold text-primary-600 uppercase">Bước 1</div>
-              <div className="text-[12px] font-extrabold text-neutral-800 mt-0.5">Gửi link mời</div>
-            </div>
-            <ArrowRight size={14} className="text-primary-300 shrink-0" />
-            <div className="flex-1">
-              <div className="text-[11px] font-bold text-primary-600 uppercase">Bước 2</div>
-              <div className="text-[12px] font-extrabold text-neutral-800 mt-0.5">Bạn bè mua sắm</div>
-            </div>
-            <ArrowRight size={14} className="text-primary-300 shrink-0" />
-            <div className="flex-1">
-              <div className="text-[11px] font-bold text-primary-600 uppercase">Bước 3</div>
-              <div className="text-[12px] font-extrabold text-neutral-800 mt-0.5">Hoa hồng vào ví</div>
+          {/* 3 bước đơn giản - Responsive Clean Layout */}
+          <div className="rounded-2xl bg-gradient-to-r from-primary-50/70 via-pink-50/40 to-primary-50/70 p-3 sm:p-3.5 border border-primary-200/80 shadow-2xs">
+            <div className="grid grid-cols-3 gap-1.5 sm:gap-2 text-center items-center">
+              <div className="flex flex-col items-center">
+                <span className="flex h-5 w-5 sm:h-6 sm:w-6 items-center justify-center rounded-full bg-primary-500 text-white text-[10px] sm:text-[11px] font-black shadow-2xs mb-1">
+                  1
+                </span>
+                <span className="text-[11px] sm:text-[12px] font-extrabold text-neutral-900 leading-tight">Gửi link mời</span>
+              </div>
+              <div className="flex flex-col items-center">
+                <span className="flex h-5 w-5 sm:h-6 sm:w-6 items-center justify-center rounded-full bg-primary-500 text-white text-[10px] sm:text-[11px] font-black shadow-2xs mb-1">
+                  2
+                </span>
+                <span className="text-[11px] sm:text-[12px] font-extrabold text-neutral-900 leading-tight">Bạn mua sắm</span>
+              </div>
+              <div className="flex flex-col items-center">
+                <span className="flex h-5 w-5 sm:h-6 sm:w-6 items-center justify-center rounded-full bg-emerald-500 text-white text-[10px] sm:text-[11px] font-black shadow-2xs mb-1">
+                  3
+                </span>
+                <span className="text-[11px] sm:text-[12px] font-extrabold text-neutral-900 leading-tight">Nhận hoa hồng</span>
+              </div>
             </div>
           </div>
         </div>
@@ -460,63 +472,104 @@ export function ReferralClient({
 
       {/* ═══ 4. TIẾN TRÌNH ĐƠN HÀNG & DANH SÁCH BẠN BÈ ═══ */}
       <div className="rounded-3xl bg-white p-4 sm:p-6 shadow-cute border border-primary-100/80 flex flex-col gap-4 overflow-hidden">
-        {/* Navigation Tabs */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-primary-100/70 pb-3.5">
-          <div className="flex items-center gap-2">
+        {/* Navigation Tabs - Segmented Mobile-First Pill Design */}
+        <div className="flex flex-col gap-2.5 pb-2 border-b border-primary-100/60">
+          <div className="grid grid-cols-2 p-1 rounded-2xl bg-neutral-100/90 border border-neutral-200/60">
             <button
               type="button"
               onClick={() => setActiveTab("timeline")}
-              className={`h-9 px-4 rounded-xl text-[13px] font-bold transition-all cursor-pointer ${
+              className={`flex items-center justify-center gap-1.5 py-2 px-2 rounded-xl text-[12.5px] sm:text-[13px] font-bold transition-all cursor-pointer select-none ${
                 activeTab === "timeline"
-                  ? "bg-primary-500 text-white shadow-cute"
-                  : "bg-neutral-100 text-neutral-600 hover:bg-primary-50 hover:text-primary-600"
+                  ? "bg-white text-primary-600 shadow-sm border border-neutral-200/70"
+                  : "text-neutral-500 hover:text-neutral-800"
               }`}
             >
-              Đơn hàng của bạn bè ({friendOrderTimeline.length})
+              <ShoppingBag size={14} className={activeTab === "timeline" ? "text-primary-500" : "text-neutral-400"} />
+              <span className="truncate">
+                <span className="sm:hidden">Đơn bạn bè</span>
+                <span className="hidden sm:inline">Đơn hàng của bạn bè</span>
+              </span>
+              <span
+                className={`px-1.5 py-0.2 rounded-full text-[10.5px] font-black shrink-0 ${
+                  activeTab === "timeline" ? "bg-primary-100 text-primary-700" : "bg-neutral-200/80 text-neutral-600"
+                }`}
+              >
+                {friendOrderTimeline.length}
+              </span>
             </button>
+
             <button
               type="button"
               onClick={() => setActiveTab("friends")}
-              className={`h-9 px-4 rounded-xl text-[13px] font-bold transition-all cursor-pointer ${
+              className={`flex items-center justify-center gap-1.5 py-2 px-2 rounded-xl text-[12.5px] sm:text-[13px] font-bold transition-all cursor-pointer select-none ${
                 activeTab === "friends"
-                  ? "bg-primary-500 text-white shadow-cute"
-                  : "bg-neutral-100 text-neutral-600 hover:bg-primary-50 hover:text-primary-600"
+                  ? "bg-white text-primary-600 shadow-sm border border-neutral-200/70"
+                  : "text-neutral-500 hover:text-neutral-800"
               }`}
             >
-              Danh sách bạn bè ({friends.length})
+              <Users size={14} className={activeTab === "friends" ? "text-primary-500" : "text-neutral-400"} />
+              <span className="truncate">
+                <span className="sm:hidden">Bạn bè</span>
+                <span className="hidden sm:inline">Danh sách bạn bè</span>
+              </span>
+              <span
+                className={`px-1.5 py-0.2 rounded-full text-[10.5px] font-black shrink-0 ${
+                  activeTab === "friends" ? "bg-primary-100 text-primary-700" : "bg-neutral-200/80 text-neutral-600"
+                }`}
+              >
+                {friends.length}
+              </span>
             </button>
           </div>
-          <span className="text-[11.5px] text-neutral-400 font-medium">
-            {activeTab === "timeline"
-              ? "Tiền ở đơn chưa xong là dự kiến"
-              : "Cập nhật tự động theo thời gian thực"}
-          </span>
+
+          <div className="flex items-center justify-between px-1 text-[11px] text-neutral-500 font-medium">
+            <span className="flex items-center gap-1.5">
+              <span className="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              <span>{activeTab === "timeline" ? "Tiền ở đơn chưa xong là dự kiến" : "Cập nhật tự động theo thời gian thực"}</span>
+            </span>
+            <span className="text-[10.5px] text-neutral-400">Tự động đối soát</span>
+          </div>
         </div>
 
         {/* Tab 1: Tiến trình đơn hàng */}
         {activeTab === "timeline" && (
           <>
             {friendOrderTimeline.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
-                <div className="w-16 h-16 rounded-3xl bg-gradient-to-br from-primary-100 via-pink-100 to-rose-100 flex items-center justify-center shadow-cute p-1 border-2 border-white mb-3.5">
-                  <img src="/meow-back-community.png" alt="Community" className="w-full h-full object-contain rounded-2xl" />
+              <div className="flex flex-col items-center justify-center py-10 px-4 text-center rounded-2xl bg-gradient-to-b from-primary-50/30 via-white to-white border border-dashed border-primary-200/70">
+                <div className="relative mb-3.5">
+                  <div className="w-16 h-16 rounded-3xl bg-gradient-to-br from-primary-400 via-primary-500 to-pink-500 flex items-center justify-center shadow-lg shadow-primary-500/25 ring-4 ring-primary-50 text-white">
+                    <Users size={28} strokeWidth={2.3} />
+                  </div>
+                  <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-sm ring-2 ring-white">
+                    <Sparkles size={12} />
+                  </div>
                 </div>
                 <h3 className="text-[15px] font-extrabold text-neutral-900">
                   {totalFriends === 0 ? "Chưa có bạn bè nào đăng ký 🎀" : `Bạn đã mời được ${totalFriends} người bạn!`}
                 </h3>
-                <p className="mt-1 text-[12.5px] text-neutral-500 max-w-sm font-medium leading-relaxed">
+                <p className="mt-1 text-[12px] sm:text-[12.5px] text-neutral-500 max-w-sm font-medium leading-relaxed">
                   {totalFriends === 0
                     ? "Hãy gửi link hoặc mã giới thiệu cho bạn bè ngay hôm nay. Chỉ cần 1 đơn hàng đầu tiên của họ, bạn sẽ bắt đầu nhận hoa hồng tự động!"
                     : "Bạn bè chưa phát sinh đơn hàng mới nào. Ngay khi họ mua sắm qua MeowBack, đơn sẽ tự động hiển thị tại đây."}
                 </p>
-                <button
-                  type="button"
-                  onClick={handleCopyLink}
-                  className="mt-4 inline-flex items-center gap-1.5 rounded-2xl bg-gradient-to-r from-primary-500 to-rose-500 px-4 py-2 text-[12.5px] font-bold text-white shadow-cute hover:shadow-cute-lg transition-all active:scale-95 cursor-pointer"
-                >
-                  <Sparkles size={14} />
-                  <span>Sao chép link mời bạn bè</span>
-                </button>
+                <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+                  <button
+                    type="button"
+                    onClick={handleCopyLink}
+                    className="inline-flex items-center gap-1.5 rounded-2xl bg-gradient-to-r from-primary-500 to-rose-500 px-4 py-2.5 text-[12.5px] font-bold text-white shadow-cute hover:shadow-cute-lg transition-all active:scale-95 cursor-pointer"
+                  >
+                    <Sparkles size={14} />
+                    <span>Sao chép link mời bạn bè</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleCopyCode}
+                    className="inline-flex items-center gap-1 px-3 py-2.5 rounded-2xl bg-white hover:bg-neutral-50 text-neutral-700 text-[12px] font-bold border border-neutral-200/90 shadow-2xs transition-all active:scale-95 cursor-pointer"
+                  >
+                    <Copy size={13} className="text-primary-500" />
+                    <span>Mã: <span className="font-mono text-primary-600 font-extrabold">{customerCode}</span></span>
+                  </button>
+                </div>
               </div>
             ) : (
               <>
@@ -543,19 +596,34 @@ export function ReferralClient({
                           entry.bonusState === "received" ||
                           entry.bonusState === "clawed_back" ||
                           entry.bonusState === "pending_eligible";
+                        const platformLower = entry.platformId?.toLowerCase() ?? "";
+
                         return (
                           <tr key={entry.id} className="hover:bg-primary-50/30 transition-colors">
                             <td className="py-3.5 px-4 align-top">
                               <div className="font-extrabold text-neutral-900">{entry.friendName}</div>
                               {entry.friendCode && (
-                                <div className="font-mono text-[11px] text-neutral-400">{entry.friendCode}</div>
+                                <div className="font-mono text-[11px] text-neutral-400">#{entry.friendCode}</div>
                               )}
                             </td>
                             <td className="py-3.5 px-4 align-top max-w-[240px]">
-                              <div className="truncate font-bold text-neutral-900" title={entry.itemName ?? undefined}>
-                                {entry.itemName ?? `Đơn ${entry.orderExternalId}`}
+                              <div className="flex items-center gap-2">
+                                <div className="w-6 h-6 rounded-lg bg-neutral-50 border border-neutral-200/80 flex items-center justify-center shrink-0">
+                                  {platformLower.includes("shopee") ? (
+                                    <ShopeeIcon className="w-4 h-4" />
+                                  ) : platformLower.includes("tiktok") ? (
+                                    <TiktokIcon className="w-4 h-4" />
+                                  ) : platformLower.includes("lazada") ? (
+                                    <LazadaIcon className="w-4 h-4" />
+                                  ) : (
+                                    <ShoppingBag size={13} className="text-primary-500" />
+                                  )}
+                                </div>
+                                <div className="truncate font-bold text-neutral-900" title={entry.itemName ?? undefined}>
+                                  {entry.itemName ?? `Đơn ${entry.orderExternalId}`}
+                                </div>
                               </div>
-                              <div className="truncate text-[11px] text-neutral-500 font-medium">
+                              <div className="truncate text-[11px] text-neutral-500 font-medium ml-8">
                                 {entry.shopName ? `${entry.shopName} · ` : ""}
                                 <span className="font-mono">{entry.orderExternalId}</span>
                               </div>
@@ -604,23 +672,38 @@ export function ReferralClient({
                       entry.bonusState === "received" ||
                       entry.bonusState === "clawed_back" ||
                       entry.bonusState === "pending_eligible";
+                    const platformLower = entry.platformId?.toLowerCase() ?? "";
+
                     return (
-                      <div key={entry.id} className="rounded-2xl border border-primary-100 bg-white p-3.5 shadow-2xs flex flex-col gap-2">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <span className="text-[13px] font-bold text-neutral-900">{entry.friendName}</span>
-                            {entry.friendCode && (
-                              <span className="font-mono text-[10.5px] text-neutral-400 ml-1.5">({entry.friendCode})</span>
-                            )}
+                      <div key={entry.id} className="rounded-2xl border border-neutral-200/80 hover:border-primary-300 bg-white p-3.5 shadow-2xs flex flex-col gap-2 transition-all">
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <div className="w-8 h-8 rounded-xl bg-neutral-50 border border-neutral-200/80 flex items-center justify-center shrink-0">
+                              {platformLower.includes("shopee") ? (
+                                <ShopeeIcon className="w-5 h-5" />
+                              ) : platformLower.includes("tiktok") ? (
+                                <TiktokIcon className="w-5 h-5" />
+                              ) : platformLower.includes("lazada") ? (
+                                <LazadaIcon className="w-5 h-5" />
+                              ) : (
+                                <ShoppingBag size={16} className="text-primary-500" />
+                              )}
+                            </div>
+                            <div className="min-w-0">
+                              <span className="text-[13px] font-extrabold text-neutral-900 block truncate">{entry.friendName}</span>
+                              {entry.friendCode && (
+                                <span className="font-mono text-[10.5px] text-neutral-400">#{entry.friendCode}</span>
+                              )}
+                            </div>
                           </div>
-                          <span className={`inline-block whitespace-nowrap rounded-full px-2.5 py-0.5 text-[10px] font-bold ${orderStatus.className}`}>
+                          <span className={`inline-block whitespace-nowrap rounded-full px-2.5 py-0.5 text-[10px] font-bold shrink-0 ${orderStatus.className}`}>
                             {orderStatus.text}
                           </span>
                         </div>
                         <div className="text-[12.5px] font-semibold text-neutral-800 truncate" title={entry.itemName ?? undefined}>
                           {entry.itemName ?? `Đơn ${entry.orderExternalId}`}
                         </div>
-                        <div className="flex items-center justify-between pt-1.5 border-t border-primary-50 text-[11.5px]">
+                        <div className="flex items-center justify-between pt-1.5 border-t border-neutral-100 text-[11.5px]">
                           <span className="text-neutral-500">{formatDate(entry.createdAt)}</span>
                           <div className="text-right">
                             {showAmount && (
@@ -645,22 +728,37 @@ export function ReferralClient({
         {activeTab === "friends" && (
           <>
             {friends.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
-                <div className="w-16 h-16 rounded-3xl bg-gradient-to-br from-primary-100 via-pink-100 to-rose-100 flex items-center justify-center shadow-cute p-1 border-2 border-white mb-3.5">
-                  <img src="/meow-back-community.png" alt="Community" className="w-full h-full object-contain rounded-2xl" />
+              <div className="flex flex-col items-center justify-center py-10 px-4 text-center rounded-2xl bg-gradient-to-b from-primary-50/30 via-white to-white border border-dashed border-primary-200/70">
+                <div className="relative mb-3.5">
+                  <div className="w-16 h-16 rounded-3xl bg-gradient-to-br from-primary-400 via-primary-500 to-pink-500 flex items-center justify-center shadow-lg shadow-primary-500/25 ring-4 ring-primary-50 text-white">
+                    <Users size={28} strokeWidth={2.3} />
+                  </div>
+                  <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-sm ring-2 ring-white">
+                    <Sparkles size={12} />
+                  </div>
                 </div>
                 <h3 className="text-[15px] font-extrabold text-neutral-900">Danh sách bạn bè trống 🎀</h3>
-                <p className="mt-1 text-[12.5px] text-neutral-500 max-w-sm font-medium leading-relaxed">
+                <p className="mt-1 text-[12px] sm:text-[12.5px] text-neutral-500 max-w-sm font-medium leading-relaxed">
                   Khi có bạn bè đăng ký qua link hoặc mã của bạn, danh sách thành viên sẽ được cập nhật đầy đủ tại đây.
                 </p>
-                <button
-                  type="button"
-                  onClick={handleCopyLink}
-                  className="mt-4 inline-flex items-center gap-1.5 rounded-2xl bg-gradient-to-r from-primary-500 to-rose-500 px-4 py-2 text-[12.5px] font-bold text-white shadow-cute hover:shadow-cute-lg transition-all active:scale-95 cursor-pointer"
-                >
-                  <Sparkles size={14} />
-                  <span>Sao chép link mời bạn bè</span>
-                </button>
+                <div className="mt-4 flex flex-wrap items-center justify-center gap-2">
+                  <button
+                    type="button"
+                    onClick={handleCopyLink}
+                    className="inline-flex items-center gap-1.5 rounded-2xl bg-gradient-to-r from-primary-500 to-rose-500 px-4 py-2.5 text-[12.5px] font-bold text-white shadow-cute hover:shadow-cute-lg transition-all active:scale-95 cursor-pointer"
+                  >
+                    <Sparkles size={14} />
+                    <span>Sao chép link mời bạn bè</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleCopyCode}
+                    className="inline-flex items-center gap-1 px-3 py-2.5 rounded-2xl bg-white hover:bg-neutral-50 text-neutral-700 text-[12px] font-bold border border-neutral-200/90 shadow-2xs transition-all active:scale-95 cursor-pointer"
+                  >
+                    <Copy size={13} className="text-primary-500" />
+                    <span>Mã: <span className="font-mono text-primary-600 font-extrabold">{customerCode}</span></span>
+                  </button>
+                </div>
               </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">

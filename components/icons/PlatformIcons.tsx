@@ -1,4 +1,4 @@
-type IconProps = { size?: number; className?: string };
+export type IconProps = { size?: number; className?: string; pure?: boolean };
 
 function Icons8Image({
   size = 22,
@@ -20,16 +20,60 @@ function Icons8Image({
   );
 }
 
-export function FacebookIcon(props: IconProps) {
-  return <Icons8Image {...props} style="color" slug="facebook-new" alt="Facebook" />;
+export function FacebookIcon({ size = 22, className = "", pure = false }: IconProps) {
+  if (pure) {
+    return (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" className={className}>
+        <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+      </svg>
+    );
+  }
+  return (
+    <svg width={size} height={size} viewBox="0 0 48 48" fill="none" className={className}>
+      <rect width="48" height="48" rx="12" fill="#1877F2" />
+      <path
+        d="M32 25.5l.8-5.5h-5.3v-3.6c0-1.5.7-3 3.1-3h2.4V8.7s-2.2-.4-4.3-.4c-4.4 0-7.3 2.7-7.3 7.5v4.2H16.5v5.5h4.9V39h6.3V25.5H32z"
+        fill="#FFFFFF"
+      />
+    </svg>
+  );
 }
 
-export function ZaloIcon(props: IconProps) {
-  return <Icons8Image {...props} style="color" slug="zalo" alt="Zalo" />;
+export function ZaloIcon({ size = 22, className = "", pure = false }: IconProps) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 48 48"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+    >
+      {!pure && <rect width="48" height="48" rx="12" fill="#0068FF" />}
+      <g transform={pure ? "translate(3.6, 3.6) scale(1.7)" : "translate(4.8, 4.8) scale(1.6)"}>
+        <path
+          fill="#FFFFFF"
+          d="M12.49 10.2722v-.4496h1.3467v6.3218h-.7704a.576.576 0 01-.5763-.5729l-.0006.0005a3.273 3.273 0 01-1.9372.6321c-1.8138 0-3.2844-1.4697-3.2844-3.2823 0-1.8125 1.4706-3.2822 3.2844-3.2822a3.273 3.273 0 011.9372.6321l.0006.0005zM6.9188 7.7896v.205c0 .3823-.051.6944-.2995 1.0605l-.03.0343c-.0542.0615-.1815.206-.2421.2843L2.024 14.8h4.8948v.7682a.5764.5764 0 01-.5767.5761H0v-.3622c0-.4436.1102-.6414.2495-.8476L4.8582 9.23H.1922V7.7896h6.7266zm8.5513 8.3548a.4805.4805 0 01-.4803-.4798v-7.875h1.4416v8.3548H15.47zM20.6934 9.6C22.52 9.6 24 11.0807 24 12.9044c0 1.8252-1.4801 3.306-3.3066 3.306-1.8264 0-3.3066-1.4808-3.3066-3.306 0-1.8237 1.4802-3.3044 3.3066-3.3044zm-10.1412 5.253c1.0675 0 1.9324-.8645 1.9324-1.9312 0-1.065-.865-1.9295-1.9324-1.9295s-1.9324.8644-1.9324 1.9295c0 1.0667.865 1.9312 1.9324 1.9312zm10.1412-.0033c1.0737 0 1.945-.8707 1.945-1.9453 0-1.073-.8713-1.9436-1.945-1.9436-1.0753 0-1.945.8706-1.945 1.9453 0 1.0746.8697 1.9453 1.945 1.9453z"
+        />
+      </g>
+    </svg>
+  );
 }
 
-export function YoutubeIcon(props: IconProps) {
-  return <Icons8Image {...props} style="color" slug="youtube-play" alt="Youtube" />;
+export function YoutubeIcon({ size = 22, className = "", pure = false }: IconProps) {
+  if (pure) {
+    return (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" className={className}>
+        <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
+      </svg>
+    );
+  }
+  return (
+    <svg width={size} height={size} viewBox="0 0 48 48" fill="none" className={className}>
+      <rect width="48" height="48" rx="12" fill="#FF0000" />
+      <path d="M38.5 16.2a3.8 3.8 0 0 0-2.7-2.7C33.4 12.8 24 12.8 24 12.8s-9.4 0-11.8.7a3.8 3.8 0 0 0-2.7 2.7C9 18.6 9 24 9 24s0 5.4.5 7.8a3.8 3.8 0 0 0 2.7 2.7c2.4.7 11.8.7 11.8.7s9.4 0 11.8-.7a3.8 3.8 0 0 0 2.7-2.7c.5-2.4.5-7.8.5-7.8s0-5.4-.5-7.8zM21 28.5V19.5L28.8 24 21 28.5z" fill="#FFFFFF" />
+    </svg>
+  );
 }
 
 export function InstagramIcon(props: IconProps) {
@@ -50,22 +94,23 @@ export function ShopeeIcon({ size = 22, className = "" }: IconProps) {
       xmlns="http://www.w3.org/2000/svg"
       className={className}
     >
+      <rect width="48" height="48" rx="12" fill="#EE4D2D" />
+      {/* Quai túi Shopee */}
       <path
-        d="M10 16.5C10 14.567 11.567 13 13.5 13h21c1.933 0 3.5 1.567 3.5 3.5V37a4 4 0 0 1-4 4H14a4 4 0 0 1-4-4V16.5Z"
+        d="M18 18.5C18 15.2 20.7 12.5 24 12.5C27.3 12.5 30 15.2 30 18.5"
+        stroke="#FFFFFF"
+        strokeWidth="2.6"
+        strokeLinecap="round"
+      />
+      {/* Thân túi Shopee */}
+      <path
+        d="M12 18.5H36L34.2 37.2C34.1 38.2 33.2 39 32.2 39H15.8C14.8 39 13.9 38.2 13.8 37.2L12 18.5Z"
+        fill="#FFFFFF"
+      />
+      {/* Chữ S Shopee */}
+      <path
+        d="M26 24.2C25.5 23.9 24.8 23.7 24 23.7C22.6 23.7 21.7 24.3 21.7 25.3C21.7 26.2 22.4 26.7 24.2 27.2C26.4 27.7 27.6 28.7 27.6 30.6C27.6 32.8 25.7 34 23.6 34C21.9 34 20.6 33.4 19.9 32.3L21.4 31.2C21.9 32 22.7 32.5 23.7 32.5C24.9 32.5 25.8 32 25.8 30.9C25.8 30 25.1 29.5 23.3 29C21.3 28.5 20.1 27.5 20.1 25.7C20.1 23.8 21.7 22.4 23.9 22.4C25.3 22.4 26.4 22.9 27.1 23.7L26 24.2Z"
         fill="#EE4D2D"
-      />
-      <path
-        d="M17 16v-2.5a7 7 0 1 1 14 0V16"
-        stroke="#fff"
-        strokeWidth="2.4"
-        strokeLinecap="round"
-      />
-      <path
-        d="M18.5 24.5c0 1.9 1.79 2.6 4.2 3.3 3 .9 6.3 1.9 6.3 5.4 0 2.9-2.55 4.8-6.13 4.8-2.66 0-4.98-.98-6.37-2.66"
-        stroke="#fff"
-        strokeWidth="2.2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
       />
     </svg>
   );
@@ -94,8 +139,38 @@ export function GoogleIcon({ size = 22, className = "" }: IconProps) {
   );
 }
 
-export function TiktokIcon(props: IconProps) {
-  return <Icons8Image {...props} style="color" slug="tiktok" alt="Tiktok" />;
+export function TiktokIcon({ size = 22, className = "", pure = false }: IconProps) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 48 48"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+    >
+      {!pure && <rect width="48" height="48" rx="12" fill="#0A0A0A" />}
+      <g transform={pure ? "translate(6, 6) scale(1.3)" : "translate(10, 10)"}>
+        {/* Bóng Cyan */}
+        <path
+          d="M20.5 7.8a5.5 5.5 0 0 1-4.1-4V3.5h-3v12.2a2.7 2.7 0 0 1-2.7 2.7 2.7 2.7 0 0 1-2.7-2.7 2.7 2.7 0 0 1 2.7-2.7c.3 0 .6.1.9.2V9.8c-.3 0-.6-.1-.9-.1a6 6 0 0 0-6 6 6 6 0 0 0 6 6 6 6 0 0 0 6-6V9.6a7.8 7.8 0 0 0 3.8 1V7.8z"
+          fill="#25F4EE"
+          transform="translate(-0.7, -0.5)"
+        />
+        {/* Bóng Hồng/Đỏ */}
+        <path
+          d="M20.5 7.8a5.5 5.5 0 0 1-4.1-4V3.5h-3v12.2a2.7 2.7 0 0 1-2.7 2.7 2.7 2.7 0 0 1-2.7-2.7 2.7 2.7 0 0 1 2.7-2.7c.3 0 .6.1.9.2V9.8c-.3 0-.6-.1-.9-.1a6 6 0 0 0-6 6 6 6 0 0 0 6 6 6 6 0 0 0 6-6V9.6a7.8 7.8 0 0 0 3.8 1V7.8z"
+          fill="#FE2C55"
+          transform="translate(0.7, 0.5)"
+        />
+        {/* Nốt nhạc trắng */}
+        <path
+          d="M20.5 7.8a5.5 5.5 0 0 1-4.1-4V3.5h-3v12.2a2.7 2.7 0 0 1-2.7 2.7 2.7 2.7 0 0 1-2.7-2.7 2.7 2.7 0 0 1 2.7-2.7c.3 0 .6.1.9.2V9.8c-.3 0-.6-.1-.9-.1a6 6 0 0 0-6 6 6 6 0 0 0 6 6 6 6 0 0 0 6-6V9.6a7.8 7.8 0 0 0 3.8 1V7.8z"
+          fill="#FFFFFF"
+        />
+      </g>
+    </svg>
+  );
 }
 
 export function LazadaIcon({ size = 22, className = "" }: IconProps) {
@@ -109,7 +184,7 @@ export function LazadaIcon({ size = 22, className = "" }: IconProps) {
       className={className}
     >
       <rect width="48" height="48" rx="12" fill="#0F146D" />
-      <g transform="translate(6.5, 9.5) scale(0.515, 0.515)">
+      <g transform="translate(7.5, 10.5) scale(0.48, 0.48)">
         <defs>
           <linearGradient id="lzHeart" x1="0%" y1="50%" x2="100%" y2="50%">
             <stop offset="0%" stopColor="#FF9200" />
@@ -119,11 +194,11 @@ export function LazadaIcon({ size = 22, className = "" }: IconProps) {
             <stop offset="100%" stopColor="#FF00FF" />
           </linearGradient>
           <linearGradient id="lzRight" x1="20%" y1="90%" x2="100%" y2="20%">
-            <stop offset="0%" stopColor="#000083" stopOpacity="0.35" />
+            <stop offset="0%" stopColor="#000083" stopOpacity="0.3" />
             <stop offset="100%" stopColor="#000083" stopOpacity="0" />
           </linearGradient>
           <linearGradient id="lzLeft" x1="60%" y1="70%" x2="100%" y2="20%">
-            <stop offset="0%" stopColor="#ED6600" stopOpacity="0.45" />
+            <stop offset="0%" stopColor="#ED6600" stopOpacity="0.4" />
             <stop offset="100%" stopColor="#F98200" stopOpacity="0" />
           </linearGradient>
         </defs>

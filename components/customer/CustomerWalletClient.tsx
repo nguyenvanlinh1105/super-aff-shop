@@ -9,6 +9,12 @@ import { formatCurrency } from "@/lib/format";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { Pagination } from "@/components/ui/Pagination";
 import { IconBow } from "@/components/icons/CatRibbonIcons";
+import {
+  IconPaidSuccessBadge,
+  IconAccumulatedBag,
+  IconPendingHourglass,
+  IconReadyToWithdraw,
+} from "@/components/icons/FinanceBadgeIcons";
 import { useModal } from "@/components/ui/ModalProvider";
 import { useToast } from "@/components/ui/Toast";
 import { PaymentPinModal } from "@/components/customer/PaymentPinModal";
@@ -357,44 +363,44 @@ export function CustomerWalletClient({
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {/* Card 1: Khả dụng */}
           <div className="group relative overflow-hidden rounded-3xl bg-gradient-to-b from-white via-primary-50/25 to-white p-5 sm:p-6 shadow-cute border border-primary-200/80 hover:border-primary-400 hover:shadow-cute-lg transition-all duration-300 flex flex-col justify-between gap-3">
-            <div className="absolute -right-2 -bottom-2 text-6xl select-none opacity-[0.06] pointer-events-none group-hover:scale-110 transition-transform">
-              👛
+            <div className="absolute -right-3 -bottom-3 opacity-[0.08] pointer-events-none group-hover:scale-110 transition-transform">
+              <IconReadyToWithdraw size={88} />
             </div>
             <div className="relative z-10 flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary-100 text-primary-600 shadow-2xs">
-                  <Wallet size={18} strokeWidth={2.5} />
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-50/80 border border-emerald-100 shadow-2xs group-hover:scale-105 transition-transform p-1">
+                  <IconReadyToWithdraw size={36} />
                 </div>
                 <div>
                   <span className="text-[11px] font-bold uppercase tracking-wider text-neutral-400">Số dư</span>
                   <div className="text-[13px] font-extrabold text-neutral-800">Khả dụng</div>
                 </div>
               </div>
-              <span className="rounded-full bg-primary-50 border border-primary-200/80 px-2.5 py-0.5 text-[10.5px] font-black uppercase text-primary-600 tracking-wider">
+              <span className="rounded-full bg-emerald-50 border border-emerald-200/80 px-2.5 py-0.5 text-[10.5px] font-black uppercase text-emerald-700 tracking-wider">
                 Sẵn sàng
               </span>
             </div>
             <div className="relative z-10 pt-2 border-t border-primary-100/60">
               <div className="text-[10.5px] font-semibold text-neutral-400 uppercase tracking-wider">Có thể rút ngay</div>
-              <div className="text-2xl sm:text-3xl font-black text-primary-600 tabular-nums leading-tight mt-0.5">
+              <div className="text-2xl sm:text-3xl font-black text-emerald-600 tabular-nums leading-tight mt-0.5">
                 {formatCurrency(stats.available)}
               </div>
             </div>
             <div className="relative z-10 flex items-center gap-1.5 text-[11px] text-neutral-500 font-medium">
-              <span className="w-1.5 h-1.5 rounded-full bg-primary-500 animate-pulse shrink-0" />
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0" />
               <span>Rút về ngân hàng bất kỳ lúc nào</span>
             </div>
           </div>
 
           {/* Card 2: Chờ duyệt */}
           <div className="group relative overflow-hidden rounded-3xl bg-white p-5 sm:p-6 shadow-sm border border-neutral-200/80 hover:border-amber-300 hover:shadow-md transition-all duration-300 flex flex-col justify-between gap-3">
-            <div className="absolute -right-2 -bottom-2 text-6xl select-none opacity-[0.06] pointer-events-none group-hover:scale-110 transition-transform">
-              ⏳
+            <div className="absolute -right-3 -bottom-3 opacity-[0.08] pointer-events-none group-hover:scale-110 transition-transform">
+              <IconPendingHourglass size={88} />
             </div>
             <div className="relative z-10 flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-amber-50 text-amber-600 border border-amber-100 shadow-2xs">
-                  <Clock size={18} strokeWidth={2.5} />
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-amber-50/80 border border-amber-100 shadow-2xs group-hover:scale-105 transition-transform p-1">
+                  <IconPendingHourglass size={36} />
                 </div>
                 <div>
                   <span className="text-[11px] font-bold uppercase tracking-wider text-neutral-400">Tiền thưởng</span>
@@ -417,15 +423,15 @@ export function CustomerWalletClient({
             </div>
           </div>
 
-          {/* Card 3: Đã nhận */}
+          {/* Card 3: Đã nhận (Xanh lá ngọc với tiền & đồng xu & checkmark) */}
           <div className="group relative overflow-hidden rounded-3xl bg-white p-5 sm:p-6 shadow-sm border border-neutral-200/80 hover:border-emerald-300 hover:shadow-md transition-all duration-300 flex flex-col justify-between gap-3">
-            <div className="absolute -right-2 -bottom-2 text-6xl select-none opacity-[0.06] pointer-events-none group-hover:scale-110 transition-transform">
-              ✅
+            <div className="absolute -right-3 -bottom-3 opacity-[0.09] pointer-events-none group-hover:scale-110 transition-transform">
+              <IconPaidSuccessBadge size={88} />
             </div>
             <div className="relative z-10 flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-100 shadow-2xs">
-                  <CheckCircle2 size={18} strokeWidth={2.5} />
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-50/80 border border-emerald-100 shadow-2xs group-hover:scale-105 transition-transform p-1">
+                  <IconPaidSuccessBadge size={38} />
                 </div>
                 <div>
                   <span className="text-[11px] font-bold uppercase tracking-wider text-neutral-400">Tích luỹ</span>

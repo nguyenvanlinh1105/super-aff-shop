@@ -1,35 +1,80 @@
+import crypto from "crypto";
 import { prisma } from "./prisma";
 
+const UPPERCASE = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+const LOWERCASE = "abcdefghijklmnopqrstuvwxyz";
+const DIGITS = "0123456789";
+const ALL_CHARS = UPPERCASE + LOWERCASE + DIGITS;
+
 /**
- * Sinh mã khách hàng tiếp theo (C0001, C0002, ...).
- *
- * TRƯỚC ĐÂY dùng prisma.customer.count() + 1 — sai vì dựa vào SỐ LƯỢNG bản
- * ghi hiện có, không phải mã LỚN NHẤT đã từng cấp. Chỉ cần 1 khách bị xoá
- * (kể cả tài khoản test) là count() tụt xuống, sinh ra mã đã cấp cho ai đó
- * trước đó rồi — gây lỗi 500 "Unique constraint failed on customer_code"
- * ngay khi có khách đăng ký mới.
- *
- * Lấy MAX theo string DESC cũng không an toàn — hệ thống có khách đặc biệt
- * mã "SYSTEM" ("Link chia sẻ công khai"), và "SYSTEM" xếp sau mọi "C####"
- * theo alphabet (S > C) nên findFirst() sẽ chọn nhầm dòng đó, regex không
- * khớp, rơi về mặc định C0001 — đã tồn tại, và vì không có gì thay đổi giữa
- * các lần thử, retry cũng lặp lại y hệt lỗi. Phải lọc đúng định dạng C+số
- * rồi tính max bằng số thực sự, không dựa vào thứ tự sắp xếp chuỗi.
+ * Lấy ngẫu nhiên 1 ký tự từ chuỗi bằng cryptographically secure RNG
+ */
+function getRandomChar(chars: string): string {
+  const index = crypto.randomInt(0, chars.length);
+  return chars[index];
+}
+
+/**
+ * Sinh chuỗi ngẫu nhiên 6 ký tự gồm:
+ * - Ít nhất 1 chữ hoa (A-Z)
+ * - Ít nhất 1 chữ thường (a-z)
+ * - Ít nhất 1 số (0-9)
+ * - 3 ký tự ngẫu nhiên còn lại từ toàn bộ bảng mã [A-Za-z0-9]
+ * - Xáo trộn ngẫu nhiên hoàn toàn (Fisher-Yates)
+ */
+export function generateRandomCode(length = 6): string {
+  const chars: string[] = [
+    getRandomChar(UPPERCASE),
+    getRandomChar(LOWERCASE),
+    getRandomChar(DIGITS),
+  ];
+
+  for (let i = 3; i < length; i++) {
+    chars.push(getRandomChar(ALL_CHARS));
+  }
+
+  // Fisher-Yates shuffle
+  for (let i = chars.length - 1; i > 0; i--) {
+    const j = crypto.randomInt(0, i + 1);
+    [chars[i], chars[j]] = [chars[j], chars[i]];
+  }
+
+  return chars.join("");
+}
+
+/**
+ * Sinh mã khách hàng / mã giới thiệu:
+ * - Độ dài: đúng 6 ký tự ngẫu nhiên
+ * - Thành phần: kết hợp chữ hoa, chữ thường và chữ số (vd: k7N2pX, 9mB4wZ)
+ * - Đảm bảo KHÔNG TRÙNG NHAU (kiểm tra tồn tại trong DB, case-insensitive)
+ * - Không cho phép đoán tuần tự như C0001, C0002...
  */
 export async function generateCustomerCode(): Promise<string> {
-  const customers = await prisma.customer.findMany({
-    where: { customerCode: { startsWith: "C" } },
-    select: { customerCode: true },
-  });
+  const maxAttempts = 20;
 
-  let maxNumber = 0;
-  for (const c of customers) {
-    const match = c.customerCode.match(/^C(\d+)$/);
-    if (match) {
-      const n = parseInt(match[1], 10);
-      if (n > maxNumber) maxNumber = n;
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    const code = generateRandomCode(6);
+
+    // Tránh các từ khoá hệ thống đặc biệt
+    const upper = code.toUpperCase();
+    if (upper === "SYSTEM" || upper === "ADMIN" || upper === "MEOWBK") {
+      continue;
+    }
+
+    // Đảm bảo không trùng với bất kỳ khách hàng nào đã tồn tại trong DB
+    const existing = await prisma.customer.findFirst({
+      where: {
+        customerCode: { equals: code, mode: "insensitive" },
+      },
+      select: { id: true },
+    });
+
+    if (!existing) {
+      return code;
     }
   }
 
-  return `C${String(maxNumber + 1).padStart(4, "0")}`;
+  // Fallback an toàn (xác suất đụng 20 lần là gần như 0 trên không gian 56.8 tỷ mã)
+  return generateRandomCode(7);
 }
+

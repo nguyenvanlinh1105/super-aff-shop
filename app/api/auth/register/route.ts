@@ -66,13 +66,15 @@ export async function POST(req: NextRequest) {
   const passwordHash = hashPassword(password);
 
   // Check referral cookie
-  const refCode = req.cookies.get("ref_code")?.value;
+  const refCode = req.cookies.get("ref_code")?.value?.trim();
   let referredById = null;
   let referrerName: string | null = null;
   let referrerEmail: string | null = null;
   if (refCode) {
-    const referrer = await prisma.customer.findUnique({
-      where: { customerCode: refCode },
+    const referrer = await prisma.customer.findFirst({
+      where: {
+        customerCode: { equals: refCode, mode: "insensitive" },
+      },
       select: { id: true, fullName: true, user: { select: { email: true } } },
     });
     if (referrer) {

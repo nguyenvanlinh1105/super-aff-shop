@@ -129,6 +129,7 @@ export default async function ReferralPage() {
       id: fo.id,
       friendName: friend?.fullName ?? "Bạn bè",
       friendCode: friend?.customerCode ?? "",
+      platformId: fo.platformId,
       orderExternalId: fo.orderExternalId,
       itemName: fo.trackingLink?.productTitle ?? fo.itemName ?? null,
       shopName: fo.shopName,
