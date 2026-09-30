@@ -14,10 +14,36 @@ import {
   ShoppingBag,
   ShieldCheck,
 } from "lucide-react";
+import { CustomSelect, CustomSelectOption } from "@/components/ui/CustomSelect";
 
 export type FaqItem = { question: string; answer: string; group?: string };
 
 const GROUP_CONFIG: Record<string, { icon: any; color: string; label: string }> = {
+  "Về cách hoạt động": {
+    icon: Zap,
+    color: "from-amber-400 to-orange-500",
+    label: "Về cách hoạt động",
+  },
+  "Về tiền hoàn": {
+    icon: Wallet,
+    color: "from-primary-400 via-[#FF3B7B] to-primary-600",
+    label: "Về tiền hoàn",
+  },
+  "Về lý do link không ghi nhận": {
+    icon: HelpCircle,
+    color: "from-rose-400 to-pink-600",
+    label: "Về lý do link không ghi nhận",
+  },
+  "Về mời bạn bè": {
+    icon: Sparkles,
+    color: "from-purple-400 to-indigo-600",
+    label: "Về mời bạn bè",
+  },
+  "Các tình huống khác": {
+    icon: MessageCircleQuestion,
+    color: "from-sky-400 to-blue-600",
+    label: "Các tình huống khác",
+  },
   "VỀ CÁCH HOẠT ĐỘNG": {
     icon: Zap,
     color: "from-amber-400 to-orange-500",
@@ -56,6 +82,33 @@ export function FaqAccordion({ items }: { items: FaqItem[] }) {
     return list;
   }, [items]);
 
+  // Options for Mobile CustomSelect
+  const mobileOptions: CustomSelectOption[] = useMemo(() => {
+    return [
+      {
+        value: "ALL",
+        label: "Tất cả câu hỏi",
+        icon: <Sparkles size={14} className="text-primary-500" />,
+        count: items.length,
+      },
+      ...allGroups.map((g) => {
+        const conf = GROUP_CONFIG[g] || {
+          icon: MessageCircleQuestion,
+          color: "from-primary-400 to-primary-500",
+          label: g,
+        };
+        const IconComp = conf.icon;
+        const count = items.filter((i) => (i.group ?? "KHÁC") === g).length;
+        return {
+          value: g,
+          label: conf.label || g,
+          icon: <IconComp size={14} className="text-primary-500" />,
+          count,
+        };
+      }),
+    ];
+  }, [items, allGroups]);
+
   // Filter items by search query & selected group tab
   const filteredItems = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -87,7 +140,7 @@ export function FaqAccordion({ items }: { items: FaqItem[] }) {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-8 items-start">
       {/* ── MOBILE HEADER CONTROLS (Chỉ hiện trên Mobile < lg: Tối ưu gọn gàng) ── */}
-      <div className="lg:hidden flex flex-col gap-3">
+      <div className="lg:hidden flex flex-col gap-2.5">
         {/* Search Bar Mobile */}
         <div className="relative">
           <Search
@@ -102,7 +155,7 @@ export function FaqAccordion({ items }: { items: FaqItem[] }) {
               if (e.target.value.trim()) setSelectedGroup("ALL");
             }}
             placeholder="Tìm kiếm câu hỏi (rút tiền, hoàn tiền...)"
-            className="w-full rounded-2xl border border-primary-200/90 bg-white py-2.5 pl-10 pr-9 text-xs sm:text-[13px] font-bold text-neutral-900 placeholder:text-neutral-400 outline-none transition-all focus:border-primary-400 focus:ring-2 focus:ring-primary-100 shadow-2xs"
+            className="h-10 sm:h-11 w-full rounded-2xl border border-primary-200/90 bg-white pl-10 pr-9 text-xs sm:text-[13px] font-bold text-neutral-900 placeholder:text-neutral-400 outline-none transition-all focus:border-primary-400 focus:ring-2 focus:ring-primary-100 shadow-2xs"
           />
           {query && (
             <button
@@ -114,62 +167,15 @@ export function FaqAccordion({ items }: { items: FaqItem[] }) {
           )}
         </div>
 
-        {/* Mobile Horizontal Category Chips */}
-        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 scrollbar-hide -mx-1 px-1">
-          <button
-            type="button"
-            onClick={() => setSelectedGroup("ALL")}
-            className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-black shrink-0 transition-all cursor-pointer ${
-              selectedGroup === "ALL"
-                ? "bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-cute"
-                : "bg-white text-neutral-700 border border-primary-100/90 hover:bg-neutral-50 shadow-2xs"
-            }`}
-          >
-            <Sparkles size={13} />
-            <span>Tất cả</span>
-            <span
-              className={`text-[10px] px-1.5 py-0.2 rounded-full font-black ${
-                selectedGroup === "ALL" ? "bg-white/25 text-white" : "bg-primary-100 text-primary-700"
-              }`}
-            >
-              {items.length}
-            </span>
-          </button>
-
-          {allGroups.map((g) => {
-            const conf = GROUP_CONFIG[g] || {
-              icon: MessageCircleQuestion,
-              color: "from-primary-400 to-primary-500",
-              label: g,
-            };
-            const IconComp = conf.icon;
-            const count = items.filter((i) => (i.group ?? "KHÁC") === g).length;
-            const isSelected = selectedGroup === g;
-
-            return (
-              <button
-                key={g}
-                type="button"
-                onClick={() => setSelectedGroup(g)}
-                className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-black shrink-0 transition-all cursor-pointer ${
-                  isSelected
-                    ? "bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-cute"
-                    : "bg-white text-neutral-700 border border-primary-100/90 hover:bg-neutral-50 shadow-2xs"
-                }`}
-              >
-                <IconComp size={13} />
-                <span>{conf.label || g}</span>
-                <span
-                  className={`text-[10px] px-1.5 py-0.2 rounded-full font-black ${
-                    isSelected ? "bg-white/25 text-white" : "bg-primary-100 text-primary-700"
-                  }`}
-                >
-                  {count}
-                </span>
-              </button>
-            );
-          })}
-        </div>
+        {/* Mobile Custom-Selection Dropdown */}
+        <CustomSelect
+          value={selectedGroup}
+          onChange={(val) => setSelectedGroup(val)}
+          options={mobileOptions}
+          placeholder="Chọn danh mục chủ đề..."
+          ariaLabel="Chọn danh mục câu hỏi"
+          buttonClassName="border-primary-200/90 hover:border-primary-300"
+        />
       </div>
 
       {/* ── LEFT SIDEBAR TRÊN PC (hidden lg:block: Giữ nguyên 100% như cũ) ── */}
