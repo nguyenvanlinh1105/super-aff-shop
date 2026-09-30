@@ -98,9 +98,9 @@ export default async function CustomerHomePage() {
 
   return (
     <div className="flex flex-col gap-10 sm:gap-12 pb-16">
-      {!customer?.phone && (
+      {true && (
         <FadeUp delay={0}>
-          <PhoneNumberPrompt />
+          <PhoneNumberPrompt initialPhone={customer?.phone} />
         </FadeUp>
       )}
 

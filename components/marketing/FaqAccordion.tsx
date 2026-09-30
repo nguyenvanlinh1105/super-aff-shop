@@ -9,7 +9,6 @@ import {
   Sparkles,
   MessageCircleQuestion,
   ThumbsUp,
-  Headphones,
   Zap,
   Wallet,
   ShoppingBag,
@@ -274,25 +273,6 @@ export function FaqAccordion({ items }: { items: FaqItem[] }) {
             );
           })}
         </div>
-
-        {/* Quick Support Banner Box */}
-        <div className="bg-gradient-to-br from-primary-500 via-[#FF3B7B] to-primary-600 rounded-3xl p-6 text-white shadow-cute-lg space-y-3 relative overflow-hidden">
-          <Headphones size={36} className="text-white/30 absolute right-4 bottom-4" />
-          <h4 className="font-black text-[17px] leading-snug">
-            Vẫn chưa tìm thấy câu trả lời? 🎧
-          </h4>
-          <p className="text-[13px] font-semibold text-white/90 leading-relaxed">
-            Đội ngũ CSKH MeowBack sẵn sàng hỗ trợ bạn 24/7 qua Zalo & Telegram.
-          </p>
-          <a
-            href="https://zalo.me/g/cgmmvw394"
-            target="_blank"
-            rel="noreferrer"
-            className="inline-block w-full text-center bg-white text-primary-600 font-extrabold py-2.5 rounded-xl text-[13.5px] shadow-sm hover:scale-[1.02] transition-transform"
-          >
-            Chat Zalo Ngay 💬
-          </a>
-        </div>
       </div>
 
       {/* ── RIGHT CONTENT PANEL (8/12 width) ── */}
@@ -414,25 +394,6 @@ export function FaqAccordion({ items }: { items: FaqItem[] }) {
             );
           })
         )}
-
-        {/* Quick Support Banner Mobile (Chỉ hiện trên mobile sau khi lướt danh sách câu hỏi) */}
-        <div className="lg:hidden bg-gradient-to-br from-primary-500 via-[#FF3B7B] to-primary-600 rounded-2xl p-4 text-white shadow-cute space-y-2 relative overflow-hidden mt-6">
-          <Headphones size={32} className="text-white/20 absolute right-3 bottom-3" />
-          <h4 className="font-black text-[15px] leading-snug">
-            Vẫn chưa tìm thấy câu trả lời? 🎧
-          </h4>
-          <p className="text-xs font-semibold text-white/90 leading-relaxed">
-            Đội ngũ CSKH MeowBack sẵn sàng hỗ trợ bạn 24/7 qua Zalo & Telegram.
-          </p>
-          <a
-            href="https://zalo.me/g/cgmmvw394"
-            target="_blank"
-            rel="noreferrer"
-            className="inline-block w-full text-center bg-white text-primary-600 font-extrabold py-2 rounded-xl text-xs shadow-sm active:scale-98 transition-transform"
-          >
-            Chat Zalo Ngay 💬
-          </a>
-        </div>
       </div>
     </div>
   );
