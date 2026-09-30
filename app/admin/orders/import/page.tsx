@@ -3,7 +3,11 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { ImportOrdersWizard } from "@/components/admin/ImportOrdersWizard";
 
 export default async function AdminOrdersImportPage() {
-  const platforms = await prisma.platform.findMany({ orderBy: { name: "asc" } });
+  const rawPlatforms = await prisma.platform.findMany();
+  // Ưu tiên Shopee lên đầu danh sách vì Shopee sử dụng đối soát CSV
+  const platforms = rawPlatforms.sort((a, b) => 
+    a.code === "SHOPEE" ? -1 : b.code === "SHOPEE" ? 1 : a.name.localeCompare(b.name)
+  );
 
   return (
     <div className="flex flex-col gap-6 fade-in pb-8">

@@ -34,7 +34,8 @@ type CommitResult = {
 
 export function ImportOrdersWizard({ platforms }: { platforms: Option[] }) {
   const router = useRouter();
-  const [platformId, setPlatformId] = useState(platforms[0]?.id ?? "");
+  const shopeeOpt = platforms.find((p) => p.label.toLowerCase().includes("shopee"));
+  const [platformId, setPlatformId] = useState(shopeeOpt?.id ?? platforms[0]?.id ?? "");
   const [sourceName, setSourceName] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<PreviewResult | null>(null);
