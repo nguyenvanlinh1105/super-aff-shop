@@ -15,8 +15,9 @@ npx prisma db push
 # hoặc chạy migration:
 # npx prisma migrate dev
 
-# 3. Seed dữ liệu mẫu (nếu cần)
+# 3. Seed dữ liệu hệ thống & cấu hình master
 npm run prisma:seed
+# hoặc: npx prisma db seed
 
 # 4. Chạy dev server
 npm run dev
@@ -24,12 +25,12 @@ npm run dev
 
 Mở http://localhost:3000
 
-## Tài khoản demo
+## Tài khoản Quản trị viên (Admin)
 
-| Vai trò | Email | Mật khẩu |
+| Vai trò | Email | Mật khẩu khởi tạo |
 |---|---|---|
-| Admin | admin@demo.vn | Demo@123 |
-| Khách hàng | khach@demo.vn | Demo@123 |
+| Admin | vanlinh11052004nguyenvan@gmail.com | Đã bảo lưu / `Admin@123` |
+| Admin | trannam6362@gmail.com | `Admin@123` |
 
 ## Biến môi trường (`.env`)
 
