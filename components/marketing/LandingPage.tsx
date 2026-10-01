@@ -29,7 +29,7 @@ import { DemoConvertLink } from "@/components/marketing/DemoConvertLink";
 
 import { HowItWorksSteps } from "@/components/marketing/HowItWorksSteps";
 import { LiveCashbackCalculator } from "@/components/marketing/LiveCashbackCalculator";
-import { ValueComparisonSection } from "@/components/marketing/ValueComparisonSection";
+
 import { ShopeeLiveDemo } from "@/components/ui/ShopeeLiveDemo";
 
 const CAT_HIGHLIGHT_CARDS = [
@@ -249,10 +249,7 @@ export function LandingPage({
           </div>
         </section>
 
-        {/* Interactive Value Comparison Table — chỉ hiện trên PC */}
-        <div className="hidden md:block">
-          <ValueComparisonSection customerRate={customerRate} />
-        </div>
+
 
         {/* Quick Registration Banner */}
         <section className="py-10 md:py-16 bg-gradient-to-br from-primary-100 via-primary-50 to-secondary-50 relative">
