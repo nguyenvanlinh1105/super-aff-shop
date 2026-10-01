@@ -373,14 +373,14 @@ export function RegisterForm() {
             )}
           </div>
 
-          <div className="flex gap-3 mt-1">
+          <div className="flex gap-2.5 sm:gap-3 mt-1">
             <button
               type="button"
               onClick={() => {
                 setStep(1);
                 setErrors({});
               }}
-              className="flex h-14 items-center justify-center gap-1.5 rounded-2xl border border-neutral-200 bg-white px-5 text-[14px] font-bold text-neutral-700 transition-all hover:bg-neutral-50"
+              className="flex h-14 shrink-0 items-center justify-center gap-1.5 rounded-2xl border border-neutral-200 bg-white px-3.5 sm:px-5 text-[13px] sm:text-[14px] font-bold text-neutral-700 transition-all hover:bg-neutral-50 active:scale-[0.98]"
             >
               <ArrowLeft size={16} />
               Quay lại
@@ -388,14 +388,15 @@ export function RegisterForm() {
             <button
               type="submit"
               disabled={loading}
-              className="flex h-14 flex-1 items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-primary-400 to-primary-500 text-[15px] font-black text-white shadow-cute transition-all hover:shadow-cute-lg hover:scale-[1.01] active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100"
+              className="flex h-14 flex-1 items-center justify-center gap-1.5 sm:gap-2 rounded-2xl bg-gradient-to-r from-primary-400 to-primary-500 px-3 sm:px-4 text-[13.5px] sm:text-[15px] font-black text-white shadow-cute transition-all hover:shadow-cute-lg hover:scale-[1.01] active:scale-[0.99] disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100 whitespace-nowrap"
             >
               {loading ? (
                 <Loader2 size={18} className="animate-spin" />
               ) : (
                 <>
-                  Hoàn tất đăng ký 🎀
-                  <ArrowRight size={18} strokeWidth={2.5} />
+                  <span>Hoàn tất đăng ký</span>
+                  <span className="text-[14px] leading-none select-none">🎀</span>
+                  <ArrowRight size={17} strokeWidth={2.5} className="shrink-0" />
                 </>
               )}
             </button>

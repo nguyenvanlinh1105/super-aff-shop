@@ -306,27 +306,33 @@ export function PwaInstallBanner() {
 
   return (
     <>
-      <div className="mb-lg flex items-center justify-between gap-md rounded-2xl border border-primary-200 bg-primary-50 p-md shadow-sm sm:p-lg">
-        <div className="flex items-center gap-md">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white shadow-cute border border-primary-200/80">
-            <img src={versionedAsset("/meowback_lucky_cat_logo.png")} alt="MeowBack" className="h-8 w-8 object-cover rounded-xl" />
+      <div className="mb-4 sm:mb-6 flex items-center justify-between gap-2.5 sm:gap-3.5 rounded-2xl sm:rounded-3xl border border-primary-200/90 bg-gradient-to-r from-primary-50/90 via-pink-50/50 to-white p-3 sm:p-4 shadow-cute">
+        <div className="flex items-center gap-2.5 sm:gap-3.5 min-w-0 flex-1">
+          <div className="flex h-10 w-10 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-2xl bg-white shadow-cute border border-primary-200/80 p-1">
+            <img src={versionedAsset("/meowback_lucky_cat_logo.png")} alt="MeowBack" className="h-full w-full object-contain rounded-xl" />
           </div>
-          <div>
-            <h3 className="text-[14px] font-bold text-gray-900 sm:text-[15px]">Cài đặt ứng dụng MeowBack</h3>
-            <p className="mt-0.5 text-[12px] text-gray-600 sm:text-[13px]">
+          <div className="min-w-0 flex-1">
+            <h3 className="text-[13px] sm:text-[15px] font-extrabold text-neutral-900 leading-snug">
+              Cài đặt ứng dụng MeowBack
+            </h3>
+            <p className="mt-0.5 text-[11px] sm:text-[12.5px] text-neutral-500 font-medium leading-relaxed line-clamp-2">
               Cài lên điện thoại (iPhone &amp; Android) để mở nhanh hơn, dùng mượt mà như app thật.
             </p>
           </div>
         </div>
-        <div className="flex shrink-0 items-center gap-sm">
+        <div className="flex shrink-0 items-center gap-1.5 sm:gap-2">
           <button
             onClick={handleInstallClick}
-            className="rounded-xl bg-primary px-4 py-2 text-[13px] font-bold text-white shadow-sm hover:bg-primary-600 cursor-pointer"
+            className="rounded-xl bg-gradient-to-r from-primary-500 to-pink-500 hover:from-primary-600 hover:to-pink-600 px-3 py-1.5 sm:px-4 sm:py-2 text-[11.5px] sm:text-[13px] font-bold text-white shadow-sm shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all whitespace-nowrap cursor-pointer"
           >
             Xem hướng dẫn
           </button>
-          <button onClick={dismiss} className="rounded-full p-2 text-gray-400 hover:bg-black/5 hover:text-gray-600 cursor-pointer">
-            <X size={18} />
+          <button
+            onClick={dismiss}
+            className="rounded-full p-1.5 text-neutral-400 hover:bg-black/5 hover:text-neutral-600 transition-colors cursor-pointer"
+            aria-label="Đóng banner"
+          >
+            <X size={16} />
           </button>
         </div>
       </div>
@@ -460,22 +466,24 @@ export function PwaInstallHorizontalCard() {
 
   return (
     <>
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 sm:gap-4 rounded-3xl border border-primary-100/80 bg-white p-4 shadow-cute sm:p-5 hover:border-primary-300 transition-colors">
-        <div className="flex items-center gap-3.5">
-          <div className="flex h-12 w-12 sm:h-14 sm:w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-primary-400 to-primary-500 shadow-cute ring-2 ring-white p-1">
-            <img src={versionedAsset("/meowback_lucky_cat_logo.png")} alt="MeowBack" className="h-full w-full object-cover rounded-xl" />
+      <div className="flex items-center justify-between gap-3 sm:gap-4 rounded-3xl border border-primary-100/90 bg-white p-3.5 sm:p-5 shadow-cute hover:shadow-cute-lg hover:border-primary-300 transition-all">
+        <div className="flex items-center gap-3 sm:gap-3.5 min-w-0 flex-1">
+          <div className="flex h-11 w-11 sm:h-13 sm:w-13 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-primary-400 to-primary-500 shadow-cute ring-2 ring-white p-1">
+            <img src={versionedAsset("/meowback_lucky_cat_logo.png")} alt="MeowBack" className="h-full w-full object-contain rounded-xl" />
           </div>
           <div className="min-w-0 flex-1">
-            <h3 className="text-[15px] font-extrabold text-neutral-900 tracking-tight">Cài đặt ứng dụng MeowBack</h3>
-            <p className="mt-0.5 text-[12.5px] sm:text-[13px] text-neutral-500 font-medium leading-relaxed">
+            <h3 className="text-[14px] sm:text-[15px] font-extrabold text-neutral-900 tracking-tight leading-snug">
+              Cài đặt ứng dụng MeowBack
+            </h3>
+            <p className="mt-0.5 text-[11.5px] sm:text-[12.5px] text-neutral-500 font-medium leading-relaxed line-clamp-2">
               Cài lên điện thoại (iPhone &amp; Android) để mở nhanh hơn, dùng mượt mà như app thật.
             </p>
           </div>
         </div>
-        <div className="flex shrink-0 w-full sm:w-auto">
+        <div className="flex shrink-0">
           <button
             onClick={handleInstallClick}
-            className="w-full sm:w-auto rounded-2xl bg-gradient-to-r from-primary to-primary-active px-5 py-2.5 text-[13.5px] sm:text-[14px] font-bold text-white shadow-md shadow-primary/20 hover:scale-[1.02] sm:hover:scale-105 active:scale-98 transition-all cursor-pointer text-center"
+            className="rounded-xl sm:rounded-2xl bg-gradient-to-r from-primary-500 to-pink-500 hover:from-primary-600 hover:to-pink-600 px-3.5 py-2 sm:px-5 sm:py-2.5 text-[12px] sm:text-[13.5px] font-bold text-white shadow-sm shadow-primary/25 hover:scale-[1.02] active:scale-[0.98] transition-all whitespace-nowrap cursor-pointer text-center"
           >
             Hướng dẫn cài đặt
           </button>

@@ -170,9 +170,6 @@ export function DemoConvertLink() {
             </span>
           </div>
           <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
-            <span className="text-[10px] sm:text-[11.5px] font-black text-emerald-700 bg-emerald-50 px-2 sm:px-2.5 py-0.5 rounded-full border border-emerald-200/80 whitespace-nowrap shadow-2xs">
-              ⚡ Rút từ 10k
-            </span>
             <span className="text-[10px] sm:text-[11.5px] font-black text-primary-700 bg-primary-50 px-2 sm:px-2.5 py-0.5 rounded-full border border-primary-200/80 shrink-0 whitespace-nowrap shadow-2xs">
               Hoàn tới 80%
             </span>
