@@ -7,6 +7,8 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { safeJsonLdString } from "@/lib/jsonLd";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Cửa Hàng — MeowBack | Nền Tảng Hỗ Trợ Hoàn Tiền",
   description: "Danh sách sàn thương mại điện tử được MeowBack hỗ trợ hoàn tiền: Shopee, TikTok Shop và nhiều đối tác khác.",

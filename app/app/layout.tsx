@@ -37,6 +37,8 @@ const sections: NavSection[] = [
   },
 ];
 
+export const dynamic = "force-dynamic";
+
 export default async function CustomerAppLayout({ children }: { children: React.ReactNode }) {
   const session = await getSession();
   if (!session) redirect("/login");

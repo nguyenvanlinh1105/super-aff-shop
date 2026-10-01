@@ -9,6 +9,8 @@ import { Flame } from "lucide-react";
 import { safeJsonLdString } from "@/lib/jsonLd";
 import { IconBow, IllustCatWelcome } from "@/components/icons/CatRibbonIcons";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Ưu Đãi & Mã Giảm Giá Shopee, TikTok Shop Mới Nhất | MeowBack",
   description:
