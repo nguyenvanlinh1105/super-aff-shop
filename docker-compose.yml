@@ -49,7 +49,7 @@ services:
       NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-https://meowback.shop}
     volumes:
       # Lưu trữ ảnh upload, hóa đơn vĩnh viễn không bị mất khi build lại container
-      - uploads_data:/app/public/uploads
+      - uploads_data:/var/www/meowback/public/uploads
     depends_on:
       postgres:
         condition: service_healthy
