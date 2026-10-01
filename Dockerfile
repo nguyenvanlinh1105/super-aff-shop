@@ -46,6 +46,7 @@ COPY --from=builder --chown=nextjs:nodejs /var/www/meowback/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /var/www/meowback/.next/static ./.next/static
 COPY --from=builder --chown=nextjs:nodejs /var/www/meowback/prisma ./prisma
 COPY --from=deps --chown=nextjs:nodejs /var/www/meowback/node_modules ./node_modules
+COPY --from=builder --chown=nextjs:nodejs /var/www/meowback/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder /var/www/meowback/package.json ./package.json
 
 USER nextjs
