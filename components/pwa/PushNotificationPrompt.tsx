@@ -108,11 +108,13 @@ export function PushNotificationPrompt({
     return null;
   }
 
-  // 2. Trạng thái ĐÃ BẬT THÔNG BÁO
+  // 2. Trạng thái ĐÃ BẬT THÔNG BÁO (permission granted)
+  // Nếu không ở Settings → ẩn banner ngay khi permission = granted (không cần chờ check subscription async)
+  if (permission === "granted" && !inSettings) {
+    return null;
+  }
+
   if (permission === "granted" && isSubscribed) {
-    if (!inSettings) {
-      return null;
-    }
 
     // Khi ở trang Cài đặt -> Hiển thị card trạng thái đang bật và nút "Tắt thông báo"
     return (
