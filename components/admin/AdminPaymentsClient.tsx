@@ -805,8 +805,8 @@ function WaitingCustomerOrdersModal({
         {/* Modal Header */}
         <div className="flex items-center justify-between p-5 sm:px-6 border-b border-neutral-100 bg-neutral-50/70">
           <div className="flex items-center gap-3.5">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-400 to-sky-600 text-white font-black text-base shadow-xs">
-              {customer.name.charAt(0).toUpperCase()}
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-white p-1 border border-neutral-200/80 shadow-xs overflow-hidden">
+              <img src="/icon-512.png" alt="MeowBack" className="w-full h-full object-contain rounded-xl" />
             </div>
             <div>
               <div className="flex items-center gap-2">
@@ -1252,8 +1252,8 @@ export function AdminPaymentsClient({
                         {/* Cột 2: Khách hàng */}
                         <td className="px-4 py-3.5 whitespace-nowrap">
                           <div className="flex items-center gap-2.5">
-                            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-rose-400 to-pink-600 text-white font-black text-xs shadow-2xs">
-                              {b.customerName.charAt(0).toUpperCase()}
+                            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-white p-0.5 border border-rose-200/80 shadow-2xs overflow-hidden">
+                              <img src="/icon-512.png" alt="MeowBack" className="w-full h-full object-contain rounded-lg" />
                             </div>
                             <div className="min-w-0">
                               <p className="font-extrabold text-neutral-900 truncate">
@@ -1411,8 +1411,8 @@ export function AdminPaymentsClient({
                       <tr key={c.id} className="transition-colors hover:bg-amber-50/20">
                         <td className="px-4 py-3.5 whitespace-nowrap">
                           <div className="flex items-center gap-2.5">
-                            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-800 font-black text-xs">
-                              {c.name.charAt(0).toUpperCase()}
+                            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-white p-0.5 border border-amber-200/80 shadow-2xs overflow-hidden">
+                              <img src="/icon-512.png" alt="MeowBack" className="w-full h-full object-contain rounded-lg" />
                             </div>
                             <div>
                               <p className="font-extrabold text-neutral-900">{c.name}</p>
@@ -1655,8 +1655,8 @@ export function AdminPaymentsClient({
                             {/* Cột 1: Khách hàng */}
                             <td className="px-4 py-3.5 whitespace-nowrap">
                               <div className="flex items-center gap-2.5">
-                                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-sky-400 to-sky-600 text-white font-black text-xs shadow-xs">
-                                  {c.name.charAt(0).toUpperCase()}
+                                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white p-0.5 border border-sky-200/80 shadow-2xs overflow-hidden">
+                                  <img src="/icon-512.png" alt="MeowBack" className="w-full h-full object-contain rounded-lg" />
                                 </div>
                                 <div>
                                   <p className="font-extrabold text-neutral-900 text-xs">{c.name}</p>

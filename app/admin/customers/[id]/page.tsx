@@ -85,10 +85,10 @@ export default async function CustomerDetailPage({ params }: { params: { id: str
 
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="flex items-start sm:items-center gap-5">
-            {/* Avatar Circle */}
+            {/* Avatar */}
             <div className="relative">
-              <div className="w-18 h-18 sm:w-22 sm:h-22 rounded-3xl bg-gradient-to-br from-rose-500 via-pink-600 to-rose-700 text-white flex items-center justify-center font-black text-2xl sm:text-3xl shadow-xl shadow-rose-500/25 border-2 border-white shrink-0">
-                {customer.fullName.charAt(0).toUpperCase()}
+              <div className="w-18 h-18 sm:w-22 sm:h-22 rounded-3xl bg-white p-2 shadow-xl shadow-rose-500/15 border-2 border-rose-200/80 shrink-0 overflow-hidden flex items-center justify-center">
+                <img src="/icon-512.png" alt="MeowBack" className="w-full h-full object-contain rounded-2xl" />
               </div>
               <div
                 className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-white shadow-xs ${
@@ -290,51 +290,73 @@ export default async function CustomerDetailPage({ params }: { params: { id: str
         </div>
       </div>
 
-      {/* ── THÔNG TIN NGÂN HÀNG & RÚT TIỀN ── */}
-      <div className="rounded-3xl bg-white p-6 sm:p-7 shadow-sm border border-neutral-200/80 flex flex-col gap-4">
-        <div className="flex items-center justify-between border-b border-neutral-100 pb-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-neutral-100 flex items-center justify-center text-neutral-700 border border-neutral-200/60 shadow-2xs">
-              <Building2 size={20} />
+      {/* ── TRẠNG THÁI THIẾT LẬP TÀI KHOẢN RÚT TIỀN ── */}
+      {(() => {
+        const hasSetup = !!(customer.bankAccountNumber || customer.momoNumber);
+        return (
+          <div
+            className={`rounded-3xl p-5 sm:p-6 shadow-sm border transition-all ${
+              hasSetup
+                ? "bg-gradient-to-br from-emerald-50/70 via-white to-emerald-50/30 border-emerald-200/90"
+                : "bg-gradient-to-br from-amber-50/60 via-white to-amber-50/20 border-amber-200/80"
+            }`}
+          >
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="flex items-center gap-3.5">
+                <div
+                  className={`w-11 h-11 rounded-2xl flex items-center justify-center shrink-0 shadow-2xs ${
+                    hasSetup
+                      ? "bg-emerald-500 text-white shadow-emerald-500/20"
+                      : "bg-amber-100 text-amber-700 border border-amber-200/80"
+                  }`}
+                >
+                  <CreditCard size={20} strokeWidth={2.2} />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h2 className="text-base font-extrabold text-neutral-900 tracking-tight">
+                      Tài Khoản Rút Tiền Hoàn
+                    </h2>
+                    {hasSetup ? (
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-black uppercase tracking-wider border border-emerald-300/80 shadow-2xs">
+                        <CheckCircle2 size={13} className="text-emerald-600" />
+                        Đã thiết lập tài khoản rút tiền
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-xs font-black uppercase tracking-wider border border-amber-300/80 shadow-2xs">
+                        <Clock size={13} className="text-amber-600" />
+                        Chưa thiết lập tài khoản rút tiền
+                      </span>
+                    )}
+                  </div>
+                  <p className="mt-1 text-xs text-neutral-500 font-medium">
+                    {hasSetup
+                      ? "Khách hàng đã hoàn tất thiết lập tài khoản nhận tiền hoàn."
+                      : "Khách hàng chưa thiết lập tài khoản nhận tiền hoàn."}
+                  </p>
+                </div>
+              </div>
+
+              <div className="shrink-0">
+                <span
+                  className={`text-xs font-black px-3.5 py-1.5 rounded-xl inline-flex items-center gap-1.5 border shadow-2xs ${
+                    hasSetup
+                      ? "bg-emerald-50 text-emerald-800 border-emerald-200"
+                      : "bg-amber-50 text-amber-800 border-amber-200"
+                  }`}
+                >
+                  <span
+                    className={`w-2 h-2 rounded-full ${
+                      hasSetup ? "bg-emerald-500 animate-pulse" : "bg-amber-400"
+                    }`}
+                  />
+                  {hasSetup ? "Đã liên kết" : "Chưa liên kết"}
+                </span>
+              </div>
             </div>
-            <div>
-              <h2 className="text-base font-extrabold text-neutral-900 tracking-tight">Thông Tin Tài Khoản Rút Tiền</h2>
-              <p className="text-xs text-neutral-500 font-medium">Tài khoản ngân hàng hoặc ví điện tử dùng để nhận hoàn tiền</p>
-            </div>
           </div>
-          <span className="text-[10px] font-black uppercase tracking-wider text-neutral-500 bg-neutral-100 px-2.5 py-1 rounded-xl">
-            Bank Details
-          </span>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-          {/* Ngân hàng */}
-          <div className="p-4 rounded-2xl bg-neutral-50/80 border border-neutral-200/60 flex flex-col gap-1">
-            <span className="text-[10px] font-extrabold text-neutral-400 uppercase tracking-wider">Ngân hàng</span>
-            <span className="text-sm font-black text-neutral-900">{customer.bankName || "— Chưa thiết lập —"}</span>
-          </div>
-
-          {/* Số tài khoản */}
-          <div className="p-4 rounded-2xl bg-neutral-50/80 border border-neutral-200/60 flex flex-col gap-1">
-            <span className="text-[10px] font-extrabold text-neutral-400 uppercase tracking-wider">Số tài khoản</span>
-            <span className="text-sm font-mono font-black text-neutral-900">{customer.bankAccountNumber || "—"}</span>
-          </div>
-
-          {/* Tên chủ thẻ */}
-          <div className="p-4 rounded-2xl bg-neutral-50/80 border border-neutral-200/60 flex flex-col gap-1">
-            <span className="text-[10px] font-extrabold text-neutral-400 uppercase tracking-wider">Tên chủ tài khoản</span>
-            <span className="text-sm font-black text-neutral-900 uppercase">{customer.bankAccountName || "—"}</span>
-          </div>
-
-          {/* MoMo */}
-          <div className="p-4 rounded-2xl bg-neutral-50/80 border border-neutral-200/60 flex flex-col gap-1">
-            <span className="text-[10px] font-extrabold text-neutral-400 uppercase tracking-wider">Ví MoMo</span>
-            <span className="text-sm font-bold text-neutral-900">
-              {customer.momoNumber ? `${customer.momoNumber} (${customer.momoName || "Chính chủ"})` : "—"}
-            </span>
-          </div>
-        </div>
-      </div>
+        );
+      })()}
 
       {/* ── CẤU HÌNH ĐỐI TÁC & GIỚI THIỆU ── */}
       <div className="rounded-3xl bg-white p-6 sm:p-7 shadow-sm border border-neutral-200/80 flex flex-col gap-5">

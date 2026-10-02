@@ -168,8 +168,8 @@ export function PartnerSettings({
                   className="flex items-center justify-between p-3 rounded-2xl bg-neutral-50 hover:bg-emerald-50/70 border border-neutral-200/70 hover:border-emerald-200 transition-all duration-200 group"
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
-                    <div className="w-7 h-7 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center text-xs font-black shrink-0">
-                      {u.fullName.charAt(0).toUpperCase()}
+                    <div className="w-7 h-7 rounded-xl bg-white p-0.5 border border-emerald-200/80 flex items-center justify-center shrink-0 shadow-2xs overflow-hidden">
+                      <img src="/icon-512.png" alt="MeowBack" className="w-full h-full object-contain rounded-lg" />
                     </div>
                     <span className="font-extrabold text-xs text-neutral-800 group-hover:text-emerald-700 transition-colors truncate">
                       {u.fullName}

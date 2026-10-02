@@ -360,8 +360,8 @@ export function AdminCustomersClient({
                   <Tr key={c.id}>
                     <Td>
                       <div className="flex items-start gap-2.5">
-                        <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-rose-400 via-pink-500 to-rose-600 text-white flex items-center justify-center font-black text-xs shrink-0 shadow-xs mt-0.5 border border-white/40">
-                          {c.fullName.charAt(0).toUpperCase()}
+                        <div className="w-8 h-8 rounded-xl bg-white p-0.5 border border-rose-200/80 flex items-center justify-center shrink-0 shadow-2xs mt-0.5 overflow-hidden">
+                          <img src="/icon-512.png" alt="MeowBack" className="w-full h-full object-contain rounded-lg" />
                         </div>
                         <div className="flex flex-col gap-0.5 min-w-0">
                           <div className="flex items-center gap-1.5 flex-wrap">

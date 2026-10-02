@@ -192,8 +192,8 @@ export function TopReferrersWidget({
                     {/* Thông tin thành viên */}
                     <td className="py-3.5 px-4">
                       <div className="flex items-center gap-2.5">
-                        <div className="w-8 h-8 rounded-full bg-rose-100 text-rose-700 font-black text-xs flex items-center justify-center shrink-0">
-                          {item.name.charAt(0).toUpperCase()}
+                        <div className="w-8 h-8 rounded-xl bg-white p-0.5 border border-rose-200/80 flex items-center justify-center shrink-0 shadow-2xs overflow-hidden">
+                          <img src="/icon-512.png" alt="MeowBack" className="w-full h-full object-contain rounded-lg" />
                         </div>
                         <div className="min-w-0">
                           <Link

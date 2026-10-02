@@ -395,7 +395,7 @@ export function AdminOrdersClient({
       {/* INFO BANNER PER TAB */}
       {currentTab === "pending" && (
         <div className="flex items-start gap-3 bg-amber-50/80 border border-amber-200/80 rounded-2xl p-4">
-          <img src="/meow-back-mascot.png" alt="" className="h-6 w-6 object-contain shrink-0" />
+          <img src="/meow-back-mascot.png" alt="" className="h-6 w-6 object-contain shrink-0 rounded-lg" />
           <p className="text-xs text-amber-800 font-medium leading-relaxed">
             Shopee <strong>chưa xác nhận</strong> sản phẩm nào trong đơn là "Hoàn thành" hay "Đã huỷ" — số tiền hiển thị chỉ là ước tính,
             có thể thay đổi khi <strong>import lại CSV mới</strong> sau khi Shopee cập nhật trạng thái.
@@ -404,7 +404,7 @@ export function AdminOrdersClient({
       )}
       {currentTab === "cancelled" && (
         <div className="flex items-start gap-3 bg-rose-50/80 border border-rose-200/80 rounded-2xl p-4">
-          <img src="/meow-back-mascot.png" alt="" className="h-6 w-6 object-contain shrink-0" />
+          <img src="/meow-back-mascot.png" alt="" className="h-6 w-6 object-contain shrink-0 rounded-lg" />
           <p className="text-xs text-rose-800 font-medium leading-relaxed">
             Shopee báo <strong>tất cả sản phẩm trong đơn đều bị huỷ</strong> (khách huỷ đơn hoặc trả hàng trước khi được duyệt) — không tính hoa hồng.
             Đơn đã duyệt rồi mới bị huỷ nằm ở tab <strong>⚠️ Clawback</strong> riêng.
@@ -413,7 +413,7 @@ export function AdminOrdersClient({
       )}
       {currentTab === "completed" && (
         <div className="flex items-start gap-3 bg-sky-50/80 border border-sky-200/80 rounded-2xl p-4">
-          <img src="/meow-back-voucher.png" alt="" className="h-6 w-6 object-contain shrink-0" />
+          <img src="/meow-back-voucher.png" alt="" className="h-6 w-6 object-contain shrink-0 rounded-lg" />
           <p className="text-xs text-sky-800 font-medium leading-relaxed">
             Đây là đơn được import <strong>trước khi hệ thống sửa lại logic đọc CSV</strong> nên còn kẹt ở trạng thái cũ.
             <strong> Import lại đúng file CSV đã dùng cho các đơn này</strong> để hệ thống tự phân loại lại chính xác.
@@ -422,7 +422,7 @@ export function AdminOrdersClient({
       )}
       {currentTab === "processing" && (
         <div className="flex items-start gap-3 bg-amber-50/80 border border-amber-200/80 rounded-2xl p-4">
-          <img src="/meow-back-analytics.png" alt="" className="h-6 w-6 object-contain shrink-0" />
+          <img src="/meow-back-analytics.png" alt="" className="h-6 w-6 object-contain shrink-0 rounded-lg" />
           <p className="text-xs text-amber-800 font-medium leading-relaxed">
             Shopee đã báo <strong>"Hoàn thành"</strong> nhưng hoa hồng còn trong thời gian đối soát — hệ thống tính là
             <strong> "💰 Tiền đã về"</strong> sau <strong>15 ngày kể từ ngày hoàn thành</strong>.
@@ -431,7 +431,7 @@ export function AdminOrdersClient({
       )}
       {currentTab === "money_in" && (
         <div className="flex items-start gap-3 bg-emerald-50/80 border border-emerald-200/80 rounded-2xl p-4">
-          <img src="/meow-back-quick-link.png" alt="" className="h-6 w-6 object-contain shrink-0" />
+          <img src="/meow-back-quick-link.png" alt="" className="h-6 w-6 object-contain shrink-0 rounded-lg" />
           <p className="text-xs text-emerald-800 font-medium leading-relaxed">
             Toàn bộ đơn ở đây <strong>Shopee đã duyệt và trả hoa hồng thật cho bạn</strong>.
             Xem riêng phần <strong>chưa trả khách</strong> hay <strong>đã trả khách</strong> tại 2 tab bên cạnh.
@@ -440,7 +440,7 @@ export function AdminOrdersClient({
       )}
       {currentTab === "unpaid" && (
         <div className="flex items-start gap-3 bg-rose-50/80 border border-rose-200/80 rounded-2xl p-4">
-          <img src="/meow-back-mascot.png" alt="" className="h-6 w-6 object-contain shrink-0" />
+          <img src="/meow-back-mascot.png" alt="" className="h-6 w-6 object-contain shrink-0 rounded-lg" />
           <p className="text-xs text-rose-800 font-medium leading-relaxed">
             Tiền Shopee đã về (approved) nhưng <strong>bạn chưa chuyển cho khách</strong>. Vào trang <strong>Thanh toán</strong> để tạo phiếu chi cho khách.
           </p>
@@ -516,8 +516,10 @@ export function AdminOrdersClient({
               {orders.length === 0 ? (
                 <tr>
                   <td colSpan={8} className="py-12 text-center">
-                    <div className="flex flex-col items-center gap-2">
-                      <img src="/meow-back-orders.png" alt="MeowBack Orders" className="h-16 w-16 object-contain" />
+                    <div className="flex flex-col items-center gap-2.5">
+                      <div className="w-18 h-18 rounded-3xl bg-neutral-50 p-2 border border-neutral-200/80 shadow-xs overflow-hidden flex items-center justify-center">
+                        <img src="/meow-back-orders.png" alt="MeowBack Orders" className="h-full w-full object-contain rounded-2xl" />
+                      </div>
                       <span className="text-xs font-bold text-neutral-400">Không tìm thấy đơn hàng nào phù hợp</span>
                     </div>
                   </td>

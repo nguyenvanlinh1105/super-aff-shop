@@ -1,4 +1,3 @@
-import { IllustCatEmpty } from "@/components/icons/CatRibbonIcons";
 import { LucideIcon } from "lucide-react";
 
 export function EmptyState({
@@ -15,10 +14,16 @@ export function EmptyState({
   return (
     <div className="flex flex-col items-center justify-center gap-4 py-12 text-center fade-in">
       <div className="relative">
-        <IllustCatEmpty className="w-40 h-40" />
+        <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-3xl bg-pink-50/80 p-2.5 border border-pink-200/70 shadow-sm flex items-center justify-center mx-auto overflow-hidden">
+          <img
+            src="/icon-512.png"
+            alt="MeowBack Mascot"
+            className="w-full h-full object-contain rounded-2xl drop-shadow-xs"
+          />
+        </div>
         {Icon && (
-          <div className="absolute bottom-1 right-1 flex h-10 w-10 items-center justify-center rounded-full bg-primary-100 text-primary-600 shadow-cute">
-            <Icon size={20} strokeWidth={2} />
+          <div className="absolute -bottom-1 -right-1 flex h-8 w-8 items-center justify-center rounded-full bg-primary-100 text-primary-600 shadow-cute border-2 border-white">
+            <Icon size={16} strokeWidth={2.5} />
           </div>
         )}
       </div>
