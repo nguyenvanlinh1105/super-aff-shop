@@ -1,12 +1,31 @@
+"use client";
+
+import { useEffect } from "react";
 import Link from "next/link";
-import { ArrowLeft, Sparkles, ChevronRight, ArrowRight } from "lucide-react";
+import { ArrowLeft, Sparkles, ChevronRight, ArrowRight, ShieldCheck, Zap } from "lucide-react";
 import { GUIDE_STEPS, TIP_CARDS } from "./guideData";
+import { FloatingElement } from "@/components/ui/FloatingElement";
+import { IconBow } from "@/components/icons/CatRibbonIcons";
 
 interface GuideViewProps {
   isPublic?: boolean;
 }
 
 export function GuideView({ isPublic = false }: GuideViewProps) {
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const hash = window.location.hash;
+      if (hash === "#7-luu-y" || hash === "#luu-y") {
+        setTimeout(() => {
+          const el = document.getElementById("7-luu-y") || document.getElementById("luu-y");
+          if (el) {
+            el.scrollIntoView({ behavior: "smooth", block: "start" });
+          }
+        }, 150);
+      }
+    }
+  }, []);
+
   return (
     <div className="flex flex-col gap-6 sm:gap-8 pb-12">
       {/* ── HEADER TRANG HƯỚNG DẪN (Tối ưu cho cả Mobile & PC) ── */}
@@ -34,12 +53,12 @@ export function GuideView({ isPublic = false }: GuideViewProps) {
           </div>
 
           <Link
-            href="#luu-y"
+            href="#7-luu-y"
             className="group inline-flex items-center justify-between sm:justify-start gap-2 rounded-xl bg-amber-50 hover:bg-amber-100/80 text-amber-900 border border-amber-200/70 px-3.5 py-2 text-xs font-bold transition-all shadow-2xs shrink-0"
           >
             <div className="flex items-center gap-1.5 min-w-0">
               <Sparkles size={13} className="text-amber-600 shrink-0" />
-              <span className="whitespace-nowrap">6 Lưu ý quan trọng</span>
+              <span className="whitespace-nowrap">7 Lưu ý quan trọng</span>
             </div>
             <ChevronRight size={13} className="text-amber-700 group-hover:translate-x-0.5 transition-transform" />
           </Link>
@@ -146,43 +165,61 @@ export function GuideView({ isPublic = false }: GuideViewProps) {
         </div>
       </div>
 
-      {/* ── 6 LƯU Ý QUAN TRỌNG (Đồng bộ tone hồng pastel) ── */}
-      <div id="luu-y" className="scroll-mt-24 flex flex-col gap-6 pt-4">
-        {/* Banner header lưu ý với tone hồng pastel MeowBack */}
-        <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-primary-500 via-pink-500 to-rose-400 p-5 sm:p-8 shadow-xl shadow-primary-500/20 text-white">
-          <div className="absolute inset-0 opacity-10">
-            <div className="absolute top-4 left-8 text-8xl font-black text-white/30 select-none">🐾</div>
-            <div className="absolute bottom-2 right-8 text-6xl font-black text-white/20 select-none">🎀</div>
+      {/* ── 7 LƯU Ý QUAN TRỌNG (Đồng bộ tone hồng pastel) ── */}
+      <div id="7-luu-y" className="scroll-mt-24 flex flex-col gap-6 pt-4 relative">
+        <span id="luu-y" className="absolute -top-24 pointer-events-none" />
+        {/* Banner header lưu ý: Gọn gàng 1 dòng, siêu dễ thương & không dài dòng */}
+        <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl bg-gradient-to-r from-rose-500 via-pink-500 to-rose-500 p-3.5 sm:p-4.5 shadow-md shadow-rose-500/20 text-white border border-white/30">
+          {/* Subtle glowing ambient lights */}
+          <div className="absolute -right-6 -bottom-6 w-32 h-32 rounded-full bg-white/20 blur-2xl pointer-events-none" />
+          <div className="absolute -left-6 -top-6 w-28 h-28 rounded-full bg-amber-300/20 blur-xl pointer-events-none" />
+
+          {/* Background watermark paws */}
+          <div className="absolute inset-0 opacity-10 pointer-events-none select-none flex items-center justify-between px-6">
+            <span className="text-3xl">🐾</span>
+            <span className="text-3xl">🎀</span>
           </div>
-          <div className="relative z-10 flex flex-col sm:flex-row sm:items-center justify-between gap-5">
-            <div className="flex items-center gap-3.5 sm:gap-4 flex-1">
-              <div className="w-14 h-14 sm:w-20 sm:h-20 rounded-2xl sm:rounded-3xl bg-white/20 backdrop-blur-sm flex items-center justify-center shrink-0 border border-white/30 shadow-lg">
-                <span className="text-3xl sm:text-5xl font-black text-white drop-shadow-md">6</span>
+
+          <div className="relative z-10 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4">
+            {/* Mascot + 1-Line Title */}
+            <div className="flex items-center gap-3 min-w-0 w-full sm:w-auto">
+              <div className="relative shrink-0">
+                <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-white/25 backdrop-blur-md flex items-center justify-center p-1 border border-white/50 shadow-sm overflow-hidden">
+                  <img
+                    src="/meow-back-mascot.png"
+                    alt="MeowBack Mascot"
+                    className="w-full h-full object-contain"
+                  />
+                </div>
+                {/* Cute Badge 7 */}
+                <div className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-gradient-to-tr from-amber-400 to-yellow-300 text-amber-950 font-black text-[11px] flex items-center justify-center border border-white shadow-xs">
+                  7
+                </div>
               </div>
-              <div>
-                <h2 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-white tracking-tight leading-tight drop-shadow-xs">
-                  Lưu Ý Quan Trọng
-                </h2>
-                <p className="text-[12px] sm:text-sm text-white/95 font-medium mt-0.5 sm:mt-1">
-                  Đọc kỹ trước khi mua — tránh mất tiền hoàn trên Shopee, TikTok Shop & Lazada 🐱
-                </p>
-              </div>
+
+              <h2 className="text-base sm:text-lg lg:text-xl font-black text-white tracking-tight leading-none drop-shadow-xs flex items-center gap-1.5 truncate">
+                <span>7 Lưu Ý Quan Trọng Cần Nhớ</span>
+                <span className="text-amber-200">✨</span>
+              </h2>
             </div>
+
+            {/* Action Button */}
             {isPublic ? (
               <Link
                 href="/register"
-                className="flex items-center justify-center gap-2 shrink-0 rounded-2xl bg-white text-primary-600 px-5 py-2.5 sm:py-3 text-[13px] font-extrabold transition-all hover:scale-105 active:scale-[0.97] shadow-md"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-white hover:bg-rose-50 text-rose-600 px-4 py-2 text-xs font-black transition-all hover:scale-105 active:scale-95 shadow-sm shrink-0 border border-white/80"
               >
                 <span>Tạo tài khoản ngay 🌸</span>
-                <ArrowRight size={16} strokeWidth={2.5} />
+                <ArrowRight size={14} strokeWidth={2.6} />
               </Link>
             ) : (
               <Link
                 href="/app/refunds"
-                className="flex items-center justify-center gap-2 shrink-0 rounded-2xl bg-white/20 backdrop-blur-sm border border-white/30 px-5 py-2.5 sm:py-3 text-[13px] font-extrabold text-white transition-all hover:bg-white/30 active:scale-[0.97]"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-white hover:bg-rose-50 text-rose-600 px-4 py-2 text-xs font-black transition-all hover:scale-105 active:scale-95 shadow-sm shrink-0 border border-white/80 group"
               >
-                <ArrowLeft size={16} strokeWidth={2.5} />
-                Quay lại tạo link
+                <ArrowLeft size={14} strokeWidth={2.6} className="group-hover:-translate-x-0.5 transition-transform" />
+                <span>Quay lại tạo link</span>
+                <Sparkles size={13} className="text-amber-500 fill-amber-400" />
               </Link>
             )}
           </div>

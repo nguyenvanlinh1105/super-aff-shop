@@ -83,57 +83,29 @@ export default async function CustomerRefundsPage({ searchParams }: { searchPara
 
   return (
     <div className="flex w-full flex-col gap-xl fade-in pb-2xl">
-      {/* ── HEADER CARD (Thiết kế thanh lịch, gọn gàng, chuẩn responsive mobile) ── */}
-      <div className="relative rounded-3xl border border-rose-100/80 bg-white p-4 sm:p-6 shadow-sm overflow-hidden flex flex-col gap-3.5">
-        <div className="flex items-center justify-between gap-3">
-          {/* Khối tiêu đề + Icon */}
-          <div className="flex items-center gap-3 sm:gap-3.5 min-w-0">
-            <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-br from-rose-500 to-pink-500 text-white flex items-center justify-center shadow-sm shadow-rose-500/20 shrink-0">
-              <Sparkles size={22} className="text-white fill-white/30" />
-            </div>
-            <div className="min-w-0">
-              <h1 className="text-lg sm:text-2xl font-black text-neutral-900 tracking-tight leading-snug">
-                Tạo link hoàn tiền
-              </h1>
-              <p className="mt-0.5 text-xs sm:text-sm text-neutral-500 font-medium">
-                Kích hoạt hoàn tiền tự động khi mua sắm
-              </p>
-            </div>
+      {/* ── HEADER CARD ── */}
+      <div className="relative rounded-3xl border border-rose-100/80 bg-white p-4 sm:p-6 shadow-sm overflow-hidden flex items-center justify-between">
+        {/* Khối tiêu đề + Icon */}
+        <div className="flex items-center gap-3 sm:gap-3.5 min-w-0">
+          <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-br from-rose-500 to-pink-500 text-white flex items-center justify-center shadow-sm shadow-rose-500/20 shrink-0">
+            <Sparkles size={22} className="text-white fill-white/30" />
           </div>
-
-          {/* Nút lưu ý nhỏ gọn trên desktop */}
-          <Link
-            href="/app/guide#luu-y"
-            className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-50 hover:bg-amber-100/80 text-amber-900 border border-amber-200/70 text-xs font-bold transition-all shadow-2xs shrink-0 group"
-          >
-            <Lightbulb size={14} className="text-amber-600" />
-            <span>6 Lưu ý quan trọng</span>
-            <ChevronRight size={13} className="text-amber-700 group-hover:translate-x-0.5 transition-transform" />
-          </Link>
-        </div>
-
-        {/* Smart Tip Bar: Đẹp, thanh lịch, chuẩn mobile, không bao giờ bị gãy dòng */}
-        <Link
-          href="/app/guide#luu-y"
-          className="group flex items-center justify-between gap-2 px-3 sm:px-3.5 py-2 sm:py-2.5 rounded-2xl bg-gradient-to-r from-amber-50/90 via-orange-50/50 to-amber-50/90 border border-amber-200/70 hover:border-amber-300 shadow-2xs transition-all active:scale-[0.99]"
-        >
-          <div className="flex items-center gap-2 min-w-0">
-            <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-md bg-amber-500/20 text-amber-700">
-              <Lightbulb size={12} className="stroke-[2.5]" />
-            </span>
-            <p className="text-[11.5px] sm:text-xs text-neutral-700 font-medium truncate">
-              <strong className="font-bold text-amber-950">Mẹo:</strong> 6 lưu ý để không bị huỷ hoàn tiền
+          <div className="min-w-0">
+            <h1 className="text-lg sm:text-2xl font-black text-neutral-900 tracking-tight leading-snug">
+              Tạo link hoàn tiền
+            </h1>
+            <p className="mt-0.5 text-xs sm:text-sm text-neutral-500 font-medium">
+              Kích hoạt hoàn tiền tự động khi mua sắm
             </p>
           </div>
-          <span className="inline-flex items-center gap-0.5 text-[11px] sm:text-xs font-bold text-amber-900 shrink-0 group-hover:translate-x-0.5 transition-transform">
-            <span>Đọc ngay</span>
-            <ChevronRight size={12} strokeWidth={2.5} />
-          </span>
-        </Link>
+        </div>
       </div>
 
       {/* FORM: CHỌN NỀN TẢNG & TẠO LINK */}
-      <CustomerLinkForm platforms={sortedPlatforms.map((p) => ({ id: p.id, code: p.code, label: p.name }))} />
+      <CustomerLinkForm
+        platforms={sortedPlatforms.map((p) => ({ id: p.id, code: p.code, label: p.name }))}
+        autoShowTips={allCount === 0}
+      />
 
       {/* HISTORY CARD */}
       <RefundHistoryClient

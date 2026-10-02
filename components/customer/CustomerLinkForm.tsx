@@ -1,13 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Store, Check, Copy, ExternalLink, Link2, Plus, Package, Sparkles, Wallet } from "lucide-react";
+import { Store, Check, Copy, ExternalLink, Link2, Plus, Package, Sparkles, Wallet, Lightbulb } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { TextInput } from "@/components/ui/TextInput";
 import { ShopeeIcon, TiktokIcon, LazadaIcon } from "@/components/icons/PlatformIcons";
 import { IconBow } from "@/components/icons/CatRibbonIcons";
+import { SevenTipsModal } from "@/components/customer/SevenTipsModal";
 import { formatCurrency } from "@/lib/format";
 import { useToast } from "@/components/ui/Toast";
 
@@ -63,7 +64,13 @@ function getPlatformMeta(code: string) {
   };
 }
 
-export function CustomerLinkForm({ platforms }: { platforms: Option[] }) {
+export function CustomerLinkForm({
+  platforms,
+  autoShowTips = false,
+}: {
+  platforms: Option[];
+  autoShowTips?: boolean;
+}) {
   const router = useRouter();
   const { toast } = useToast();
   const [platformId, setPlatformId] = useState(platforms[0]?.id ?? "");
@@ -72,6 +79,21 @@ export function CustomerLinkForm({ platforms }: { platforms: Option[] }) {
   const [result, setResult] = useState<LinkResult | null>(null);
   const [copied, setCopied] = useState(false);
   const [imgBroken, setImgBroken] = useState(false);
+  const [showTipModal, setShowTipModal] = useState(false);
+
+  useEffect(() => {
+    if (autoShowTips) {
+      const hasSeen = sessionStorage.getItem("meow_seen_7_tips");
+      if (!hasSeen) {
+        setShowTipModal(true);
+      }
+    }
+  }, [autoShowTips]);
+
+  const handleCloseTips = () => {
+    sessionStorage.setItem("meow_seen_7_tips", "true");
+    setShowTipModal(false);
+  };
 
   const selectedPlatform = platforms.find((p) => p.id === platformId);
   const meta = selectedPlatform ? getPlatformMeta(selectedPlatform.code) : getPlatformMeta("");
@@ -137,9 +159,14 @@ export function CustomerLinkForm({ platforms }: { platforms: Option[] }) {
               <Store size={17} className="text-primary-500" />
               Chọn sàn mua sắm
             </span>
-            <span className="text-xs text-neutral-400 font-medium hidden sm:inline">
-              Nhấn để đổi sàn
-            </span>
+            <button
+              type="button"
+              onClick={() => setShowTipModal(true)}
+              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200/80 text-[11px] sm:text-xs font-bold transition-all hover:scale-105 active:scale-95 cursor-pointer shadow-2xs group"
+            >
+              <Lightbulb size={13} className="text-amber-500 fill-amber-400 group-hover:rotate-12 transition-transform" />
+              <span>7 lưu ý cần nhớ</span>
+            </button>
           </div>
 
           <div className="grid grid-cols-3 gap-2.5 sm:gap-3.5">
@@ -303,6 +330,9 @@ export function CustomerLinkForm({ platforms }: { platforms: Option[] }) {
           </div>
         </div>
       )}
+
+      {/* Popup 7 lưu ý cho người mới hoặc khi nhấn nút */}
+      <SevenTipsModal isOpen={showTipModal} onClose={handleCloseTips} />
     </div>
   );
 }

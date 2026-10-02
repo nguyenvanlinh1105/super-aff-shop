@@ -7,6 +7,11 @@ import { useToast } from "@/components/ui/Toast";
 
 const PRESET_TEMPLATES = [
   {
+    title: "🏆 Đua Top Giới Thiệu — Nhận Ngay +50.000đ Vào Ví",
+    message: "Bùng nổ đường đua tháng này! Top các thành viên giới thiệu bạn bè nhiều nhất sẽ được cộng ngay +50.000đ trực tiếp vào ví MeowBack. Rủ rê hội bạn cùng mua sắm hoàn tiền để giật giải ngay hôm nay!",
+    link: "/app/referral",
+  },
+  {
     title: "⚡ Siêu Flash Sale Hoàn Tiền X2",
     message: "Duy nhất hôm nay! Mua sắm mọi đơn Shopee & TikTok Shop qua MeowBack để nhận gấp đôi hoa hồng hoàn về ví. Số lượng có hạn, chốt đơn ngay!",
     link: "/app/deals",

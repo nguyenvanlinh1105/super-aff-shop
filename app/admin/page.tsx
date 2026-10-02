@@ -18,10 +18,17 @@ import {
 import { prisma } from "@/lib/prisma";
 import { formatCurrency } from "@/lib/format";
 import { AdminRevenueChart } from "@/components/admin/AdminRevenueChart";
+import { TopReferrersWidget } from "@/components/admin/TopReferrersWidget";
 import { IconBow } from "@/components/icons/CatRibbonIcons";
 import { ShopeeIcon, TiktokIcon, LazadaIcon } from "@/components/icons/PlatformIcons";
 
 export default async function AdminDashboardPage() {
+  const now = new Date();
+  const currentMonth = now.getMonth() + 1;
+  const currentYear = now.getFullYear();
+  const startOfMonth = new Date(currentYear, now.getMonth(), 1);
+  const endOfMonth = new Date(currentYear, now.getMonth() + 1, 0, 23, 59, 59, 999);
+
   const [
     totalCustomers,
     totalLinks,
@@ -34,6 +41,9 @@ export default async function AdminDashboardPage() {
     orders,
     platforms,
     topBuyersRaw,
+    topReferrersMonthRaw,
+    topReferrersAllTimeRaw,
+    totalReferralsThisMonth,
   ] = await Promise.all([
     prisma.customer.count(),
     prisma.trackingLink.count(),
@@ -63,6 +73,31 @@ export default async function AdminDashboardPage() {
       take: 5,
       where: { customerId: { not: null } },
     }),
+    prisma.customer.groupBy({
+      by: ["referredById"],
+      where: {
+        referredById: { not: null },
+        createdAt: { gte: startOfMonth, lte: endOfMonth },
+      },
+      _count: { id: true },
+      orderBy: { _count: { id: "desc" } },
+      take: 10,
+    }),
+    prisma.customer.groupBy({
+      by: ["referredById"],
+      where: {
+        referredById: { not: null },
+      },
+      _count: { id: true },
+      orderBy: { _count: { id: "desc" } },
+      take: 10,
+    }),
+    prisma.customer.count({
+      where: {
+        referredById: { not: null },
+        createdAt: { gte: startOfMonth, lte: endOfMonth },
+      },
+    }),
   ]);
 
   const commission = Number(commissionAgg._sum.commissionAmount ?? 0);
@@ -89,6 +124,67 @@ export default async function AdminDashboardPage() {
   });
 
   const maxOrders = topBuyersList[0]?.orderCount || 1;
+
+  // ─── TOP 10 NGƯỜI MỜI NHIỀU NHẤT TRONG THÁNG & TOÀN THỜI GIAN ───
+  const allReferrerIds = Array.from(
+    new Set([
+      ...topReferrersMonthRaw.map((r) => r.referredById).filter(Boolean),
+      ...topReferrersAllTimeRaw.map((r) => r.referredById).filter(Boolean),
+    ])
+  ) as string[];
+
+  const referrersData = await prisma.customer.findMany({
+    where: { id: { in: allReferrerIds } },
+    select: {
+      id: true,
+      fullName: true,
+      customerCode: true,
+      phone: true,
+      bankName: true,
+      bankAccountNumber: true,
+      bankAccountName: true,
+      momoNumber: true,
+      momoName: true,
+      _count: {
+        select: { referredUsers: true },
+      },
+    },
+  });
+  const refMap = new Map(referrersData.map((c) => [c.id, c]));
+
+  const monthTopList = topReferrersMonthRaw.map((r) => {
+    const c = r.referredById ? refMap.get(r.referredById) : null;
+    return {
+      id: r.referredById ?? "",
+      name: c?.fullName ?? "Khách hàng ẩn danh",
+      code: c?.customerCode ?? "C000",
+      phone: c?.phone ?? null,
+      bankName: c?.bankName ?? null,
+      bankAccountNumber: c?.bankAccountNumber ?? null,
+      bankAccountName: c?.bankAccountName ?? null,
+      momoNumber: c?.momoNumber ?? null,
+      momoName: c?.momoName ?? null,
+      countThisMonth: r._count.id,
+      totalReferrals: c?._count.referredUsers ?? r._count.id,
+    };
+  });
+
+  const allTimeTopList = topReferrersAllTimeRaw.map((r) => {
+    const c = r.referredById ? refMap.get(r.referredById) : null;
+    return {
+      id: r.referredById ?? "",
+      name: c?.fullName ?? "Khách hàng ẩn danh",
+      code: c?.customerCode ?? "C000",
+      phone: c?.phone ?? null,
+      bankName: c?.bankName ?? null,
+      bankAccountNumber: c?.bankAccountNumber ?? null,
+      bankAccountName: c?.bankAccountName ?? null,
+      momoNumber: c?.momoNumber ?? null,
+      momoName: c?.momoName ?? null,
+      countThisMonth: 0,
+      totalReferrals: r._count.id,
+    };
+  });
 
   // Serialize dữ liệu order cho biểu đồ drill-down (Year → Month → Week)
   const orderData = orders.map((o) => {
@@ -919,6 +1015,15 @@ export default async function AdminDashboardPage() {
           </div>
         )}
       </div>
+
+      {/* ═══ BẢNG XẾP HẠNG TOP 10 NGƯỜI MỜI NHIỀU NHẤT (ĐUA TOP THÁNG & TOÀN THỜI GIAN) ═══ */}
+      <TopReferrersWidget
+        currentMonth={currentMonth}
+        currentYear={currentYear}
+        monthTopList={monthTopList}
+        allTimeTopList={allTimeTopList}
+        totalReferralsThisMonth={totalReferralsThisMonth}
+      />
 
       {/* ═══ 4. TOP THÀNH VIÊN MUA NHIỀU NHẤT & CHỈ SỐ VẬN HÀNH (KẾT HỢP DƯỚI CÙNG THÀNH 1 HÀNG) ═══ */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
