@@ -10,6 +10,16 @@ export const metadata: Metadata = {
   description:
     "Dán link Shopee, Lazada hoặc TikTok Shop, nhận link hoàn tiền tự động vào ví MeowBack. Rút tiền từ 10.000đ, miễn phí hoàn toàn.",
   alternates: { canonical: "/" },
+  keywords: [
+    "MeowBack",
+    "meowback",
+    "meowback shop",
+    "meowback.shop",
+    "hoàn tiền meowback",
+    "hoàn tiền shopee",
+    "hoàn tiền lazada",
+    "hoàn tiền tiktok shop",
+  ],
   openGraph: {
     title: "MeowBack — Hoàn Tiền Mua Sắm Shopee, Lazada & TikTok Shop",
     description:
