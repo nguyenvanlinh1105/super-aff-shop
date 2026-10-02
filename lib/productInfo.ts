@@ -121,6 +121,24 @@ function extractPriceByClass(html: string, classNames: string[]): number | null 
   return !isNaN(parsed) && parsed > 0 ? parsed : null;
 }
 
+export function extractPriceFromTitle(title: string | null): number | null {
+  if (!title) return null;
+  // Match "99k", "150k", "250K"
+  const kMatch = title.match(/\b(\d{1,4})\s*[kK]\b/);
+  if (kMatch) {
+    const val = parseInt(kMatch[1], 10);
+    if (val >= 10 && val <= 50000) return val * 1000;
+  }
+  // Match "99.000đ", "150,000đ", "250.000d"
+  const dMatch = title.match(/\b(\d{1,3}(?:[.,]\d{3})+)\s*(?:đ|d|vnd|vnđ)?\b/i);
+  if (dMatch) {
+    const clean = dMatch[1].replace(/[.,]/g, "");
+    const val = parseInt(clean, 10);
+    if (val >= 10000 && val <= 500000000) return val;
+  }
+  return null;
+}
+
 function extractShopeeIds(url: string): { shopId: string; itemId: string } | null {
   try {
     const path = new URL(url).pathname;
@@ -241,6 +259,7 @@ export async function fetchProductInfo(url: string): Promise<ProductInfo | null>
         if (!title) title = cleanTitle(extractTextByClass(html, CLASS_FALLBACK.title));
         if (!image) image = cleanImage(extractImageSrcByClass(html, CLASS_FALLBACK.image));
         if (price == null) price = extractPriceByClass(html, CLASS_FALLBACK.price);
+        if (price == null && title) price = extractPriceFromTitle(title);
 
         // Nếu lấy được ít nhất tiêu đề hoặc ảnh hợp lệ, trả về ngay
         if (title || image) {

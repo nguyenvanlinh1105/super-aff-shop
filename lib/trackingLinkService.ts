@@ -2,7 +2,7 @@ import { prisma } from "./prisma";
 import { normalizeUrl, buildAffiliateUrl, resolveShortLink } from "./linkConversion";
 import { generateTrackingCode, buildShopeeSubIds } from "./tracking";
 import { buildShortUrl, generateShortCode } from "./shortLink";
-import { fetchProductInfo } from "./productInfo";
+import { fetchProductInfo, extractPriceFromTitle } from "./productInfo";
 import { fetchShopeeProductDetail } from "./shopeeProductApi";
 import { estimateCashback } from "./cashbackEstimate";
 
@@ -50,11 +50,11 @@ export async function createTrackingLink(params: {
 
   const productTitle = productInfo?.title ?? shopeeDetail?.name ?? null;
   const productImage = productInfo?.image ?? shopeeDetail?.image ?? null;
-  // Ưu tiên: nhập tay > JSON-LD (Googlebot scrape) > Shopee internal API
+  // Ưu tiên: nhập tay > JSON-LD (Googlebot scrape) > Shopee internal API > Trích xuất từ tiêu đề
   const productPrice =
     (params.manualPrice && params.manualPrice > 0)
       ? params.manualPrice
-      : (productInfo?.price ?? shopeeDetail?.price ?? null);
+      : (productInfo?.price ?? shopeeDetail?.price ?? extractPriceFromTitle(productTitle) ?? null);
   const productSold = shopeeDetail?.sold ?? productInfo?.sold ?? null;
 
   const cashback = productPrice != null ? await estimateCashback(productTitle, productPrice) : null;

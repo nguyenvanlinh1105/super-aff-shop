@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Store, Check, Copy, ExternalLink, Link2, Plus, Package, Sparkles, Wallet, Lightbulb } from "lucide-react";
+import { Store, Check, Copy, ExternalLink, Link2, Plus, Package, Sparkles, Wallet, Lightbulb, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { TextInput } from "@/components/ui/TextInput";
 import { ShopeeIcon, TiktokIcon, LazadaIcon } from "@/components/icons/PlatformIcons";
@@ -152,20 +152,24 @@ export function CustomerLinkForm({
     <div className="flex flex-col gap-6">
       {/* ─── KHUNG TẠO LINK HOÀN TIỀN (Gộp gọn gàng, đơn giản & hiện đại) ─── */}
       <div className="rounded-3xl bg-white p-5 sm:p-7 shadow-cute border border-primary-100/80">
-        {/* Phần 1: Chọn sàn mua sắm */}
+        {/* Bước 1: Chọn sàn mua sắm */}
         <div className="mb-5">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-[14px] font-extrabold text-neutral-800 flex items-center gap-2">
-              <Store size={17} className="text-primary-500" />
-              Chọn sàn mua sắm
-            </span>
+          <div className="flex items-center justify-between gap-2 mb-3">
+            <div className="flex items-center gap-1.5 sm:gap-2 min-w-0">
+              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-gradient-to-r from-primary-500 to-rose-500 text-[10.5px] font-black text-white shadow-xs">
+                1
+              </span>
+              <span className="text-[13px] sm:text-[14px] font-black text-neutral-900 whitespace-nowrap">
+                Bước 1: <span className="font-extrabold text-neutral-700">Chọn sàn<span className="hidden sm:inline"> mua sắm</span></span>
+              </span>
+            </div>
             <button
               type="button"
               onClick={() => setShowTipModal(true)}
-              className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200/80 text-[11px] sm:text-xs font-bold transition-all hover:scale-105 active:scale-95 cursor-pointer shadow-2xs group"
+              className="inline-flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-1 rounded-full bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200/80 text-[11px] sm:text-xs font-bold transition-all hover:scale-105 active:scale-95 cursor-pointer shadow-2xs group shrink-0 whitespace-nowrap"
             >
-              <Lightbulb size={13} className="text-amber-500 fill-amber-400 group-hover:rotate-12 transition-transform" />
-              <span>7 lưu ý cần nhớ</span>
+              <Lightbulb size={12} className="text-amber-500 fill-amber-400 group-hover:rotate-12 transition-transform shrink-0" />
+              <span>7 lưu ý<span className="hidden sm:inline"> cần nhớ</span></span>
             </button>
           </div>
 
@@ -221,12 +225,20 @@ export function CustomerLinkForm({
         {/* Đường kẻ phân cách nhẹ nhàng */}
         <div className="h-px bg-neutral-100 mb-5" />
 
-        {/* Phần 2: Dán link sản phẩm */}
+        {/* Bước 2: Dán link sản phẩm */}
         <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-3">
-          <label htmlFor="url-input" className="text-[13px] font-bold text-neutral-700 flex items-center gap-1.5">
-            <Link2 size={15} className="text-primary-500" />
-            {meta.tagline}
-          </label>
+          <div className="flex items-center justify-between gap-2">
+            <label htmlFor="url-input" className="text-[13px] font-black text-neutral-900 flex items-center gap-1.5 sm:gap-2 min-w-0 whitespace-nowrap">
+              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-gradient-to-r from-primary-500 to-rose-500 text-[10.5px] font-black text-white shadow-xs">
+                2
+              </span>
+              <span>Bước 2:</span>
+              <span className="text-neutral-600 font-semibold truncate">{meta.tagline}</span>
+            </label>
+            <span className="text-[11px] text-neutral-400 font-medium hidden sm:inline whitespace-nowrap shrink-0">
+              Hỗ trợ link app &amp; web
+            </span>
+          </div>
           <div className="flex flex-col sm:flex-row gap-3">
             <TextInput
               id="url-input"
@@ -260,71 +272,114 @@ export function CustomerLinkForm({
         </form>
       </div>
 
-      {/* ─── Kết quả ─── */}
+      {/* ─── Kết quả (Chỉ hiển thị card thông tin sản phẩm và button Mua ngay) ─── */}
       {result && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 fade-in">
-          {/* Panel left: PRODUCT INFO */}
-          <div className="rounded-3xl bg-white p-6 shadow-cute border border-primary-100/80">
-            <div className="mb-3 flex items-center gap-1.5 text-[12px] font-extrabold uppercase tracking-wider text-neutral-500">
-              <Package size={14} strokeWidth={2.5} />
-              Thông tin sản phẩm
+        <div className="w-full fade-in">
+          <div
+            onClick={() => window.open(result.shortUrl, "_blank")}
+            className="group rounded-3xl bg-white p-5 sm:p-6 shadow-cute hover:shadow-cute-lg border border-primary-100/80 hover:border-primary-300 transition-all cursor-pointer relative block overflow-hidden active:scale-[0.99]"
+            title="Chạm vào để mở sàn & mua ngay"
+          >
+            {/* Top Tag & Platform */}
+            <div className="mb-3.5 flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2">
+                <span
+                  className="rounded-full px-2.5 py-0.5 text-[11px] font-black text-white shadow-2xs"
+                  style={{ backgroundColor: meta.color }}
+                >
+                  {selectedPlatform?.label ?? "Sàn mua sắm"}
+                </span>
+                <span className="font-mono text-[11px] text-neutral-400 truncate">
+                  {result.trackingCode}
+                </span>
+              </div>
             </div>
-            <div className="flex gap-3">
-              <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-primary-50 border border-primary-100 overflow-hidden">
+
+            <div className="flex gap-3.5 sm:gap-4 items-center">
+              <div className="relative flex h-20 w-20 sm:h-24 sm:w-24 shrink-0 items-center justify-center rounded-2xl bg-primary-50 border border-primary-100 overflow-hidden">
                 {result.productImage && !imgBroken ? (
                   <img
                     src={result.productImage}
                     alt=""
                     onError={() => setImgBroken(true)}
-                    className="h-full w-full object-cover"
+                    className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
                   />
                 ) : (
                   <Link2 size={24} strokeWidth={1.5} className="text-primary-500" />
                 )}
               </div>
-              <div className="min-w-0 flex-1">
-                <p className="line-clamp-2 text-[14px] font-bold text-neutral-900 leading-snug">
+              <div className="min-w-0 flex-1 flex flex-col justify-between gap-2">
+                <p className="line-clamp-2 text-[14px] sm:text-[15px] font-bold text-neutral-900 leading-snug group-hover:text-primary-600 transition-colors">
                   {result.productTitle ?? "Sản phẩm mua sắm"}
                 </p>
-                <div className="mt-1 flex items-center gap-1.5 flex-wrap">
-                  <span
-                    className="rounded-full px-2.5 py-0.5 text-[11px] font-bold text-white"
-                    style={{ backgroundColor: meta.color }}
-                  >
-                    {selectedPlatform?.label ?? "Sản phẩm"}
-                  </span>
-                  <span className="font-mono text-[11px] text-neutral-400 truncate">{result.trackingCode}</span>
+
+                {/* GIÁ SẢN PHẨM & ƯỚC TÍNH TIỀN HOÀN CHO KHÁCH HÀNG */}
+                <div className="flex items-center justify-between gap-2 flex-wrap pt-1">
+                  {/* Giá sản phẩm */}
+                  {result.productPrice && Number(result.productPrice) > 0 ? (
+                    <div>
+                      <span className="text-[10px] text-neutral-400 font-semibold block leading-none">
+                        Giá sản phẩm
+                      </span>
+                      <span className="text-xs sm:text-[13px] font-black text-neutral-900 tabular-nums">
+                        {formatCurrency(result.productPrice)}
+                      </span>
+                    </div>
+                  ) : (
+                    <div>
+                      <span className="text-[10px] text-neutral-400 font-semibold block leading-none">
+                        Tỷ lệ hoàn tiền
+                      </span>
+                      <span className="text-xs font-black text-rose-600">
+                        Lên tới 10% - 15% ✨
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Ước tính tiền hoàn */}
+                  {result.estimatedCashback && Number(result.estimatedCashback) > 0 ? (
+                    <div className="text-right">
+                      <span className="text-[10px] text-emerald-600 font-bold block leading-none">
+                        Hoàn tiền ước tính
+                      </span>
+                      <span className="text-xs sm:text-[13px] font-black text-emerald-600 tabular-nums">
+                        +{formatCurrency(result.estimatedCashback)} 🎀
+                      </span>
+                    </div>
+                  ) : result.productPrice && Number(result.productPrice) > 0 ? (
+                    <div className="text-right">
+                      <span className="text-[10px] text-emerald-600 font-bold block leading-none">
+                        Hoàn tiền ước tính
+                      </span>
+                      <span className="text-xs sm:text-[13px] font-black text-emerald-600 tabular-nums">
+                        ~ +{formatCurrency(Math.round(Number(result.productPrice) * 0.05))} 🎀
+                      </span>
+                    </div>
+                  ) : (
+                    <div className="text-right">
+                      <span className="text-[10px] text-neutral-400 font-semibold block leading-none">
+                        Tiền hoàn về ví
+                      </span>
+                      <span className="text-xs font-black text-emerald-600">
+                        Tự động sau khi nhận hàng
+                      </span>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
-          </div>
 
-          {/* Panel right: GENERATED LINK */}
-          <div className="rounded-3xl bg-gradient-to-br from-primary-50 to-white p-6 shadow-cute border border-primary-200">
-            <div className="mb-3 flex items-center gap-1.5 text-[12px] font-extrabold uppercase tracking-wider text-primary-600">
-              <Sparkles size={14} strokeWidth={2.5} />
-              Link hoàn tiền của bạn
-            </div>
-            <input
-              readOnly
-              value={result.shortUrl}
-              onFocus={(e) => e.target.select()}
-              className="mb-4 h-11 w-full rounded-2xl bg-white px-4 text-[13px] font-bold text-neutral-900 border border-primary-200 focus:outline-none focus:ring-2 focus:ring-primary-300"
-            />
-            <div className="flex gap-2">
-              <Button
-                type="button"
-                onClick={copyLink}
-                className="flex-1 rounded-full bg-gradient-to-r from-primary-400 to-primary-500 text-white font-bold shadow-cute"
+            {/* CHỈ HIỂN THỊ BUTTON MUA NGAY */}
+            <div className="mt-4 pt-3.5 border-t border-neutral-100">
+              <a
+                href={result.shortUrl}
+                target="_blank"
+                rel="noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                className="w-full flex items-center justify-center gap-2 h-11 sm:h-12 rounded-2xl bg-gradient-to-r from-primary-500 via-rose-500 to-pink-500 hover:from-primary-600 hover:to-rose-600 text-white text-sm sm:text-base font-black shadow-md shadow-primary-500/25 transition-all hover:scale-[1.01] active:scale-[0.98] cursor-pointer"
               >
-                {copied ? <Check size={16} /> : <Copy size={16} />}
-                {copied ? "Đã copy 🎀" : "Copy link"}
-              </Button>
-              <a href={result.shortUrl} target="_blank" rel="noreferrer">
-                <Button type="button" variant="tertiary" className="rounded-full">
-                  <ExternalLink size={16} />
-                  Mở
-                </Button>
+                <span>Mua ngay</span>
+                <ArrowRight size={18} strokeWidth={2.8} />
               </a>
             </div>
           </div>
