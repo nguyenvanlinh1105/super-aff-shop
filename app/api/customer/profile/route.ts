@@ -1,12 +1,13 @@
 import { NextResponse } from "next/server";
-import { getSession } from "@/lib/auth";
+import { getSession, setSessionCookie, clearSessionCookie } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { generateCustomerCode } from "@/lib/customerCode";
 
 export async function PATCH(request: Request) {
   try {
     const session = await getSession();
-    if (!session || !session.customerId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (!session || !session.userId) {
+      return NextResponse.json({ error: "Vui lòng đăng nhập để thực hiện thao tác này" }, { status: 401 });
     }
 
     const data = await request.json();
@@ -50,24 +51,78 @@ export async function PATCH(request: Request) {
       updateData.phone = data.phone.trim();
     }
 
-    const customer = await prisma.customer.update({
-      where: { id: session.customerId },
+    // Tìm customer hiện tại theo session.customerId
+    let targetCustomerId = session.customerId;
+    let customer = targetCustomerId
+      ? await prisma.customer.findUnique({ where: { id: targetCustomerId } })
+      : null;
+
+    // Nếu không tìm thấy theo session.customerId, tìm theo User trong DB để tự động đồng bộ
+    if (!customer) {
+      const dbUser = await prisma.user.findUnique({
+        where: { id: session.userId },
+        include: { customer: true },
+      });
+
+      if (!dbUser) {
+        clearSessionCookie();
+        return NextResponse.json(
+          { error: "Tài khoản không tồn tại trên hệ thống. Vui lòng đăng nhập lại." },
+          { status: 401 }
+        );
+      }
+
+      if (dbUser.customer) {
+        customer = dbUser.customer;
+        targetCustomerId = customer.id;
+        await setSessionCookie({
+          userId: dbUser.id,
+          role: dbUser.role as "admin" | "customer",
+          fullName: dbUser.fullName,
+          customerId: customer.id,
+        });
+      } else {
+        // Tạo mới hồ sơ Customer cho User nếu chưa có
+        const customerCode = await generateCustomerCode();
+        customer = await prisma.customer.create({
+          data: {
+            customerCode,
+            fullName: dbUser.fullName,
+            phone: updateData.phone ?? null,
+          },
+        });
+        targetCustomerId = customer.id;
+        await prisma.user.update({
+          where: { id: dbUser.id },
+          data: { customerId: customer.id },
+        });
+        await setSessionCookie({
+          userId: dbUser.id,
+          role: dbUser.role as "admin" | "customer",
+          fullName: dbUser.fullName,
+          customerId: customer.id,
+        });
+      }
+    }
+
+    const updatedCustomer = await prisma.customer.update({
+      where: { id: targetCustomerId! },
       data: updateData,
     });
 
     return NextResponse.json({
       success: true,
       customer: {
-        bankName: customer.bankName,
-        bankAccountNumber: customer.bankAccountNumber,
-        bankAccountName: customer.bankAccountName,
-        phone: customer.phone,
-        fullName: customer.fullName,
-        address: customer.address,
+        bankName: updatedCustomer.bankName,
+        bankAccountNumber: updatedCustomer.bankAccountNumber,
+        bankAccountName: updatedCustomer.bankAccountName,
+        phone: updatedCustomer.phone,
+        fullName: updatedCustomer.fullName,
+        address: updatedCustomer.address,
       },
     });
   } catch (error: any) {
     console.error("Profile update error:", error);
-    return NextResponse.json({ error: "Failed to update profile" }, { status: 500 });
+    return NextResponse.json({ error: "Không thể cập nhật hồ sơ, vui lòng thử lại sau" }, { status: 500 });
   }
 }

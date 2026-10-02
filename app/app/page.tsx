@@ -10,7 +10,7 @@ import {
   Zap,
 } from "lucide-react";
 import QRCode from "qrcode";
-import { getSession } from "@/lib/auth";
+import { getSession, setSessionCookie, clearSessionCookie } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { formatCurrency, formatDate } from "@/lib/format";
 import { IconBow } from "@/components/icons/CatRibbonIcons";
@@ -43,27 +43,48 @@ export default async function CustomerHomePage() {
   if (!session) redirect("/login");
   if (session.role === "admin" || !session.customerId) redirect("/admin");
 
-  const [customer, activeRule, allOrders] = await Promise.all([
-    prisma.customer.findUnique({
-      where: { id: session.customerId },
-      include: {
-        orders: {
-          orderBy: { createdAt: "desc" },
-          take: 6,
-          include: {
-            trackingLink: { select: { productImage: true, productTitle: true } },
-            platform: { select: { code: true, name: true } },
-          },
+  let customer = await prisma.customer.findUnique({
+    where: { id: session.customerId },
+    include: {
+      orders: {
+        orderBy: { createdAt: "desc" },
+        take: 6,
+        include: {
+          trackingLink: { select: { productImage: true, productTitle: true } },
+          platform: { select: { code: true, name: true } },
         },
-        trackingLinks: { orderBy: { createdAt: "desc" }, take: 3 },
       },
-    }),
+      trackingLinks: { orderBy: { createdAt: "desc" }, take: 3 },
+    },
+  });
+
+  if (!customer) {
+    const dbUser = await prisma.user.findUnique({
+      where: { id: session.userId },
+      include: { customer: true },
+    });
+
+    if (dbUser?.customer) {
+      await setSessionCookie({
+        userId: dbUser.id,
+        role: dbUser.role as "admin" | "customer",
+        fullName: dbUser.fullName,
+        customerId: dbUser.customer.id,
+      });
+      redirect("/app");
+    } else {
+      clearSessionCookie();
+      redirect("/login?error=" + encodeURIComponent("Phiên đăng nhập không còn hiệu lực. Vui lòng đăng nhập lại."));
+    }
+  }
+
+  const [activeRule, allOrders] = await Promise.all([
     prisma.commissionRule.findFirst({
       where: { active: true },
       orderBy: { createdAt: "desc" },
     }),
     prisma.order.findMany({
-      where: { customerId: session.customerId },
+      where: { customerId: customer.id },
       select: { orderStatus: true, payoutStatus: true, customerRewardAmount: true },
     }),
   ]);
@@ -98,7 +119,7 @@ export default async function CustomerHomePage() {
 
   return (
     <div className="flex flex-col gap-10 sm:gap-12 pb-16">
-      {true && (
+      {(!customer?.phone || customer.phone.trim() === "") && (
         <FadeUp delay={0}>
           <PhoneNumberPrompt initialPhone={customer?.phone} />
         </FadeUp>

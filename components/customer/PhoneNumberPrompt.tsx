@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Phone, X, CheckCircle2, Loader2 } from "lucide-react";
 import { ZaloIcon } from "@/components/icons/PlatformIcons";
@@ -19,35 +19,73 @@ export function PhoneNumberPrompt({ initialPhone }: PhoneNumberPromptProps = {})
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  useEffect(() => {
+    try {
+      if (sessionStorage.getItem("meow_phone_prompt_dismissed") === "true") {
+        setDismissed(true);
+      }
+    } catch (_) {}
+  }, []);
+
+  // Nếu người dùng đã có số điện thoại rồi thì tuyệt đối không hiển thị nhắc nhở nữa
+  if (initialPhone && initialPhone.trim().length > 0) return null;
   if (dismissed) return null;
+
+  function handleDismiss() {
+    setDismissed(true);
+    try {
+      sessionStorage.setItem("meow_phone_prompt_dismissed", "true");
+    } catch (_) {}
+  }
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    const cleanPhone = phone.trim().replace(/\D/g, "");
+    let cleanPhone = phone.trim().replace(/\D/g, "");
+    if (cleanPhone.startsWith("84")) {
+      cleanPhone = "0" + cleanPhone.slice(2);
+    }
     if (!PHONE_PATTERN.test(cleanPhone)) {
-      setError("Số điện thoại không hợp lệ (VD: 0901234567)");
+      setError("Số điện thoại không hợp lệ (gồm 10 số, bắt đầu bằng 0, VD: 0901234567)");
       return;
     }
     setLoading(true);
     setError(null);
 
-    const res = await fetch("/api/customer/profile", {
-      method: "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ phone: cleanPhone }),
-    });
+    try {
+      const res = await fetch("/api/customer/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone: cleanPhone }),
+      });
 
-    setLoading(false);
+      const data = await res.json().catch(() => ({}));
+      setLoading(false);
 
-    if (!res.ok) {
-      setError("Không lưu được, vui lòng thử lại");
-      return;
+      if (!res.ok) {
+        let msg = data.error;
+        if (!msg || msg === "Failed to update profile") {
+          msg = "Không thể cập nhật số điện thoại. Vui lòng thử lại.";
+        }
+        if (res.status === 401) {
+          setError(msg || "Phiên đăng nhập đã hết hạn. Đang chuyển về trang đăng nhập...");
+          setTimeout(() => {
+            window.location.href = "/login";
+          }, 1500);
+          return;
+        }
+        setError(msg);
+        return;
+      }
+
+      setSuccess(true);
+      setTimeout(() => {
+        setDismissed(true);
+        router.refresh();
+      }, 1000);
+    } catch {
+      setLoading(false);
+      setError("Lỗi kết nối máy chủ, vui lòng thử lại sau");
     }
-
-    setSuccess(true);
-    setTimeout(() => {
-      router.refresh();
-    }, 1200);
   }
 
   return (
@@ -59,7 +97,7 @@ export function PhoneNumberPrompt({ initialPhone }: PhoneNumberPromptProps = {})
       {/* Dismiss Button on Mobile (< lg) */}
       <button
         type="button"
-        onClick={() => setDismissed(true)}
+        onClick={handleDismiss}
         className="lg:hidden absolute right-3 top-3 h-6 w-6 sm:h-7 sm:w-7 rounded-full bg-white/90 hover:bg-white text-neutral-400 hover:text-neutral-700 shadow-2xs border border-primary-100/60 flex items-center justify-center transition-all hover:scale-105 active:scale-95 cursor-pointer z-10"
         aria-label="Đóng"
       >
@@ -108,7 +146,7 @@ export function PhoneNumberPrompt({ initialPhone }: PhoneNumberPromptProps = {})
                   value={phone}
                   onChange={(e) => {
                     let val = e.target.value.replace(/\D/g, "");
-                    if (val.startsWith("84") && val.length > 10) {
+                    if (val.startsWith("84")) {
                       val = "0" + val.slice(2);
                     }
                     setPhone(val.slice(0, 10));
@@ -171,7 +209,7 @@ export function PhoneNumberPrompt({ initialPhone }: PhoneNumberPromptProps = {})
           {/* Dismiss Button on Desktop (PC) - vertically aligned with input & button */}
           <button
             type="button"
-            onClick={() => setDismissed(true)}
+            onClick={handleDismiss}
             className="hidden lg:flex h-9 w-9 rounded-full bg-white/90 hover:bg-white text-neutral-400 hover:text-neutral-700 shadow-2xs border border-primary-200/80 hover:border-primary-300 items-center justify-center transition-all hover:scale-105 active:scale-95 cursor-pointer shrink-0"
             aria-label="Đóng thông báo"
             title="Đóng thông báo"
