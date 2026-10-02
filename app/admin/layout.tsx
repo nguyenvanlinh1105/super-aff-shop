@@ -38,7 +38,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
         { href: "/admin/customers",  label: "Khách hàng",          emoji: "👥", icon: <Users           size={16} strokeWidth={1.75} /> },
         { href: "/admin/links",      label: "Link Affiliate",       emoji: "🔗", icon: <Link2           size={16} strokeWidth={1.75} /> },
         { href: "/admin/deals",      label: "Deals Hot",            emoji: "🔥", icon: <Flame           size={16} strokeWidth={1.75} /> },
-        { href: "/admin/community",  label: "Cộng đồng",            emoji: "💬", icon: <MessagesSquare  size={16} strokeWidth={1.75} /> },
+        { href: "/admin/community",  label: "Phát thông báo & Chat", emoji: "📢", icon: <MessagesSquare  size={16} strokeWidth={1.75} /> },
       ],
     },
     {

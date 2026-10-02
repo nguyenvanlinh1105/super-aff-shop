@@ -7,6 +7,26 @@ import { useToast } from "@/components/ui/Toast";
 
 const PRESET_TEMPLATES = [
   {
+    title: "⚡ Shopee Flash Sale 12H rồi sen ơi! 🐾",
+    message: "Đừng mua vội! Mở MeowBack lấy link để được hoàn thêm tới 15% tiền ăn trưa/cà phê nhé 🎀",
+    link: "/app/deals",
+  },
+  {
+    title: "🔥 Đang xem Live chốt đơn hả bạn? ⚡",
+    message: "Chỉ mất 5 giây qua MeowBack là có thêm tiền hoàn về ví rút về tài khoản ngân hàng rồi 💸",
+    link: "/app",
+  },
+  {
+    title: "🌙 0H Bão Sale Shopee đừng quên MeowBack ⏰",
+    message: "Áp mã giảm của sàn xong, nhớ qua MeowBack để nhận hoàn tiền kép. Tiết kiệm tối đa nha! 🐾",
+    link: "/app",
+  },
+  {
+    title: "🎁 Lương Đã Về Ví — Tự Thưởng Thôi! 💰",
+    message: "Mua sắm tẹt ga trên Shopee & TikTok, MeowBack lo hoàn tiền tới 200k cho bạn hôm nay!",
+    link: "/app/deals",
+  },
+  {
     title: "🏆 Đua Top Giới Thiệu — Nhận Ngay +50.000đ Vào Ví",
     message: "Bùng nổ đường đua tháng này! Top các thành viên giới thiệu bạn bè nhiều nhất sẽ được cộng ngay +50.000đ trực tiếp vào ví MeowBack. Rủ rê hội bạn cùng mua sắm hoàn tiền để giật giải ngay hôm nay!",
     link: "/app/referral",
