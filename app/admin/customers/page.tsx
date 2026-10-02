@@ -19,6 +19,7 @@ export default async function AdminCustomersPage({ searchParams }: { searchParam
       { customerCode: { contains: q, mode: "insensitive" } },
       { phone: { contains: q } },
       { telegramUsername: { contains: q, mode: "insensitive" } },
+      { user: { email: { contains: q, mode: "insensitive" } } },
     ];
   }
   if (tab === "active") where.status = "active";
@@ -56,6 +57,8 @@ export default async function AdminCustomersPage({ searchParams }: { searchParam
     include: {
       _count: { select: { trackingLinks: true, orders: true } },
       orders: { select: { customerRewardAmount: true, payoutStatus: true } },
+      user: { select: { email: true, createdAt: true } },
+      referredBy: { select: { id: true, fullName: true, customerCode: true } },
     },
   });
 
@@ -68,6 +71,7 @@ export default async function AdminCustomersPage({ searchParams }: { searchParam
       id: c.id,
       fullName: c.fullName,
       customerCode: c.customerCode,
+      email: c.user?.email || null,
       phone: c.phone,
       zaloUserId: c.zaloUserId,
       telegramUsername: c.telegramUsername,
@@ -77,7 +81,13 @@ export default async function AdminCustomersPage({ searchParams }: { searchParam
       linkCount: c._count.trackingLinks,
       totalReward,
       debt,
-      createdAt: c.createdAt,
+      createdAt: c.createdAt.toISOString(),
+      registeredAt: (c.user?.createdAt || c.createdAt).toISOString(),
+      referredBy: c.referredBy ? {
+        id: c.referredBy.id,
+        fullName: c.referredBy.fullName,
+        customerCode: c.referredBy.customerCode,
+      } : null,
     };
   });
 

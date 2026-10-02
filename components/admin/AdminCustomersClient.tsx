@@ -15,11 +15,15 @@ import {
   ArrowDown,
   ChevronDown,
   Filter,
+  Mail,
+  Globe,
+  UserPlus,
+  Calendar,
 } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
 import { Table, Thead, Tr, Th, Td } from "@/components/ui/Table";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { formatCurrency } from "@/lib/format";
+import { formatCurrency, formatDate } from "@/lib/format";
 import { Pagination } from "@/components/ui/Pagination";
 import { ServerSearchInput } from "@/components/ui/ServerSearchInput";
 import { CustomSelect, type CustomSelectOption } from "@/components/ui/CustomSelect";
@@ -29,6 +33,7 @@ type Customer = {
   id: string;
   fullName: string;
   customerCode: string;
+  email?: string | null;
   phone: string | null;
   zaloUserId: string | null;
   telegramUsername: string | null;
@@ -38,6 +43,13 @@ type Customer = {
   linkCount: number;
   totalReward: number;
   debt: number;
+  createdAt: string;
+  registeredAt?: string;
+  referredBy?: {
+    id: string;
+    fullName: string;
+    customerCode: string;
+  } | null;
 };
 
 interface AdminCustomersClientProps {
@@ -263,7 +275,7 @@ export function AdminCustomersClient({
                       }`}
                       title="Click để đổi chiều sắp xếp theo tên"
                     >
-                      <span>Khách hàng</span>
+                      <span>Khách hàng &amp; Email</span>
                       {currentSort === "fullName" ? (
                         currentOrder === "asc" ? (
                           <ArrowUp size={13} className="text-rose-600 shrink-0" />
@@ -276,6 +288,8 @@ export function AdminCustomersClient({
                     </button>
                   </Th>
                   <Th>Mã KH</Th>
+                  <Th>Nguồn Đăng Ký</Th>
+                  <Th>Ngày Đăng Ký</Th>
                   <Th>Kênh Liên Hệ</Th>
                   <Th align="right">
                     <button
@@ -345,34 +359,73 @@ export function AdminCustomersClient({
                 {customers.map((c) => (
                   <Tr key={c.id}>
                     <Td>
-                      <div className="flex items-center gap-2">
-                        <Link
-                          href={`/admin/customers/${c.id}`}
-                          className="font-extrabold text-neutral-900 hover:text-rose-600 transition-colors"
-                        >
-                          {c.fullName}
-                        </Link>
-                        {c.isPartner && (
-                          <span
-                            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-black"
-                            title="Đối tác — hoa hồng giới thiệu vĩnh viễn"
-                          >
-                            <Handshake size={11} strokeWidth={2.5} />
-                            Đối tác
-                          </span>
-                        )}
+                      <div className="flex items-start gap-2.5">
+                        <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-rose-400 via-pink-500 to-rose-600 text-white flex items-center justify-center font-black text-xs shrink-0 shadow-xs mt-0.5 border border-white/40">
+                          {c.fullName.charAt(0).toUpperCase()}
+                        </div>
+                        <div className="flex flex-col gap-0.5 min-w-0">
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <Link
+                              href={`/admin/customers/${c.id}`}
+                              className="font-extrabold text-neutral-900 hover:text-rose-600 transition-colors text-sm"
+                            >
+                              {c.fullName}
+                            </Link>
+                            {c.isPartner && (
+                              <span
+                                className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200 text-[9.5px] font-black"
+                                title="Đối tác — hoa hồng giới thiệu vĩnh viễn"
+                              >
+                                <Handshake size={10} strokeWidth={2.5} />
+                                Đối tác
+                              </span>
+                            )}
+                          </div>
+                          {c.email ? (
+                            <span className="flex items-center gap-1 text-[11px] text-neutral-500 font-medium truncate max-w-[200px]" title={c.email}>
+                              <Mail size={11} className="text-neutral-400 shrink-0" />
+                              <span className="truncate">{c.email}</span>
+                            </span>
+                          ) : (
+                            <span className="text-[10px] text-neutral-400 italic">Chưa có email</span>
+                          )}
+                        </div>
                       </div>
                     </Td>
                     <Td>
-                      <span className="font-mono text-xs font-bold text-neutral-500 bg-neutral-100 px-2 py-1 rounded-lg">
+                      <span className="font-mono text-xs font-bold text-neutral-600 bg-neutral-100 px-2 py-1 rounded-lg border border-neutral-200/60">
                         {c.customerCode}
                       </span>
                     </Td>
                     <Td>
+                      {c.referredBy ? (
+                        <Link
+                          href={`/admin/customers/${c.referredBy.id}`}
+                          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200/80 text-[11px] font-black transition-colors"
+                          title={`Người mời: ${c.referredBy.fullName} (${c.referredBy.customerCode})`}
+                        >
+                          <UserPlus size={11} className="text-purple-500 shrink-0" />
+                          <span className="truncate max-w-[120px]">{c.referredBy.fullName}</span>
+                        </Link>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-neutral-100 text-neutral-600 border border-neutral-200/70 text-[11px] font-bold">
+                          <Globe size={11} className="text-neutral-400 shrink-0" />
+                          Trực tiếp
+                        </span>
+                      )}
+                    </Td>
+                    <Td>
+                      <div className="flex items-center gap-1.5 text-xs text-neutral-700 whitespace-nowrap">
+                        <Calendar size={12} className="text-neutral-400 shrink-0" />
+                        <span className="font-semibold">{formatDate(c.registeredAt || c.createdAt)}</span>
+                      </div>
+                    </Td>
+                    <Td>
                       <div className="flex flex-col gap-0.5 text-xs font-medium">
-                        {c.phone && <span className="text-neutral-700">📞 {c.phone}</span>}
+                        {c.phone && <span className="text-neutral-700 font-semibold">📞 {c.phone}</span>}
                         {c.zaloUserId && <span className="text-blue-600">Zalo: {c.zaloUserId}</span>}
                         {c.telegramUsername && <span className="text-sky-500">Telegram: @{c.telegramUsername}</span>}
+                        {!c.phone && !c.zaloUserId && !c.telegramUsername && <span className="text-neutral-400">—</span>}
                       </div>
                     </Td>
                     <Td align="right">
