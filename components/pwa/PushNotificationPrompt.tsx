@@ -124,15 +124,8 @@ export function PushNotificationPrompt({
     }
   }
 
-  // 1. Không hỗ trợ
+  // 1. Không hỗ trợ -> Ẩn hoàn toàn
   if (!supported) {
-    if (inSettings) {
-      return (
-        <div className="rounded-2xl bg-neutral-50 border border-neutral-200/80 p-4 text-xs font-medium text-neutral-600">
-          Trình duyệt hiện tại chưa hỗ trợ nhận thông báo đẩy.
-        </div>
-      );
-    }
     return null;
   }
 

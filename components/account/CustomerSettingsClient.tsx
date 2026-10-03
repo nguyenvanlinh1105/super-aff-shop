@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { User, Lock, KeyRound, Bell, Send } from "lucide-react";
+import { isPushNotificationSupported } from "@/lib/pushClient";
 import { ProfileSummaryCard } from "./ProfileSummaryCard";
 import { ProfileInfoForm } from "./ProfileInfoForm";
 import { PaymentPinSettings } from "./PaymentPinSettings";
@@ -38,6 +39,11 @@ export function CustomerSettingsClient({
   hasPin,
   defaultTab,
 }: CustomerSettingsClientProps) {
+  const [pushSupported, setPushSupported] = useState(false);
+
+  useEffect(() => {
+    setPushSupported(isPushNotificationSupported());
+  }, []);
   // Tự động cuộn mượt mà đến khu vực mong muốn nếu có defaultTab hoặc hash trên URL
   useEffect(() => {
     if (defaultTab && defaultTab !== "profile") {
@@ -160,32 +166,34 @@ export function CustomerSettingsClient({
           <ChangePasswordForm />
         </section>
 
-        {/* Khối 2.3: Cài đặt nhận thông báo thiết bị (Bật / Tắt thông báo) */}
-        <section
-          id="notifications"
-          className="bg-white rounded-3xl border border-primary-100/90 shadow-cute p-4 sm:p-6 lg:p-7 scroll-mt-24"
-        >
-          <div className="flex items-start sm:items-center gap-3 pb-4 mb-4 sm:pb-5 sm:mb-5 border-b border-neutral-100">
-            <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-rose-50 border border-rose-100 text-rose-600 flex items-center justify-center shrink-0 shadow-2xs">
-              <Bell size={19} strokeWidth={2.3} />
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 flex-wrap">
-                <h2 className="text-base sm:text-lg font-black text-neutral-900 tracking-tight leading-snug">
-                  Cài đặt nhận thông báo
-                </h2>
-                <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md bg-rose-100/80 text-rose-700 whitespace-nowrap shrink-0">
-                  Thiết bị
-                </span>
+        {/* Khối 2.3: Cài đặt nhận thông báo thiết bị (Bật / Tắt thông báo) - Ẩn hoàn toàn nếu trình duyệt không hỗ trợ */}
+        {pushSupported && (
+          <section
+            id="notifications"
+            className="bg-white rounded-3xl border border-primary-100/90 shadow-cute p-4 sm:p-6 lg:p-7 scroll-mt-24"
+          >
+            <div className="flex items-start sm:items-center gap-3 pb-4 mb-4 sm:pb-5 sm:mb-5 border-b border-neutral-100">
+              <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-rose-50 border border-rose-100 text-rose-600 flex items-center justify-center shrink-0 shadow-2xs">
+                <Bell size={19} strokeWidth={2.3} />
               </div>
-              <p className="text-xs text-neutral-500 font-medium mt-0.5 leading-relaxed">
-                Quản lý bật hoặc tắt nhận thông báo hoàn tiền &amp; đơn hàng trên thiết bị này
-              </p>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h2 className="text-base sm:text-lg font-black text-neutral-900 tracking-tight leading-snug">
+                    Cài đặt nhận thông báo
+                  </h2>
+                  <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md bg-rose-100/80 text-rose-700 whitespace-nowrap shrink-0">
+                    Thiết bị
+                  </span>
+                </div>
+                <p className="text-xs text-neutral-500 font-medium mt-0.5 leading-relaxed">
+                  Quản lý bật hoặc tắt nhận thông báo hoàn tiền &amp; đơn hàng trên thiết bị này
+                </p>
+              </div>
             </div>
-          </div>
 
-          <PushNotificationPrompt inSettings />
-        </section>
+            <PushNotificationPrompt inSettings />
+          </section>
+        )}
 
         {/* Khối 2.4: Tiện ích Telegram Bot */}
         <section
