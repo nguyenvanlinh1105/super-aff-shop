@@ -22,9 +22,7 @@ export const SUPPORT_CONFIG: SupportChannelConfig[] = [
     label: "Hotline Hỗ Trợ",
     handle: "0387.092.630",
     href: "tel:0387092630",
-    enabled:
-      process.env.NEXT_PUBLIC_SHOW_SUPPORT_HOTLINE === "true" ||
-      process.env.NEXT_PUBLIC_SHOW_SUPPORT_HOTLINE === undefined, // default: true
+    enabled: process.env.NEXT_PUBLIC_SHOW_SUPPORT_HOTLINE === "true", // default: false (tạm ẩn)
     iconType: "hotline",
     gradient: "from-rose-500 to-pink-600",
   },

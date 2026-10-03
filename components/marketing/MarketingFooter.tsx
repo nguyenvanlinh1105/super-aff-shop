@@ -156,13 +156,6 @@ export function MarketingFooter() {
             © {new Date().getFullYear()} MeowBack - Nơ Mèo Hoàn Tiền. Bản quyền
             thuộc về MeowBack.
           </p>
-          <a
-            href="tel:19008888"
-            className="flex items-center gap-1.5 text-[13px] text-primary-600 font-bold hover:text-primary-500 transition-colors"
-          >
-            <Phone size={15} strokeWidth={2.2} />
-            Hotline hỗ trợ: 1900.8888
-          </a>
         </div>
       </div>
     </footer>

@@ -132,7 +132,7 @@ const SECTIONS = [
   {
     title: "12. Liên hệ",
     body: [
-      "Nếu có bất kỳ thắc mắc nào về Điều khoản sử dụng, vui lòng liên hệ đội ngũ MeowBack qua hotline 0387.092.630 hoặc các kênh mạng xã hội chính thức tại chân trang website.",
+      "Nếu có bất kỳ thắc mắc nào về Điều khoản sử dụng, vui lòng liên hệ đội ngũ MeowBack qua các kênh hỗ trợ chính thức tại chân trang website.",
     ],
   },
 ];

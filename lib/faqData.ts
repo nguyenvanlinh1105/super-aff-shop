@@ -119,7 +119,7 @@ export const FAQ_ITEMS: FaqItem[] = [
     group: "Về lý do link không ghi nhận",
     question: "Làm sao biết đơn của tôi đã được ghi nhận chưa?",
     answer:
-      'Vào mục đơn hàng trên web MeowBack → Đơn ghi nhận thành công sẽ hiện trạng thái "Đang chờ duyệt" trong vòng 24–48h sau khi mua. Nếu sau 48h không thấy, bạn có thể hủy và đặt lại đơn khác (nếu không gấp) hoặc liên hệ Zalo 0387.092.630 để được hỗ trợ.',
+      'Vào mục đơn hàng trên web MeowBack → Đơn ghi nhận thành công sẽ hiện trạng thái "Đang chờ duyệt" trong vòng 24–48h sau khi mua. Nếu sau 48h không thấy, bạn có thể hủy và đặt lại đơn khác (nếu không gấp) hoặc liên hệ kênh hỗ trợ Zalo để được hỗ trợ.',
   },
   {
     group: "Về lý do link không ghi nhận",
@@ -171,6 +171,6 @@ export const FAQ_ITEMS: FaqItem[] = [
     group: "Các tình huống khác",
     question: "Liên hệ hỗ trợ ở đâu nếu có vấn đề?",
     answer:
-      "Hotline: 0387.092.630 — hoặc nhắn tin qua Zalo, Facebook, Telegram bot. Phản hồi trong giờ hành chính.",
+      "Nhắn tin qua Cộng đồng Zalo hoặc Fanpage Facebook. Phản hồi nhanh chóng trong giờ làm việc.",
   },
 ];

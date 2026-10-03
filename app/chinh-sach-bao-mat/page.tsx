@@ -63,7 +63,7 @@ const SECTIONS = [
       "Ghi nhận, đối soát và tính toán chính xác số tiền hoàn cho từng đơn hàng.",
       "Xử lý yêu cầu rút tiền và chuyển khoản đến đúng tài khoản ngân hàng bạn khai báo.",
       "Gửi thông báo về trạng thái đơn hàng, thanh toán qua website và/hoặc Telegram (nếu đã liên kết).",
-      "Chăm sóc khách hàng, hỗ trợ giải đáp thắc mắc qua hotline, Zalo, Telegram.",
+      "Chăm sóc khách hàng, hỗ trợ giải đáp thắc mắc qua Zalo, Fanpage, Telegram.",
       "Phát hiện và ngăn chặn các hành vi gian lận, trục lợi chương trình hoàn tiền hoặc giới thiệu bạn bè.",
     ],
   },
@@ -106,7 +106,7 @@ const SECTIONS = [
     list: [
       "Yêu cầu xem, cập nhật hoặc chỉnh sửa thông tin cá nhân (họ tên, số điện thoại, thông tin ngân hàng...) trực tiếp trong mục Cài đặt tài khoản.",
       "Yêu cầu ngừng nhận thông báo qua Telegram bằng cách huỷ liên kết bot.",
-      "Yêu cầu đóng tài khoản và xoá dữ liệu cá nhân, bằng cách liên hệ hotline hoặc Zalo hỗ trợ — trừ các dữ liệu bắt buộc phải lưu giữ theo quy định pháp luật.",
+      "Yêu cầu đóng tài khoản và xoá dữ liệu cá nhân, bằng cách liên hệ Zalo hoặc các kênh hỗ trợ trực tuyến — trừ các dữ liệu bắt buộc phải lưu giữ theo quy định pháp luật.",
     ],
   },
   {
@@ -124,7 +124,7 @@ const SECTIONS = [
   {
     title: "11. Liên hệ",
     body: [
-      "Nếu bạn có bất kỳ câu hỏi nào về cách MeowBack thu thập, sử dụng hoặc bảo vệ thông tin cá nhân, vui lòng liên hệ qua hotline 0387.092.630 hoặc các kênh mạng xã hội chính thức tại chân trang website.",
+      "Nếu bạn có bất kỳ câu hỏi nào về cách MeowBack thu thập, sử dụng hoặc bảo vệ thông tin cá nhân, vui lòng liên hệ qua các kênh hỗ trợ chính thức tại chân trang website.",
     ],
   },
 ];
