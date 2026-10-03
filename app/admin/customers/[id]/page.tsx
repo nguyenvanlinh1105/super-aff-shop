@@ -87,8 +87,8 @@ export default async function CustomerDetailPage({ params }: { params: { id: str
           <div className="flex items-start sm:items-center gap-5">
             {/* Avatar */}
             <div className="relative">
-              <div className="w-18 h-18 sm:w-22 sm:h-22 rounded-3xl bg-white p-2 shadow-xl shadow-rose-500/15 border-2 border-rose-200/80 shrink-0 overflow-hidden flex items-center justify-center">
-                <img src="/icon-512.png" alt="MeowBack" className="w-full h-full object-contain rounded-2xl" />
+              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-white p-1.5 shadow-md shadow-rose-500/10 border border-rose-200/80 shrink-0 overflow-hidden flex items-center justify-center">
+                <img src="/logo-200.png" alt="MeowBack" className="w-full h-full object-contain rounded-xl" />
               </div>
               <div
                 className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-white shadow-xs ${

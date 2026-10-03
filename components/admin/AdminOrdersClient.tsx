@@ -515,12 +515,12 @@ export function AdminOrdersClient({
             <tbody>
               {orders.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="py-12 text-center">
-                    <div className="flex flex-col items-center gap-2.5">
-                      <div className="w-18 h-18 rounded-3xl bg-neutral-50 p-2 border border-neutral-200/80 shadow-xs overflow-hidden flex items-center justify-center">
-                        <img src="/meow-back-orders.png" alt="MeowBack Orders" className="h-full w-full object-contain rounded-2xl" />
+                  <td colSpan={8} className="py-10 text-center">
+                    <div className="flex flex-col items-center gap-2">
+                      <div className="w-10 h-10 rounded-xl bg-neutral-100 p-1 border border-neutral-200/80 shadow-2xs overflow-hidden flex items-center justify-center shrink-0">
+                        <img src="/logo-200.png" alt="MeowBack Orders" className="h-full w-full object-contain rounded-lg" />
                       </div>
-                      <span className="text-xs font-bold text-neutral-400">Không tìm thấy đơn hàng nào phù hợp</span>
+                      <span className="text-xs font-semibold text-neutral-400">Không tìm thấy đơn hàng nào phù hợp</span>
                     </div>
                   </td>
                 </tr>

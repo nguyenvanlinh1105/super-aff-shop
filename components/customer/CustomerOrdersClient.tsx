@@ -189,9 +189,11 @@ export function CustomerOrdersClient({ orders, totalPages, currentPage, counts }
       {/* CONTENT LIST */}
       <div className="mt-md rounded-3xl bg-white p-md shadow-lg shadow-primary-500/5 ring-1 ring-primary-100/50 min-h-[400px]">
         {orders.length === 0 ? (
-          <div className="flex h-full min-h-[350px] flex-col items-center justify-center">
-            <img src="/meowback_lucky_cat_logo.png" alt="" className="mb-md h-20 w-20 object-contain opacity-90" />
-            <div className="text-[14px] font-bold text-gray-400">Chưa có đơn hàng</div>
+          <div className="flex h-full min-h-[220px] flex-col items-center justify-center py-8">
+            <div className="w-10 h-10 rounded-xl bg-neutral-100 p-1 border border-neutral-200/80 shadow-2xs flex items-center justify-center overflow-hidden shrink-0 mb-2">
+              <img src="/logo-200.png" alt="MeowBack" className="w-full h-full object-contain rounded-lg" />
+            </div>
+            <div className="text-xs font-semibold text-neutral-400">Chưa có đơn hàng nào</div>
           </div>
         ) : (
           <div className="flex flex-col gap-3.5">

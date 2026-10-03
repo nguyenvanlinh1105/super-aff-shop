@@ -261,12 +261,12 @@ export function CommunityChat({
         className="flex-1 overflow-y-auto p-4 sm:p-5 flex flex-col gap-3.5 bg-neutral-50/40"
       >
         {messages.length === 0 ? (
-          <div className="flex flex-1 flex-col items-center justify-center gap-3 text-center my-auto py-10">
-            <div className="w-18 h-18 sm:w-20 sm:h-20 mx-auto rounded-3xl overflow-hidden shadow-cute border-2 border-primary-100/80 bg-pink-50/60 p-1">
-              <img src="/meow-back-mascot.png" alt="" className="w-full h-full object-contain rounded-2xl" />
+          <div className="flex flex-1 flex-col items-center justify-center gap-2 text-center my-auto py-8">
+            <div className="w-10 h-10 mx-auto rounded-xl overflow-hidden shadow-2xs border border-neutral-200/80 bg-neutral-100 p-1 shrink-0">
+              <img src="/logo-200.png" alt="" className="w-full h-full object-contain rounded-lg" />
             </div>
             <div className="max-w-sm">
-              <p className="text-sm font-extrabold text-neutral-700">Chưa có tin nhắn nào trong phòng chat</p>
+              <p className="text-xs font-bold text-neutral-600">Chưa có tin nhắn nào trong phòng chat</p>
               <p className="mt-1 text-xs text-neutral-400 font-medium">
                 Hãy là người đầu tiên gửi lời chào đến cộng đồng MeowBack hôm nay nhé! 🐾
               </p>

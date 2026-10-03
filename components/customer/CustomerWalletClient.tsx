@@ -583,12 +583,12 @@ export function CustomerWalletClient({
                 <tbody className="divide-y divide-primary-50">
                   {history.length === 0 ? (
                     <tr>
-                      <td colSpan={4} className="py-12 text-center">
+                      <td colSpan={4} className="py-10 text-center">
                         <div className="flex flex-col items-center justify-center text-center px-4">
-                          <div className="w-16 h-16 rounded-3xl bg-gradient-to-br from-primary-100 via-pink-100 to-rose-100 flex items-center justify-center shadow-cute p-1 border-2 border-white mb-3.5">
-                            <img src="/meowback_lucky_cat_logo.png" alt="MeowBack Mascot" className="w-full h-full object-contain rounded-2xl" />
+                          <div className="w-10 h-10 rounded-xl bg-neutral-100 p-1 border border-neutral-200/80 shadow-2xs flex items-center justify-center overflow-hidden shrink-0 mb-2">
+                            <img src="/logo-200.png" alt="MeowBack Mascot" className="w-full h-full object-contain rounded-lg" />
                           </div>
-                          <span className="text-[14px] font-bold text-neutral-800">Ví chưa có giao dịch rút nào 🎀</span>
+                          <span className="text-[13px] font-bold text-neutral-800">Ví chưa có giao dịch rút nào</span>
                           <p className="mt-1 text-[12px] text-neutral-500 max-w-xs font-medium">
                             Khi tích luỹ đủ số dư tối thiểu từ tiền hoàn, bạn có thể tạo lệnh rút về ngân hàng.
                           </p>

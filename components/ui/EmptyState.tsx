@@ -12,28 +12,28 @@ export function EmptyState({
   action?: React.ReactNode;
 }) {
   return (
-    <div className="flex flex-col items-center justify-center gap-4 py-12 text-center fade-in">
+    <div className="flex flex-col items-center justify-center gap-2.5 py-8 text-center fade-in">
       <div className="relative">
-        <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-3xl bg-pink-50/80 p-2.5 border border-pink-200/70 shadow-sm flex items-center justify-center mx-auto overflow-hidden">
+        <div className="w-10 h-10 rounded-xl bg-neutral-100 p-1 border border-neutral-200/80 shadow-2xs flex items-center justify-center mx-auto overflow-hidden shrink-0">
           <img
-            src="/icon-512.png"
+            src="/logo-200.png"
             alt="MeowBack Mascot"
-            className="w-full h-full object-contain rounded-2xl drop-shadow-xs"
+            className="w-full h-full object-contain rounded-lg"
           />
         </div>
         {Icon && (
-          <div className="absolute -bottom-1 -right-1 flex h-8 w-8 items-center justify-center rounded-full bg-primary-100 text-primary-600 shadow-cute border-2 border-white">
-            <Icon size={16} strokeWidth={2.5} />
+          <div className="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary-100 text-primary-600 border border-white">
+            <Icon size={9} strokeWidth={2.5} />
           </div>
         )}
       </div>
       <div>
-        <div className="text-[17px] font-bold text-neutral-900">{title}</div>
+        <div className="text-sm font-bold text-neutral-800">{title}</div>
         {description && (
-          <div className="mt-1 max-w-[340px] text-[14px] text-neutral-500 leading-relaxed">{description}</div>
+          <div className="mt-0.5 max-w-[340px] text-xs text-neutral-500 leading-relaxed">{description}</div>
         )}
       </div>
-      {action && <div className="mt-2">{action}</div>}
+      {action && <div className="mt-1.5">{action}</div>}
     </div>
   );
 }
