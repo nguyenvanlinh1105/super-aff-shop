@@ -54,6 +54,7 @@ const jsonLd = {
       "@id": "https://meowback.shop/#website",
       url: "https://meowback.shop",
       name: "MeowBack",
+      alternateName: ["MeowBack Shop", "Meow Back", "meowback.shop"],
       description:
         "Nền tảng affiliate hoàn tiền cho Shopee, Lazada và TikTok Shop tại Việt Nam.",
       inLanguage: "vi-VN",
