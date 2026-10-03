@@ -43,11 +43,10 @@ export default async function AdminAdminsPage() {
   }));
 
   const totalAdmins = formattedAdmins.length;
-  const activeAdmins = formattedAdmins.filter((a) => a.status === "active").length;
   const telegramNotifiedAdmins = formattedAdmins.filter(
-    (a) => a.status === "active" && a.notifyOnNewCustomer && a.telegramChatId
+    (a) => a.notifyOnNewCustomer && a.telegramChatId
   ).length;
-  const inactiveAdmins = formattedAdmins.filter((a) => a.status !== "active").length;
+  const mfaAdmins = formattedAdmins.filter((a) => a.mfaEnabled).length;
 
   return (
     <div className="flex flex-col gap-6 fade-in pb-12">
@@ -76,7 +75,7 @@ export default async function AdminAdminsPage() {
       </div>
 
       {/* ── STAT CARDS ── */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {/* Tổng Quản Trị Viên */}
         <div className="group relative overflow-hidden rounded-3xl bg-white p-5 shadow-sm border border-neutral-200/70 hover:border-rose-200 transition-all duration-300 hover:-translate-y-0.5">
           <div className="relative flex items-center gap-3.5">
@@ -85,27 +84,10 @@ export default async function AdminAdminsPage() {
             </div>
             <div>
               <div className="text-[10px] font-extrabold uppercase tracking-widest text-neutral-400">
-                Tổng Quản Trị
+                Tổng Quản Trị Viên
               </div>
               <div className="text-xl font-black text-neutral-900 tabular-nums leading-tight">
                 {totalAdmins}
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Đang hoạt động */}
-        <div className="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-white to-emerald-50/60 p-5 shadow-sm border border-emerald-200/70 hover:border-emerald-300 transition-all duration-300 hover:-translate-y-0.5">
-          <div className="relative flex items-center gap-3.5">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700 font-black text-xl shadow-xs shrink-0 group-hover:scale-105 transition-transform">
-              <ShieldCheck size={20} strokeWidth={2.2} />
-            </div>
-            <div>
-              <div className="text-[10px] font-extrabold uppercase tracking-widest text-emerald-700/70">
-                Đang Hoạt Động
-              </div>
-              <div className="text-xl font-black text-emerald-700 tabular-nums leading-tight">
-                {activeAdmins}
               </div>
             </div>
           </div>
@@ -119,7 +101,7 @@ export default async function AdminAdminsPage() {
             </div>
             <div>
               <div className="text-[10px] font-extrabold uppercase tracking-widest text-sky-700/70">
-                Nhận Báo Bot Telegram
+                Báo Bot Khi Có User Mới
               </div>
               <div className="text-xl font-black text-sky-700 tabular-nums leading-tight">
                 {telegramNotifiedAdmins} <span className="text-xs font-semibold text-sky-600/80">admin</span>
@@ -128,18 +110,18 @@ export default async function AdminAdminsPage() {
           </div>
         </div>
 
-        {/* Tạm khóa */}
-        <div className="group relative overflow-hidden rounded-3xl bg-white p-5 shadow-sm border border-neutral-200/70 hover:border-neutral-300 transition-all duration-300 hover:-translate-y-0.5">
+        {/* Bảo mật 2MFA */}
+        <div className="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-white to-emerald-50/60 p-5 shadow-sm border border-emerald-200/70 hover:border-emerald-300 transition-all duration-300 hover:-translate-y-0.5">
           <div className="relative flex items-center gap-3.5">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-neutral-100 text-neutral-500 font-black text-xl shadow-xs shrink-0 group-hover:scale-105 transition-transform">
-              <UserX size={20} strokeWidth={2.2} />
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700 font-black text-xl shadow-xs shrink-0 group-hover:scale-105 transition-transform">
+              <ShieldCheck size={20} strokeWidth={2.2} />
             </div>
             <div>
-              <div className="text-[10px] font-extrabold uppercase tracking-widest text-neutral-400">
-                Tạm Khóa
+              <div className="text-[10px] font-extrabold uppercase tracking-widest text-emerald-700/70">
+                Xác Thực 2MFA
               </div>
-              <div className="text-xl font-black text-neutral-700 tabular-nums leading-tight">
-                {inactiveAdmins}
+              <div className="text-xl font-black text-emerald-700 tabular-nums leading-tight">
+                {mfaAdmins} <span className="text-xs font-semibold text-emerald-600/80">đã kích hoạt</span>
               </div>
             </div>
           </div>

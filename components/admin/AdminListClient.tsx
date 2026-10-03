@@ -3,29 +3,20 @@
 import { useState } from "react";
 import {
   Shield,
-  ShieldCheck,
-  UserCheck,
-  UserX,
   Pencil,
   Plus,
   Search,
   X,
   Save,
-  Send,
   BellRing,
   BellOff,
   Copy,
   Check,
   Mail,
-  Lock,
-  Phone,
   Info,
-  Sparkles,
   KeyRound,
-  RotateCcw,
 } from "lucide-react";
 import { useToast } from "@/components/ui/Toast";
-import { useModal } from "@/components/ui/ModalProvider";
 import { TextInput } from "@/components/ui/TextInput";
 import { Button } from "@/components/ui/Button";
 
@@ -60,11 +51,9 @@ export function AdminListClient({
   currentAdminId: string;
 }) {
   const { toast } = useToast();
-  const modal = useModal();
 
   const [admins, setAdmins] = useState<AdminUser[]>(initialAdmins);
   const [search, setSearch] = useState("");
-  const [filterStatus, setFilterStatus] = useState("all");
   const [filterNotify, setFilterNotify] = useState("all");
 
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -85,8 +74,6 @@ export function AdminListClient({
   const [editPhone, setEditPhone] = useState("");
   const [editTelegramId, setEditTelegramId] = useState("");
   const [editNotify, setEditNotify] = useState(true);
-  const [editStatus, setEditStatus] = useState("active");
-  const [editNewPassword, setEditNewPassword] = useState("");
   const [editLoading, setEditLoading] = useState(false);
   const [editError, setEditError] = useState<string | null>(null);
 
@@ -150,8 +137,6 @@ export function AdminListClient({
     setEditPhone(admin.phone || "");
     setEditTelegramId(admin.telegramChatId || "");
     setEditNotify(admin.notifyOnNewCustomer);
-    setEditStatus(admin.status);
-    setEditNewPassword("");
     setEditError(null);
   };
 
@@ -171,8 +156,6 @@ export function AdminListClient({
           phone: editPhone || null,
           telegramChatId: editTelegramId || null,
           notifyOnNewCustomer: editNotify,
-          status: editStatus,
-          newPassword: editNewPassword.trim() || undefined,
         }),
       });
 
@@ -191,39 +174,6 @@ export function AdminListClient({
     }
   };
 
-  const toggleAdminStatus = async (admin: AdminUser) => {
-    const isCurrentlyActive = admin.status === "active";
-    const newStatus = isCurrentlyActive ? "inactive" : "active";
-
-    const confirmed = await modal.confirm({
-      title: isCurrentlyActive ? "Tạm khóa tài khoản Admin?" : "Kích hoạt lại tài khoản Admin?",
-      message: isCurrentlyActive
-        ? `Bạn có chắc muốn tạm khóa tài khoản của "${admin.fullName}" (${admin.email}) không? Admin này sẽ không thể đăng nhập vào hệ thống cho tới khi được mở khóa.`
-        : `Kích hoạt lại quyền truy cập hệ thống cho "${admin.fullName}" (${admin.email})?`,
-      confirmText: isCurrentlyActive ? "Tạm khóa" : "Mở khóa",
-      cancelText: "Hủy",
-      iconType: isCurrentlyActive ? "danger" : "info",
-    });
-
-    if (!confirmed) return;
-
-    try {
-      const res = await fetch(`/api/admin/admins/${admin.id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: newStatus }),
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Không thể thay đổi trạng thái");
-
-      setAdmins((prev) => prev.map((a) => (a.id === admin.id ? data.admin : a)));
-      toast.info(newStatus === "active" ? "Đã kích hoạt lại tài khoản" : "Đã tạm khóa tài khoản Admin");
-    } catch (err: any) {
-      toast.error(err.message || "Có lỗi xảy ra");
-    }
-  };
-
   // Lọc dữ liệu
   const filteredAdmins = admins.filter((a) => {
     const q = search.toLowerCase().trim();
@@ -234,17 +184,12 @@ export function AdminListClient({
       (a.phone && a.phone.includes(q)) ||
       (a.telegramChatId && a.telegramChatId.includes(q));
 
-    const matchStatus =
-      filterStatus === "all" ||
-      (filterStatus === "active" && a.status === "active") ||
-      (filterStatus === "inactive" && a.status === "inactive");
-
     const matchNotify =
       filterNotify === "all" ||
       (filterNotify === "enabled" && a.notifyOnNewCustomer && a.telegramChatId) ||
       (filterNotify === "disabled" && (!a.notifyOnNewCustomer || !a.telegramChatId));
 
-    return matchSearch && matchStatus && matchNotify;
+    return matchSearch && matchNotify;
   });
 
   return (
@@ -442,7 +387,7 @@ export function AdminListClient({
         </div>
       )}
 
-      {/* ── MODAL SỬA ADMIN ── */}
+      {/* ── MODAL SỬA ADMIN (KHÔNG CÓ ĐỔI MẬT KHẨU, KHÔNG CÓ KHÓA TÀI KHOẢN) ── */}
       {editingAdmin && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs fade-in">
           <div
@@ -551,38 +496,6 @@ export function AdminListClient({
                 </label>
               </div>
 
-              {/* Đổi trạng thái */}
-              <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-bold uppercase tracking-wider text-neutral-600">
-                  Trạng thái tài khoản
-                </label>
-                <select
-                  value={editStatus}
-                  onChange={(e) => setEditStatus(e.target.value)}
-                  className="h-11 px-3.5 rounded-2xl bg-neutral-50 border border-neutral-200 text-xs font-extrabold text-neutral-800 focus:outline-none focus:border-rose-400"
-                >
-                  <option value="active">🟢 Đang hoạt động</option>
-                  <option value="inactive">🔒 Tạm khóa tài khoản</option>
-                </select>
-              </div>
-
-              {/* Đổi mật khẩu mới (tuỳ chọn) */}
-              <div className="flex flex-col gap-1.5 pt-2 border-t border-neutral-100">
-                <label className="text-xs font-bold uppercase tracking-wider text-neutral-600">
-                  Đổi mật khẩu mới (Tuỳ chọn)
-                </label>
-                <TextInput
-                  type="password"
-                  value={editNewPassword}
-                  onChange={(e) => setEditNewPassword(e.target.value)}
-                  placeholder="Để trống nếu không muốn đổi mật khẩu"
-                  className="bg-neutral-50/70"
-                />
-                <span className="text-[11px] text-neutral-400">
-                  Nếu nhập mật khẩu mới, tối thiểu 6 ký tự.
-                </span>
-              </div>
-
               {editError && (
                 <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-600 font-bold">
                   {editError}
@@ -628,17 +541,6 @@ export function AdminListClient({
               )}
             </div>
 
-            {/* Filter Trạng thái */}
-            <select
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
-              className="h-10 px-3 rounded-xl bg-white border border-neutral-200/80 text-xs font-bold text-neutral-800 focus:outline-none shadow-xs cursor-pointer"
-            >
-              <option value="all">Tất cả trạng thái</option>
-              <option value="active">🟢 Đang hoạt động</option>
-              <option value="inactive">🔒 Tạm khóa</option>
-            </select>
-
             {/* Filter Telegram Notify */}
             <select
               value={filterNotify}
@@ -678,9 +580,6 @@ export function AdminListClient({
                 <th className="text-center px-4 py-3.5 text-[11px] font-black uppercase tracking-wider text-neutral-500">
                   Bảo Mật 2MFA
                 </th>
-                <th className="text-center px-4 py-3.5 text-[11px] font-black uppercase tracking-wider text-neutral-500">
-                  Trạng Thái
-                </th>
                 <th className="text-right px-5 py-3.5 text-[11px] font-black uppercase tracking-wider text-neutral-500">
                   Thao Tác
                 </th>
@@ -689,7 +588,7 @@ export function AdminListClient({
             <tbody>
               {filteredAdmins.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-12 text-center text-neutral-400">
+                  <td colSpan={5} className="py-12 text-center text-neutral-400">
                     <Shield size={32} className="mx-auto mb-2 opacity-30 text-rose-500" />
                     <p className="font-bold text-neutral-600">Không tìm thấy tài khoản quản trị viên nào</p>
                     <p className="text-xs text-neutral-400 mt-1">Thử thay đổi bộ lọc tìm kiếm hoặc thêm mới</p>
@@ -704,9 +603,7 @@ export function AdminListClient({
                   return (
                     <tr
                       key={admin.id}
-                      className={`border-b border-neutral-100 hover:bg-rose-50/20 transition-colors ${
-                        admin.status === "inactive" ? "opacity-60 bg-neutral-50/40" : ""
-                      }`}
+                      className="border-b border-neutral-100 hover:bg-rose-50/20 transition-colors"
                     >
                       {/* Tên & Email */}
                       <td className="px-5 py-3.5">
@@ -797,53 +694,17 @@ export function AdminListClient({
                         </span>
                       </td>
 
-                      {/* Trạng thái */}
-                      <td className="px-4 py-3.5 text-center">
-                        <span
-                          className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-black ${
-                            admin.status === "active"
-                              ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                              : "bg-rose-50 text-rose-700 border border-rose-200"
-                          }`}
-                        >
-                          {admin.status === "active" ? "🟢 Hoạt động" : "🔒 Tạm khóa"}
-                        </span>
-                      </td>
-
-                      {/* Thao tác (Chỉnh sửa / Khóa - KHÔNG CÓ NÚT XÓA) */}
+                      {/* Thao tác (Chỉ Chỉnh sửa — Không Khóa, Không Xóa) */}
                       <td className="px-5 py-3.5 text-right">
-                        <div className="flex items-center justify-end gap-1.5">
+                        <div className="flex items-center justify-end">
                           <button
                             type="button"
                             onClick={() => openEditModal(admin)}
-                            className="h-8 px-2.5 flex items-center gap-1 rounded-xl text-xs font-bold text-neutral-600 bg-neutral-100 hover:bg-neutral-200/80 transition-colors"
+                            className="h-8 px-3 flex items-center gap-1.5 rounded-xl text-xs font-bold text-neutral-700 bg-neutral-100 hover:bg-neutral-200/80 transition-colors shadow-xs"
                             title="Chỉnh sửa thông tin"
                           >
-                            <Pencil size={13} />
+                            <Pencil size={13} className="text-neutral-500" />
                             <span>Sửa</span>
-                          </button>
-
-                          <button
-                            type="button"
-                            onClick={() => toggleAdminStatus(admin)}
-                            className={`h-8 px-2.5 flex items-center gap-1 rounded-xl text-xs font-bold transition-colors ${
-                              admin.status === "active"
-                                ? "text-amber-700 bg-amber-50 hover:bg-amber-100 border border-amber-200"
-                                : "text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200"
-                            }`}
-                            title={admin.status === "active" ? "Tạm khóa tài khoản này" : "Kích hoạt lại tài khoản này"}
-                          >
-                            {admin.status === "active" ? (
-                              <>
-                                <UserX size={13} />
-                                <span>Khóa</span>
-                              </>
-                            ) : (
-                              <>
-                                <UserCheck size={13} />
-                                <span>Mở khóa</span>
-                              </>
-                            )}
                           </button>
                         </div>
                       </td>
@@ -860,7 +721,7 @@ export function AdminListClient({
           <div className="flex items-center gap-2">
             <Shield size={14} className="text-rose-500" />
             <span>
-              Tài khoản Quản trị viên được bảo vệ: <strong>Không hỗ trợ xoá tài khoản</strong> để bảo toàn toàn bộ dữ liệu đối soát và lịch sử hệ thống.
+              Tài khoản Quản trị viên hệ thống MeowBack. Để đổi mật khẩu cá nhân, vui lòng vào mục <strong>Cài đặt</strong>.
             </span>
           </div>
           <div className="font-extrabold text-neutral-700">
