@@ -390,6 +390,84 @@ export function buildReferralSuccessEmail(params: { referrerName: string; friend
   `);
 }
 
+export function buildAdminAccountCreatedEmail(params: {
+  adminName: string;
+  adminEmail: string;
+  password: string;
+  loginUrl: string;
+  createdByAdminName?: string;
+}): string {
+  return emailShell(`
+    <div style="text-align:center;margin-bottom:20px;">
+      <span style="display:inline-block;padding:4px 12px;background:#FFF1F2;border:1px solid #FFE4E6;border-radius:20px;font-size:11px;font-weight:800;color:#E11D48;text-transform:uppercase;letter-spacing:1px;">
+        🛡️ Quyền Quản Trị Viên (Admin)
+      </span>
+    </div>
+    <h1 style="margin:0 0 14px;font-size:20px;font-weight:900;color:#111827;text-align:center;letter-spacing:-0.3px;">
+      Tài Khoản Quản Trị Hệ Thống MeowBack
+    </h1>
+    <p style="margin:0 0 10px;font-size:14px;line-height:1.6;color:#374151;">
+      Xin chào <strong>${escapeHtml(params.adminName)}</strong>,
+    </p>
+    <p style="margin:0 0 20px;font-size:14px;line-height:1.6;color:#4B5563;">
+      Bạn vừa được ${
+        params.createdByAdminName
+          ? `quản trị viên <strong>${escapeHtml(params.createdByAdminName)}</strong>`
+          : "hệ thống"
+      } cấp tài khoản Quản trị viên (Admin) trên nền tảng <strong>MeowBack</strong>. Dưới đây là thông tin đăng nhập của bạn:
+    </p>
+
+    <!-- Account Details Box -->
+    <div style="margin:0 0 24px;padding:18px 20px;background:#F9FAFB;border-radius:16px;border:1px solid #E5E7EB;">
+      <table role="presentation" cellpadding="0" cellspacing="0" style="width:100%;font-size:13px;">
+        <tr>
+          <td style="padding:6px 0;color:#6B7280;font-weight:600;width:120px;">Link đăng nhập:</td>
+          <td style="padding:6px 0;font-weight:700;">
+            <a href="${params.loginUrl}" style="color:#2563EB;text-decoration:none;word-break:break-all;">
+              ${escapeHtml(params.loginUrl)}
+            </a>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:6px 0;color:#6B7280;font-weight:600;">Email đăng nhập:</td>
+          <td style="padding:6px 0;font-weight:700;color:#111827;font-family:monospace;font-size:14px;">
+            ${escapeHtml(params.adminEmail)}
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:6px 0;color:#6B7280;font-weight:600;">Mật khẩu:</td>
+          <td style="padding:6px 0;font-weight:800;color:#E11D48;font-family:monospace;font-size:15px;letter-spacing:0.5px;">
+            ${escapeHtml(params.password)}
+          </td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- Login CTA Button -->
+    <table role="presentation" cellpadding="0" cellspacing="0" style="margin:20px auto 28px;">
+      <tr>
+        <td align="center" style="border-radius:14px;background:${BRAND_GRADIENT};box-shadow:0 4px 16px rgba(255,109,158,0.35);">
+          <a href="${params.loginUrl}" style="display:inline-block;padding:14px 40px;font-size:14px;font-weight:800;color:#ffffff;text-decoration:none;border-radius:14px;letter-spacing:0.3px;">
+            Đăng Nhập Trang Quản Trị →
+          </a>
+        </td>
+      </tr>
+    </table>
+
+    <!-- Security Warnings -->
+    <div style="margin:0 0 12px;padding:14px 16px;border-radius:12px;background:#FFFBEB;border:1px solid #FDE68A;">
+      <p style="margin:0 0 6px;font-size:12px;font-weight:800;color:#92400E;text-transform:uppercase;letter-spacing:0.5px;">
+        ⚠️ Lưu ý bảo mật quan trọng:
+      </p>
+      <ul style="margin:0;padding-left:18px;font-size:12px;line-height:1.6;color:#78350F;">
+        <li>Vui lòng đăng nhập và đổi mật khẩu mới ngay tại mục <strong>Cài đặt</strong> sau khi truy cập.</li>
+        <li>Không chia sẻ tài khoản hoặc mật khẩu này cho bất kỳ ai.</li>
+        <li>Cài đặt Telegram Chat ID trong trang Quản lý Admin để nhận thông báo tức thời khi có khách hàng đăng ký mới.</li>
+      </ul>
+    </div>
+  `);
+}
+
 function escapeHtml(value: string): string {
   return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }

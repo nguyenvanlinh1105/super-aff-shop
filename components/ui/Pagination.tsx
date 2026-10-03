@@ -1,7 +1,8 @@
 "use client";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Loader2 } from "lucide-react";
+import { useTransition } from "react";
 
 export interface PaginationProps {
   totalPages: number;
@@ -12,6 +13,8 @@ export interface PaginationProps {
   itemName?: string;
   className?: string;
   onPageChange?: (page: number) => void;
+  scrollTargetId?: string;
+  scrollToTable?: boolean;
 }
 
 type PageItem =
@@ -79,10 +82,13 @@ export function Pagination({
   itemName = "mục",
   className = "",
   onPageChange,
+  scrollTargetId,
+  scrollToTable = true,
 }: PaginationProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const router = useRouter();
+  const [isPending, startTransition] = useTransition();
 
   const effectiveTotalPages = Math.max(0, totalPages || 0);
   const effectiveCurrentPage = Math.max(1, Math.min(currentPage || 1, effectiveTotalPages || 1));
@@ -101,9 +107,27 @@ export function Pagination({
     if (onPageChange) {
       onPageChange(page);
     } else {
-      const params = new URLSearchParams(searchParams);
+      const params = new URLSearchParams(searchParams.toString());
       params.set("page", page.toString());
-      router.push(`${pathname}?${params.toString()}`);
+      startTransition(() => {
+        // scroll: false ngăn Next.js tự động nhảy vụt lên đỉnh trang (0, 0)
+        router.push(`${pathname}?${params.toString()}`, { scroll: false });
+      });
+
+      // Nếu người dùng đã cuộn xuống quá đỉnh của bảng, cuộn mượt nhẹ nhàng về đầu bảng thay vì giật lên đầu trang
+      if (scrollToTable) {
+        requestAnimationFrame(() => {
+          const target = scrollTargetId
+            ? document.getElementById(scrollTargetId)
+            : document.querySelector(".responsive-table, table, [data-table-container]");
+          if (target) {
+            const rect = target.getBoundingClientRect();
+            if (rect.top < 0) {
+              target.scrollIntoView({ behavior: "smooth", block: "start" });
+            }
+          }
+        });
+      }
     }
   };
 
@@ -111,8 +135,15 @@ export function Pagination({
 
   return (
     <div
-      className={`flex items-center justify-center gap-1 sm:gap-1.5 pt-4 pb-2 select-none ${className}`}
+      className={`flex items-center justify-center gap-1 sm:gap-1.5 pt-4 pb-2 select-none relative ${
+        isPending ? "opacity-60 transition-opacity" : ""
+      } ${className}`}
     >
+      {isPending && (
+        <span className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1 text-[11px] font-bold text-neutral-500 bg-white/90 px-2 py-0.5 rounded-full border border-neutral-200 shadow-xs">
+          <Loader2 size={12} className="animate-spin text-amber-600" /> Đang tải...
+        </span>
+      )}
       {/* First Page (<<) — Chỉ hiển thị trên Desktop khi nhiều hơn 5 trang */}
       {effectiveTotalPages > 5 && (
         <button

@@ -7,6 +7,7 @@ import { setSessionCookie } from "@/lib/auth";
 import { getRequestOrigin } from "@/lib/requestOrigin";
 import { sendMail, buildAdminNewRegistrationEmail, buildReferralSuccessEmail } from "@/lib/mailer";
 import { generateCustomerCode } from "@/lib/customerCode";
+import { notifyAdminsNewCustomerRegistration } from "@/lib/adminTelegramNotify";
 
 const GOOGLE_OAUTH_STATE_COOKIE = "google_oauth_state";
 
@@ -151,6 +152,16 @@ export async function GET(req: NextRequest) {
     } else {
       console.warn("[google-callback] Thiếu ADMIN_NOTIFICATION_EMAIL — không gửi được email thông báo admin");
     }
+
+    // 🔔 Gửi thông báo đến Bot Telegram của các Admin có bật nhận thông báo
+    notifyAdminsNewCustomerRegistration({
+      fullName,
+      email,
+      customerCode,
+      source: "google",
+      referredByCode: referredById ? refCode : null,
+      referrerName,
+    }).catch((err) => console.error("[google-callback] notifyAdminsNewCustomerRegistration throw lỗi:", err));
 
     // Báo cho NGƯỜI GIỚI THIỆU biết họ vừa mời thành công — cùng cơ chế với
     // luồng đăng ký email/mật khẩu (app/api/auth/register/route.ts).

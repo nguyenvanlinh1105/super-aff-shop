@@ -11,6 +11,7 @@ import {
   Flame,
   MessagesSquare,
   Zap,
+  ShieldCheck,
 } from "lucide-react";
 import { getSession } from "@/lib/auth";
 import { AdminSidebar } from "@/components/layout/AdminSidebar";
@@ -52,6 +53,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     {
       title: "Tích hợp & Cài đặt",
       items: [
+        { href: "/admin/admins",   label: "Quản lý Admin", emoji: "🛡️", icon: <ShieldCheck     size={16} strokeWidth={1.75} /> },
         { href: "/admin/telegram", label: "Telegram Bot",  emoji: "✈️", icon: <Send          size={16} strokeWidth={1.75} /> },
         { href: "/admin/settings", label: "Cài đặt",       emoji: "⚙️", icon: <Settings      size={16} strokeWidth={1.75} /> },
       ],

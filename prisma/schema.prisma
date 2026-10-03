@@ -28,6 +28,11 @@ model User {
   mfaResetToken     String?   @map("mfa_reset_token")
   mfaResetExpiresAt DateTime? @map("mfa_reset_expires_at")
 
+  // ─── Admin Notification & Profile Fields ──────────────────────
+  telegramChatId       String?   @map("telegram_chat_id")
+  notifyOnNewCustomer  Boolean   @default(true) @map("notify_on_new_customer")
+  phone                String?
+
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @default(now()) @updatedAt @map("updated_at")
 

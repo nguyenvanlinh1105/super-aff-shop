@@ -6,6 +6,7 @@ import { setSessionCookie } from "@/lib/auth";
 import { sendMail, buildAdminNewRegistrationEmail, buildReferralSuccessEmail } from "@/lib/mailer";
 import { generateCustomerCode } from "@/lib/customerCode";
 import { checkRateLimit, getClientIp } from "@/lib/rateLimit";
+import { notifyAdminsNewCustomerRegistration } from "@/lib/adminTelegramNotify";
 
 // Đăng ký đồng thời hiếm khi trùng mã (2 request cùng đọc mã lớn nhất trước
 // khi request nào insert xong) — thử lại tối đa 3 lần thay vì để lỗi 500.
@@ -133,6 +134,17 @@ export async function POST(req: NextRequest) {
   } else {
     console.warn("[register] Thiếu ADMIN_NOTIFICATION_EMAIL — không gửi được email thông báo admin");
   }
+
+  // 🔔 Gửi thông báo đến Bot Telegram của các Admin có bật nhận thông báo
+  notifyAdminsNewCustomerRegistration({
+    fullName,
+    email,
+    customerCode,
+    phone,
+    source: "email",
+    referredByCode: referredById ? refCode : null,
+    referrerName,
+  }).catch((err) => console.error("[register] notifyAdminsNewCustomerRegistration throw lỗi:", err));
 
   // Báo cho NGƯỜI GIỚI THIỆU biết họ vừa mời thành công — chỉ gửi được nếu
   // người giới thiệu có tài khoản email (khách chỉ liên kết Zalo/Telegram
