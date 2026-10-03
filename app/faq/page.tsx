@@ -8,12 +8,14 @@ import { safeJsonLdString } from "@/lib/jsonLd";
 import { IconBow } from "@/components/icons/CatRibbonIcons";
 
 export const metadata: Metadata = {
-  title: "Câu Hỏi Thường Gặp (FAQ) | MeowBack",
-  description: "Giải đáp các thắc mắc về nền tảng hoàn tiền MeowBack: rút tiền từ 10K, phí sử dụng 0đ, các sàn hỗ trợ.",
+  title: "Câu Hỏi Thường Gặp (FAQ) | MeowBack — Hoàn Tiền Đến 80%",
+  description:
+    "Giải đáp câu hỏi về hoàn tiền đến 80% tại MeowBack: cách mua sắm Shopee, TikTok Shop nhận hoàn tiền tự động, rút tiền từ 10K về ngân hàng hoặc MoMo, miễn phí 100%.",
   alternates: { canonical: "/faq" },
   openGraph: {
-    title: "Câu Hỏi Thường Gặp (FAQ) | MeowBack",
-    description: "Giải đáp các thắc mắc về nền tảng hoàn tiền MeowBack: rút tiền từ 10K, phí sử dụng 0đ, các sàn hỗ trợ.",
+    title: "Câu Hỏi Thường Gặp (FAQ) | MeowBack — Hoàn Tiền Đến 80%",
+    description:
+      "Giải đáp câu hỏi về hoàn tiền đến 80% tại MeowBack: cách mua sắm Shopee, TikTok Shop nhận hoàn tiền tự động, rút tiền từ 10K về ngân hàng hoặc MoMo, miễn phí 100%.",
     type: "website",
     locale: "vi_VN",
     url: "/faq",

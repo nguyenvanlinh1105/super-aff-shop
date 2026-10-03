@@ -12,14 +12,14 @@ import { IconBow, IllustCatWelcome } from "@/components/icons/CatRibbonIcons";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Ưu Đãi & Mã Giảm Giá Shopee, TikTok Shop Mới Nhất | MeowBack",
+  title: "Săn Deal & Nhận Hoàn Tiền Đến 80% Shopee, TikTok Shop | MeowBack",
   description:
-    "Cập nhật liên tục mã giảm giá, deal sập sàn Shopee và TikTok Shop. Mua qua link MeowBack vừa được giá tốt vừa nhận thêm hoàn tiền.",
+    "Cập nhật mã giảm giá, deal sập sàn Shopee và TikTok Shop kết hợp hoàn tiền đến 80% hoa hồng. Mua sắm tiết kiệm tối đa cùng MeowBack.",
   alternates: { canonical: "/uu-dai" },
   openGraph: {
-    title: "Ưu Đãi & Mã Giảm Giá Shopee, TikTok Shop Mới Nhất — MeowBack 🎀",
+    title: "Săn Deal & Nhận Hoàn Tiền Đến 80% Shopee, TikTok Shop | MeowBack",
     description:
-      "Cập nhật liên tục mã giảm giá, deal sập sàn Shopee và TikTok Shop. Mua qua link MeowBack vừa được giá tốt vừa nhận thêm hoàn tiền.",
+      "Cập nhật mã giảm giá, deal sập sàn Shopee và TikTok Shop kết hợp hoàn tiền đến 80% hoa hồng. Mua sắm tiết kiệm tối đa cùng MeowBack.",
     type: "website",
     locale: "vi_VN",
     url: "/uu-dai",

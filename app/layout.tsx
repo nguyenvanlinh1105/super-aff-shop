@@ -24,15 +24,20 @@ const beVietnamPro = Be_Vietnam_Pro({
 export const metadata: Metadata = {
   metadataBase: new URL("https://meowback.shop"),
   title: {
-    default: "MeowBack — Hoàn Tiền Mua Sắm Shopee, Lazada & TikTok Shop",
+    default: "MeowBack — Hoàn Tiền Đến 80% Shopee, TikTok Shop & Lazada",
     template: "%s | MeowBack",
   },
-  description: "MeowBack — Nền tảng hoàn tiền affiliate uy tín cho Shopee, Lazada & TikTok Shop. Tự động nhận hoa hồng lên tới 80%, rút tiền từ 10.000đ. Miễn phí 100%.",
+  description:
+    "Hoàn tiền đến 80% hoa hồng khi mua sắm Shopee, Lazada & TikTok Shop tự động về ví MeowBack. Rút tiền từ 10.000đ về tài khoản ngân hàng hoặc ví MoMo. Miễn phí 100%.",
   keywords: [
     "MeowBack",
     "meowback",
     "meowback shop",
     "meowback.shop",
+    "hoàn tiền 80%",
+    "hoàn tiền 80% shopee",
+    "hoàn tiền shopee 80%",
+    "hoàn tiền tiktok 80%",
     "hoàn tiền meowback",
     "hoàn tiền shopee",
     "hoàn tiền lazada",

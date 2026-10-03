@@ -9,14 +9,14 @@ import Link from "next/link";
 import { safeJsonLdString } from "@/lib/jsonLd";
 
 export const metadata: Metadata = {
-  title: "Hướng Dẫn Sử Dụng | MeowBack — Hoàn Tiền Shopee, Lazada & TikTok Shop",
+  title: "Hướng Dẫn Nhận Hoàn Tiền Đến 80% Shopee & TikTok Shop | MeowBack",
   description:
-    "Cách sử dụng nền tảng hoàn tiền MeowBack: 5 bước đơn giản để mua sắm Shopee, Lazada, TikTok Shop và nhận hoàn tiền tự động về ví.",
+    "5 bước đơn giản để mua sắm và nhận hoàn tiền đến 80% hoa hồng Shopee, Lazada & TikTok Shop tự động về ví MeowBack, rút tiền từ 10.000đ về ngân hàng.",
   alternates: { canonical: "/huong-dan" },
   openGraph: {
-    title: "Hướng Dẫn Sử Dụng | MeowBack — Hoàn Tiền Shopee, Lazada & TikTok Shop",
+    title: "Hướng Dẫn Nhận Hoàn Tiền Đến 80% Shopee & TikTok Shop | MeowBack",
     description:
-      "Cách sử dụng nền tảng hoàn tiền MeowBack: 5 bước đơn giản để mua sắm Shopee, Lazada, TikTok Shop và nhận hoàn tiền tự động về ví.",
+      "5 bước đơn giản để mua sắm và nhận hoàn tiền đến 80% hoa hồng Shopee, Lazada & TikTok Shop tự động về ví MeowBack, rút tiền từ 10.000đ về ngân hàng.",
     type: "website",
     locale: "vi_VN",
     url: "/huong-dan",

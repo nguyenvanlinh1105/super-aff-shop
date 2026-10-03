@@ -10,12 +10,14 @@ import { safeJsonLdString } from "@/lib/jsonLd";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Cửa Hàng — MeowBack | Nền Tảng Hỗ Trợ Hoàn Tiền",
-  description: "Danh sách sàn thương mại điện tử được MeowBack hỗ trợ hoàn tiền: Shopee, TikTok Shop và nhiều đối tác khác.",
+  title: "Cửa Hàng Hoàn Tiền Đến 80% — Shopee & TikTok Shop | MeowBack",
+  description:
+    "Danh sách sàn thương mại điện tử hỗ trợ hoàn tiền đến 80% hoa hồng tại MeowBack: Shopee, TikTok Shop, Lazada. Mua sắm thông minh, nhận hoàn tiền tự động.",
   alternates: { canonical: "/cua-hang" },
   openGraph: {
-    title: "Cửa Hàng — MeowBack",
-    description: "Danh sách sàn thương mại điện tử được MeowBack hỗ trợ hoàn tiền: Shopee, TikTok Shop và nhiều đối tác khác.",
+    title: "Cửa Hàng Hoàn Tiền Đến 80% — Shopee & TikTok Shop | MeowBack",
+    description:
+      "Danh sách sàn thương mại điện tử hỗ trợ hoàn tiền đến 80% hoa hồng tại MeowBack: Shopee, TikTok Shop, Lazada. Mua sắm thông minh, nhận hoàn tiền tự động.",
     type: "website",
     locale: "vi_VN",
     url: "/cua-hang",
