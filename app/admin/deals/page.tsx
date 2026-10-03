@@ -5,7 +5,7 @@ import { MousePointerClick, Tag, Eye, Clock, Sparkles, AlertTriangle } from "luc
 import { CreateDealForm } from "@/components/admin/CreateDealForm";
 import { AdminDealList } from "@/components/admin/AdminDealList";
 
-function getDateBounds(period: string, startDate?: string, endDate?: string) {
+function getDateBounds(period: string, startDate?: string, endDate?: string, dateField?: string) {
   const now = new Date();
   if (period === "today") {
     const start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
@@ -19,10 +19,20 @@ function getDateBounds(period: string, startDate?: string, endDate?: string) {
     return { gte: start, lte: end };
   }
   if (period === "last_7_days") {
+    if (dateField === "expiresAt") {
+      const start = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+      const end = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
+      return { gte: start, lte: end };
+    }
     const start = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
     return { gte: start, lte: now };
   }
   if (period === "last_30_days") {
+    if (dateField === "expiresAt") {
+      const start = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+      const end = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+      return { gte: start, lte: end };
+    }
     const start = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
     return { gte: start, lte: now };
   }
@@ -167,7 +177,7 @@ export default async function AdminDealsPage({
   }
 
   // Lọc theo Thời Gian (Hôm nay, Hôm qua, Khoảng ngày...)
-  const dateBounds = getDateBounds(period, startDate, endDate);
+  const dateBounds = getDateBounds(period, startDate, endDate, dateField);
   if (dateBounds) {
     andClauses.push({
       [dateField]: dateBounds,

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useTransition } from "react";
+import { useState, useRef, useTransition, useEffect } from "react";
 import {
   Eye,
   EyeOff,
@@ -475,11 +475,33 @@ export function AdminDealList({
 
   const [isPending, startTransition] = useTransition();
 
+  // ĐỒNG BỘ STATE KHI PROPS SERVER COMPONENT THAY ĐỔI
+  useEffect(() => {
+    setDeals(initialDeals);
+  }, [initialDeals]);
+
+  useEffect(() => {
+    setSearchVal(currentQuery);
+  }, [currentQuery]);
+
+  useEffect(() => {
+    setStartDateVal(currentStartDate);
+  }, [currentStartDate]);
+
+  useEffect(() => {
+    setEndDateVal(currentEndDate);
+  }, [currentEndDate]);
+
   // Helper để cập nhật Query params mà KHÔNG nhảy trang / KHÔNG cuộn lên đỉnh
   const updateQuery = (updates: Record<string, string | null>) => {
     const params = new URLSearchParams(searchParams.toString());
     Object.entries(updates).forEach(([key, val]) => {
-      if (val === null || val === "" || val === "all") {
+      if (val === null || val === "") {
+        params.delete(key);
+      } else if (key === "tab") {
+        // Tab luôn luôn được set cụ thể: 'active' | 'history' | 'all'
+        params.set("tab", val);
+      } else if (val === "all") {
         params.delete(key);
       } else {
         params.set(key, val);
@@ -511,7 +533,7 @@ export function AdminDealList({
     setEndDateVal("");
     startTransition(() => {
       const params = new URLSearchParams();
-      if (currentTab !== "active") params.set("tab", currentTab);
+      params.set("tab", currentTab);
       router.push(`${pathname}?${params.toString()}`, { scroll: false });
     });
   };
