@@ -64,10 +64,13 @@ export default async function AdminOrdersPage({
   if (q) {
     andConditions.push({
       OR: [
-        { orderExternalId: { contains: q } },
-        { trackingCode: { contains: q } },
-        { itemName: { contains: q } },
-        { customer: { fullName: { contains: q } } },
+        { orderExternalId: { contains: q, mode: "insensitive" } },
+        { trackingCode: { contains: q, mode: "insensitive" } },
+        { itemName: { contains: q, mode: "insensitive" } },
+        { customer: { fullName: { contains: q, mode: "insensitive" } } },
+        { customer: { customerCode: { contains: q, mode: "insensitive" } } },
+        { customer: { user: { email: { contains: q, mode: "insensitive" } } } },
+        { customer: { phone: { contains: q } } },
       ],
     });
   }
@@ -129,14 +132,26 @@ export default async function AdminOrdersPage({
     prisma.order.count({ where: { ...baseWhere, orderStatus: "clawback" } }),
     prisma.order.count({ where: { ...baseWhere, sourceType: "referral" } }),
     prisma.order.findMany({ where, orderBy, skip, take: limit, include: { platform: true, customer: true } }),
-    prisma.customer.findMany({ orderBy: { fullName: "asc" } }),
+    prisma.customer.findMany({
+      include: {
+        user: { select: { email: true } },
+      },
+      orderBy: { fullName: "asc" },
+    }),
     prisma.order.count({ where }),
     prisma.order.aggregate({ where, _sum: { orderAmount: true, commissionAmount: true, customerRewardAmount: true, systemProfitAmount: true, referralBonusDeducted: true } }),
     prisma.order.aggregate({ where: { ...baseWhere, orderStatus: "approved" }, _sum: { customerRewardAmount: true } }),
     prisma.order.aggregate({ where: { ...baseWhere, orderStatus: "approved", payoutStatus: { not: "paid" } }, _sum: { customerRewardAmount: true } }),
   ]);
 
-  const customerOptions = customers.map((c) => ({ id: c.id, label: `${c.fullName} (${c.customerCode})` }));
+  const customerOptions = customers.map((c) => ({
+    id: c.id,
+    label: c.fullName,
+    code: c.customerCode,
+    email: c.user?.email ?? null,
+    phone: c.phone ?? null,
+    subLabel: [c.customerCode, c.user?.email, c.phone].filter(Boolean).join(" • "),
+  }));
 
   const mappedOrders = orders.map((o) => ({
     id: o.id,

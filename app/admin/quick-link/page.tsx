@@ -6,7 +6,11 @@ import Link from "next/link";
 
 export default async function AdminQuickLinkPage() {
   const [customers, platforms, recentLinks] = await Promise.all([
-    prisma.customer.findMany({ where: { status: "active" }, orderBy: { fullName: "asc" } }),
+    prisma.customer.findMany({
+      where: { status: "active" },
+      orderBy: { fullName: "asc" },
+      include: { user: { select: { email: true } } },
+    }),
     prisma.platform.findMany({ where: { status: "active" }, orderBy: { name: "asc" } }),
     prisma.trackingLink.findMany({
       orderBy: { createdAt: "desc" },
@@ -112,7 +116,14 @@ export default async function AdminQuickLinkPage() {
 
       {/* ── QUICK LINK FORM CONTAINER ── */}
       <QuickLinkForm
-        customers={customers.map((c) => ({ id: c.id, label: `${c.fullName} (${c.customerCode})` }))}
+        customers={customers.map((c) => ({
+          id: c.id,
+          label: c.fullName,
+          code: c.customerCode,
+          email: c.user?.email ?? null,
+          phone: c.phone ?? null,
+          subLabel: [c.customerCode, c.user?.email, c.phone].filter(Boolean).join(" • "),
+        }))}
         platforms={platforms.map((p) => ({ id: p.id, label: p.name }))}
       />
 

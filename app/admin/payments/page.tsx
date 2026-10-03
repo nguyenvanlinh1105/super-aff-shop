@@ -111,14 +111,23 @@ export default async function AdminPaymentsPage() {
         id: true,
         fullName: true,
         customerCode: true,
+        phone: true,
         bankName: true,
         bankAccountNumber: true,
         bankAccountName: true,
+        user: { select: { email: true } },
       },
     }),
   ]);
 
-  const customerOptions = allCustomers.map((c) => ({ id: c.id, label: `${c.fullName} (${c.customerCode})` }));
+  const customerOptions = allCustomers.map((c) => ({
+    id: c.id,
+    label: c.fullName,
+    code: c.customerCode,
+    email: c.user?.email ?? null,
+    phone: c.phone ?? null,
+    subLabel: [c.customerCode, c.user?.email, c.phone].filter(Boolean).join(" • "),
+  }));
   const customerMap = new Map(allCustomers.map((c) => [c.id, c]));
 
   // Tính tổng số tiền approved + unpaid theo từng customer

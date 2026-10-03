@@ -3,10 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
-import { SearchableSelect } from "@/components/ui/SearchableSelect";
+import { SearchableSelect, type ComboboxOption } from "@/components/ui/SearchableSelect";
 import { CheckCircle, UserPlus, AlertTriangle, XCircle, Pencil, X, AlertCircle } from "lucide-react";
-
-type Option = { id: string; label: string };
 
 export function OrderActions({
   orderId,
@@ -19,7 +17,7 @@ export function OrderActions({
   orderStatus: string;
   payoutStatus: string;
   hasCustomer: boolean;
-  customers: Option[];
+  customers: ComboboxOption[];
 }) {
   const router = useRouter();
   const [customerId, setCustomerId] = useState("");
@@ -63,23 +61,27 @@ export function OrderActions({
     <div className="flex flex-col gap-xs">
       {/* Gán khách hàng */}
       {!hasCustomer && (
-        <div className="flex items-center gap-xs">
+        <div className="flex items-center gap-2">
           <SearchableSelect
             options={customers}
             value={customerId}
             onChange={setCustomerId}
-            placeholder="Gán khách (tên/mã)..."
+            placeholder="Tìm tên, mã, email..."
             size="sm"
-            className="w-[180px]"
-            inputClassName="bg-canvas text-gray-900"
+            className="w-[230px]"
           />
           <Button
             variant="secondary"
             size="sm"
             disabled={!customerId || loading}
             onClick={() => patch({ customerId })}
+            className={`transition-all duration-200 shrink-0 ${
+              customerId
+                ? "!bg-rose-500 !text-white !border-rose-500 font-black shadow-md hover:!bg-rose-600 ring-2 ring-rose-200"
+                : "opacity-40 cursor-not-allowed"
+            }`}
           >
-            <UserPlus size={13} strokeWidth={1.75} />
+            <UserPlus size={13} strokeWidth={2} />
             Gán
           </Button>
         </div>
@@ -98,23 +100,27 @@ export function OrderActions({
       )}
 
       {canChangeCustomer && editingCustomer && (
-        <div className="flex items-center gap-xs flex-wrap">
+        <div className="flex items-center gap-2 flex-wrap">
           <SearchableSelect
             options={customers}
             value={customerId}
             onChange={setCustomerId}
             placeholder="Chọn khách mới..."
             size="sm"
-            className="w-[180px]"
-            inputClassName="bg-canvas text-gray-900"
+            className="w-[230px]"
           />
           <Button
             variant="secondary"
             size="sm"
             disabled={!customerId || loading}
             onClick={() => { patch({ customerId }); setEditingCustomer(false); }}
+            className={`transition-all duration-200 shrink-0 ${
+              customerId
+                ? "!bg-rose-500 !text-white !border-rose-500 font-black shadow-md hover:!bg-rose-600 ring-2 ring-rose-200"
+                : "opacity-40 cursor-not-allowed"
+            }`}
           >
-            <UserPlus size={13} strokeWidth={1.75} />
+            <UserPlus size={13} strokeWidth={2} />
             Lưu
           </Button>
           <Button

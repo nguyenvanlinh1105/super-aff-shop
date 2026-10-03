@@ -23,8 +23,7 @@ import {
   CalendarDays,
   type LucideIcon,
 } from "lucide-react";
-
-type Option = { id: string; label: string };
+import type { ComboboxOption } from "@/components/ui/SearchableSelect";
 
 type Order = {
   id: string;
@@ -49,7 +48,7 @@ type Order = {
 
 type Props = {
   orders: Order[];
-  customers: Option[];
+  customers: ComboboxOption[];
   totalPages: number;
   currentPage: number;
   totalItems?: number;
@@ -499,7 +498,7 @@ export function AdminOrdersClient({
         </div>
 
         <div className="responsive-table overflow-x-auto">
-          <table className="w-full text-left text-xs min-w-[1040px]">
+          <table className="w-full text-left text-xs min-w-[1140px]">
             <thead>
               <tr className="border-b border-neutral-100 bg-neutral-50/80">
                 <th className="px-4 py-3 font-extrabold uppercase tracking-wider text-neutral-400 text-[10px]">Đơn hàng / Tracking</th>
@@ -509,7 +508,7 @@ export function AdminOrdersClient({
                 <th className="px-4 py-3 font-extrabold uppercase tracking-wider text-neutral-400 text-[10px] text-right">HH Trước Thuế</th>
                 <th className="px-4 py-3 font-extrabold uppercase tracking-wider text-rose-600 text-[10px] text-right">Tiền Hoàn / Giữ Lại</th>
                 <th className="px-4 py-3 font-extrabold uppercase tracking-wider text-neutral-400 text-[10px] w-[150px]">Trạng thái</th>
-                <th className="px-4 py-3 font-extrabold uppercase tracking-wider text-neutral-400 text-[10px] w-[160px]">Thao tác</th>
+                <th className="px-4 py-3 font-extrabold uppercase tracking-wider text-neutral-400 text-[10px] min-w-[320px]">Thao tác</th>
               </tr>
             </thead>
             <tbody>
