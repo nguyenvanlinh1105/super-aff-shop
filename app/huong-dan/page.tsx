@@ -43,12 +43,63 @@ const breadcrumbJsonLd = {
   ],
 };
 
+const howToJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "HowTo",
+  name: "Cách Nhận Hoàn Tiền Khi Mua Sắm Shopee, Lazada & TikTok Shop",
+  description:
+    "5 bước đơn giản để mua sắm và nhận hoàn tiền tự động lên tới 80% hoa hồng về tài khoản ngân hàng hoặc ví MoMo qua MeowBack.",
+  image: "https://meowback.shop/icon-512.png",
+  totalTime: "PT3M",
+  step: [
+    {
+      "@type": "HowToStep",
+      position: 1,
+      name: "Sao chép link sản phẩm cần mua",
+      text: "Mở ứng dụng Shopee, Lazada hoặc TikTok Shop, chọn sản phẩm bạn muốn mua và bấm nút Chia sẻ để sao chép liên kết.",
+      url: "https://meowback.shop/huong-dan#step-1",
+    },
+    {
+      "@type": "HowToStep",
+      position: 2,
+      name: "Dán link vào MeowBack",
+      text: "Truy cập meowback.shop, dán link sản phẩm vào thanh tìm kiếm để hệ thống tự động tạo link hoàn tiền affiliate.",
+      url: "https://meowback.shop/huong-dan#step-2",
+    },
+    {
+      "@type": "HowToStep",
+      position: 3,
+      name: "Chuyển tiếp và đặt hàng",
+      text: "Bấm 'Mua Ngay Để Nhận Hoàn Tiền', hệ thống sẽ mở ứng dụng sàn để bạn tiến hành đặt hàng như bình thường.",
+      url: "https://meowback.shop/huong-dan#step-3",
+    },
+    {
+      "@type": "HowToStep",
+      position: 4,
+      name: "Hệ thống ghi nhận đơn và đối soát hoa hồng",
+      text: "Đơn hàng sẽ được tự động ghi nhận vào tài khoản MeowBack của bạn trong vòng vài phút đến vài giờ.",
+      url: "https://meowback.shop/huong-dan#step-4",
+    },
+    {
+      "@type": "HowToStep",
+      position: 5,
+      name: "Rút tiền hoàn về tài khoản",
+      text: "Sau khi đơn hàng hoàn thành và sàn đối soát xong, bạn có thể rút tiền hoàn về tài khoản ngân hàng hoặc ví MoMo từ 10.000đ.",
+      url: "https://meowback.shop/huong-dan#step-5",
+    },
+  ],
+};
+
 export default function HuongDanPage() {
   return (
     <div className="min-h-screen bg-neutral-bg font-sans overflow-x-hidden text-neutral-900">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: safeJsonLdString(breadcrumbJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: safeJsonLdString(howToJsonLd) }}
       />
       <MarketingHeader activePath="/huong-dan" />
 

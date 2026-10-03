@@ -92,9 +92,17 @@ export function MarketingFooter() {
               <li>
                 <Link
                   className="hover:text-primary-600 hover:translate-x-1 inline-block transition-all"
+                  href="/huong-dan"
+                >
+                  Hướng dẫn nhận hoàn tiền
+                </Link>
+              </li>
+              <li>
+                <Link
+                  className="hover:text-primary-600 hover:translate-x-1 inline-block transition-all"
                   href="/faq"
                 >
-                  Trung tâm trợ giúp
+                  Trung tâm trợ giúp (FAQ)
                 </Link>
               </li>
               <li>
