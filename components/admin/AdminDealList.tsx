@@ -919,11 +919,23 @@ export function AdminDealList({
                       <Flame size={28} />
                     </div>
                     <p className="text-sm font-bold text-neutral-700">Không tìm thấy deal nào phù hợp</p>
-                    <p className="text-xs text-neutral-400 mt-1">
+                    <p className="text-xs text-neutral-400 mt-1 max-w-md">
                       {hasActiveFilters
-                        ? "Thử xoá bộ lọc hoặc đổi sang tab khác"
-                        : "Bấm nút 'Thêm Deal Mới' ở góc trên để tạo deal đầu tiên"}
+                        ? "Thử xoá bộ lọc hoặc đổi sang tab khác."
+                        : currentTab === "active" && tabCounts.history > 0
+                        ? `Hiện chưa có deal nào đang phát sóng, nhưng có ${tabCounts.history} deal trong tab Lịch sử (đã hết hạn / đã ẩn).`
+                        : "Bấm nút 'Thêm Deal Mới' ở góc trên để tạo deal đầu tiên."}
                     </p>
+                    {currentTab === "active" && tabCounts.history > 0 && !hasActiveFilters && (
+                      <button
+                        type="button"
+                        onClick={() => updateQuery({ tab: "history" })}
+                        className="mt-3 inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-500 text-white text-xs font-bold hover:bg-amber-600 transition-colors shadow-xs"
+                      >
+                        <Clock size={13} />
+                        Xem {tabCounts.history} deal trong tab Lịch sử / Hết hạn
+                      </button>
+                    )}
                     {hasActiveFilters && (
                       <button
                         type="button"

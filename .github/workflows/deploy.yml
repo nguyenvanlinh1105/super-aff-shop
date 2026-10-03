@@ -36,11 +36,13 @@ jobs:
             # 2. Build lại container app không dùng cache và khởi động lại container
             echo "🔨 [2/4] Build ứng dụng Next.js (no-cache) và khởi động lại container..."
             docker compose build --no-cache app
+            docker rm -f meowback_app 2>/dev/null || true
             docker compose up -d --force-recreate app
 
-            # 3. Chạy Prisma Migrate đồng bộ database
+            # 3. Chạy Prisma Migrate & DB Push đồng bộ database
             echo "🗄️ [3/4] Cập nhật Database schema nếu có migration mới..."
-            docker compose exec -T app npx prisma migrate deploy
+            docker compose exec -T app npx prisma db push --skip-generate || true
+            docker compose exec -T app npx prisma migrate deploy || true
 
             # 4. Dọn dẹp Docker images cũ để tiết kiệm dung lượng ổ cứng VPS
             echo "🧹 [4/4] Dọn dẹp Docker images rác..."

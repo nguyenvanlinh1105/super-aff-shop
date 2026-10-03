@@ -76,7 +76,6 @@ export default async function AdminDealsPage({
   const limit = Math.max(5, Math.min(100, Number(searchParams.limit) || 10));
   const skip = (page - 1) * limit;
   const q = searchParams.q?.trim() || "";
-  const tab = searchParams.tab || "active"; // "active" | "history" | "all"
   const status = searchParams.status || "all";
   const period = searchParams.period || "all";
   const dateField = searchParams.dateField === "createdAt" ? "createdAt" : "expiresAt";
@@ -117,6 +116,10 @@ export default async function AdminDealsPage({
     prisma.dealPost.findMany({ select: { clicks: true } }),
   ]);
 
+  // Tab mặc định: nếu không có param tab và đang không có deal còn hạn, tự mở tab có deal
+  const defaultTab = activeDealsCount > 0 ? "active" : historyDealsCount > 0 ? "history" : "active";
+  const tab = searchParams.tab || defaultTab; // "active" | "history" | "all"
+
   const totalClicks = allDealsData.reduce((s, d) => s + d.clicks, 0);
   const avgClicks = allDealsCount > 0 ? Math.round(totalClicks / allDealsCount) : 0;
 
@@ -139,41 +142,42 @@ export default async function AdminDealsPage({
     andClauses.push({ category });
   }
 
-  // Phân loại theo Tab:
-  // Tab "active" (Đang phát sóng): status === "active" VÀ (chưa hết hạn hoặc không có ngày hết hạn)
-  // Tab "history" (Lịch sử / Đã hết hạn): đã hết hạn (expiresAt <= now) HOẶC đã ẩn (status === "hidden")
-  // Tab "all": tất cả deal
-  if (tab === "active") {
-    andClauses.push({
-      status: "active",
-      OR: [{ expiresAt: null }, { expiresAt: { gt: now } }],
-    });
-  } else if (tab === "history") {
-    andClauses.push({
-      OR: [
-        { status: "hidden" },
-        { AND: [{ expiresAt: { not: null } }, { expiresAt: { lte: now } }] },
-      ],
-    });
-  }
-
-  // Lọc theo Trạng Thái chi tiết (nếu có chọn)
-  if (status === "active") {
-    andClauses.push({
-      status: "active",
-      OR: [{ expiresAt: null }, { expiresAt: { gt: now } }],
-    });
-  } else if (status === "hidden") {
-    andClauses.push({ status: "hidden" });
-  } else if (status === "expired") {
-    andClauses.push({
-      expiresAt: { not: null, lte: now },
-    });
-  } else if (status === "expiring_soon") {
-    const next24h = new Date(now.getTime() + 24 * 60 * 60 * 1000);
-    andClauses.push({
-      expiresAt: { gt: now, lte: next24h },
-    });
+  // Lọc theo Trạng Thái chi tiết HOẶC theo Tab
+  // Nếu người dùng chọn trạng thái cụ thể từ dropdown (khác "all"), ưu tiên lọc theo trạng thái đó
+  if (status !== "all") {
+    if (status === "active") {
+      andClauses.push({
+        status: "active",
+        OR: [{ expiresAt: null }, { expiresAt: { gt: now } }],
+      });
+    } else if (status === "hidden") {
+      andClauses.push({ status: "hidden" });
+    } else if (status === "expired") {
+      andClauses.push({
+        expiresAt: { not: null, lte: now },
+      });
+    } else if (status === "expiring_soon") {
+      const next24h = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+      andClauses.push({
+        expiresAt: { gt: now, lte: next24h },
+      });
+    }
+  } else {
+    // Khi status === "all", lọc theo Tab
+    if (tab === "active") {
+      andClauses.push({
+        status: "active",
+        OR: [{ expiresAt: null }, { expiresAt: { gt: now } }],
+      });
+    } else if (tab === "history") {
+      andClauses.push({
+        OR: [
+          { status: "hidden" },
+          { AND: [{ expiresAt: { not: null } }, { expiresAt: { lte: now } }] },
+        ],
+      });
+    }
+    // tab === "all": không thêm điều kiện gì (hiển thị toàn bộ deal)
   }
 
   // Lọc theo Thời Gian (Hôm nay, Hôm qua, Khoảng ngày...)
