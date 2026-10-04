@@ -57,13 +57,6 @@ export function DealMarketHero({ activeCount }: { activeCount: number }) {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-6">
           {/* Left Column: Heading & Information */}
           <div className="flex-1 min-w-0 space-y-2 sm:space-y-2.5">
-            {/* Top pill badge */}
-            <div className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1 shadow-2xs border border-primary-200 text-xs font-black text-primary-600">
-              <Sparkles size={13} className="text-[#FF4D85]" />
-              <span>MeowBack Săn Deal Siêu Hời</span>
-              <span className="inline-block h-1 w-1 rounded-full bg-primary-400" />
-              <span className="text-neutral-500 font-bold">{activeCount} deal đang mở</span>
-            </div>
 
             {/* Headline */}
             <h1 className="text-xl sm:text-3xl lg:text-[32px] font-black text-neutral-900 tracking-tight leading-snug">
@@ -78,8 +71,8 @@ export function DealMarketHero({ activeCount }: { activeCount: number }) {
               Kho ưu đãi độc quyền từ Shopee, Lazada &amp; TikTok Shop mỗi ngày. Tự động nhận lại hoa hồng ròng về ví sau khi mua sắm!
             </p>
 
-            {/* Value badges */}
-            <div className="flex flex-wrap items-center gap-2 pt-1 text-[11px] sm:text-xs font-bold text-neutral-700">
+            {/* Value badges (chỉ hiện trên màn hình sm trở lên, ẩn trên mobile) */}
+            <div className="hidden sm:flex flex-wrap items-center gap-2 pt-1 text-[11px] sm:text-xs font-bold text-neutral-700">
               <span className="flex items-center gap-1.5 bg-white rounded-xl px-2.5 sm:px-3 py-1 border border-primary-100/90 shadow-2xs">
                 <Zap size={13} className="text-amber-500" />
                 <span>Rút từ <strong className="text-neutral-900 font-black">10.000đ</strong></span>
@@ -95,8 +88,8 @@ export function DealMarketHero({ activeCount }: { activeCount: number }) {
             </div>
           </div>
 
-          {/* Right Column: Panoramic Mascot Card */}
-          <div className="shrink-0 self-center md:self-auto">
+          {/* Right Column: Panoramic Mascot Card (chỉ hiện trên màn hình sm trở lên, ẩn trên mobile) */}
+          <div className="hidden sm:block shrink-0 self-center md:self-auto">
             <div className="relative w-full sm:w-[260px] lg:w-[290px] h-[100px] sm:h-[125px] rounded-2xl sm:rounded-[22px] overflow-hidden shadow-cute border-2 border-white group">
               <img
                 src="/meowback_market_spree.jpg"
