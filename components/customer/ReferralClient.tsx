@@ -168,23 +168,23 @@ export function ReferralClient({
       </div>
 
       {/* ═══ 2. TOP 3 THẺ THỐNG KÊ (Đồng bộ với Portal) ═══ */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 sm:gap-4">
         {/* Card 1: Bạn bè */}
-        <div className="group relative overflow-hidden rounded-3xl bg-gradient-to-b from-white via-primary-50/25 to-white p-5 sm:p-6 shadow-cute border border-primary-200/80 hover:border-primary-400 hover:shadow-cute-lg transition-all duration-300 flex flex-col justify-between gap-3">
+        <div className="group relative overflow-hidden rounded-3xl bg-gradient-to-b from-white via-primary-50/25 to-white p-4.5 sm:p-5 shadow-cute border border-primary-200/80 hover:border-primary-400 hover:shadow-cute-lg transition-all duration-300 flex flex-col justify-between gap-3">
           <div className="absolute -right-3 -bottom-3 text-primary-400/10 pointer-events-none group-hover:scale-110 transition-transform">
             <Users size={80} strokeWidth={1.5} />
           </div>
-          <div className="relative z-10 flex items-center justify-between">
-            <div className="flex items-center gap-2.5">
-              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-primary-100 text-primary-600 shadow-2xs">
+          <div className="relative z-10 flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
+              <div className="flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-xl sm:rounded-2xl bg-primary-100 text-primary-600 shadow-2xs">
                 <Users size={18} strokeWidth={2.5} />
               </div>
-              <div>
-                <span className="text-[11px] font-bold uppercase tracking-wider text-neutral-400">Mạng lưới</span>
-                <div className="text-[13px] font-extrabold text-neutral-800">Bạn bè đã mời</div>
+              <div className="min-w-0">
+                <span className="text-[10.5px] sm:text-[11px] font-bold uppercase tracking-wider text-neutral-400 block truncate">Mạng lưới</span>
+                <div className="text-xs sm:text-[13px] font-extrabold text-neutral-800 whitespace-nowrap">Bạn bè đã mời</div>
               </div>
             </div>
-            <span className="rounded-full bg-primary-50 border border-primary-200/80 px-2.5 py-0.5 text-[10.5px] font-black uppercase text-primary-600 tracking-wider">
+            <span className="shrink-0 rounded-full bg-primary-50 border border-primary-200/80 px-2 sm:px-2.5 py-0.5 text-[10px] sm:text-[10.5px] font-black uppercase text-primary-600 tracking-wider">
               {totalFriends > 0 ? "Đang tăng" : "Bắt đầu"}
             </span>
           </div>
@@ -201,21 +201,21 @@ export function ReferralClient({
         </div>
 
         {/* Card 2: Hoa hồng tích luỹ */}
-        <div className="group relative overflow-hidden rounded-3xl bg-white p-5 sm:p-6 shadow-sm border border-neutral-200/80 hover:border-emerald-300 hover:shadow-md transition-all duration-300 flex flex-col justify-between gap-3">
+        <div className="group relative overflow-hidden rounded-3xl bg-white p-4.5 sm:p-5 shadow-sm border border-neutral-200/80 hover:border-emerald-300 hover:shadow-md transition-all duration-300 flex flex-col justify-between gap-3">
           <div className="absolute -right-3 -bottom-3 text-emerald-500/10 pointer-events-none group-hover:scale-110 transition-transform">
             <TrendingUp size={80} strokeWidth={1.5} />
           </div>
-          <div className="relative z-10 flex items-center justify-between">
-            <div className="flex items-center gap-2.5">
-              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-100 shadow-2xs">
+          <div className="relative z-10 flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
+              <div className="flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-xl sm:rounded-2xl bg-emerald-50 text-emerald-600 border border-emerald-100 shadow-2xs">
                 <TrendingUp size={18} strokeWidth={2.5} />
               </div>
-              <div>
-                <span className="text-[11px] font-bold uppercase tracking-wider text-neutral-400">Thu nhập</span>
-                <div className="text-[13px] font-extrabold text-neutral-800">Hoa hồng nhận được</div>
+              <div className="min-w-0">
+                <span className="text-[10.5px] sm:text-[11px] font-bold uppercase tracking-wider text-neutral-400 block truncate">Thu nhập</span>
+                <div className="text-xs sm:text-[13px] font-extrabold text-neutral-800 whitespace-nowrap">Hoa hồng nhận được</div>
               </div>
             </div>
-            <span className="rounded-full bg-emerald-50 border border-emerald-200/80 px-2.5 py-0.5 text-[10.5px] font-black uppercase text-emerald-700 tracking-wider">
+            <span className="shrink-0 rounded-full bg-emerald-50 border border-emerald-200/80 px-2 sm:px-2.5 py-0.5 text-[10px] sm:text-[10.5px] font-black uppercase text-emerald-700 tracking-wider">
               Vào ví
             </span>
           </div>
@@ -232,21 +232,21 @@ export function ReferralClient({
         </div>
 
         {/* Card 3: Chính sách thưởng */}
-        <div className="group relative overflow-hidden rounded-3xl bg-white p-5 sm:p-6 shadow-sm border border-neutral-200/80 hover:border-amber-300 hover:shadow-md transition-all duration-300 flex flex-col justify-between gap-3">
+        <div className="group relative overflow-hidden rounded-3xl bg-white p-4.5 sm:p-5 shadow-sm border border-neutral-200/80 hover:border-amber-300 hover:shadow-md transition-all duration-300 flex flex-col justify-between gap-3">
           <div className="absolute -right-3 -bottom-3 text-amber-500/10 pointer-events-none group-hover:scale-110 transition-transform">
             <Gift size={80} strokeWidth={1.5} />
           </div>
-          <div className="relative z-10 flex items-center justify-between">
-            <div className="flex items-center gap-2.5">
-              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-amber-50 text-amber-600 border border-amber-100 shadow-2xs">
+          <div className="relative z-10 flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2 sm:gap-2.5 min-w-0">
+              <div className="flex h-9 w-9 sm:h-10 sm:w-10 shrink-0 items-center justify-center rounded-xl sm:rounded-2xl bg-amber-50 text-amber-600 border border-amber-100 shadow-2xs">
                 <Gift size={18} strokeWidth={2.5} />
               </div>
-              <div>
-                <span className="text-[11px] font-bold uppercase tracking-wider text-neutral-400">Chính sách</span>
-                <div className="text-[13px] font-extrabold text-neutral-800">Tỷ lệ thưởng</div>
+              <div className="min-w-0">
+                <span className="text-[10.5px] sm:text-[11px] font-bold uppercase tracking-wider text-neutral-400 block truncate">Chính sách</span>
+                <div className="text-xs sm:text-[13px] font-extrabold text-neutral-800 whitespace-nowrap">Tỷ lệ thưởng</div>
               </div>
             </div>
-            <span className="rounded-full bg-amber-50 border border-amber-200/80 px-2.5 py-0.5 text-[10.5px] font-black uppercase text-amber-700 tracking-wider">
+            <span className="shrink-0 rounded-full bg-amber-50 border border-amber-200/80 px-2 sm:px-2.5 py-0.5 text-[10px] sm:text-[10.5px] font-black uppercase text-amber-700 tracking-wider">
               {isPartner ? "Đối tác" : "Chuẩn"}
             </span>
           </div>

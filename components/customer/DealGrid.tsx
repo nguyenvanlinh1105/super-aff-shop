@@ -12,13 +12,11 @@ import {
   ArrowRight,
   ArrowUpDown,
   Sparkles,
-  Lock,
 } from "lucide-react";
 import { Pagination } from "@/components/ui/Pagination";
 import { CustomSelect, CustomSelectOption } from "@/components/ui/CustomSelect";
 import { ShopeeIcon, TiktokIcon, LazadaIcon } from "@/components/icons/PlatformIcons";
 import { DEAL_CATEGORIES } from "@/lib/dealCategories";
-import { DealCategoryPills } from "@/components/customer/DealCategoryPills";
 
 export type Deal = {
   id: string;
@@ -68,6 +66,7 @@ function DealCard({
 }) {
   const router = useRouter();
   const [clicked, setClicked] = useState(false);
+  const [imgError, setImgError] = useState(false);
   const isShop = deal.linkType === "shop";
   const platform = getPlatformBadge(deal.platformCode);
 
@@ -103,11 +102,12 @@ function DealCard({
     >
       {/* Product Image & Badges */}
       <div className="relative aspect-square w-full overflow-hidden bg-primary-50/30">
-        {deal.imageUrl ? (
+        {deal.imageUrl && !imgError ? (
           <img
             src={deal.imageUrl}
             alt={deal.title}
             loading="lazy"
+            onError={() => setImgError(true)}
             className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
           />
         ) : (
@@ -195,11 +195,10 @@ function DealCard({
           <button
             type="button"
             onClick={handleAction}
-            className="w-full h-8 sm:h-9 rounded-xl bg-gradient-to-r from-primary-500 via-[#FF3B7B] to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white font-extrabold text-[11.5px] sm:text-[12.5px] flex items-center justify-center gap-1.5 shadow-2xs hover:shadow-cute transition-all cursor-pointer active:scale-95"
+            className="w-full h-8 sm:h-9 rounded-xl bg-gradient-to-r from-primary-500 via-[#FF3B7B] to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white font-extrabold text-[12px] sm:text-[13px] flex items-center justify-center gap-1.5 shadow-2xs hover:shadow-cute transition-all cursor-pointer active:scale-95"
           >
-            {!isLoggedIn && <Lock size={12} className="opacity-80" />}
-            <span>{isLoggedIn ? "Săn deal ngay" : "Đăng nhập để săn deal"}</span>
-            <ArrowRight size={12} strokeWidth={2.5} />
+            <span>Mua ngay</span>
+            <ArrowRight size={13} strokeWidth={2.5} />
           </button>
         </div>
       </div>
@@ -312,7 +311,7 @@ function FilterBar() {
   ];
 
   const categoryOptions: CustomSelectOption[] = [
-    { value: "all", label: "Tất cả mục", icon: <Tag size={13} className="text-primary-500" /> },
+    { value: "all", label: "Tất cả danh mục", icon: <Tag size={13} className="text-primary-500" /> },
     ...DEAL_CATEGORIES.map((c) => ({ value: c, label: c })),
   ];
 
@@ -323,14 +322,14 @@ function FilterBar() {
   }));
 
   return (
-    <div className="my-1.5 sm:my-3 flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-2.5 w-full">
-      <div className="grid grid-cols-3 sm:flex sm:items-center gap-1.5 sm:gap-2 w-full sm:w-auto">
+    <div className="my-1 sm:my-2 w-full">
+      <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 sm:gap-2.5 w-full">
         <CustomSelect
           value={platform}
           onChange={(val) => updateParam("platform", val)}
           options={platformOptions}
-          className="w-full sm:w-[145px]"
-          buttonClassName="h-8 sm:h-10 text-[11px] sm:text-[12.5px] rounded-xl sm:rounded-2xl px-1.5 sm:px-3"
+          className="w-full sm:w-[150px]"
+          buttonClassName="h-9 sm:h-10 text-[12px] sm:text-[13px] rounded-xl sm:rounded-2xl px-2.5 sm:px-3"
           ariaLabel="Lọc theo sàn mua sắm"
         />
 
@@ -338,8 +337,8 @@ function FilterBar() {
           value={category}
           onChange={(val) => updateParam("category", val)}
           options={categoryOptions}
-          className="w-full sm:w-[155px]"
-          buttonClassName="h-8 sm:h-10 text-[11px] sm:text-[12.5px] rounded-xl sm:rounded-2xl px-1.5 sm:px-3"
+          className="w-full sm:w-[170px]"
+          buttonClassName="h-9 sm:h-10 text-[12px] sm:text-[13px] rounded-xl sm:rounded-2xl px-2.5 sm:px-3"
           ariaLabel="Lọc theo danh mục"
         />
 
@@ -347,8 +346,8 @@ function FilterBar() {
           value={sort}
           onChange={(val) => updateParam("sort", val)}
           options={sortOptions}
-          className="w-full sm:w-[165px]"
-          buttonClassName="h-8 sm:h-10 text-[11px] sm:text-[12.5px] rounded-xl sm:rounded-2xl px-1.5 sm:px-3"
+          className="col-span-2 sm:col-span-1 w-full sm:w-[185px] sm:ml-auto"
+          buttonClassName="h-9 sm:h-10 text-[12px] sm:text-[13px] rounded-xl sm:rounded-2xl px-2.5 sm:px-3"
           align="right"
           ariaLabel="Sắp xếp ưu đãi"
         />
@@ -380,10 +379,7 @@ export function DealGrid({
   const activeLinkType = searchParams.get("linkType") || "all";
 
   return (
-    <div className="flex flex-col gap-3">
-      {/* Category Pills: Direct Aisle Navigation */}
-      <DealCategoryPills />
-
+    <div className="flex flex-col gap-2.5 sm:gap-3">
       {linkTypeCounts && <LinkTypeTabs counts={linkTypeCounts} />}
 
       {activeLinkType === "shop" && (
@@ -447,8 +443,8 @@ export function DealGrid({
         </div>
       ) : (
         <>
-          {/* Grid danh sách deal: 2 cột trên mobile, 3 cột tablet, 4 cột desktop */}
-          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-4 lg:gap-4.5">
+          {/* Grid danh sách deal: 2 cột trên mobile, 3 cột trên tablet & desktop */}
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-3 sm:gap-4 lg:gap-5">
             {deals.map((deal) => (
               <DealCard
                 key={deal.id}

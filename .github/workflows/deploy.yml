@@ -39,11 +39,10 @@ jobs:
             docker rm -f meowback_app 2>/dev/null || true
             docker compose up -d --force-recreate app
 
-            # 3. Chạy Prisma Migrate & DB Push đồng bộ database & Seed dữ liệu thật
-            echo "🗄️ [3/4] Cập nhật Database schema và seed dữ liệu..."
+            # 3. Chạy Prisma Migrate & DB Push đồng bộ database schema
+            echo "🗄️ [3/4] Cập nhật Database schema..."
             docker compose exec -T app npx prisma db push --skip-generate || true
             docker compose exec -T app npx prisma migrate deploy || true
-            docker compose exec -T app npx prisma db seed || true
 
             # 4. Dọn dẹp Docker images cũ để tiết kiệm dung lượng ổ cứng VPS
             echo "🧹 [4/4] Dọn dẹp Docker images rác..."

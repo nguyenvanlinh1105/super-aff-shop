@@ -479,15 +479,39 @@ export async function POST(req: NextRequest) {
     replyText = "📱 <b>Bàn phím thao tác nhanh đã mở!</b>\n\nBạn có thể bấm các nút bên dưới để sử dụng, hoặc bấm <b>[ ❌ Đóng menu ]</b> để thu gọn lại cho gọn màn hình.";
     processingStatus = "processed_menu";
   } else if (command === "/id" || command === "/myid") {
-    replyText = [
-      "🆔 <b>Thông tin Telegram của bạn:</b>",
-      "",
-      `• <b>Chat ID:</b> <code>${incoming.chatId}</code>`,
-      `• <b>Username:</b> ${incoming.username ? `@${incoming.username}` : "<i>Chưa đặt username</i>"}`,
-      "",
-      "💡 <i>Copy mã Chat ID này dán vào mục Quản trị viên trên web để nhận thông báo bot khi có khách đăng ký mới nhé!</i>",
-    ].join("\n");
-    processingStatus = "processed_myid";
+    // Chỉ Admin trong hệ thống mới được phép xem thông tin Chat ID quản trị
+    const adminUser = await prisma.user.findFirst({
+      where: {
+        role: "admin",
+        status: "active",
+        OR: [
+          { telegramChatId: incoming.chatId },
+          { telegramChatId: incoming.senderId },
+          ...(incoming.username
+            ? [
+                { telegramChatId: `@${incoming.username}` },
+                { telegramChatId: incoming.username },
+              ]
+            : []),
+          ...(customer?.id ? [{ customerId: customer.id }] : []),
+        ],
+      },
+    });
+
+    if (adminUser) {
+      replyText = [
+        "🆔 <b>Thông tin Telegram Quản trị viên:</b>",
+        "",
+        `• <b>Chat ID:</b> <code>${incoming.chatId}</code>`,
+        `• <b>Username:</b> ${incoming.username ? `@${incoming.username}` : "<i>Chưa đặt username</i>"}`,
+        "",
+        "💡 <i>Copy mã Chat ID này dán vào mục Quản trị viên trên web để nhận thông báo bot khi có khách đăng ký mới nhé!</i>",
+      ].join("\n");
+      processingStatus = "processed_myid_admin";
+    } else {
+      replyText = "✨ Lệnh này không khả dụng. Bạn vui lòng bấm <b>Menu</b> hoặc gõ <b>/menu</b> để khám phá các ưu đãi hoàn tiền nhé! 🎀";
+      processingStatus = "processed_myid_forbidden";
+    }
   } else if (command === "/keyboard" || command === "/phim") {
     replyText = "⌨️ Đã mở bàn phím phím tắt bên dưới. Bạn có thể bấm [ ❌ Đóng menu ] để thu gọn lại bất kỳ lúc nào.";
     processingStatus = "processed_keyboard";

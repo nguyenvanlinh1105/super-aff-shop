@@ -11,7 +11,7 @@ export default async function CustomerDealsPage({ searchParams }: { searchParams
   if (!session) redirect("/login");
 
   const page = Number(searchParams.page) || 1;
-  const limit = 8;
+  const limit = 12;
   const skip = (page - 1) * limit;
   const q = searchParams.q || "";
   const platform = searchParams.platform || "";

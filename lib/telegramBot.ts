@@ -533,7 +533,6 @@ export const TELEGRAM_BOT_COMMANDS = [
   { command: "orders", description: "📦 5 đơn hàng gần nhất" },
   { command: "links", description: "🔗 5 link đã tạo gần nhất" },
   { command: "referral", description: "🎁 Link mời bạn & hoa hồng" },
-  { command: "myid", description: "🆔 Xem Telegram Chat ID của bạn" },
   { command: "help", description: "📖 Hướng dẫn sử dụng" },
 ];
 

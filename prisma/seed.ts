@@ -63,7 +63,7 @@ async function seedPlatforms() {
   for (const p of platforms) {
     const result = await prisma.platform.upsert({
       where: { code: p.code },
-      update: { name: p.name, status: "active" },
+      update: { name: p.name }, // Giữ nguyên status hiện tại do Admin cấu hình (không tự động bật lại active)
       create: { code: p.code, name: p.name, status: "active" },
     });
     console.log(`  ✓ Nền tảng: ${result.name} (${result.code})`);
@@ -350,8 +350,6 @@ async function seedDeals() {
         platformCode: d.platformCode,
         category: d.category,
         uploadedImageUrl: d.uploadedImageUrl,
-        status: "active",
-        clicks: d.clicks,
       },
       create: {
         id: d.id,
