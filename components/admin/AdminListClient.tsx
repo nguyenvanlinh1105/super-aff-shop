@@ -319,14 +319,14 @@ export function AdminListClient({
                 <TextInput
                   value={createTelegramId}
                   onChange={(e) => setCreateTelegramId(e.target.value)}
-                  placeholder="Ví dụ: 987654321"
+                  placeholder="Ví dụ: 7558379347 hoặc @username"
                   className="bg-neutral-50/70 font-mono"
                 />
                 <div className="p-3 rounded-2xl bg-sky-50/60 border border-sky-200/70 text-[11px] text-sky-800 leading-relaxed flex items-start gap-2">
                   <Info size={15} className="shrink-0 text-sky-600 mt-0.5" />
                   <div>
-                    <strong>Cách lấy Chat ID Telegram:</strong> Admin chỉ cần mở ứng dụng Telegram và nhắn tin bất kỳ cho bot{" "}
-                    <strong>@userinfobot</strong> hoặc <strong>@myidbot</strong> để lấy số <code>Id</code> của mình.
+                    <strong>Cách lấy Chat ID Telegram:</strong> Nhắn lệnh <code>/myid</code> cho bot hệ thống{" "}
+                    <strong>@meoback_hoantien_bot</strong> hoặc nhập trực tiếp <strong>@username</strong> Telegram của bạn.
                   </div>
                 </div>
               </div>
@@ -455,16 +455,16 @@ export function AdminListClient({
               {/* Telegram Chat ID */}
               <div className="flex flex-col gap-1.5">
                 <label className="text-xs font-bold uppercase tracking-wider text-neutral-600">
-                  Telegram Chat ID
+                  Telegram Chat ID hoặc @Username
                 </label>
                 <TextInput
                   value={editTelegramId}
                   onChange={(e) => setEditTelegramId(e.target.value)}
-                  placeholder="Ví dụ: 123456789"
+                  placeholder="Ví dụ: 7558379347 hoặc @username"
                   className="bg-neutral-50/70 font-mono"
                 />
                 <span className="text-[11px] text-neutral-400">
-                  Nhập Chat ID để bot Telegram gửi tin nhắn thông báo trực tiếp đến tài khoản của bạn.
+                  Nhập Chat ID hoặc Username Telegram (ví dụ: <code>7558379347</code> hoặc <code>@username</code>). Bạn có thể gõ <code>/myid</code> cho bot <strong>@meoback_hoantien_bot</strong> để lấy ID nhanh.
                 </span>
               </div>
 

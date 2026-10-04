@@ -6,6 +6,7 @@ import {
   buildBankInfoFlowPrompt,
   buildBankInfoSavedMessage,
   buildConvertLinkPromptMessage,
+  buildDealCardCaption,
   buildDealsListMessage,
   buildFlowCancelledMessage,
   buildLinkExpiredMessage,
@@ -15,6 +16,8 @@ import {
   buildOrdersListMessage,
   buildReferralInfoMessage,
   buildReplyKeyboardMenu,
+  buildReplyKeyboardRemove,
+  buildMainMenuKeyboard,
   buildTelegramHelpMessage,
   buildUnsupportedPlatformMessage,
   buildTikTokDisabledOnTelegramMessage,
@@ -26,6 +29,11 @@ import {
   mapDetectedPlatformToCode,
   matchQuickMenuCommand,
   sendTelegramTextMessage,
+  sendTelegramPhoto,
+  editTelegramMessageMedia,
+  TelegramInlineKeyboard,
+  TelegramReplyKeyboard,
+  TelegramReplyKeyboardRemove,
 } from "@/lib/telegramBot";
 import { createTrackingLink } from "@/lib/trackingLinkService";
 import { getOrCreatePersonalDealLink } from "@/lib/dealPersonalization";
@@ -157,6 +165,83 @@ export async function POST(req: NextRequest) {
       where: { id: customer.id },
       data: { telegramUsername: incoming.username },
     });
+  }
+
+  // Xử lý các Callback Query đặc biệt từ nút bấm inline (lướt deal carousel...)
+  if (isCallback) {
+    if (normalizedText === "noop") {
+      if (incoming.callbackQueryId) await answerTelegramCallbackQuery(incoming.callbackQueryId);
+      return NextResponse.json({ ok: true, action: "noop" });
+    }
+
+    if (normalizedText.startsWith("deal_page:")) {
+      const pageIdx = parseInt(normalizedText.replace("deal_page:", ""), 10) || 0;
+      const now = new Date();
+      const deals = await prisma.dealPost.findMany({
+        where: {
+          status: "active",
+          OR: [{ expiresAt: null }, { expiresAt: { gt: now } }],
+        },
+        orderBy: { createdAt: "desc" },
+        take: 10,
+      });
+
+      if (deals.length > 0 && incoming.messageId) {
+        const currentIdx = ((pageIdx % deals.length) + deals.length) % deals.length;
+        const d = deals[currentIdx];
+        const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://meowback.shop";
+
+        const personalLink = await getOrCreatePersonalDealLink({
+          customerId: customer.id,
+          deal: { id: d.id, cleanLink: d.cleanLink, platformCode: d.platformCode },
+          channelSource: "telegram",
+        });
+
+        const targetUrl = personalLink?.shortUrl ?? d.shortUrl ?? d.affiliateUrl ?? `${appUrl}/uu-dai`;
+        const rawImg = d.uploadedImageUrl || d.shopeeImageUrl;
+        const fullImageUrl = rawImg && rawImg.startsWith("/") ? `${appUrl.replace(/\/+$/, "")}${rawImg}` : rawImg;
+        const discountLabel = d.discountPercent ? `🛒 Mua ngay (Giảm ${d.discountPercent}%) ➔` : "🛒 Mua ngay ➔";
+
+        const prevIdx = (currentIdx - 1 + deals.length) % deals.length;
+        const nextIdx = (currentIdx + 1) % deals.length;
+
+        const caption = buildDealCardCaption({
+          title: `[${currentIdx + 1}/${deals.length}] ${d.title}`,
+          platformCode: d.platformCode,
+          category: d.category,
+          salePrice: d.salePrice ? Number(d.salePrice) : null,
+          originalPrice: d.originalPrice ? Number(d.originalPrice) : null,
+          discountPercent: d.discountPercent,
+        });
+
+        const dealKeyboard: TelegramInlineKeyboard = {
+          inline_keyboard: [
+            [{ text: discountLabel, url: targetUrl }],
+            [
+              { text: "◀️ Trước", callback_data: `deal_page:${prevIdx}` },
+              { text: `${currentIdx + 1}/${deals.length} 🔄`, callback_data: "noop" },
+              { text: "Tiếp ▶️", callback_data: `deal_page:${nextIdx}` },
+            ],
+            [{ text: "📋 Xem tất cả dạng danh sách", callback_data: "deals_list" }],
+          ],
+        };
+
+        if (fullImageUrl) {
+          await editTelegramMessageMedia({
+            chatId: incoming.chatId,
+            messageId: incoming.messageId,
+            photo: fullImageUrl,
+            caption,
+            keyboard: dealKeyboard,
+          });
+        }
+      }
+
+      if (incoming.callbackQueryId) {
+        await answerTelegramCallbackQuery(incoming.callbackQueryId);
+      }
+      return NextResponse.json({ ok: true, action: "flipped_deal_page", page: pageIdx });
+    }
   }
 
   // Hội thoại nhiều bước nhập thông tin ngân hàng (bot hỏi lần lượt tên NH
@@ -293,7 +378,7 @@ export async function POST(req: NextRequest) {
       totalBonusEarned,
     });
     processingStatus = "processed_referral";
-  } else if (command === "/deals") {
+  } else if (command === "/deals" || command === "/deals_list") {
     const now = new Date();
     const deals = await prisma.dealPost.findMany({
       where: {
@@ -304,34 +389,111 @@ export async function POST(req: NextRequest) {
       take: 5,
     });
 
-    // Mỗi deal gửi qua Telegram PHẢI map vào link cá nhân của đúng khách
-    // này (không phải link chung của deal gán vào SYSTEM) — trước đây
-    // luôn gửi d.shortUrl tĩnh, khiến 100% deal bấm qua Telegram bị tính
-    // nhầm hoa hồng vào khách hệ thống thay vì người thật đã bấm.
-    //
-    // Chạy TUẦN TỰ (không Promise.all) — sinh trackingCode dựa trên số thứ
-    // tự trong ngày của khách, chạy song song nhiều deal cùng lúc cho CÙNG
-    // 1 khách khiến nhiều request đọc cùng "số thứ tự kế tiếp" trước khi
-    // request nào commit xong, gây lỗi trùng trackingCode (unique
-    // constraint) — đã bắt được lỗi này ngay trong lần test đầu tiên nhờ
-    // log DEAL_PERSONALIZE_FALLBACK mới thêm.
-    const dealsWithPersonalLinks: { title: string; discountPercent: number | null; url: string | null }[] = [];
-    for (const d of deals) {
-      const personalLink = await getOrCreatePersonalDealLink({
-        customerId: customer.id,
-        deal: { id: d.id, cleanLink: d.cleanLink, platformCode: d.platformCode },
-        channelSource: "telegram",
-      });
+    if (deals.length === 0) {
+      replyText = "🏷️ Hiện tại chưa có ưu đãi nào đang chạy. Bạn có thể gửi link Shopee bất kỳ vào đây để nhận hoàn tiền ngay nhé! 🎁";
+      processingStatus = "processed_deals_empty";
+    } else {
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://meowback.shop";
 
-      dealsWithPersonalLinks.push({
-        title: d.title,
-        discountPercent: d.discountPercent,
-        url: personalLink?.shortUrl ?? d.shortUrl ?? d.affiliateUrl,
+      const dealsWithPersonalLinks = [];
+      for (const d of deals) {
+        const personalLink = await getOrCreatePersonalDealLink({
+          customerId: customer.id,
+          deal: { id: d.id, cleanLink: d.cleanLink, platformCode: d.platformCode },
+          channelSource: "telegram",
+        });
+
+        dealsWithPersonalLinks.push({
+          title: d.title,
+          discountPercent: d.discountPercent,
+          salePrice: d.salePrice ? Number(d.salePrice) : null,
+          originalPrice: d.originalPrice ? Number(d.originalPrice) : null,
+          platformCode: d.platformCode,
+          url: personalLink?.shortUrl ?? d.shortUrl ?? d.affiliateUrl ?? `${appUrl}/uu-dai`,
+        });
+      }
+
+      const cardsText = buildDealsListMessage(dealsWithPersonalLinks);
+
+      // Sắp xếp các nút bấm Mua ngay nằm ngang thành từng cặp 2 nút/dòng
+      const buttonRows: TelegramInlineKeyboard["inline_keyboard"] = [];
+      for (let i = 0; i < dealsWithPersonalLinks.length; i += 2) {
+        const row = [];
+        const d1 = dealsWithPersonalLinks[i];
+        const d2 = dealsWithPersonalLinks[i + 1];
+
+        const label1 = d1.discountPercent ? `🛒 [${i + 1}] Giảm ${d1.discountPercent}%` : `🛒 [${i + 1}] Mua ngay`;
+        row.push({ text: label1, url: d1.url });
+
+        if (d2) {
+          const label2 = d2.discountPercent ? `🛒 [${i + 2}] Giảm ${d2.discountPercent}%` : `🛒 [${i + 2}] Mua ngay`;
+          row.push({ text: label2, url: d2.url });
+        }
+        buttonRows.push(row);
+      }
+      buttonRows.push([
+        { text: "🌐 Xem tất cả Ưu đãi trên Website ➔", url: `${appUrl}/uu-dai` },
+      ]);
+
+      const dealKeyboard: TelegramInlineKeyboard = {
+        inline_keyboard: buttonRows,
+      };
+
+      const firstDeal = deals[0];
+      const rawImg = firstDeal.uploadedImageUrl || firstDeal.shopeeImageUrl;
+      const fullImageUrl = rawImg && rawImg.startsWith("/") ? `${appUrl.replace(/\/+$/, "")}${rawImg}` : rawImg;
+
+      let cardSent = false;
+      if (fullImageUrl && cardsText.length <= 1024) {
+        const photoResult = await sendTelegramPhoto({
+          chatId: incoming.chatId,
+          photo: fullImageUrl,
+          caption: cardsText,
+          keyboard: dealKeyboard,
+        });
+        cardSent = photoResult.ok;
+      }
+
+      if (!cardSent) {
+        await sendTelegramTextMessage({
+          chatId: incoming.chatId,
+          message: cardsText,
+          keyboard: dealKeyboard,
+        });
+      }
+
+      if (isCallback && incoming.callbackQueryId) {
+        await answerTelegramCallbackQuery(incoming.callbackQueryId);
+      }
+
+      return NextResponse.json({
+        ok: true,
+        action: "processed_deals_cards",
+        dealCount: dealsWithPersonalLinks.length,
       });
     }
-
-    replyText = buildDealsListMessage(dealsWithPersonalLinks);
-    processingStatus = "processed_deals";
+  } else if (command === "/close") {
+    replyText = "✨ Đã đóng menu thao tác. Bấm nút <b>Menu</b> ở góc trái hoặc gõ <b>/menu</b> bất kỳ lúc nào để mở lại nhé!";
+    processingStatus = "processed_close_menu";
+  } else if (command === "/menu") {
+    replyText = "📱 <b>Bàn phím thao tác nhanh đã mở!</b>\n\nBạn có thể bấm các nút bên dưới để sử dụng, hoặc bấm <b>[ ❌ Đóng menu ]</b> để thu gọn lại cho gọn màn hình.";
+    processingStatus = "processed_menu";
+  } else if (command === "/id" || command === "/myid") {
+    replyText = [
+      "🆔 <b>Thông tin Telegram của bạn:</b>",
+      "",
+      `• <b>Chat ID:</b> <code>${incoming.chatId}</code>`,
+      `• <b>Username:</b> ${incoming.username ? `@${incoming.username}` : "<i>Chưa đặt username</i>"}`,
+      "",
+      "💡 <i>Copy mã Chat ID này dán vào mục Quản trị viên trên web để nhận thông báo bot khi có khách đăng ký mới nhé!</i>",
+    ].join("\n");
+    processingStatus = "processed_myid";
+  } else if (command === "/keyboard" || command === "/phim") {
+    replyText = "⌨️ Đã mở bàn phím phím tắt bên dưới. Bạn có thể bấm [ ❌ Đóng menu ] để thu gọn lại bất kỳ lúc nào.";
+    processingStatus = "processed_keyboard";
+  } else if (command === "/nokeyboard" || command === "/closekeyboard") {
+    replyText = "✨ Đã đóng bàn phím phím tắt. Bạn có thể dùng nút <b>[ Menu ]</b> màu xanh ở góc trái ô nhập tin nhắn.";
+    processingStatus = "processed_nokeyboard";
   } else {
     // Kiểm tra câu lệnh tùy chỉnh được Admin cấu hình trong Database
     const customCmd = command.startsWith("/")
@@ -388,7 +550,7 @@ export async function POST(req: NextRequest) {
   const sendResult = await sendTelegramTextMessage({
     chatId: incoming.chatId,
     message: replyText,
-    keyboard: buildReplyKeyboardMenu(),
+    keyboard: buildReplyKeyboardRemove(),
   });
 
   if (isCallback && incoming.callbackQueryId) {

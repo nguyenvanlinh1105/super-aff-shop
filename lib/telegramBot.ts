@@ -20,14 +20,25 @@ export type TelegramSendResult = {
   error?: string;
 };
 
+export type TelegramInlineKeyboardButton = {
+  text: string;
+  callback_data?: string;
+  url?: string;
+};
+
 export type TelegramInlineKeyboard = {
-  inline_keyboard: { text: string; callback_data: string }[][];
+  inline_keyboard: TelegramInlineKeyboardButton[][];
+};
+
+export type TelegramReplyKeyboardRemove = {
+  remove_keyboard: true;
 };
 
 export type TelegramReplyKeyboard = {
   keyboard: { text: string }[][];
-  resize_keyboard: true;
-  is_persistent: true;
+  resize_keyboard?: boolean;
+  is_persistent?: boolean;
+  one_time_keyboard?: boolean;
 };
 
 const URL_REGEX = /(https?:\/\/[^\s]+)/gi;
@@ -82,22 +93,21 @@ export function buildMainMenuKeyboard(): TelegramInlineKeyboard {
       [{ text: "🔄 Đổi link nhanh", callback_data: "newlink" }],
       [
         { text: "💰 Số dư ví", callback_data: "wallet" },
+        { text: "💸 Rút tiền", callback_data: "rut" },
+      ],
+      [
         { text: "📦 Đơn hàng", callback_data: "orders" },
-      ],
-      [
         { text: "🔗 Link của tôi", callback_data: "links" },
-        { text: "🏷️ Ưu đãi", callback_data: "deals" },
       ],
       [
+        { text: "🏷️ Ưu đãi", callback_data: "deals" },
         { text: "🎁 Mời bạn", callback_data: "referral" },
-        { text: "📖 Hướng dẫn", callback_data: "help" },
       ],
+      [{ text: "📖 Hướng dẫn", callback_data: "help" }],
     ],
   };
 }
 
-// Menu nút bấm cố định ngay dưới ô nhập tin nhắn (ReplyKeyboard) — tiện hơn
-// inline keyboard vì không bị trôi mất khi cuộn lên, luôn nằm sẵn chờ bấm.
 // Dùng chung 1 danh sách cho cả hiển thị nút lẫn nhận diện text khi bấm, để
 // nhãn nút và lệnh tương ứng không bao giờ lệch nhau.
 const QUICK_MENU_ITEMS: { label: string; command: string }[][] = [
@@ -114,14 +124,24 @@ const QUICK_MENU_ITEMS: { label: string; command: string }[][] = [
     { label: "🏷️ Ưu đãi", command: "/deals" },
     { label: "🎁 Mời bạn", command: "/referral" },
   ],
-  [{ label: "📖 Hướng dẫn", command: "/help" }],
+  [
+    { label: "📖 Hướng dẫn", command: "/help" },
+    { label: "❌ Đóng menu", command: "/close" },
+  ],
 ];
 
 export function buildReplyKeyboardMenu(): TelegramReplyKeyboard {
   return {
     keyboard: QUICK_MENU_ITEMS.map((row) => row.map((item) => ({ text: item.label }))),
     resize_keyboard: true,
-    is_persistent: true,
+    is_persistent: false, // Để false để người dùng có thể đóng/thu gọn bàn phím tuỳ ý
+  };
+}
+
+// Xóa bàn phím cứng ở đáy màn hình, giúp ô chat gọn gàng và dùng nút Menu xanh chuẩn của Telegram
+export function buildReplyKeyboardRemove(): TelegramReplyKeyboardRemove {
+  return {
+    remove_keyboard: true,
   };
 }
 
@@ -130,6 +150,12 @@ export function buildReplyKeyboardMenu(): TelegramReplyKeyboard {
 // ngược label về command tương ứng để tái dùng toàn bộ logic xử lý lệnh sẵn có.
 export function matchQuickMenuCommand(text: string): string | null {
   const trimmed = text.trim();
+  if (trimmed === "❌ Đóng menu" || trimmed === "Đóng menu" || trimmed.toLowerCase() === "/close") {
+    return "/close";
+  }
+  if (trimmed === "📱 Mở menu" || trimmed === "Mở menu" || trimmed.toLowerCase() === "/menu") {
+    return "/menu";
+  }
   for (const row of QUICK_MENU_ITEMS) {
     for (const item of row) {
       if (item.label === trimmed) return item.command;
@@ -277,20 +303,90 @@ export function buildReferralInfoMessage(params: {
   ].join("\n");
 }
 
-export function buildDealsListMessage(
-  deals: { title: string; discountPercent: number | null; url: string | null }[]
-): string {
-  if (deals.length === 0) {
-    return "🏷️ Hiện chưa có ưu đãi nào đang chạy. Quay lại sau nhé!";
+export function buildDealCardCaption(deal: {
+  title: string;
+  platformCode?: string | null;
+  category?: string | null;
+  salePrice?: number | null;
+  originalPrice?: number | null;
+  discountPercent?: number | null;
+}): string {
+  const cleanTitle = deal.title.length > 90 ? deal.title.slice(0, 87) + "..." : deal.title;
+  const platform = deal.platformCode || "Shopee";
+  const discountText = deal.discountPercent ? ` (-${deal.discountPercent}%)` : "";
+
+  let priceLine: string | null = null;
+  if (deal.salePrice) {
+    const saleStr = formatCurrency(deal.salePrice);
+    const origStr = deal.originalPrice && deal.originalPrice > deal.salePrice
+      ? ` <s>${formatCurrency(deal.originalPrice)}</s>`
+      : "";
+    priceLine = `💰 <b>Giá ưu đãi:</b> <b>${saleStr}</b>${origStr}${discountText ? ` <b>${discountText}</b>` : ""}`;
+  } else if (deal.discountPercent) {
+    priceLine = `🔥 <b>Mức giảm sốc:</b> <b>-${deal.discountPercent}%</b>`;
   }
 
-  const lines = deals.map((d) => {
-    const discount = d.discountPercent ? ` (giảm ${d.discountPercent}%)` : "";
-    const title = `${escapeHtml(d.title)}${discount}`;
-    return d.url ? `🏷️ <a href="${d.url}">${title}</a>` : `🏷️ ${title}`;
+  return [
+    `🛍️ <b>${escapeHtml(cleanTitle)}</b>`,
+    "",
+    `🏷️ <b>Nền tảng:</b> ${escapeHtml(platform)}${deal.category ? ` • ${escapeHtml(deal.category)}` : ""}`,
+    priceLine,
+    "",
+    "✨ <i>Bấm nút bên dưới để mua & nhận hoàn tiền tự động:</i>",
+  ]
+    .filter(Boolean)
+    .join("\n");
+}
+
+export function buildDealsListMessage(
+  deals: {
+    title: string;
+    discountPercent: number | null;
+    salePrice?: number | null;
+    originalPrice?: number | null;
+    platformCode?: string | null;
+    url: string | null;
+  }[]
+): string {
+  if (deals.length === 0) {
+    return "🏷️ Hiện chưa có ưu đãi nào đang chạy. Bạn có thể gửi link Shopee bất kỳ vào đây để nhận hoàn tiền ngay nhé! 🎁";
+  }
+
+  const cards = deals.map((d, index) => {
+    const cleanTitle = d.title.length > 55 ? d.title.slice(0, 52) + "..." : d.title;
+    const discountBadge = d.discountPercent ? `  •  🔥 <b>Giảm ${d.discountPercent}%</b>` : "";
+
+    let pricePart = "";
+    if (d.salePrice) {
+      const sale = formatCurrency(d.salePrice);
+      const orig = d.originalPrice && d.originalPrice > d.salePrice
+        ? ` <s>${formatCurrency(d.originalPrice)}</s>`
+        : "";
+      pricePart = `├ 💰 <b>${sale}</b>${orig}${discountBadge}`;
+    } else if (d.discountPercent) {
+      pricePart = `├ 🔥 <b>Giảm sốc: -${d.discountPercent}%</b>`;
+    }
+
+    const buyLink = d.url
+      ? `╰ 👉 <a href="${d.url}"><b>Mua ngay & nhận hoàn tiền ➔</b></a>`
+      : `╰ ──────────────────────────`;
+
+    return [
+      `╭─ 🛍️ <b>[${index + 1}] ${escapeHtml(cleanTitle)}</b>`,
+      pricePart,
+      buyLink,
+    ]
+      .filter(Boolean)
+      .join("\n");
   });
 
-  return ["🏷️ <b>Ưu đãi hot đang chạy:</b>", "", ...lines].join("\n");
+  return [
+    "🔥 <b>TOP ƯU ĐÃI & DEAL HOT HÔM NAY</b>",
+    "━━━━━━━━━━━━━━━━━━━━━━━━━━",
+    "",
+    ...cards.flatMap((card) => [card, ""]),
+    "💡 <i>Bấm trực tiếp link trong thẻ hoặc các nút bên dưới để nhận hoàn tiền:</i>",
+  ].join("\n");
 }
 
 export function buildPaymentPaidMessage(params: {
@@ -428,10 +524,55 @@ export function mapDetectedPlatformToCode(url: string): "SHOPEE" | "TIKTOK" | nu
   return null;
 }
 
+export const TELEGRAM_BOT_COMMANDS = [
+  { command: "menu", description: "📱 Mở menu thao tác" },
+  { command: "close", description: "❌ Đóng menu (cho gọn màn hình)" },
+  { command: "deals", description: "🏷️ Ưu đãi hot đang chạy" },
+  { command: "wallet", description: "💰 Số dư ví hoàn tiền" },
+  { command: "rut", description: "💸 Yêu cầu rút tiền" },
+  { command: "orders", description: "📦 5 đơn hàng gần nhất" },
+  { command: "links", description: "🔗 5 link đã tạo gần nhất" },
+  { command: "referral", description: "🎁 Link mời bạn & hoa hồng" },
+  { command: "myid", description: "🆔 Xem Telegram Chat ID của bạn" },
+  { command: "help", description: "📖 Hướng dẫn sử dụng" },
+];
+
+export async function setupTelegramBotCommands(): Promise<{ ok: boolean; error?: string }> {
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+  if (!token) return { ok: false, error: "Thiếu TELEGRAM_BOT_TOKEN trong .env" };
+
+  try {
+    const resCmd = await fetch(`https://api.telegram.org/bot${token}/setMyCommands`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ commands: TELEGRAM_BOT_COMMANDS }),
+    });
+    const cmdData = await resCmd.json().catch(() => null);
+
+    const resMenu = await fetch(`https://api.telegram.org/bot${token}/setChatMenuButton`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        menu_button: {
+          type: "commands",
+        },
+      }),
+    });
+    const menuData = await resMenu.json().catch(() => null);
+
+    if (!resCmd.ok || !cmdData?.ok) {
+      return { ok: false, error: cmdData?.description || `HTTP ${resCmd.status}` };
+    }
+    return { ok: true };
+  } catch (error) {
+    return { ok: false, error: error instanceof Error ? error.message : "Unknown error" };
+  }
+}
+
 export async function sendTelegramTextMessage(params: {
   chatId: string;
   message: string;
-  keyboard?: TelegramInlineKeyboard | TelegramReplyKeyboard;
+  keyboard?: TelegramInlineKeyboard | TelegramReplyKeyboard | TelegramReplyKeyboardRemove;
 }): Promise<TelegramSendResult> {
   const token = process.env.TELEGRAM_BOT_TOKEN;
 
@@ -466,6 +607,110 @@ export async function sendTelegramTextMessage(params: {
       simulated: false,
       response: responseBody,
       error: response.ok ? undefined : `HTTP ${response.status}`,
+    };
+  } catch (error) {
+    return {
+      ok: false,
+      simulated: false,
+      error: error instanceof Error ? error.message : "Unknown error",
+    };
+  }
+}
+
+export async function sendTelegramPhoto(params: {
+  chatId: string;
+  photo: string;
+  caption?: string;
+  keyboard?: TelegramInlineKeyboard | TelegramReplyKeyboard | TelegramReplyKeyboardRemove;
+}): Promise<TelegramSendResult> {
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+
+  if (!token) {
+    return {
+      ok: true,
+      simulated: true,
+      response: {
+        reason: "Missing TELEGRAM_BOT_TOKEN",
+        chatId: params.chatId,
+        photo: params.photo,
+        caption: params.caption,
+      },
+    };
+  }
+
+  try {
+    const response = await fetch(`https://api.telegram.org/bot${token}/sendPhoto`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        chat_id: params.chatId,
+        photo: params.photo,
+        caption: params.caption,
+        parse_mode: "HTML",
+        reply_markup: params.keyboard,
+      }),
+    });
+
+    const responseBody = await response.json().catch(() => null);
+    return {
+      ok: response.ok,
+      simulated: false,
+      response: responseBody,
+      error: response.ok ? undefined : `HTTP ${response.status}: ${responseBody?.description || ""}`,
+    };
+  } catch (error) {
+    return {
+      ok: false,
+      simulated: false,
+      error: error instanceof Error ? error.message : "Unknown error",
+    };
+  }
+}
+
+export async function editTelegramMessageMedia(params: {
+  chatId: string;
+  messageId: string | number;
+  photo: string;
+  caption?: string;
+  keyboard?: TelegramInlineKeyboard;
+}): Promise<TelegramSendResult> {
+  const token = process.env.TELEGRAM_BOT_TOKEN;
+
+  if (!token) {
+    return {
+      ok: true,
+      simulated: true,
+      response: {
+        reason: "Missing TELEGRAM_BOT_TOKEN",
+        chatId: params.chatId,
+        messageId: params.messageId,
+      },
+    };
+  }
+
+  try {
+    const response = await fetch(`https://api.telegram.org/bot${token}/editMessageMedia`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        chat_id: params.chatId,
+        message_id: params.messageId,
+        media: {
+          type: "photo",
+          media: params.photo,
+          caption: params.caption,
+          parse_mode: "HTML",
+        },
+        reply_markup: params.keyboard,
+      }),
+    });
+
+    const responseBody = await response.json().catch(() => null);
+    return {
+      ok: response.ok,
+      simulated: false,
+      response: responseBody,
+      error: response.ok ? undefined : `HTTP ${response.status}: ${responseBody?.description || ""}`,
     };
   } catch (error) {
     return {

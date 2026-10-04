@@ -5,6 +5,61 @@ function escapeHtml(val: string): string {
   return val.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
+/**
+ * Chuyển đổi Chat ID hoặc Username Telegram thành Chat ID số hợp lệ để gửi tin.
+ * Hỗ trợ các trường hợp:
+ * - ID số (VD: "7558379347" hoặc "-100xxx")
+ * - Username có hoặc không có dấu @ (VD: "@nonamepro123", "nonamepro123")
+ */
+export async function resolveTelegramChatId(rawInput?: string | null): Promise<string | null> {
+  if (!rawInput) return null;
+  const trimmed = rawInput.trim();
+  if (!trimmed) return null;
+
+  // Nếu là số thuần túy (kể cả số âm ID nhóm Telegram: -100...)
+  if (/^-?\d+$/.test(trimmed)) {
+    return trimmed;
+  }
+
+  // Nếu nhập username (có thể có @ hoặc không)
+  const username = trimmed.replace(/^@/, "").toLowerCase();
+  if (!username) return null;
+
+  // 1. Tìm trong Customer (đã từng chat với bot hoặc liên kết trên web)
+  const customer = await prisma.customer.findFirst({
+    where: {
+      telegramUsername: {
+        equals: username,
+        mode: "insensitive",
+      },
+      telegramUserId: { not: null },
+    },
+    select: { telegramUserId: true },
+  });
+
+  if (customer?.telegramUserId) {
+    return customer.telegramUserId;
+  }
+
+  // 2. Tìm trong log tin nhắn Telegram gần nhất của username này
+  const log = await prisma.telegramMessageLog.findFirst({
+    where: {
+      payload: {
+        contains: username,
+        mode: "insensitive",
+      },
+    },
+    orderBy: { createdAt: "desc" },
+    select: { senderId: true },
+  });
+
+  if (log?.senderId) {
+    return log.senderId;
+  }
+
+  return null;
+}
+
 export async function notifyAdminsNewCustomerRegistration(params: {
   fullName: string;
   email: string;
@@ -21,31 +76,66 @@ export async function notifyAdminsNewCustomerRegistration(params: {
         role: "admin",
         status: "active",
         notifyOnNewCustomer: true,
-        telegramChatId: { not: null },
       },
       select: {
         id: true,
         fullName: true,
+        email: true,
         telegramChatId: true,
+        customer: {
+          select: {
+            telegramUserId: true,
+            telegramUsername: true,
+          },
+        },
       },
     });
 
     const targetChatIds = new Set<string>();
 
     for (const a of admins) {
+      // 1.1 Thử dùng telegramChatId được cấu hình trực tiếp (ID hoặc @username)
       if (a.telegramChatId && a.telegramChatId.trim()) {
-        targetChatIds.add(a.telegramChatId.trim());
+        const resolved = await resolveTelegramChatId(a.telegramChatId);
+        if (resolved) {
+          targetChatIds.add(resolved);
+          continue;
+        }
+      }
+
+      // 1.2 Thử lấy từ hồ sơ Customer liên kết của tài khoản Admin
+      if (a.customer?.telegramUserId) {
+        targetChatIds.add(a.customer.telegramUserId.trim());
+        continue;
+      }
+
+      // 1.3 Thử tìm theo email admin trong bảng Customer
+      if (a.email) {
+        const matchingCustomer = await prisma.customer.findFirst({
+          where: {
+            OR: [
+              { user: { email: a.email } },
+              { note: { contains: a.email } },
+            ],
+            telegramUserId: { not: null },
+          },
+          select: { telegramUserId: true },
+        });
+        if (matchingCustomer?.telegramUserId) {
+          targetChatIds.add(matchingCustomer.telegramUserId.trim());
+        }
       }
     }
 
     // Kiểm tra thêm biến môi trường TELEGRAM_ADMIN_CHAT_ID (nếu có cấu hình)
     const envAdminChatId = process.env.TELEGRAM_ADMIN_CHAT_ID?.trim();
     if (envAdminChatId) {
-      targetChatIds.add(envAdminChatId);
+      const resolvedEnv = await resolveTelegramChatId(envAdminChatId);
+      if (resolvedEnv) targetChatIds.add(resolvedEnv);
     }
 
     if (targetChatIds.size === 0) {
-      console.log("[notifyAdmins] Không có tài khoản admin nào cấu hình Telegram Chat ID để nhận thông báo.");
+      console.log("[notifyAdmins] Không có tài khoản admin nào cấu hình Telegram Chat ID hoặc username hợp lệ để nhận thông báo.");
       return;
     }
 

@@ -3,7 +3,7 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { hashPassword } from "@/lib/password";
 import { setSessionCookie } from "@/lib/auth";
-import { sendMail, buildAdminNewRegistrationEmail, buildReferralSuccessEmail } from "@/lib/mailer";
+import { sendMail, buildReferralSuccessEmail } from "@/lib/mailer";
 import { generateCustomerCode } from "@/lib/customerCode";
 import { checkRateLimit, getClientIp } from "@/lib/rateLimit";
 import { notifyAdminsNewCustomerRegistration } from "@/lib/adminTelegramNotify";
@@ -42,12 +42,13 @@ export async function POST(req: NextRequest) {
   }
 
   const { email, password, fullName, phone } = await req.json();
+  const cleanFullName = typeof fullName === "string" ? fullName.trim().replace(/\s+/g, " ") : "";
 
   if (!email || typeof email !== "string" || !/^\S+@\S+\.\S+$/.test(email) || email.length > 255) {
     return NextResponse.json({ error: "Email không hợp lệ" }, { status: 400 });
   }
 
-  if (!fullName || typeof fullName !== "string" || fullName.length > 100) {
+  if (!cleanFullName || cleanFullName.length > 100) {
     return NextResponse.json({ error: "Họ tên không hợp lệ hoặc quá dài" }, { status: 400 });
   }
 
@@ -86,8 +87,8 @@ export async function POST(req: NextRequest) {
   }
 
   const customer = await createCustomerWithUniqueCode({
-    fullName,
-    phone: phone || null,
+    fullName: cleanFullName,
+    phone: phone ? phone.trim() : null,
     referredById,
   });
   const customerCode = customer.customerCode;
@@ -96,7 +97,7 @@ export async function POST(req: NextRequest) {
     data: {
       email,
       passwordHash,
-      fullName,
+      fullName: cleanFullName,
       role: "customer",
       customerId: customer.id,
     },
@@ -109,35 +110,9 @@ export async function POST(req: NextRequest) {
     customerId: customer.id,
   });
 
-  const adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL;
-  if (adminEmail) {
-    sendMail({
-      to: adminEmail,
-      subject: `[Đăng ký mới] ${fullName} (${customerCode})`,
-      html: buildAdminNewRegistrationEmail({
-        fullName,
-        email,
-        customerCode,
-        phone,
-        source: "email",
-        referredByCode: referredById ? refCode : null,
-        referrerName,
-        referrerEmail,
-      }),
-    })
-      .then((result) => {
-        if (!result.ok) console.error("[register] Gửi email thông báo admin thất bại:", result.error);
-        else if (result.simulated) console.warn("[register] SMTP chưa cấu hình — bỏ qua email thông báo admin");
-        else console.log("[register] Đã gửi email thông báo admin thành công tới", adminEmail);
-      })
-      .catch((err) => console.error("[register] sendMail throw lỗi:", err));
-  } else {
-    console.warn("[register] Thiếu ADMIN_NOTIFICATION_EMAIL — không gửi được email thông báo admin");
-  }
-
-  // 🔔 Gửi thông báo đến Bot Telegram của các Admin có bật nhận thông báo
+  // 🔔 Gửi thông báo đến Bot Telegram của các Admin có bật nhận thông báo (Không gửi qua email để tránh phiền toái)
   notifyAdminsNewCustomerRegistration({
-    fullName,
+    fullName: cleanFullName,
     email,
     customerCode,
     phone,

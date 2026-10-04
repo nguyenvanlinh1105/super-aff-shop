@@ -101,7 +101,8 @@ export default async function CustomerHomePage() {
     .filter((o) => o.payoutStatus === "paid")
     .reduce((s, o) => s + Number(o.customerRewardAmount), 0);
 
-  const firstName = (customer?.fullName ?? session.fullName).split(" ").at(-1) ?? "bạn";
+  const rawName = (customer?.fullName || session?.fullName || "").trim();
+  const firstName = rawName.split(/\s+/).filter(Boolean).at(-1) || rawName || "bạn";
   const customerCode = customer?.customerCode ?? "";
   const referralRate = activeRule?.referralRate ? Number(activeRule.referralRate) : 0.05;
   const maxReferralOrders = activeRule?.maxReferralOrders ?? 5;

@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { hashPassword } from "@/lib/password";
 import { setSessionCookie } from "@/lib/auth";
 import { getRequestOrigin } from "@/lib/requestOrigin";
-import { sendMail, buildAdminNewRegistrationEmail, buildReferralSuccessEmail } from "@/lib/mailer";
+import { sendMail, buildReferralSuccessEmail } from "@/lib/mailer";
 import { generateCustomerCode } from "@/lib/customerCode";
 import { notifyAdminsNewCustomerRegistration } from "@/lib/adminTelegramNotify";
 
@@ -84,7 +84,8 @@ export async function GET(req: NextRequest) {
   const profile = await userInfoRes.json();
   const email = profile.email as string | undefined;
   const emailVerified = profile.email_verified as boolean | undefined;
-  const fullName = (profile.name as string | undefined) || email || "Người dùng Google";
+  const rawName = (profile.name as string | undefined)?.trim() || email || "Người dùng Google";
+  const fullName = rawName.replace(/\s+/g, " ");
 
   if (!email || !emailVerified) {
     return failRedirect("google_email_not_verified");
@@ -128,32 +129,7 @@ export async function GET(req: NextRequest) {
       },
     });
 
-    const adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL;
-    if (adminEmail) {
-      sendMail({
-        to: adminEmail,
-        subject: `[Đăng ký mới] ${fullName} (${customerCode})`,
-        html: buildAdminNewRegistrationEmail({
-          fullName,
-          email,
-          customerCode,
-          source: "google",
-          referredByCode: referredById ? refCode : null,
-          referrerName,
-          referrerEmail,
-        }),
-      })
-        .then((result) => {
-          if (!result.ok) console.error("[google-callback] Gửi email thông báo admin thất bại:", result.error);
-          else if (result.simulated) console.warn("[google-callback] SMTP chưa cấu hình — bỏ qua email thông báo admin");
-          else console.log("[google-callback] Đã gửi email thông báo admin thành công tới", adminEmail);
-        })
-        .catch((err) => console.error("[google-callback] sendMail throw lỗi:", err));
-    } else {
-      console.warn("[google-callback] Thiếu ADMIN_NOTIFICATION_EMAIL — không gửi được email thông báo admin");
-    }
-
-    // 🔔 Gửi thông báo đến Bot Telegram của các Admin có bật nhận thông báo
+    // 🔔 Gửi thông báo đến Bot Telegram của các Admin có bật nhận thông báo (Không gửi mail để tránh phiền toái)
     notifyAdminsNewCustomerRegistration({
       fullName,
       email,

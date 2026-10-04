@@ -11,7 +11,11 @@ function getPrisma() {
 
 const vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
 const vapidPrivateKey = process.env.VAPID_PRIVATE_KEY;
-const vapidSubject = process.env.VAPID_SUBJECT || "mailto:support@meowback.shop";
+let rawSubject = process.env.VAPID_SUBJECT || "mailto:vanlinh11052004nguyenvan@gmail.com";
+if (rawSubject && !rawSubject.startsWith("mailto:") && !rawSubject.startsWith("http://") && !rawSubject.startsWith("https://")) {
+  rawSubject = `mailto:${rawSubject}`;
+}
+const vapidSubject = rawSubject;
 
 if (vapidPublicKey && vapidPrivateKey) {
   try {

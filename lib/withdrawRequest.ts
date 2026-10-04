@@ -1,5 +1,5 @@
 import { prisma } from "./prisma";
-import { sendMail, buildAdminWithdrawRequestEmail, buildCustomerWithdrawRequestEmail } from "./mailer";
+import { sendMail, buildCustomerWithdrawRequestEmail } from "./mailer";
 import { notifyAdminsInApp, notifyCustomerInApp } from "./notifications";
 
 export const MIN_WITHDRAW_AMOUNT = 10000;
@@ -83,19 +83,7 @@ export async function createWithdrawRequest(customerId: string): Promise<CreateW
     });
   }
 
-  // ── Email notifications ──────────────────────────────────────────────
-  const adminEmail = process.env.ADMIN_NOTIFICATION_EMAIL;
-  if (adminEmail) {
-    void sendMail({
-      to: adminEmail,
-      subject: `[Yêu cầu rút tiền] ${customer.fullName} (${customer.customerCode})`,
-      html: buildAdminWithdrawRequestEmail({
-        customerName: customer.fullName,
-        customerCode: customer.customerCode,
-        amount: available,
-      }),
-    });
-  }
+  // ── Email notification cho khách hàng ────────────────────────────────
 
   // Gửi ngược về cho khách để họ phát hiện sớm nếu có ai đó chiếm được tài
   // khoản và tự ý gửi yêu cầu rút tiền mà không phải chính chủ.

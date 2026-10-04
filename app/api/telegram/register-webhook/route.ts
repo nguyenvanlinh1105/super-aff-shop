@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getSession } from "@/lib/auth";
+import { setupTelegramBotCommands } from "@/lib/telegramBot";
 
 export async function POST() {
   const session = await getSession();
@@ -16,7 +17,7 @@ export async function POST() {
   }
   if (!appUrl || appUrl.includes("localhost")) {
     return NextResponse.json(
-      { error: "NEXT_PUBLIC_APP_URL phải là domain public (VD: ngrok) để Telegram gọi tới được" },
+      { error: "NEXT_PUBLIC_APP_URL phải là domain public để Telegram gọi tới được" },
       { status: 400 }
     );
   }
@@ -42,6 +43,9 @@ export async function POST() {
       { status: 400 }
     );
   }
+
+  // Tự động cài đặt danh sách lệnh & nút Menu xanh trên Telegram
+  await setupTelegramBotCommands();
 
   return NextResponse.json({ ok: true, webhookUrl, telegram: data });
 }
