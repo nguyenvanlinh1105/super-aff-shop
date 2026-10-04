@@ -28,11 +28,11 @@ export function MarketingHeader({ activePath = "/" }: { activePath?: string }) {
 
   return (
     <header className="fixed top-0 w-full z-50 bg-white/90 backdrop-blur-md border-b border-primary-100/80 shadow-cute">
-      <nav className="flex justify-between items-center w-full px-5 md:px-10 py-0 max-w-[1200px] mx-auto h-16">
+      <nav className="flex justify-between items-center w-full px-3.5 sm:px-5 md:px-10 py-0 max-w-[1200px] mx-auto h-16">
         {/* ── Logo ── */}
         <Link
           href="/"
-          className="hover:scale-[1.02] transition-transform"
+          className="hover:scale-[1.02] transition-transform shrink-0"
         >
           <LogoMeowBack />
         </Link>
@@ -58,18 +58,18 @@ export function MarketingHeader({ activePath = "/" }: { activePath?: string }) {
         </div>
 
         {/* ── CTA + Hamburger ── */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           {isLoggedIn ? (
             <Link
               href="/app"
-              className="bg-gradient-to-r from-primary-400 to-primary-500 text-white rounded-full px-4 py-2 font-bold text-[14px] whitespace-nowrap shadow-cute hover:shadow-cute-lg hover:scale-[1.02] transition-all duration-200 active:scale-95 flex items-center gap-1.5"
+              className="bg-gradient-to-r from-primary-400 to-primary-500 text-white rounded-full px-2.5 sm:px-4 py-1.5 sm:py-2 font-bold text-xs sm:text-[14px] whitespace-nowrap shadow-cute hover:shadow-cute-lg hover:scale-[1.02] transition-all duration-200 active:scale-95 flex items-center justify-center"
             >
-              <span>Vào ứng dụng 🐾</span>
+              <span>Vào ứng dụng</span>
             </Link>
           ) : (
             <Link
               href="/login"
-              className="bg-gradient-to-r from-primary-400 to-primary-500 text-white rounded-full px-3 py-2 font-bold text-[14px] whitespace-nowrap shadow-cute hover:shadow-cute-lg hover:scale-[1.02] transition-all duration-200 active:scale-95 flex items-center gap-1.5"
+              className="bg-gradient-to-r from-primary-400 to-primary-500 text-white rounded-full px-2.5 sm:px-3.5 py-1.5 sm:py-2 font-bold text-xs sm:text-[14px] whitespace-nowrap shadow-cute hover:shadow-cute-lg hover:scale-[1.02] transition-all duration-200 active:scale-95 flex items-center justify-center"
             >
               Đăng nhập 
             </Link>
@@ -77,7 +77,7 @@ export function MarketingHeader({ activePath = "/" }: { activePath?: string }) {
 
           {/* Hamburger (mobile only) */}
           <button
-            className="flex md:hidden flex-col justify-center items-center w-9 h-9 rounded-full bg-primary-50 hover:bg-primary-100 transition-colors"
+            className="flex md:hidden flex-col justify-center items-center w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-primary-50 hover:bg-primary-100 transition-colors shrink-0"
             onClick={() => setMenuOpen((v) => !v)}
             aria-label="Toggle menu"
             aria-expanded={menuOpen}
@@ -133,7 +133,7 @@ export function MarketingHeader({ activePath = "/" }: { activePath?: string }) {
                 onClick={() => setMenuOpen(false)}
                 className="block w-full text-center bg-gradient-to-r from-primary-400 to-primary-500 text-white rounded-full px-3 py-2.5 font-bold text-[14px] shadow-cute hover:shadow-cute-lg transition-all duration-200"
               >
-                Vào ứng dụng MeowBack 🐾
+                Vào ứng dụng MeowBack
               </Link>
             ) : (
               <Link
