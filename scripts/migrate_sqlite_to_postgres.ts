@@ -128,26 +128,7 @@ async function main() {
     }
   }
 
-  // 4. affiliate_channels
-  const channels = dump["affiliate_channels"] || [];
-  console.log(`Migrating affiliate_channels (${channels.length})...`);
-  for (const ch of channels) {
-    await prisma.affiliateChannel.upsert({
-      where: { id: ch.id },
-      update: {},
-      create: {
-        id: ch.id,
-        code: ch.code,
-        name: ch.name,
-        platformId: ch.platform_id,
-        status: ch.status || "active",
-        metadata: ch.metadata,
-        createdAt: toDate(ch.created_at) || new Date(),
-      },
-    });
-  }
-
-  // 5. tracking_links
+  // 4. tracking_links
   const trackingLinks = dump["tracking_links"] || [];
   console.log(`Migrating tracking_links (${trackingLinks.length})...`);
   for (const tl of trackingLinks) {
@@ -158,7 +139,6 @@ async function main() {
         id: tl.id,
         customerId: tl.customer_id,
         platformId: tl.platform_id,
-        affiliateChannelId: tl.affiliate_channel_id,
         channelSource: tl.channel_source,
         trackingCode: tl.tracking_code,
         originalUrl: tl.original_url,

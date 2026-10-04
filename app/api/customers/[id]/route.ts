@@ -123,7 +123,6 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
   await prisma.$transaction([
     prisma.withdrawRequest.deleteMany({ where: { customerId: customer.id } }),
     prisma.telegramLinkCode.deleteMany({ where: { customerId: customer.id } }),
-    prisma.zaloMessageLog.deleteMany({ where: { customerId: customer.id } }),
     prisma.telegramMessageLog.deleteMany({ where: { customerId: customer.id } }),
     prisma.paymentBatch.deleteMany({ where: { customerId: customer.id } }),
     // Giữ lại order (lịch sử đối soát thật) — chỉ gỡ liên kết khách hàng/link.

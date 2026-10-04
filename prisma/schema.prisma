@@ -96,7 +96,6 @@ model Customer {
   trackingLinks    TrackingLink[]
   orders           Order[]
   paymentBatches   PaymentBatch[]
-  zaloMessageLogs  ZaloMessageLog[]
   telegramMessageLogs TelegramMessageLog[]
   telegramLinkCodes   TelegramLinkCode[]
   withdrawRequests    WithdrawRequest[]
@@ -147,7 +146,6 @@ model Platform {
   status    String   @default("active")
   createdAt DateTime @default(now()) @map("created_at")
 
-  affiliateChannels AffiliateChannel[]
   trackingLinks     TrackingLink[]
   vouchers          Voucher[]
   orders            Order[]
@@ -155,20 +153,6 @@ model Platform {
   @@map("platforms")
 }
 
-model AffiliateChannel {
-  id         String   @id @default(uuid())
-  code       String   @unique
-  name       String
-  platformId String   @map("platform_id")
-  platform   Platform @relation(fields: [platformId], references: [id])
-  status     String   @default("active")
-  metadata   String?
-  createdAt  DateTime @default(now()) @map("created_at")
-
-  trackingLinks TrackingLink[]
-
-  @@map("affiliate_channels")
-}
 
 model TrackingLink {
   id                 String   @id @default(uuid())
@@ -176,8 +160,6 @@ model TrackingLink {
   customer           Customer @relation(fields: [customerId], references: [id])
   platformId         String   @map("platform_id")
   platform           Platform @relation(fields: [platformId], references: [id])
-  affiliateChannelId String?  @map("affiliate_channel_id")
-  affiliateChannel   AffiliateChannel? @relation(fields: [affiliateChannelId], references: [id])
   channelSource      String   @map("channel_source") // 'web' | 'zalo' | 'telegram'
   trackingCode       String   @unique @map("tracking_code")
   originalUrl        String   @map("original_url")
@@ -450,43 +432,6 @@ model PaymentBatchItem {
   @@map("payment_batch_items")
 }
 
-model ZaloAccount {
-  id         String   @id @default(uuid())
-  oaName     String   @map("oa_name")
-  oaId       String?  @map("oa_id")
-  appId      String?  @map("app_id")
-  webhookUrl String?  @map("webhook_url")
-  status     String   @default("inactive")
-  metadata   String?
-  createdAt  DateTime @default(now()) @map("created_at")
-  updatedAt  DateTime @default(now()) @updatedAt @map("updated_at")
-
-  messageLogs ZaloMessageLog[]
-
-  @@map("zalo_accounts")
-}
-
-model ZaloMessageLog {
-  id                 String   @id @default(uuid())
-  zaloAccountId      String?  @map("zalo_account_id")
-  zaloAccount        ZaloAccount? @relation(fields: [zaloAccountId], references: [id])
-  customerId         String?  @map("customer_id")
-  customer           Customer? @relation(fields: [customerId], references: [id])
-  direction          String // 'in' | 'out'
-  externalMessageId  String?  @map("external_message_id")
-  senderId           String?  @map("sender_id")
-  receiverId         String?  @map("receiver_id")
-  messageType        String?  @map("message_type")
-  messageText        String?  @map("message_text")
-  payload            String?
-  processingStatus   String   @default("received") @map("processing_status")
-  createdAt          DateTime @default(now()) @map("created_at")
-
-  @@index([customerId])
-  @@index([direction])
-  @@index([createdAt])
-  @@map("zalo_message_logs")
-}
 
 model TelegramAccount {
   id            String   @id @default(uuid())
