@@ -2,7 +2,16 @@
 
 import React, { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Search, Sparkles, ShieldCheck, Zap } from "lucide-react";
+import { Search, Sparkles, ShieldCheck, Zap, X, Flame, ArrowRight } from "lucide-react";
+
+const HOT_KEYWORDS = [
+  { label: "Váy & Đầm", icon: "👗" },
+  { label: "Son môi", icon: "💄" },
+  { label: "Tai nghe", icon: "🎧" },
+  { label: "Giày sneaker", icon: "👟" },
+  { label: "Mẹ & Bé", icon: "🍼" },
+  { label: "Đồ gia dụng", icon: "🏡" },
+];
 
 export function DealMarketHero({ activeCount }: { activeCount: number }) {
   const router = useRouter();
@@ -21,84 +30,86 @@ export function DealMarketHero({ activeCount }: { activeCount: number }) {
     router.replace(`/uu-dai?${params.toString()}`);
   }
 
-  return (
-    <div className="relative w-full overflow-hidden rounded-2xl sm:rounded-3xl bg-gradient-to-r from-primary-50/80 via-white to-pink-50/70 border border-primary-100 shadow-[0_4px_24px_rgba(255,109,158,0.06)] mb-4 sm:mb-6">
-      {/* Decorative ambient blurs */}
-      <div className="absolute -top-12 -right-12 w-44 h-44 bg-primary-200/30 rounded-full blur-2xl pointer-events-none" />
-      <div className="absolute -bottom-8 -left-8 w-36 h-36 bg-rose-200/20 rounded-full blur-2xl pointer-events-none" />
+  function handleSelectKeyword(kw: string) {
+    setKeyword(kw);
+    const params = new URLSearchParams(searchParams);
+    params.set("page", "1");
+    params.set("q", kw);
+    router.replace(`/uu-dai?${params.toString()}`);
+  }
 
-      <div className="relative z-10 p-3.5 sm:p-5 lg:p-6">
-        {/* Main Content Row */}
-        <div className="flex items-center justify-between gap-3 sm:gap-6">
+  function handleClear() {
+    setKeyword("");
+    const params = new URLSearchParams(searchParams);
+    params.set("page", "1");
+    params.delete("q");
+    router.replace(`/uu-dai?${params.toString()}`);
+  }
+
+  return (
+    <div className="relative w-full overflow-hidden rounded-3xl sm:rounded-[32px] bg-gradient-to-br from-primary-50/90 via-white to-pink-50/80 border-2 border-primary-200/80 shadow-[0_8px_32px_rgba(255,109,158,0.1)] mb-6 sm:mb-8 transition-all">
+      {/* Decorative ambient blurs */}
+      <div className="absolute -top-16 -right-16 w-56 h-56 bg-primary-200/35 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-12 -left-12 w-48 h-48 bg-rose-200/25 rounded-full blur-3xl pointer-events-none" />
+
+      <div className="relative z-10 p-4 sm:p-7 lg:p-8 space-y-4 sm:space-y-6">
+        {/* Top Section: Heading & Mascot Banner */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-6">
           {/* Left Column: Heading & Information */}
-          <div className="flex-1 min-w-0">
+          <div className="flex-1 min-w-0 space-y-2 sm:space-y-2.5">
             {/* Top pill badge */}
-            <div className="inline-flex items-center gap-1.5 rounded-full bg-white px-2.5 py-0.5 sm:px-3 sm:py-1 shadow-2xs border border-primary-200/80 text-[10.5px] sm:text-[12px] font-extrabold text-primary-600 mb-1 sm:mb-1.5">
-              <span>🎀 MeowBack Săn Deal</span>
-              <span className="hidden sm:inline-block h-1 w-1 rounded-full bg-primary-400" />
-              <span className="hidden sm:inline-block text-neutral-500 font-semibold">{activeCount} deal đang mở</span>
+            <div className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1 shadow-2xs border border-primary-200 text-xs font-black text-primary-600">
+              <Sparkles size={13} className="text-[#FF4D85]" />
+              <span>MeowBack Săn Deal Siêu Hời</span>
+              <span className="inline-block h-1 w-1 rounded-full bg-primary-400" />
+              <span className="text-neutral-500 font-bold">{activeCount} deal đang mở</span>
             </div>
 
             {/* Headline */}
-            <h1 className="text-[17px] sm:text-2xl lg:text-[26px] font-black text-neutral-900 tracking-tight leading-snug">
-              Săn Deal Siêu Rẻ &{" "}
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#EE4D2D] via-[#FF3B7B] to-[#0F146D]">
+            <h1 className="text-xl sm:text-3xl lg:text-[32px] font-black text-neutral-900 tracking-tight leading-snug">
+              Săn Deal Siêu Rẻ &amp;{" "}
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#EE4D2D] via-[#FF3B7B] to-[#E02868]">
                 Hoàn Tiền Đến 80% 🐾
               </span>
             </h1>
 
             {/* Subtitle */}
-            <p className="mt-0.5 sm:mt-1 text-[11.5px] sm:text-[13px] text-neutral-600 leading-snug sm:leading-relaxed font-medium line-clamp-1 sm:line-clamp-2 max-w-xl">
-              Cập nhật ưu đãi Shopee & TikTok Shop mỗi ngày. Đăng nhập để tự động nhận hoàn tiền về ví!
+            <p className="text-xs sm:text-sm text-neutral-600 font-semibold leading-relaxed max-w-2xl">
+              Kho ưu đãi độc quyền từ Shopee, Lazada &amp; TikTok Shop mỗi ngày. Tự động nhận lại hoa hồng ròng về ví sau khi mua sắm!
             </p>
 
-            {/* Value badges (desktop) */}
-            <div className="hidden sm:flex flex-wrap items-center gap-2 mt-2.5 text-[11px] font-bold text-neutral-700">
-              <span className="flex items-center gap-1 bg-white rounded-lg px-2.5 py-1 border border-primary-100 shadow-2xs">
-                <Zap size={12} className="text-amber-500" />
-                <span>Rút từ <b>10.000đ</b></span>
+            {/* Value badges */}
+            <div className="flex flex-wrap items-center gap-2 pt-1 text-[11px] sm:text-xs font-bold text-neutral-700">
+              <span className="flex items-center gap-1.5 bg-white rounded-xl px-2.5 sm:px-3 py-1 border border-primary-100/90 shadow-2xs">
+                <Zap size={13} className="text-amber-500" />
+                <span>Rút từ <strong className="text-neutral-900 font-black">10.000đ</strong></span>
               </span>
-              <span className="flex items-center gap-1 bg-white rounded-lg px-2.5 py-1 border border-primary-100 shadow-2xs">
-                <ShieldCheck size={12} className="text-emerald-500" />
+              <span className="flex items-center gap-1.5 bg-white rounded-xl px-2.5 sm:px-3 py-1 border border-primary-100/90 shadow-2xs">
+                <ShieldCheck size={13} className="text-emerald-500" />
                 <span>Đối soát tự động 24/7</span>
               </span>
-              <span className="flex items-center gap-1 bg-white rounded-lg px-2.5 py-1 border border-primary-100 shadow-2xs">
-                <Sparkles size={12} className="text-primary-500" />
-                <span>Hoàn đến <b className="text-primary-600">80% hoa hồng</b></span>
+              <span className="flex items-center gap-1.5 bg-white rounded-xl px-2.5 sm:px-3 py-1 border border-primary-100/90 shadow-2xs">
+                <Sparkles size={13} className="text-[#FF4D85]" />
+                <span>Hoàn đến <strong className="text-[#E02868] font-black">80% hoa hồng</strong></span>
               </span>
             </div>
           </div>
 
-          {/* Right Column: Mascot Visual */}
-          <div className="shrink-0">
-            {/* Mobile: Compact Square Thumbnail */}
-            <div className="block md:hidden relative w-[80px] h-[80px] rounded-2xl overflow-hidden shadow-cute border-2 border-white">
-              <img
-                src="/meowback_market_spree.jpg"
-                alt="MeowBack Săn Deal"
-                className="w-full h-full object-cover object-[62%_center]"
-              />
-              <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/60 to-transparent py-0.5 text-center">
-                <span className="text-[9px] font-black text-amber-300">
-                  Hoàn 80%
-                </span>
-              </div>
-            </div>
-
-            {/* Desktop: Panoramic Shopping Card */}
-            <div className="hidden md:block relative w-[230px] lg:w-[260px] h-[115px] lg:h-[125px] rounded-2xl overflow-hidden shadow-cute border-2 border-white group">
+          {/* Right Column: Panoramic Mascot Card */}
+          <div className="shrink-0 self-center md:self-auto">
+            <div className="relative w-full sm:w-[260px] lg:w-[290px] h-[100px] sm:h-[125px] rounded-2xl sm:rounded-[22px] overflow-hidden shadow-cute border-2 border-white group">
               <img
                 src="/meowback_market_spree.jpg"
                 alt="MeowBack Săn Deal"
                 className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-transparent flex items-end p-2.5">
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent flex items-end p-3">
                 <div className="flex items-center justify-between w-full">
-                  <span className="text-[11px] font-black text-white drop-shadow-sm flex items-center gap-1">
-                    <span>Shopee & TikTok</span>
+                  <span className="text-xs font-black text-white drop-shadow-sm flex items-center gap-1">
+                    <span>Shopee • TikTok • Lazada</span>
                   </span>
-                  <span className="rounded-md bg-amber-400 px-1.5 py-0.5 text-[9.5px] font-black text-neutral-900 shadow-xs">
-                    Hoàn 80%
+                  <span className="rounded-lg bg-amber-400 px-2 py-0.5 text-[10px] font-black text-neutral-900 shadow-xs">
+                    Hoàn 80% 🎀
                   </span>
                 </div>
               </div>
@@ -106,45 +117,72 @@ export function DealMarketHero({ activeCount }: { activeCount: number }) {
           </div>
         </div>
 
-        {/* Search bar & Mobile value ticker */}
-        <div className="mt-2.5 sm:mt-3 pt-2.5 border-t border-primary-100/70 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2">
-          {/* Mobile-only compact ticker */}
-          <div className="flex sm:hidden items-center justify-between text-[10px] font-extrabold text-neutral-600 px-0.5">
-            <span className="flex items-center gap-1">
-              <Zap size={11} className="text-amber-500" />
-              <span>Rút từ 10k</span>
-            </span>
-            <span className="text-primary-300">•</span>
-            <span className="flex items-center gap-1">
-              <ShieldCheck size={11} className="text-emerald-500" />
-              <span>Đối soát 24/7</span>
-            </span>
-            <span className="text-primary-300">•</span>
-            <span className="flex items-center gap-1 text-primary-600">
-              <Sparkles size={11} className="text-primary-500" />
-              <span>Hoàn 80%</span>
-            </span>
-          </div>
+        {/* PRO SEARCH BAR SECTION - To, Nổi Bật, Chuẩn UX PC & Mobile */}
+        <div className="pt-2 sm:pt-3 border-t border-primary-100/80 space-y-3">
+          <form onSubmit={handleSearch} className="w-full">
+            <div className="relative flex items-center w-full rounded-2xl sm:rounded-full bg-white border-2 border-primary-200/90 shadow-[0_8px_25px_rgba(255,109,158,0.12)] hover:border-primary-300 focus-within:border-[#FF4D85] focus-within:ring-4 focus-within:ring-pink-100 transition-all p-1 sm:p-1.5">
+              
+              {/* Left Search Icon Badge */}
+              <div className="pl-2 sm:pl-3 pr-2 flex items-center justify-center shrink-0">
+                <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-gradient-to-br from-pink-100 via-rose-100 to-pink-50 flex items-center justify-center text-[#E02868] shadow-2xs">
+                  <Search size={18} className="sm:w-5 sm:h-5" />
+                </div>
+              </div>
 
-          {/* Search Form */}
-          <form onSubmit={handleSearch} className="w-full max-w-xl">
-            <div className="relative flex items-center">
+              {/* Main Search Input */}
               <input
                 type="text"
                 value={keyword}
                 onChange={(e) => setKeyword(e.target.value)}
-                placeholder="Tìm deal hot, sản phẩm hoặc dán link sàn..."
-                className="w-full h-8.5 sm:h-9.5 pl-8 sm:pl-9.5 pr-20 sm:pr-24 rounded-xl sm:rounded-2xl bg-white border border-primary-200 text-xs sm:text-[13px] text-neutral-800 placeholder:text-neutral-400 shadow-2xs focus:outline-none focus:ring-2 focus:ring-primary-400 focus:border-primary-400 font-medium transition-all"
+                placeholder="Tìm deal hot, sản phẩm Shopee, TikTok hoặc dán link sàn..."
+                className="w-full h-11 sm:h-13 bg-transparent text-sm sm:text-base md:text-[16.5px] font-bold text-neutral-900 placeholder:text-neutral-400 placeholder:font-medium focus:outline-none px-2"
               />
-              <Search size={14} className="absolute left-2.5 sm:left-3 text-primary-400 pointer-events-none" />
+
+              {/* Quick Clear Button */}
+              {keyword && (
+                <button
+                  type="button"
+                  onClick={handleClear}
+                  className="p-1.5 mr-1 text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 rounded-full transition-colors cursor-pointer shrink-0"
+                  title="Xóa từ khóa"
+                >
+                  <X size={16} />
+                </button>
+              )}
+
+              {/* Pro Action Button */}
               <button
                 type="submit"
-                className="absolute right-1 sm:right-1.5 h-6.5 sm:h-7.5 px-2.5 sm:px-3.5 rounded-lg sm:rounded-xl bg-gradient-to-r from-primary-500 to-rose-500 hover:from-primary-600 hover:to-rose-600 text-white text-[10.5px] sm:text-xs font-bold shadow-xs hover:shadow-cute transition-all cursor-pointer"
+                className="h-10 sm:h-12 px-4 sm:px-7 rounded-xl sm:rounded-full bg-gradient-to-r from-[#FF528A] via-[#E02868] to-[#FF4D85] hover:opacity-95 text-white font-black text-xs sm:text-sm shadow-md hover:shadow-cute active:scale-95 transition-all cursor-pointer flex items-center gap-1.5 shrink-0"
               >
-                Tìm kiếm
+                <span>Tìm Deal</span>
+                <ArrowRight size={15} className="hidden sm:inline-block" />
               </button>
             </div>
           </form>
+
+          {/* Hot Deal Keywords - Gợi ý săn deal hot tương tác */}
+          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 px-1 text-xs">
+            <span className="flex items-center gap-1 font-black text-[#E02868] text-[11px] sm:text-xs mr-0.5">
+              <Flame size={14} className="text-amber-500 fill-amber-500" />
+              <span>Gợi ý hot:</span>
+            </span>
+            {HOT_KEYWORDS.map((kw) => (
+              <button
+                key={kw.label}
+                type="button"
+                onClick={() => handleSelectKeyword(kw.label)}
+                className={`px-2.5 sm:px-3 py-1 rounded-full text-[11px] sm:text-xs font-bold transition-all cursor-pointer flex items-center gap-1 border ${
+                  keyword.toLowerCase() === kw.label.toLowerCase()
+                    ? "bg-[#FFF0F5] text-[#E02868] border-pink-300 font-black shadow-xs"
+                    : "bg-white text-neutral-600 border-neutral-200/70 hover:border-pink-200 hover:bg-pink-50/60 hover:text-neutral-900"
+                }`}
+              >
+                <span>{kw.icon}</span>
+                <span>{kw.label}</span>
+              </button>
+            ))}
+          </div>
         </div>
       </div>
     </div>
