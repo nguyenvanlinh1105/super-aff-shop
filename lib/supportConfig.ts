@@ -30,7 +30,7 @@ export const SUPPORT_CONFIG: SupportChannelConfig[] = [
     key: "zalo",
     label: "Zalo MeowBack",
     handle: "Cộng đồng Zalo",
-    href: "https://zalo.me/g/cgmmvw394",
+    href: "https://zalo.me/g/gr8cdnrzekv7frhradyz",
     enabled:
       process.env.NEXT_PUBLIC_SHOW_SUPPORT_ZALO === "true" ||
       process.env.NEXT_PUBLIC_SHOW_SUPPORT_ZALO === undefined, // default: true

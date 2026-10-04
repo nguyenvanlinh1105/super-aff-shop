@@ -20,7 +20,7 @@ const SOCIAL_LINKS = [
   {
     key: "zalo",
     label: "Zalo",
-    href: "https://zalo.me/g/cgmmvw394",
+    href: "https://zalo.me/g/gr8cdnrzekv7frhradyz",
     Icon: ZaloIcon,
   },
   {
