@@ -174,7 +174,7 @@ export function buildConvertLinkPromptMessage(): string {
 
 export function buildTelegramHelpMessage(): string {
   return [
-    "👋 <b>Chào mừng đến với bot ivi Hoàn Tiền!</b>",
+    "👋 <b>Chào mừng đến với bot MeowBack Hoàn Tiền!</b>",
     "",
     "Gửi link Shopee, bot sẽ đổi sang link hoàn tiền ngay lập tức.",
     "",
