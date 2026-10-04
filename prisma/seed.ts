@@ -196,6 +196,185 @@ async function seedTelegramAccount() {
   }
 }
 
+async function seedDeals() {
+  console.log("\n🏷️ Khởi tạo danh sách Deal thật chất lượng cao...");
+
+  const REAL_DEALS = [
+    {
+      id: "deal-seed-1",
+      title: "Bàn Chải Điện Sonic X Siêu Âm Chống Nước IPX7 Tặng Kèm 4 Đầu Bàn Chải",
+      description: "Tần số rung 42.000 lần/phút làm sạch mảng bám gấp 10 lần, 5 chế độ làm trắng răng chuyên biệt, pin dùng 60 ngày sau mỗi lần sạc.",
+      originalPrice: 399000,
+      salePrice: 199000,
+      discountPercent: 50,
+      platformCode: "SHOPEE",
+      category: "Gia dụng",
+      linkType: "product",
+      rawInputLink: "https://shopee.vn/product/123456/78906",
+      cleanLink: "https://shopee.vn/product/123456/78906",
+      affiliateUrl: "https://shopee.vn",
+      uploadedImageUrl: "https://down-vn.img.susercontent.com/file/vn-11134207-7r98o-lkj9x8v7n6a54b",
+      clicks: 420,
+      status: "active",
+    },
+    {
+      id: "deal-seed-2",
+      title: "Nồi Chiên Không Dầu Lock&Lock Điện Tử Dung Tích Lớn 5.2L EJF284BLK",
+      description: "Công nghệ chiên chân không giảm 80% dầu mỡ, bảng điều khiển cảm ứng thông minh 8 chế độ nấu nướng tự động, lòng nồi chống dính cao cấp.",
+      originalPrice: 1650000,
+      salePrice: 890000,
+      discountPercent: 46,
+      platformCode: "SHOPEE",
+      category: "Gia dụng",
+      linkType: "product",
+      rawInputLink: "https://shopee.vn/product/123456/78903",
+      cleanLink: "https://shopee.vn/product/123456/78903",
+      affiliateUrl: "https://shopee.vn",
+      uploadedImageUrl: "https://down-vn.img.susercontent.com/file/vn-11134207-7r98o-lkj7x4v5n3a21b",
+      clicks: 256,
+      status: "active",
+    },
+    {
+      id: "deal-seed-3",
+      title: "Áo Thun Cotton Form Rộng Unisex Meow Studio 100% Cotton Co Giãn 4 Chiều",
+      description: "Chất vải cotton 250gsm thoáng mát, không xù lông, hình in sắc nét bền màu sau nhiều lần giặt. Form oversize mặc tôn dáng.",
+      originalPrice: 220000,
+      salePrice: 119000,
+      discountPercent: 46,
+      platformCode: "SHOPEE",
+      category: "Thời trang",
+      linkType: "product",
+      rawInputLink: "https://shopee.vn/product/123456/78905",
+      cleanLink: "https://shopee.vn/product/123456/78905",
+      affiliateUrl: "https://shopee.vn",
+      uploadedImageUrl: "https://down-vn.img.susercontent.com/file/vn-11134207-7r98o-lm1x4y6z9a8b7c",
+      clicks: 189,
+      status: "active",
+    },
+    {
+      id: "deal-seed-4",
+      title: "Tai Nghe Bluetooth Baseus Bowie True Wireless Âm Bass Sâu Khử Ồn ENC",
+      description: "Pin trâu 30 giờ, kết nối Bluetooth 5.3 độ trễ cực thấp 0.06s, mic chống ồn đàm thoại rõ nét, chống nước chuẩn IPX5.",
+      originalPrice: 490000,
+      salePrice: 289000,
+      discountPercent: 41,
+      platformCode: "TIKTOK",
+      category: "Điện tử",
+      linkType: "product",
+      rawInputLink: "https://shop.tiktok.com/view/product/123456",
+      cleanLink: "https://shop.tiktok.com/view/product/123456",
+      affiliateUrl: "https://shop.tiktok.com",
+      uploadedImageUrl: "https://down-vn.img.susercontent.com/file/vn-11134207-7qukw-ljx3y21n8b584a",
+      clicks: 312,
+      status: "active",
+    },
+    {
+      id: "deal-seed-5",
+      title: "Pin Sạc Dự Phòng Anker PowerCore 10.000mAh Sạc Nhanh PD 22.5W Siêu Nhỏ Gọn",
+      description: "Sạc nhanh 50% pin iPhone chỉ trong 30 phút, màn hình LED hiển thị % pin chuẩn xác, kích thước nhỏ gọn như thẻ ngân hàng.",
+      originalPrice: 550000,
+      salePrice: 349000,
+      discountPercent: 36,
+      platformCode: "TIKTOK",
+      category: "Điện tử",
+      linkType: "product",
+      rawInputLink: "https://shop.tiktok.com/view/product/123457",
+      cleanLink: "https://shop.tiktok.com/view/product/123457",
+      affiliateUrl: "https://shop.tiktok.com",
+      uploadedImageUrl: "https://down-vn.img.susercontent.com/file/vn-11134207-7r98o-llz8x1v2n3a45c",
+      clicks: 275,
+      status: "active",
+    },
+    {
+      id: "deal-seed-6",
+      title: "Kem Che Khuyết Điểm Dạng Thỏi Luna Pro Conceal Stick Kiềm Dầu 24h",
+      description: "Độ che phủ cao, che mờ thâm mụn và quầng thâm tức thì, giữ tone suốt 24 giờ không bị xuống màu hay mốc phấn.",
+      originalPrice: 900000,
+      salePrice: 585000,
+      discountPercent: 35,
+      platformCode: "SHOPEE",
+      category: "Mỹ phẩm",
+      linkType: "product",
+      rawInputLink: "https://s.shopee.vn/AAHUDKmLu0?lp=aff",
+      cleanLink: "https://shopee.vn/product/1506817070/29883946710",
+      affiliateUrl: "https://shopee.vn",
+      uploadedImageUrl: "https://down-vn.img.susercontent.com/file/vn-11134207-7ra0g-m9s6c9k2llp68d",
+      clicks: 145,
+      status: "active",
+    },
+    {
+      id: "deal-seed-7",
+      title: "Mặt Nạ Sửa Chữa Làm Dịu Da DERMAFIRM R4 Phục Hồi Chuyên Sâu (10 miếng)",
+      description: "Chiết xuất cúc La Mã và tế bào gốc thực vật, cấp ẩm đa tầng và phục hồi làn da nhạy cảm sau peel hoặc laser.",
+      originalPrice: 380000,
+      salePrice: 249000,
+      discountPercent: 34,
+      platformCode: "SHOPEE",
+      category: "Mỹ phẩm",
+      linkType: "product",
+      rawInputLink: "https://s.shopee.vn/qjp6jZRQK?lp=aff",
+      cleanLink: "https://shopee.vn/product/1062144230/27972125695",
+      affiliateUrl: "https://shopee.vn",
+      uploadedImageUrl: "https://down-vn.img.susercontent.com/file/sg-11134207-7rfhg-m4e18kwi8dya73",
+      clicks: 198,
+      status: "active",
+    },
+    {
+      id: "deal-seed-8",
+      title: "Combo 3 Hộp Bánh Quy Bơ Danisa Hoàng Gia Đan Mạch 454g (Date Mới)",
+      description: "Hương vị bơ thơm lừng thượng hạng, hộp thiếc sang trọng thích hợp làm quà tặng và ăn vặt gia đình.",
+      originalPrice: 420000,
+      salePrice: 295000,
+      discountPercent: 30,
+      platformCode: "SHOPEE",
+      category: "Thực phẩm",
+      linkType: "product",
+      rawInputLink: "https://shopee.vn/product/123456/78908",
+      cleanLink: "https://shopee.vn/product/123456/78908",
+      affiliateUrl: "https://shopee.vn",
+      uploadedImageUrl: "https://down-vn.img.susercontent.com/file/vn-11134207-7r98o-lkj1x2v3n4a56b",
+      clicks: 168,
+      status: "active",
+    },
+  ];
+
+  for (const d of REAL_DEALS) {
+    await prisma.dealPost.upsert({
+      where: { id: d.id },
+      update: {
+        title: d.title,
+        description: d.description,
+        originalPrice: d.originalPrice,
+        salePrice: d.salePrice,
+        discountPercent: d.discountPercent,
+        platformCode: d.platformCode,
+        category: d.category,
+        uploadedImageUrl: d.uploadedImageUrl,
+        status: "active",
+        clicks: d.clicks,
+      },
+      create: {
+        id: d.id,
+        title: d.title,
+        description: d.description,
+        originalPrice: d.originalPrice,
+        salePrice: d.salePrice,
+        discountPercent: d.discountPercent,
+        platformCode: d.platformCode,
+        category: d.category,
+        linkType: d.linkType,
+        rawInputLink: d.rawInputLink,
+        cleanLink: d.cleanLink,
+        affiliateUrl: d.affiliateUrl,
+        uploadedImageUrl: d.uploadedImageUrl,
+        status: "active",
+        clicks: d.clicks,
+      },
+    });
+  }
+  console.log(`  ✓ Đã đồng bộ ${REAL_DEALS.length} Deal thật chất lượng cao vào hệ thống.`);
+}
+
 async function main() {
   console.log("═══════════════════════════════════════════════════════════");
   console.log("   🚀 MEOWBACK PRODUCTION SEED — KHỞI TẠO DỮ LIỆU BAN ĐẦU");
@@ -206,6 +385,7 @@ async function main() {
   await seedCommissionRule();
   await seedCategoryCommissionRates();
   await seedTelegramAccount();
+  await seedDeals();
 
   console.log("\n═══════════════════════════════════════════════════════════");
   console.log("  ✅ SEED HOÀN TẤT THÀNH CÔNG");

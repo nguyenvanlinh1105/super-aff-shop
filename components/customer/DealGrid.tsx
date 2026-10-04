@@ -3,14 +3,30 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { MousePointerClick, Flame, Tag, SlidersHorizontal, Store, ArrowRight, ArrowUpDown } from "lucide-react";
+import {
+  MousePointerClick,
+  Flame,
+  Tag,
+  SlidersHorizontal,
+  Store,
+  ArrowRight,
+  ArrowUpDown,
+  ShoppingBag,
+  Check,
+  Eye,
+  Sparkles,
+} from "lucide-react";
 import { Pagination } from "@/components/ui/Pagination";
 import { CustomSelect, CustomSelectOption } from "@/components/ui/CustomSelect";
 import { ShopeeIcon, TiktokIcon, LazadaIcon } from "@/components/icons/PlatformIcons";
 import { DEAL_CATEGORIES } from "@/lib/dealCategories";
-import { DEAL_LINK_TYPES } from "@/lib/dealLinkTypes";
+import { useDealCart, calculateEstimatedCashback } from "@/components/customer/DealCartContext";
+import { DealCartDrawer } from "@/components/customer/DealCartDrawer";
+import { FloatingDealCartButton } from "@/components/customer/FloatingDealCartButton";
+import { DealQuickViewModal, QuickViewDeal } from "@/components/customer/DealQuickViewModal";
+import { DealCategoryPills } from "@/components/customer/DealCategoryPills";
 
-type Deal = {
+export type Deal = {
   id: string;
   title: string;
   description: string | null;
@@ -46,27 +62,60 @@ function getPlatformBadge(code?: string) {
   return { name: "Shopee", icon: <ShopeeIcon size={12} className="shrink-0" />, color: "text-[#EE4D2D]", bg: "bg-white/95" };
 }
 
-function DealCard({ deal }: { deal: Deal }) {
+function DealCard({
+  deal,
+  onQuickView,
+}: {
+  deal: Deal;
+  onQuickView: (deal: Deal) => void;
+}) {
   const [clicked, setClicked] = useState(false);
+  const { addToCart, isInCart, removeFromCart } = useDealCart();
   const isShop = deal.linkType === "shop";
   const platform = getPlatformBadge(deal.platformCode);
+  const inCart = isInCart(deal.id);
 
-  function handleClick() {
+  const discount =
+    deal.discountPercent ??
+    (deal.originalPrice && deal.salePrice && deal.originalPrice > deal.salePrice
+      ? Math.round((1 - deal.salePrice / deal.originalPrice) * 100)
+      : null);
+
+  const estimatedCashback = calculateEstimatedCashback(deal.salePrice, discount);
+
+  function handleBuyClick(e: React.MouseEvent) {
+    e.stopPropagation();
     setClicked(true);
     const target = deal.shortUrl || `/api/deals/${deal.id}/click`;
     window.open(target, "_blank");
     setTimeout(() => setClicked(false), 2200);
   }
 
-  const discount = deal.discountPercent
-    ?? (deal.originalPrice && deal.salePrice && deal.originalPrice > deal.salePrice
-      ? Math.round((1 - deal.salePrice / deal.originalPrice) * 100)
-      : null);
+  function handleCartToggle(e: React.MouseEvent) {
+    e.stopPropagation();
+    if (inCart) {
+      removeFromCart(deal.id);
+    } else {
+      addToCart({
+        id: deal.id,
+        title: deal.title,
+        description: deal.description,
+        salePrice: deal.salePrice,
+        originalPrice: deal.originalPrice,
+        discountPercent: deal.discountPercent,
+        platformCode: deal.platformCode,
+        category: deal.category,
+        imageUrl: deal.imageUrl,
+        shortUrl: deal.shortUrl,
+        linkType: deal.linkType,
+      });
+    }
+  }
 
   return (
     <div
-      onClick={handleClick}
-      className="group relative flex flex-col min-w-0 overflow-hidden rounded-2xl sm:rounded-3xl bg-white shadow-[0_2px_12px_rgba(255,109,158,0.06)] border border-primary-100/80 cursor-pointer transition-all duration-200 hover:-translate-y-1 hover:shadow-cute hover:border-primary-300 active:scale-[0.985]"
+      onClick={() => onQuickView(deal)}
+      className="group relative flex flex-col min-w-0 overflow-hidden rounded-2xl sm:rounded-3xl bg-white shadow-[0_2px_12px_rgba(255,109,158,0.06)] border border-primary-100/90 cursor-pointer transition-all duration-200 hover:-translate-y-1 hover:shadow-cute hover:border-primary-300 active:scale-[0.99]"
     >
       {/* Product Image & Badges */}
       <div className="relative aspect-square w-full overflow-hidden bg-primary-50/40">
@@ -91,12 +140,24 @@ function DealCard({ deal }: { deal: Deal }) {
           </div>
         ) : null}
 
-        {/* Expiry badge: compact glassmorphic top-right */}
-        {deal.expiresAt && (
-          <div className="absolute top-2 right-2 z-10 rounded-md bg-neutral-900/65 backdrop-blur-[2px] px-1.5 py-0.5 text-[9.5px] font-bold text-white/95 shadow-xs">
-            HSD: {formatExpiry(deal.expiresAt)}
-          </div>
-        )}
+        {/* Add to Bag Quick Button: top-right on image */}
+        <button
+          type="button"
+          onClick={handleCartToggle}
+          aria-label={inCart ? "Bỏ khỏi túi" : "Thêm vào túi"}
+          title={inCart ? "Đã trong túi săn deal" : "Thêm vào túi săn deal"}
+          className={`absolute top-2 right-2 z-10 flex h-7.5 w-7.5 sm:h-8 sm:w-8 items-center justify-center rounded-xl shadow-md transition-all active:scale-90 cursor-pointer ${
+            inCart
+              ? "bg-rose-500 text-white ring-2 ring-white"
+              : "bg-white/95 text-neutral-600 hover:bg-primary-500 hover:text-white border border-primary-200/80"
+          }`}
+        >
+          {inCart ? (
+            <Check size={14} strokeWidth={3} />
+          ) : (
+            <ShoppingBag size={14} strokeWidth={2.4} />
+          )}
+        </button>
 
         {/* Platform pill: bottom-left of image */}
         <div className="absolute bottom-2 left-2 z-10 flex items-center gap-1 rounded-md px-1.5 py-0.5 text-[9.5px] font-extrabold shadow-xs backdrop-blur-xs bg-white/95 text-neutral-800 border border-white/70">
@@ -125,7 +186,7 @@ function DealCard({ deal }: { deal: Deal }) {
 
       {/* Card Info */}
       <div className="flex flex-1 flex-col justify-between p-2.5 sm:p-3 gap-1.5 min-w-0 bg-white">
-        {/* Title container: exactly 2 lines without line 3 bleed */}
+        {/* Title container */}
         <div className="min-w-0">
           <h3
             className="text-[12px] sm:text-[13px] font-bold text-neutral-800 leading-[1.25rem] line-clamp-2 h-[2.5rem] sm:h-[2.6rem] overflow-hidden group-hover:text-primary-600 transition-colors"
@@ -135,11 +196,11 @@ function DealCard({ deal }: { deal: Deal }) {
           </h3>
         </div>
 
-        {/* Cash back incentive pill */}
+        {/* Estimated Cashback Pill (prominent for conversion!) */}
         <div className="flex items-center gap-1 min-w-0">
-          <span className="inline-flex items-center gap-1 rounded-md bg-rose-50/90 px-1.5 py-0.5 text-[10px] font-extrabold text-rose-600 border border-rose-100/80 truncate">
-            <span>🎀</span>
-            <span className="truncate">Hoàn tiền vào ví</span>
+          <span className="inline-flex items-center gap-1 rounded-lg bg-gradient-to-r from-emerald-50 to-teal-50 px-2 py-0.5 text-[10px] sm:text-[10.5px] font-black text-emerald-700 border border-emerald-200/80 truncate">
+            <Sparkles size={11} className="text-emerald-500 fill-emerald-500 shrink-0" />
+            <span className="truncate">Hoàn ~{formatPrice(estimatedCashback)}</span>
           </span>
         </div>
 
@@ -164,16 +225,38 @@ function DealCard({ deal }: { deal: Deal }) {
           )}
         </div>
 
-        {/* Footer: Clicks count + Mua action */}
-        <div className="flex items-center justify-between border-t border-primary-50/80 pt-1.5 mt-0.5 text-[10px] sm:text-[11px] text-neutral-400 min-w-0">
-          <span className="flex items-center gap-1 truncate font-medium text-neutral-500">
-            <MousePointerClick size={11} className="shrink-0 text-primary-400" />
-            <span className="truncate">{deal.clicks > 0 ? `${deal.clicks} lượt` : "Mới đăng"}</span>
-          </span>
-          <span className="inline-flex items-center gap-0.5 rounded-lg bg-primary-50 px-2 py-0.5 font-extrabold text-primary-600 border border-primary-100 group-hover:bg-primary-500 group-hover:text-white group-hover:border-primary-500 transition-colors shrink-0">
+        {/* Action Row: [ 🛍️ Thêm ] & [ Mua ngay ➔ ] */}
+        <div className="grid grid-cols-2 gap-1.5 pt-2 border-t border-primary-50/90 mt-1">
+          <button
+            type="button"
+            onClick={handleCartToggle}
+            className={`flex items-center justify-center gap-1 rounded-xl py-1.5 px-1 text-[11px] font-extrabold transition-all cursor-pointer ${
+              inCart
+                ? "bg-rose-50 text-rose-600 border border-rose-200"
+                : "bg-primary-50/70 text-primary-600 border border-primary-200/70 hover:bg-primary-500 hover:text-white"
+            }`}
+          >
+            {inCart ? (
+              <>
+                <Check size={12} strokeWidth={3} />
+                <span>Đã lưu</span>
+              </>
+            ) : (
+              <>
+                <ShoppingBag size={12} strokeWidth={2.2} />
+                <span>+ Túi</span>
+              </>
+            )}
+          </button>
+
+          <button
+            type="button"
+            onClick={handleBuyClick}
+            className="flex items-center justify-center gap-1 rounded-xl bg-gradient-to-r from-primary-500 to-rose-500 hover:from-primary-600 hover:to-rose-600 text-white py-1.5 px-1 text-[11px] font-extrabold shadow-2xs hover:shadow-xs transition-all cursor-pointer"
+          >
             <span>Mua</span>
-            <ArrowRight size={10} strokeWidth={2.5} className="group-hover:translate-x-0.5 transition-transform" />
-          </span>
+            <ArrowRight size={11} strokeWidth={2.5} />
+          </button>
         </div>
       </div>
     </div>
@@ -296,14 +379,14 @@ function FilterBar() {
   }));
 
   return (
-    <div className="my-2.5 sm:my-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 sm:gap-2.5 w-full">
-      <div className="grid grid-cols-2 sm:flex sm:items-center gap-2 w-full sm:w-auto">
+    <div className="my-1.5 sm:my-3 flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-2.5 w-full">
+      <div className="grid grid-cols-3 sm:flex sm:items-center gap-1.5 sm:gap-2 w-full sm:w-auto">
         <CustomSelect
           value={platform}
           onChange={(val) => updateParam("platform", val)}
           options={platformOptions}
-          className="w-full sm:w-[155px]"
-          buttonClassName="h-9 sm:h-10 text-[12px] sm:text-[12.5px] rounded-2xl"
+          className="w-full sm:w-[145px]"
+          buttonClassName="h-8 sm:h-10 text-[11px] sm:text-[12.5px] rounded-xl sm:rounded-2xl px-1.5 sm:px-3"
           ariaLabel="Lọc theo sàn mua sắm"
         />
 
@@ -311,19 +394,17 @@ function FilterBar() {
           value={category}
           onChange={(val) => updateParam("category", val)}
           options={categoryOptions}
-          className="w-full sm:w-[165px]"
-          buttonClassName="h-9 sm:h-10 text-[12px] sm:text-[12.5px] rounded-2xl"
+          className="w-full sm:w-[155px]"
+          buttonClassName="h-8 sm:h-10 text-[11px] sm:text-[12.5px] rounded-xl sm:rounded-2xl px-1.5 sm:px-3"
           ariaLabel="Lọc theo danh mục"
         />
-      </div>
 
-      <div className="w-full sm:w-[175px]">
         <CustomSelect
           value={sort}
           onChange={(val) => updateParam("sort", val)}
           options={sortOptions}
-          className="w-full"
-          buttonClassName="h-9 sm:h-10 text-[12px] sm:text-[12.5px] rounded-2xl"
+          className="w-full sm:w-[165px]"
+          buttonClassName="h-8 sm:h-10 text-[11px] sm:text-[12.5px] rounded-xl sm:rounded-2xl px-1.5 sm:px-3"
           align="right"
           ariaLabel="Sắp xếp ưu đãi"
         />
@@ -351,9 +432,13 @@ export function DealGrid({
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const activeLinkType = searchParams.get("linkType") || "all";
+  const [selectedQuickViewDeal, setSelectedQuickViewDeal] = useState<Deal | null>(null);
 
   return (
     <div className="flex flex-col gap-3">
+      {/* Category Pills: Direct Market Aisle Navigation */}
+      <DealCategoryPills />
+
       {linkTypeCounts && <LinkTypeTabs counts={linkTypeCounts} />}
 
       {activeLinkType === "shop" && (
@@ -372,7 +457,7 @@ export function DealGrid({
       <FilterBar />
 
       {deals.length === 0 ? (
-        /* Empty State thiết kế phong cách MeowBack Mascot cao cấp */
+        /* Empty State */
         <div className="flex flex-col items-center justify-center py-12 sm:py-16 px-4 text-center rounded-3xl bg-gradient-to-b from-white via-primary-50/30 to-white border border-primary-100/80 shadow-xs my-2">
           <div className="relative mb-5">
             <div className="w-20 h-20 sm:w-24 sm:h-24 rounded-3xl bg-gradient-to-br from-primary-100 via-pink-100 to-rose-100 flex items-center justify-center shadow-cute p-1.5 border-2 border-white">
@@ -388,7 +473,7 @@ export function DealGrid({
           </div>
 
           <h3 className="text-lg sm:text-xl font-extrabold text-neutral-900 tracking-tight">
-            {hasQuery ? "Không tìm thấy ưu đãi phù hợp 🔍" : "Chưa có ưu đãi nào hôm nay 🎀"}
+            {hasQuery ? "Không tìm thấy ưu đãi phù hợp 🔍" : "Đang cập nhật deal mới hôm nay 🎀"}
           </h3>
           <p className="mt-2 text-xs sm:text-sm text-neutral-500 max-w-md leading-relaxed font-medium">
             {hasQuery
@@ -417,10 +502,14 @@ export function DealGrid({
         </div>
       ) : (
         <>
-          {/* Grid danh sách deal tối ưu cho màn hình 960px và mobile */}
+          {/* Grid danh sách deal tối ưu cho 2 cột trên mobile và 4 cột trên desktop */}
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5 sm:gap-4">
             {deals.map((deal) => (
-              <DealCard key={deal.id} deal={deal} />
+              <DealCard
+                key={deal.id}
+                deal={deal}
+                onQuickView={(d) => setSelectedQuickViewDeal(d)}
+              />
             ))}
           </div>
 
@@ -430,18 +519,18 @@ export function DealGrid({
               <Pagination totalPages={totalPages} currentPage={currentPage} />
             </div>
           )}
-
-          {/* Footer note */}
-          <div className="mt-4 flex items-center justify-center gap-2 text-[12px] text-neutral-500 text-center font-medium">
-            <Flame size={14} className="text-primary-500 shrink-0" />
-            <span>
-              {activeLinkType === "shop"
-                ? "Chọn sản phẩm rồi tạo link riêng ở mục Hoàn tiền trước khi mua để nhận hoàn tiền"
-                : "Bấm vào deal để mua trực tiếp trên sàn và tự động nhận hoàn tiền"}
-            </span>
-          </div>
         </>
       )}
+
+      {/* Quick View Modal */}
+      <DealQuickViewModal
+        deal={selectedQuickViewDeal}
+        onClose={() => setSelectedQuickViewDeal(null)}
+      />
+
+      {/* Floating Shopping Bag Button & Slide-over Drawer */}
+      <FloatingDealCartButton />
+      <DealCartDrawer />
     </div>
   );
 }

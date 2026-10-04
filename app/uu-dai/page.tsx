@@ -4,10 +4,9 @@ import { MarketingHeader } from "@/components/marketing/MarketingHeader";
 import { MarketingFooter } from "@/components/marketing/MarketingFooter";
 import { PublicFloatingSupport } from "@/components/marketing/PublicFloatingSupport";
 import { DealGrid } from "@/components/customer/DealGrid";
-import { ServerSearchInput } from "@/components/ui/ServerSearchInput";
-import { Flame } from "lucide-react";
+import { DealMarketHero } from "@/components/customer/DealMarketHero";
+import { DealCartProvider } from "@/components/customer/DealCartContext";
 import { safeJsonLdString } from "@/lib/jsonLd";
-import { IconBow, IllustCatWelcome } from "@/components/icons/CatRibbonIcons";
 
 export const dynamic = "force-dynamic";
 
@@ -153,55 +152,23 @@ export default async function PublicDealsPage({
       )}
       <MarketingHeader activePath="/uu-dai" />
 
-      <main className="pt-16">
-        {/* Header Hero */}
-        <section className="bg-gradient-to-b from-primary-100/70 via-primary-50 to-neutral-bg py-16 relative overflow-hidden">
-          <div className="max-w-[1200px] mx-auto px-4 md:px-8 relative z-10 text-center">
-            <div className="inline-flex items-center gap-2 bg-white px-4 py-1.5 rounded-full shadow-cute border border-primary-200 mb-4">
-              <IconBow className="w-4 h-4 text-accent-bow" />
-              <span className="text-[13px] font-extrabold text-primary-600">
-                Săn Deal MeowBack 🐾
-              </span>
-            </div>
-            <h1 className="text-[38px] md:text-[54px] font-extrabold text-neutral-900 tracking-tight mb-4">
-              Ưu Đãi &{" "}
-              <span className="text-primary-500 underline decoration-primary-200 decoration-wavy">
-                Mã Giảm Giá 🎀
-              </span>
-            </h1>
-            <p className="text-[17px] text-neutral-600 max-w-2xl mx-auto leading-relaxed font-medium">
-              Deal sập sàn Shopee & TikTok Shop được cập nhật mỗi ngày. Mua qua
-              link MeowBack vừa được giá tốt, vừa tự động nhận thêm hoàn tiền.
-            </p>
-          </div>
-        </section>
+      <DealCartProvider>
+        <main className="pt-20 sm:pt-24 pb-16 max-w-[1240px] mx-auto px-3 sm:px-6 lg:px-8">
+          {/* Compact Market Hero Banner */}
+          <DealMarketHero activeCount={activeDealsCount} />
 
-        {/* Deals Section */}
-        <section className="py-10 max-w-[1200px] mx-auto px-4 md:px-8 pb-16">
-          <div className="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div className="flex items-center gap-2">
-              <Flame size={20} className="text-primary-500" />
-              <span className="text-[15px] font-extrabold text-neutral-900">
-                {activeDealsCount > 0
-                  ? `${activeDealsCount} ưu đãi HOT đang mở 🐾`
-                  : "Chưa có ưu đãi nào hôm nay 🐾"}
-              </span>
-            </div>
-            <ServerSearchInput
-              placeholder="Tìm kiếm ưu đãi..."
-              className="sm:max-w-[280px]"
+          {/* Deals Section */}
+          <section className="mt-2">
+            <DealGrid
+              deals={formattedDeals}
+              totalPages={totalPages}
+              currentPage={page}
+              hasQuery={Boolean(q || platform || category)}
+              linkTypeCounts={{ product: productTypeCount, shop: shopTypeCount }}
             />
-          </div>
-
-          <DealGrid
-            deals={formattedDeals}
-            totalPages={totalPages}
-            currentPage={page}
-            hasQuery={Boolean(q || platform || category)}
-            linkTypeCounts={{ product: productTypeCount, shop: shopTypeCount }}
-          />
-        </section>
-      </main>
+          </section>
+        </main>
+      </DealCartProvider>
 
       <MarketingFooter />
       <PublicFloatingSupport />
