@@ -52,7 +52,7 @@ const SOCIAL_LINKS = [
 export function MarketingFooter() {
   return (
     <footer className="bg-primary-50/60 border-t border-primary-100">
-      <div className="max-w-[1200px] mx-auto px-6 py-12 flex flex-col md:flex-row justify-between gap-12">
+      <div className="max-w-[1200px] mx-auto px-3.5 sm:px-5 md:px-10 py-12 flex flex-col md:flex-row justify-between gap-12">
         {/* Brand & Info */}
         <div className="space-y-4 max-w-sm">
           <LogoMeowBack />
@@ -150,8 +150,8 @@ export function MarketingFooter() {
       </div>
 
       {/* Copyright */}
-      <div className="border-t border-primary-100 px-6 py-4 bg-white">
-        <div className="max-w-[1200px] mx-auto flex flex-col md:flex-row justify-between items-center gap-2">
+      <div className="border-t border-primary-100 bg-white">
+        <div className="max-w-[1200px] mx-auto px-3.5 sm:px-5 md:px-10 py-4 flex flex-col md:flex-row justify-between items-center gap-2">
           <p className="text-neutral-500 font-medium text-[13px]">
             © {new Date().getFullYear()} MeowBack - Nơ Mèo Hoàn Tiền. Bản quyền
             thuộc về MeowBack.

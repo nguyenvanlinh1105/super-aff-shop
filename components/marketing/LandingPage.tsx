@@ -118,7 +118,7 @@ export function LandingPage({
           {/* Center radiant spotlight aura */}
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[720px] h-[450px] bg-gradient-to-b from-white/80 via-white/50 to-transparent rounded-full blur-[70px] pointer-events-none" />
 
-          <div className="relative z-10 max-w-[1200px] mx-auto px-3.5 sm:px-6 md:px-8 text-center">
+          <div className="relative z-10 max-w-[1200px] mx-auto px-3.5 sm:px-5 md:px-10 text-center">
             <div className="max-w-[760px] mx-auto space-y-2.5 sm:space-y-4 fade-in">
               {/* Cute Badge on Mobile */}
               <div className="md:hidden inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/90 border border-primary-200/80 shadow-xs backdrop-blur-md mx-auto mb-0.5">
@@ -171,7 +171,7 @@ export function LandingPage({
 
         {/* Shopee Live Demo Interactive Section */}
         <section className="py-12 border-b border-primary-100/50 bg-gradient-to-b from-white/50 to-neutral-50/80 backdrop-blur-md overflow-hidden relative">
-          <div className="max-w-[1200px] mx-auto px-4 text-center mb-8">
+          <div className="max-w-[1200px] mx-auto px-3.5 sm:px-5 md:px-10 text-center mb-8">
             <h2 className="text-2xl md:text-3xl font-black text-neutral-900 mb-3">
               Chỉ 1 giây để lấy link hoàn tiền Shopee, Lazada &amp; TikTok Shop
             </h2>
@@ -184,7 +184,7 @@ export function LandingPage({
 
         {/* Feature Highlight Cards */}
         <section className="py-12 bg-white border-y border-primary-100/80">
-          <div className="max-w-[1200px] mx-auto px-4 md:px-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="max-w-[1200px] mx-auto px-3.5 sm:px-5 md:px-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {CAT_HIGHLIGHT_CARDS.map((f) => {
               const IconComponent = f.icon;
               return (
@@ -229,7 +229,7 @@ export function LandingPage({
           id="how-it-works"
           className="pt-6 pb-12 md:pt-8 md:pb-16 bg-white relative overflow-hidden"
         >
-          <div className="max-w-[1200px] mx-auto px-4 md:px-8">
+          <div className="max-w-[1200px] mx-auto px-3.5 sm:px-5 md:px-10">
             <div className="text-center mb-7 md:mb-9">
               <div className="inline-flex items-center justify-center gap-2 mb-3 bg-primary-50 px-4 py-1.5 rounded-full border border-primary-200/80">
                 <IconBow className="w-4 h-4 text-accent-bow" />
@@ -249,11 +249,9 @@ export function LandingPage({
           </div>
         </section>
 
-
-
         {/* Quick Registration Banner */}
         <section className="py-10 md:py-16 bg-gradient-to-br from-primary-100 via-primary-50 to-secondary-50 relative">
-          <div className="max-w-[1200px] mx-auto px-4 md:px-8">
+          <div className="max-w-[1200px] mx-auto px-3.5 sm:px-5 md:px-10">
             <div className="bg-white rounded-3xl p-6 sm:p-8 md:p-12 border border-primary-200/80 shadow-cute-lg flex flex-col md:grid md:grid-cols-12 gap-6 md:gap-8 items-center text-center md:text-left">
               <div className="md:col-span-8 space-y-3 md:space-y-4">
                 <div className="inline-flex items-center gap-1.5 text-xs font-bold bg-primary-100 text-primary-600 px-3 py-1 rounded-full">

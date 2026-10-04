@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import { prisma } from "@/lib/prisma";
+import { getSession } from "@/lib/auth";
 import { MarketingHeader } from "@/components/marketing/MarketingHeader";
 import { MarketingFooter } from "@/components/marketing/MarketingFooter";
 import { PublicFloatingSupport } from "@/components/marketing/PublicFloatingSupport";
 import { DealGrid } from "@/components/customer/DealGrid";
 import { DealMarketHero } from "@/components/customer/DealMarketHero";
-import { DealCartProvider } from "@/components/customer/DealCartContext";
 import { safeJsonLdString } from "@/lib/jsonLd";
 
 export const dynamic = "force-dynamic";
@@ -57,6 +57,9 @@ export default async function PublicDealsPage({
     linkType?: string;
   };
 }) {
+  const session = await getSession();
+  const isLoggedIn = Boolean(session?.userId);
+
   const page = Number(searchParams.page) || 1;
   const limit = 12;
   const skip = (page - 1) * limit;
@@ -152,23 +155,23 @@ export default async function PublicDealsPage({
       )}
       <MarketingHeader activePath="/uu-dai" />
 
-      <DealCartProvider>
-        <main className="pt-20 sm:pt-24 pb-16 max-w-[1240px] mx-auto px-3 sm:px-6 lg:px-8">
-          {/* Compact Market Hero Banner */}
-          <DealMarketHero activeCount={activeDealsCount} />
+      {/* Main Container: Strictly matches MarketingHeader width (max-w-[1200px] px-3.5 sm:px-5 md:px-10) */}
+      <main className="pt-20 sm:pt-24 pb-16 max-w-[1200px] mx-auto px-3.5 sm:px-5 md:px-10">
+        {/* Sleek Hero Banner */}
+        <DealMarketHero activeCount={activeDealsCount} />
 
-          {/* Deals Section */}
-          <section className="mt-2">
-            <DealGrid
-              deals={formattedDeals}
-              totalPages={totalPages}
-              currentPage={page}
-              hasQuery={Boolean(q || platform || category)}
-              linkTypeCounts={{ product: productTypeCount, shop: shopTypeCount }}
-            />
-          </section>
-        </main>
-      </DealCartProvider>
+        {/* Deals Section */}
+        <section className="mt-2">
+          <DealGrid
+            deals={formattedDeals}
+            totalPages={totalPages}
+            currentPage={page}
+            hasQuery={Boolean(q || platform || category)}
+            linkTypeCounts={{ product: productTypeCount, shop: shopTypeCount }}
+            isLoggedIn={isLoggedIn}
+          />
+        </section>
+      </main>
 
       <MarketingFooter />
       <PublicFloatingSupport />
