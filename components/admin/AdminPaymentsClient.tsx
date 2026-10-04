@@ -668,7 +668,7 @@ function BatchPaymentModal({
                             </p>
                             <div className="flex items-center gap-1.5 mt-0.5">
                               <span className="text-[9.5px] font-black text-rose-600 uppercase bg-rose-50 border border-rose-200 px-1.5 py-0.2 rounded">
-                                {o?.platform?.name || "Shopee"}
+                                {o?.platform?.name || "Sàn TMĐT"}
                               </span>
                               <span className="text-neutral-300">•</span>
                               <span className="font-mono text-[10px] font-bold text-neutral-500">
@@ -1115,7 +1115,7 @@ export function AdminPaymentsClient({
             },
             {
               id: "waiting" as const,
-              label: "Chờ Shopee duyệt",
+              label: "Chờ sàn duyệt",
               count: waitingList.length,
               icon: <Clock size={15} />,
             },

@@ -110,16 +110,14 @@ export function DealMarketHero({ activeCount }: { activeCount: number }) {
           </div>
         </div>
 
-        {/* PRO SEARCH BAR SECTION - To, Nổi Bật, Chuẩn UX PC & Mobile */}
-        <div className="pt-2 sm:pt-3 border-t border-primary-100/80 space-y-3">
+        {/* SEARCH BAR SECTION - Cân đối, tinh gọn & hài hoà với các bộ lọc */}
+        <div className="pt-2 sm:pt-3 border-t border-primary-100/80 space-y-2.5">
           <form onSubmit={handleSearch} className="w-full">
-            <div className="relative flex items-center w-full rounded-2xl sm:rounded-full bg-white border-2 border-primary-200/90 shadow-[0_8px_25px_rgba(255,109,158,0.12)] hover:border-primary-300 focus-within:border-[#FF4D85] focus-within:ring-4 focus-within:ring-pink-100 transition-all p-1 sm:p-1.5">
+            <div className="relative flex items-center w-full rounded-2xl bg-white border border-primary-200/90 shadow-2xs hover:border-primary-300 focus-within:border-primary-400 focus-within:ring-2 focus-within:ring-primary-100/60 transition-all p-1">
               
-              {/* Left Search Icon Badge */}
-              <div className="pl-2 sm:pl-3 pr-2 flex items-center justify-center shrink-0">
-                <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-full bg-gradient-to-br from-pink-100 via-rose-100 to-pink-50 flex items-center justify-center text-[#E02868] shadow-2xs">
-                  <Search size={18} className="sm:w-5 sm:h-5" />
-                </div>
+              {/* Left Search Icon */}
+              <div className="pl-3 pr-1 flex items-center justify-center shrink-0">
+                <Search size={16} className="text-primary-500" />
               </div>
 
               {/* Main Search Input */}
@@ -127,8 +125,8 @@ export function DealMarketHero({ activeCount }: { activeCount: number }) {
                 type="text"
                 value={keyword}
                 onChange={(e) => setKeyword(e.target.value)}
-                placeholder="Tìm deal hot, sản phẩm Shopee, TikTok hoặc dán link sàn..."
-                className="w-full h-11 sm:h-13 bg-transparent text-sm sm:text-base md:text-[16.5px] font-bold text-neutral-900 placeholder:text-neutral-400 placeholder:font-medium focus:outline-none px-2"
+                placeholder="Tìm deal hot, sản phẩm hoặc dán link sàn..."
+                className="w-full h-8 sm:h-9 bg-transparent text-xs sm:text-[13px] font-medium text-neutral-800 placeholder:text-neutral-400 placeholder:font-normal focus:outline-none px-2"
               />
 
               {/* Quick Clear Button */}
@@ -136,28 +134,28 @@ export function DealMarketHero({ activeCount }: { activeCount: number }) {
                 <button
                   type="button"
                   onClick={handleClear}
-                  className="p-1.5 mr-1 text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 rounded-full transition-colors cursor-pointer shrink-0"
+                  className="p-1 mr-1 text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 rounded-full transition-colors cursor-pointer shrink-0"
                   title="Xóa từ khóa"
                 >
-                  <X size={16} />
+                  <X size={14} />
                 </button>
               )}
 
-              {/* Pro Action Button */}
+              {/* Action Button */}
               <button
                 type="submit"
-                className="h-10 sm:h-12 px-4 sm:px-7 rounded-xl sm:rounded-full bg-gradient-to-r from-[#FF528A] via-[#E02868] to-[#FF4D85] hover:opacity-95 text-white font-black text-xs sm:text-sm shadow-md hover:shadow-cute active:scale-95 transition-all cursor-pointer flex items-center gap-1.5 shrink-0"
+                className="h-8 sm:h-9 px-3.5 sm:px-4.5 rounded-xl bg-gradient-to-r from-primary-500 to-rose-500 hover:from-primary-600 hover:to-rose-600 text-white font-extrabold text-xs shadow-xs hover:shadow-cute active:scale-95 transition-all cursor-pointer flex items-center gap-1 shrink-0"
               >
                 <span>Tìm Deal</span>
-                <ArrowRight size={15} className="hidden sm:inline-block" />
+                <ArrowRight size={13} className="hidden sm:inline-block" />
               </button>
             </div>
           </form>
 
           {/* Hot Deal Keywords - Gợi ý săn deal hot tương tác */}
-          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 px-1 text-xs">
-            <span className="flex items-center gap-1 font-black text-[#E02868] text-[11px] sm:text-xs mr-0.5">
-              <Flame size={14} className="text-amber-500 fill-amber-500" />
+          <div className="flex flex-wrap items-center gap-1.5 px-0.5 text-xs">
+            <span className="flex items-center gap-1 font-black text-primary-600 text-[11px] sm:text-xs mr-0.5">
+              <Flame size={13} className="text-amber-500 fill-amber-500" />
               <span>Gợi ý hot:</span>
             </span>
             {HOT_KEYWORDS.map((kw) => (
@@ -165,13 +163,13 @@ export function DealMarketHero({ activeCount }: { activeCount: number }) {
                 key={kw.label}
                 type="button"
                 onClick={() => handleSelectKeyword(kw.label)}
-                className={`px-2.5 sm:px-3 py-1 rounded-full text-[11px] sm:text-xs font-bold transition-all cursor-pointer flex items-center gap-1 border ${
+                className={`px-2.5 py-1 rounded-xl text-[11px] font-bold transition-all cursor-pointer flex items-center gap-1 border ${
                   keyword.toLowerCase() === kw.label.toLowerCase()
-                    ? "bg-[#FFF0F5] text-[#E02868] border-pink-300 font-black shadow-xs"
-                    : "bg-white text-neutral-600 border-neutral-200/70 hover:border-pink-200 hover:bg-pink-50/60 hover:text-neutral-900"
+                    ? "bg-[#FFF0F5] text-primary-600 border-primary-300 font-black shadow-2xs"
+                    : "bg-white text-neutral-600 border-neutral-200/70 hover:border-primary-200 hover:bg-primary-50/60 hover:text-neutral-900"
                 }`}
               >
-                <span>{kw.icon}</span>
+                <span className="text-[11px]">{kw.icon}</span>
                 <span>{kw.label}</span>
               </button>
             ))}
