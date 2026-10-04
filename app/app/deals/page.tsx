@@ -38,7 +38,7 @@ export default async function CustomerDealsPage({ searchParams }: { searchParams
 
   const [totalCount, activeDealsCount, productTypeCount, shopTypeCount, deals] = await Promise.all([
     prisma.dealPost.count({ where }),
-    prisma.dealPost.count({ where: { status: "active" } }),
+    prisma.dealPost.count({ where: activeNotExpired }),
     prisma.dealPost.count({ where: { ...activeNotExpired, linkType: "product" } }),
     prisma.dealPost.count({ where: { ...activeNotExpired, linkType: "shop" } }),
     prisma.dealPost.findMany({

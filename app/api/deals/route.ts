@@ -9,8 +9,14 @@ export async function GET(req: NextRequest) {
   const session = await getSession();
   const isAdmin = session?.role === "admin";
 
+  const now = new Date();
   const deals = await prisma.dealPost.findMany({
-    where: isAdmin ? undefined : { status: "active" },
+    where: isAdmin
+      ? undefined
+      : {
+          status: "active",
+          OR: [{ expiresAt: null }, { expiresAt: { gt: now } }],
+        },
     orderBy: { createdAt: "desc" },
     take: 100,
   });

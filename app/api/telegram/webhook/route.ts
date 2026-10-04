@@ -294,8 +294,12 @@ export async function POST(req: NextRequest) {
     });
     processingStatus = "processed_referral";
   } else if (command === "/deals") {
+    const now = new Date();
     const deals = await prisma.dealPost.findMany({
-      where: { status: "active" },
+      where: {
+        status: "active",
+        OR: [{ expiresAt: null }, { expiresAt: { gt: now } }],
+      },
       orderBy: { createdAt: "desc" },
       take: 5,
     });

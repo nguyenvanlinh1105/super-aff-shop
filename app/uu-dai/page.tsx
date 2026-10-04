@@ -91,7 +91,7 @@ export default async function PublicDealsPage({
   const [totalCount, activeDealsCount, productTypeCount, shopTypeCount, deals] =
     await Promise.all([
       prisma.dealPost.count({ where }),
-      prisma.dealPost.count({ where: { status: "active" } }),
+      prisma.dealPost.count({ where: activeNotExpired }),
       prisma.dealPost.count({
         where: { ...activeNotExpired, linkType: "product" },
       }),
@@ -182,7 +182,9 @@ export default async function PublicDealsPage({
             <div className="flex items-center gap-2">
               <Flame size={20} className="text-primary-500" />
               <span className="text-[15px] font-extrabold text-neutral-900">
-                {activeDealsCount} ưu đãi HOT đang mở 🐾
+                {activeDealsCount > 0
+                  ? `${activeDealsCount} ưu đãi HOT đang mở 🐾`
+                  : "Chưa có ưu đãi nào hôm nay 🐾"}
               </span>
             </div>
             <ServerSearchInput

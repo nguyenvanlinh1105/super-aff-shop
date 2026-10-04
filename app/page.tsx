@@ -74,7 +74,16 @@ const jsonLd = {
       "@id": "https://meowback.shop/#organization",
       name: "MeowBack",
       url: "https://meowback.shop",
-      logo: "https://meowback.shop/icon-512.png",
+      logo: {
+        "@type": "ImageObject",
+        "@id": "https://meowback.shop/#logo",
+        url: "https://meowback.shop/icon-512.png",
+        contentUrl: "https://meowback.shop/icon-512.png",
+        caption: "MeowBack",
+        width: 512,
+        height: 512,
+      },
+      image: "https://meowback.shop/icon-512.png",
       sameAs: [
         "https://www.facebook.com/meowback.official",
         "https://www.tiktok.com/@meowback.official",

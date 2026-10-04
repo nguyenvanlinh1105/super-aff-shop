@@ -10,8 +10,9 @@ export async function GET(_: NextRequest, { params }: { params: { shortCode: str
   });
 
   if (deal) {
-    if (deal.status !== "active") {
-      return new NextResponse("Deal không còn hoạt động", { status: 404 });
+    const isExpired = deal.expiresAt ? deal.expiresAt.getTime() <= Date.now() : false;
+    if (deal.status !== "active" || isExpired) {
+      return new NextResponse("Deal đã hết hạn hoặc không còn hoạt động", { status: 404 });
     }
 
     // Nếu khách ĐÃ ĐĂNG NHẬP bấm vào deal — bắt buộc map đúng link cá nhân
