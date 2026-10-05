@@ -1,4 +1,9 @@
 import { buildTikTokAffiliateUrlViaAccessTrade } from "./accesstrade";
+import {
+  buildRioHubSubId,
+  createRioHubTikTokProductLink,
+  getRioHubConfigStatus,
+} from "./riohubTikTok";
 
 export type DetectedPlatform = "shopee" | "tiktok" | "lazada" | "unknown";
 export type AffiliateSubIds = {
@@ -17,15 +22,33 @@ export function detectPlatform(rawUrl: string): DetectedPlatform {
   // shp.ee la domain rut gon chinh thuc cua Shopee (vn.shp.ee, s.shopee.vn...),
   // khong chua chuoi "shopee." nen phai kiem tra rieng.
   if (url.includes("shopee.") || url.includes("shp.ee")) return "shopee";
-  if (url.includes("tiktok.") || url.includes("vt.tiktok") || url.includes("vm.tiktok")) return "tiktok";
-  if (url.includes("lazada.") || url.includes("lzd.co") || url.includes("s.lazada.")) return "lazada";
+  if (
+    url.includes("tiktok.") ||
+    url.includes("vt.tiktok") ||
+    url.includes("vm.tiktok")
+  )
+    return "tiktok";
+  if (
+    url.includes("lazada.") ||
+    url.includes("lzd.co") ||
+    url.includes("s.lazada.")
+  )
+    return "lazada";
   return "unknown";
 }
 
-const SHORT_LINK_HOST_PATTERNS = [/(^|\.)shp\.ee$/, /(^|\.)s\.shopee\.vn$/, /(^|\.)vt\.tiktok\.com$/, /(^|\.)vm\.tiktok\.com$/, /(^|\.)lzd\.co$/];
+const SHORT_LINK_HOST_PATTERNS = [
+  /(^|\.)shp\.ee$/,
+  /(^|\.)s\.shopee\.vn$/,
+  /(^|\.)vt\.tiktok\.com$/,
+  /(^|\.)vm\.tiktok\.com$/,
+  /(^|\.)lzd\.co$/,
+];
 
 function isShortLinkHost(hostname: string): boolean {
-  return SHORT_LINK_HOST_PATTERNS.some((pattern) => pattern.test(hostname.toLowerCase()));
+  return SHORT_LINK_HOST_PATTERNS.some((pattern) =>
+    pattern.test(hostname.toLowerCase()),
+  );
 }
 
 /**
@@ -132,7 +155,7 @@ export async function buildAffiliateUrl(
   normalizedUrl: string,
   trackingCode: string,
   subIds?: AffiliateSubIds,
-  options?: BuildAffiliateUrlOptions
+  options?: BuildAffiliateUrlOptions,
 ): Promise<string> {
   const platformCode = options?.platformCode?.toUpperCase();
   if (platformCode === "SHOPEE") {
@@ -140,7 +163,20 @@ export async function buildAffiliateUrl(
   }
 
   if (platformCode === "TIKTOK") {
-    const accessTradeLink = await buildTikTokAffiliateUrlViaAccessTrade(normalizedUrl, trackingCode, subIds);
+    // 1. Ưu tiên tạo link TikTok Shop trực tiếp qua đối tác RioHub (chuẩn MCN TikTok)
+    const rioHubLink = await buildTikTokAffiliateUrlViaRioHub(
+      normalizedUrl,
+      trackingCode,
+      subIds,
+    );
+    if (rioHubLink) return rioHubLink;
+
+    // 2. Dự phòng: AccessTrade nếu có cấu hình token
+    const accessTradeLink = await buildTikTokAffiliateUrlViaAccessTrade(
+      normalizedUrl,
+      trackingCode,
+      subIds,
+    );
     if (accessTradeLink) return accessTradeLink;
   }
 
@@ -152,11 +188,16 @@ export async function buildAffiliateUrl(
     const url = new URL(normalizedUrl);
     const effectiveSubIds = subIds ?? { subId2: trackingCode };
 
-    if (effectiveSubIds.subId1) url.searchParams.set("sub_id1", effectiveSubIds.subId1);
-    if (effectiveSubIds.subId2) url.searchParams.set("sub_id2", effectiveSubIds.subId2);
-    if (effectiveSubIds.subId3) url.searchParams.set("sub_id3", effectiveSubIds.subId3);
-    if (effectiveSubIds.subId4) url.searchParams.set("sub_id4", effectiveSubIds.subId4);
-    if (effectiveSubIds.subId5) url.searchParams.set("sub_id5", effectiveSubIds.subId5);
+    if (effectiveSubIds.subId1)
+      url.searchParams.set("sub_id1", effectiveSubIds.subId1);
+    if (effectiveSubIds.subId2)
+      url.searchParams.set("sub_id2", effectiveSubIds.subId2);
+    if (effectiveSubIds.subId3)
+      url.searchParams.set("sub_id3", effectiveSubIds.subId3);
+    if (effectiveSubIds.subId4)
+      url.searchParams.set("sub_id4", effectiveSubIds.subId4);
+    if (effectiveSubIds.subId5)
+      url.searchParams.set("sub_id5", effectiveSubIds.subId5);
 
     // Giữ fallback cho các network/flow chỉ đọc một tracking key chung.
     url.searchParams.set("sub_id", effectiveSubIds.subId2 ?? trackingCode);
@@ -181,11 +222,13 @@ export async function buildAffiliateUrl(
 function buildShopeeAffiliateUrl(
   normalizedUrl: string,
   trackingCode: string,
-  subIds?: AffiliateSubIds
+  subIds?: AffiliateSubIds,
 ): string {
   const affiliateId = process.env.SHOPEE_AFFILIATE_ID;
   if (!affiliateId) {
-    throw new Error("Thieu SHOPEE_AFFILIATE_ID trong .env de build link Shopee");
+    throw new Error(
+      "Thieu SHOPEE_AFFILIATE_ID trong .env de build link Shopee",
+    );
   }
 
   const effectiveSubIds = subIds ?? { subId2: trackingCode };
@@ -207,19 +250,50 @@ function buildShopeeAffiliateUrl(
 function buildLazadaAffiliateUrl(
   normalizedUrl: string,
   trackingCode: string,
-  subIds?: AffiliateSubIds
+  subIds?: AffiliateSubIds,
 ): string {
   const effectiveSubIds = subIds ?? { subId2: trackingCode };
   try {
     const url = new URL(normalizedUrl);
     url.searchParams.set("sub_id", effectiveSubIds.subId2 ?? trackingCode);
-    if (effectiveSubIds.subId1) url.searchParams.set("sub_id1", effectiveSubIds.subId1);
-    if (effectiveSubIds.subId2) url.searchParams.set("sub_id2", effectiveSubIds.subId2);
-    if (effectiveSubIds.subId3) url.searchParams.set("sub_id3", effectiveSubIds.subId3);
+    if (effectiveSubIds.subId1)
+      url.searchParams.set("sub_id1", effectiveSubIds.subId1);
+    if (effectiveSubIds.subId2)
+      url.searchParams.set("sub_id2", effectiveSubIds.subId2);
+    if (effectiveSubIds.subId3)
+      url.searchParams.set("sub_id3", effectiveSubIds.subId3);
     url.searchParams.set("aff_channel", "affiliate-hoantien");
     return url.toString();
   } catch {
     const separator = normalizedUrl.includes("?") ? "&" : "?";
     return `${normalizedUrl}${separator}sub_id=${effectiveSubIds.subId2 ?? trackingCode}&aff_channel=affiliate-hoantien`;
+  }
+}
+
+async function buildTikTokAffiliateUrlViaRioHub(
+  normalizedUrl: string,
+  trackingCode: string,
+  subIds?: AffiliateSubIds,
+): Promise<string | null> {
+  const config = getRioHubConfigStatus();
+  if (!config.readyForLinks) return null;
+
+  try {
+    const subId = buildRioHubSubId({
+      customerCode: subIds?.subId1 || "CUST",
+      trackingCode: subIds?.subId2 || trackingCode,
+      channelSource: subIds?.subId3 || "WEB",
+    });
+    const result = await createRioHubTikTokProductLink({
+      productUrl: normalizedUrl,
+      subId,
+    });
+    return result?.affiliate_link || null;
+  } catch (error) {
+    console.warn(
+      "[RIOHUB_LINK_CONVERSION_WARN] Không tạo được link TikTok qua RioHub, chuyển sang phương thức dự phòng:",
+      error,
+    );
+    return null;
   }
 }

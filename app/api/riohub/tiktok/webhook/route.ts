@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: true, duplicate: true });
   }
 
-  const order = normalizeWebhookOrder(data);
+  const order = normalizeWebhookOrder(data, payload);
   const result = await upsertRioHubTikTokOrder(order);
   const orderExternalId = buildRioHubOrderExternalId(order);
 
@@ -73,13 +73,16 @@ function verifyRioHubSignature(rawBody: string, header: string, secret: string) 
   return left.length === right.length && timingSafeEqual(left, right);
 }
 
-function normalizeWebhookOrder(data: any) {
+function normalizeWebhookOrder(data: any, rootPayload?: any) {
   return {
     ...data,
     sub_id: data.sub_id ?? data.subid,
     settlement_status: data.settlement_status ?? data.order_status_raw,
     commission_gmv: data.commission_gmv ?? data.gmv,
     create_time: data.create_time,
+    time_created: data.time_created ?? rootPayload?.occurred_at,
+    time_delivered: data.time_delivered ?? data.settled_at_iso ?? data.settled_at,
+    settled_at: data.settled_at_iso ?? data.settled_at,
     update_time: data.update_time,
     est_commission: data.est_commission,
     actual_commission: data.actual_commission,

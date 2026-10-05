@@ -1,8 +1,6 @@
 import { Prisma } from "@prisma/client";
 import { estimateCashback } from "./cashbackEstimate";
 
-const DEFAULT_BASE_URL = "https://riohub.vn/api/v1";
-
 export type RioHubProduct = {
   id: string;
   title?: string | null;
@@ -109,7 +107,7 @@ export class RioHubError extends Error {
 
 export function getRioHubConfig() {
   return {
-    baseUrl: (process.env.RIOHUB_API_BASE_URL || DEFAULT_BASE_URL).replace(/\/+$/, ""),
+    baseUrl: (process.env.RIOHUB_API_BASE_URL || "").trim().replace(/\/+$/, ""),
     apiKey: process.env.RIOHUB_API_KEY || "",
     creatorUsername: process.env.RIOHUB_TIKTOK_CREATOR_USERNAME || "",
     signingSecret: process.env.RIOHUB_WEBHOOK_SIGNING_SECRET || "",
@@ -249,6 +247,7 @@ function requireCreatorUsername() {
 async function rioHubRequest<T>(path: string, init: RequestInit = {}, attempt = 0): Promise<T> {
   const config = getRioHubConfig();
   if (!config.apiKey) throw new Error("Thiếu RIOHUB_API_KEY trong .env");
+  if (!config.baseUrl) throw new Error("Thiếu RIOHUB_API_BASE_URL trong .env");
 
   const response = await fetch(`${config.baseUrl}${path}`, {
     ...init,

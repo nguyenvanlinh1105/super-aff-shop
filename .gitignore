@@ -17,8 +17,10 @@ prisma/prod.db
 prisma/prod.db-journal
 .env.backup-*
 prisma/*.bak-*
-HUONG_DAN_KIEN_TRUC_BE_FE.md
-HUONG_DAN_KET_NOI_TIKTOK_LAZADA.md
+HUONG_DAN_*
+QUY_TRINH_*
+Docs/HUONG_DAN_*
+Docs/QUY_TRINH_*
 Release/
 *.tsbuildinfo
 .agents/
