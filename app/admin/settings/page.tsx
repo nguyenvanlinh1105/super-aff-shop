@@ -11,6 +11,8 @@ import { LazadaIntegrationPanel } from "@/components/admin/LazadaIntegrationPane
 import { getRioHubConfigStatus } from "@/lib/riohubTikTok";
 import { getLazadaConfigStatus } from "@/lib/lazadaApi";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminSettingsPage() {
   const [activeRule, categoryRates, tiktokPlatform, lazadaPlatform] = await Promise.all([
     prisma.commissionRule.findFirst({

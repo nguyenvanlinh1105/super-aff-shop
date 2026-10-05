@@ -55,18 +55,30 @@ async function seedAdmins() {
 async function seedPlatforms() {
   console.log("\n🛒 Cấu hình nền tảng Affiliate (Shopee, TikTok, Lazada)...");
   const platforms = [
-    { code: "SHOPEE", name: "Shopee" },
-    { code: "TIKTOK", name: "TikTok Shop" },
-    { code: "LAZADA", name: "Lazada" },
+    { code: "SHOPEE", name: "Shopee", defaultStatus: "active" },
+    { code: "TIKTOK", name: "TikTok Shop", defaultStatus: "active" },
+    { code: "LAZADA", name: "Lazada", defaultStatus: "inactive" },
   ];
 
   for (const p of platforms) {
-    const result = await prisma.platform.upsert({
+    const existing = await prisma.platform.findUnique({
       where: { code: p.code },
-      update: { name: p.name }, // Giữ nguyên status hiện tại do Admin cấu hình (không tự động bật lại active)
-      create: { code: p.code, name: p.name, status: "active" },
     });
-    console.log(`  ✓ Nền tảng: ${result.name} (${result.code})`);
+
+    if (existing) {
+      // Giữ NGUYÊN cấu hình và trạng thái hiện tại (active/inactive) do Admin thiết lập,
+      // tuyệt đối không tự động ghi đè hoặc bật/tắt lại khi deploy/seed.
+      console.log(`  ✓ Nền tảng: ${existing.name} (${existing.code}) — Trạng thái hiện tại: [${existing.status}] (Giữ nguyên)`);
+    } else {
+      const created = await prisma.platform.create({
+        data: {
+          code: p.code,
+          name: p.name,
+          status: p.defaultStatus,
+        },
+      });
+      console.log(`  ✓ Khởi tạo nền tảng: ${created.name} (${created.code}) — Trạng thái mặc định: [${created.status}]`);
+    }
   }
 }
 
@@ -103,6 +115,12 @@ async function seedCommissionRule() {
 async function seedCategoryCommissionRates() {
   console.log("\n📊 Cấu hình tỷ lệ hoàn tiền ước tính theo 22 nhóm ngành hàng...");
 
+  const existingCount = await prisma.categoryCommissionRate.count();
+  if (existingCount > 0) {
+    console.log(`  ✓ Đã có ${existingCount} nhóm ngành hàng trong CSDL. Giữ nguyên cấu hình tỷ lệ của Admin (không ghi đè).`);
+    return;
+  }
+
   const categoryRates: {
     id: string;
     name: string;
@@ -136,42 +154,18 @@ async function seedCategoryCommissionRates() {
   ];
 
   for (const c of categoryRates) {
-    const existing = await prisma.categoryCommissionRate.findFirst({
-      where: {
-        OR: [
-          { id: c.id },
-          { id: `seed-category-${c.sortOrder}` },
-          { sortOrder: c.sortOrder },
-          { name: c.name },
-        ],
+    await prisma.categoryCommissionRate.create({
+      data: {
+        id: c.id,
+        name: c.name,
+        keywords: c.keywords,
+        rate: c.rate,
+        sortOrder: c.sortOrder,
+        isDefault: c.isDefault ?? false,
       },
     });
-
-    if (existing) {
-      await prisma.categoryCommissionRate.update({
-        where: { id: existing.id },
-        data: {
-          name: c.name,
-          keywords: c.keywords,
-          rate: c.rate,
-          sortOrder: c.sortOrder,
-          isDefault: c.isDefault ?? false,
-        },
-      });
-    } else {
-      await prisma.categoryCommissionRate.create({
-        data: {
-          id: c.id,
-          name: c.name,
-          keywords: c.keywords,
-          rate: c.rate,
-          sortOrder: c.sortOrder,
-          isDefault: c.isDefault ?? false,
-        },
-      });
-    }
   }
-  console.log(`  ✓ Đã đồng bộ ${categoryRates.length} nhóm ngành hàng thành công.`);
+  console.log(`  ✓ Đã khởi tạo ${categoryRates.length} nhóm ngành hàng thành công.`);
 }
 
 async function seedTelegramAccount() {
