@@ -21,6 +21,7 @@ export default async function AdminAdminsPage() {
       status: true,
       telegramChatId: true,
       notifyOnNewCustomer: true,
+      notifyOnImport: true,
       mfaEnabled: true,
       createdAt: true,
       updatedAt: true,
@@ -37,6 +38,7 @@ export default async function AdminAdminsPage() {
     status: a.status,
     telegramChatId: a.telegramChatId,
     notifyOnNewCustomer: a.notifyOnNewCustomer,
+    notifyOnImport: a.notifyOnImport,
     mfaEnabled: a.mfaEnabled,
     createdAt: a.createdAt.toISOString(),
     updatedAt: a.updatedAt.toISOString(),
@@ -44,7 +46,7 @@ export default async function AdminAdminsPage() {
 
   const totalAdmins = formattedAdmins.length;
   const telegramNotifiedAdmins = formattedAdmins.filter(
-    (a) => a.notifyOnNewCustomer && a.telegramChatId
+    (a) => (a.notifyOnNewCustomer || a.notifyOnImport) && a.telegramChatId
   ).length;
   const mfaAdmins = formattedAdmins.filter((a) => a.mfaEnabled).length;
 

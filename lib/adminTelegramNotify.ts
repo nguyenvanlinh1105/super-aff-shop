@@ -209,3 +209,167 @@ export async function notifyAdminsNewCustomerRegistration(params: {
     console.error("[notifyAdminsNewCustomerRegistration] Lỗi:", error);
   }
 }
+
+// ============================================================
+// Gửi thông báo tới admin khi import CSV hoàn tất (thành công hoặc thất bại).
+// Chỉ gửi cho admin bật notifyOnImport = true.
+// ============================================================
+export async function notifyAdminsImportResult(params: {
+  success: boolean;
+  fileName: string;
+  importedByName: string;
+  totalRows: number;
+  successRows?: number;
+  unmappedRows?: number;
+  duplicateRows?: number;
+  errorRows?: number;
+  referralBonusCount?: number;
+  referralBonusTotal?: number;
+  errorMessage?: string;
+}): Promise<void> {
+  try {
+    // 1. Tìm tất cả Admin bật nhận thông báo import qua Telegram
+    const admins = await prisma.user.findMany({
+      where: {
+        role: "admin",
+        status: "active",
+        notifyOnImport: true,
+      },
+      select: {
+        id: true,
+        fullName: true,
+        email: true,
+        telegramChatId: true,
+        customer: {
+          select: {
+            telegramUserId: true,
+            telegramUsername: true,
+          },
+        },
+      },
+    });
+
+    const targetChatIds = new Set<string>();
+
+    for (const a of admins) {
+      if (a.telegramChatId && a.telegramChatId.trim()) {
+        const resolved = await resolveTelegramChatId(a.telegramChatId);
+        if (resolved) {
+          targetChatIds.add(resolved);
+          continue;
+        }
+      }
+
+      if (a.customer?.telegramUserId) {
+        targetChatIds.add(a.customer.telegramUserId.trim());
+        continue;
+      }
+
+      if (a.email) {
+        const matchingCustomer = await prisma.customer.findFirst({
+          where: {
+            OR: [
+              { user: { email: a.email } },
+              { note: { contains: a.email } },
+            ],
+            telegramUserId: { not: null },
+          },
+          select: { telegramUserId: true },
+        });
+        if (matchingCustomer?.telegramUserId) {
+          targetChatIds.add(matchingCustomer.telegramUserId.trim());
+        }
+      }
+    }
+
+    // Fallback: biến môi trường
+    const envAdminChatId = process.env.TELEGRAM_ADMIN_CHAT_ID?.trim();
+    if (envAdminChatId) {
+      const resolvedEnv = await resolveTelegramChatId(envAdminChatId);
+      if (resolvedEnv) targetChatIds.add(resolvedEnv);
+    }
+
+    if (targetChatIds.size === 0) {
+      console.log("[notifyAdminsImport] Không có admin nào cấu hình Telegram để nhận thông báo import.");
+      return;
+    }
+
+    // 2. Format thời gian (GMT+7)
+    const now = new Date();
+    const timeStr = new Intl.DateTimeFormat("vi-VN", {
+      timeZone: "Asia/Ho_Chi_Minh",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    }).format(now);
+
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://meowback.shop";
+
+    // 3. Soạn nội dung tin nhắn
+    let message: string;
+
+    if (params.success) {
+      const lines = [
+        `📥 <b>IMPORT CSV HOÀN TẤT</b>`,
+        ``,
+        `📄 <b>File:</b> ${escapeHtml(params.fileName)}`,
+        `👤 <b>Người import:</b> ${escapeHtml(params.importedByName)}`,
+        `⏰ <b>Thời gian:</b> ${timeStr}`,
+        ``,
+        `📊 <b>Kết quả:</b>`,
+        `├ Tổng dòng: <b>${params.totalRows}</b>`,
+        `├ ✅ Thành công: <b>${params.successRows ?? 0}</b>`,
+        `├ 🔗 Chưa map: <b>${params.unmappedRows ?? 0}</b>`,
+        `├ 🔄 Trùng lặp: <b>${params.duplicateRows ?? 0}</b>`,
+        `╰ ❌ Lỗi: <b>${params.errorRows ?? 0}</b>`,
+      ];
+
+      if (params.referralBonusCount && params.referralBonusCount > 0) {
+        lines.push(
+          ``,
+          `🎁 <b>Hoa hồng giới thiệu:</b> ${params.referralBonusCount} đơn — ${(params.referralBonusTotal ?? 0).toLocaleString("vi-VN")}₫`
+        );
+      }
+
+      lines.push(
+        ``,
+        `👉 <a href="${appUrl}/admin/orders">Xem danh sách đơn hàng</a>`
+      );
+
+      message = lines.join("\n");
+    } else {
+      message = [
+        `🚫 <b>IMPORT CSV THẤT BẠI</b>`,
+        ``,
+        `📄 <b>File:</b> ${escapeHtml(params.fileName)}`,
+        `👤 <b>Người import:</b> ${escapeHtml(params.importedByName)}`,
+        `⏰ <b>Thời gian:</b> ${timeStr}`,
+        ``,
+        `❌ <b>Lý do:</b> ${escapeHtml(params.errorMessage || "Lỗi không xác định")}`,
+        ``,
+        `👉 <a href="${appUrl}/admin/orders/import">Thử import lại</a>`,
+      ].join("\n");
+    }
+
+    // 4. Gửi đồng loạt
+    await Promise.all(
+      Array.from(targetChatIds).map(async (chatId) => {
+        try {
+          const res = await sendTelegramTextMessage({ chatId, message });
+          if (!res.ok) {
+            console.warn(`[notifyAdminsImport] Gửi tin tới ${chatId} thất bại:`, res.error);
+          } else {
+            console.log(`[notifyAdminsImport] Đã gửi thông báo import tới ${chatId}`);
+          }
+        } catch (err) {
+          console.error(`[notifyAdminsImport] Lỗi gửi telegram tới ${chatId}:`, err);
+        }
+      })
+    );
+  } catch (error) {
+    console.error("[notifyAdminsImportResult] Lỗi:", error);
+  }
+}

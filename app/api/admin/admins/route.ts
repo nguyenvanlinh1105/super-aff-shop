@@ -22,6 +22,7 @@ export async function GET(req: NextRequest) {
       status: true,
       telegramChatId: true,
       notifyOnNewCustomer: true,
+      notifyOnImport: true,
       mfaEnabled: true,
       createdAt: true,
       updatedAt: true,
@@ -41,7 +42,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const { fullName, email, password, phone, telegramChatId, notifyOnNewCustomer } = body;
+    const { fullName, email, password, phone, telegramChatId, notifyOnNewCustomer, notifyOnImport } = body;
 
     if (!fullName || typeof fullName !== "string" || fullName.trim().length === 0) {
       return NextResponse.json({ error: "Vui lòng nhập họ và tên của Quản trị viên" }, { status: 400 });
@@ -78,6 +79,7 @@ export async function POST(req: NextRequest) {
         phone: phone ? phone.trim() : null,
         telegramChatId: telegramChatId ? telegramChatId.trim() : null,
         notifyOnNewCustomer: notifyOnNewCustomer ?? true,
+        notifyOnImport: notifyOnImport ?? true,
       },
       select: {
         id: true,
@@ -88,6 +90,7 @@ export async function POST(req: NextRequest) {
         status: true,
         telegramChatId: true,
         notifyOnNewCustomer: true,
+        notifyOnImport: true,
         mfaEnabled: true,
         createdAt: true,
         updatedAt: true,

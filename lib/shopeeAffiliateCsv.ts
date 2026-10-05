@@ -51,6 +51,11 @@ export const SHOPEE_AFFILIATE_CSV_HEADERS = [
   "Kênh",
 ] as const;
 
+// Cột Shopee có thể thêm mới — không bắt buộc phải có trong CSV
+export const SHOPEE_OPTIONAL_HEADERS = [
+  "Content Type",
+] as const;
+
 export type ShopeeAffiliateCsvHeader = (typeof SHOPEE_AFFILIATE_CSV_HEADERS)[number];
 export type ShopeeAffiliateCsvRow = Record<ShopeeAffiliateCsvHeader, string>;
 
@@ -144,16 +149,12 @@ function parseDecimal(value: string): Prisma.Decimal {
 }
 
 export function assertShopeeAffiliateHeaders(headers: string[]): void {
+  // Chỉ kiểm tra cột BẮT BUỘC — Shopee có thể thêm cột mới bất cứ lúc nào,
+  // không nên reject file chỉ vì có cột lạ chưa biết.
   const missingHeaders = SHOPEE_AFFILIATE_CSV_HEADERS.filter((header) => !headers.includes(header));
-  const unknownHeaders = headers.filter(
-    (header) => !SHOPEE_AFFILIATE_CSV_HEADERS.includes(header as ShopeeAffiliateCsvHeader)
-  );
 
-  if (missingHeaders.length || unknownHeaders.length) {
-    const parts = [];
-    if (missingHeaders.length) parts.push(`thiếu cột: ${missingHeaders.join(", ")}`);
-    if (unknownHeaders.length) parts.push(`cột ngoài danh sách: ${unknownHeaders.join(", ")}`);
-    throw new Error(`Header CSV Shopee không đúng cấu trúc mong đợi (${parts.join("; ")})`);
+  if (missingHeaders.length) {
+    throw new Error(`Header CSV Shopee không đúng cấu trúc mong đợi (thiếu cột: ${missingHeaders.join(", ")})`);
   }
 }
 
@@ -162,7 +163,7 @@ export function parseShopeeAffiliateCsv(csvText: string): ShopeeAffiliateImportR
     columns: true,
     skip_empty_lines: true,
     bom: true,
-    relax_column_count: false,
+    relax_column_count: true,
     trim: false,
   }) as Array<Record<string, string>>;
 

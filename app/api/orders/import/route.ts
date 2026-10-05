@@ -11,6 +11,7 @@ import { getActiveCommissionRule, splitCommission, isWithinReferralWindow, isSet
 import { notifyCustomerTelegram } from "@/lib/telegramNotify";
 import { buildOrderApprovedMessage, buildReferralBonusMessage } from "@/lib/telegramBot";
 import { notifyCustomerInApp } from "@/lib/notifications";
+import { notifyAdminsImportResult } from "@/lib/adminTelegramNotify";
 
 // Chuẩn hoá output từ cả 2 parser về cùng shape dùng trong route
 type NormRow = {
@@ -94,7 +95,22 @@ export async function POST(req: NextRequest) {
   }
 
   const content = await file.text();
-  const rows = parseAnyCsv(content);
+  let rows: NormRow[];
+  try {
+    rows = parseAnyCsv(content);
+  } catch (parseErr) {
+    const errorMessage = parseErr instanceof Error ? parseErr.message : "Không đọc được file CSV";
+    if (mode === "commit") {
+      void notifyAdminsImportResult({
+        success: false,
+        fileName: file.name,
+        importedByName: session.fullName,
+        totalRows: 0,
+        errorMessage,
+      });
+    }
+    return NextResponse.json({ error: errorMessage }, { status: 400 });
+  }
 
   if (mode === "preview") {
     // Đối chiếu cả 5 sub_id (không chỉ sub_id2) — khớp với logic commit thật
@@ -118,32 +134,48 @@ export async function POST(req: NextRequest) {
     });
   }
 
+  if (rows.length === 0) {
+    if (mode === "commit") {
+      void notifyAdminsImportResult({
+        success: false,
+        fileName: file.name,
+        importedByName: session.fullName,
+        totalRows: 0,
+        errorMessage: "File CSV không có dữ liệu để xử lý",
+      });
+    }
+    return NextResponse.json({ error: "File CSV không có dữ liệu" }, { status: 400 });
+  }
+
   // mode === "commit"
-  const uploadDir = path.join(process.cwd(), "storage", "imports");
-  await mkdir(uploadDir, { recursive: true });
-  const storageKey = `${randomUUID()}-${file.name}`;
-  await writeFile(path.join(uploadDir, storageKey), Buffer.from(await file.arrayBuffer()));
+  let batchId: string | null = null;
+  try {
+    const uploadDir = path.join(process.cwd(), "storage", "imports");
+    await mkdir(uploadDir, { recursive: true });
+    const storageKey = `${randomUUID()}-${file.name}`;
+    await writeFile(path.join(uploadDir, storageKey), Buffer.from(await file.arrayBuffer()));
 
-  const rule = await getActiveCommissionRule();
+    const rule = await getActiveCommissionRule();
 
-  const batch = await prisma.importBatch.create({
-    data: {
-      sourceName,
-      fileName: file.name,
-      fileStorageKey: storageKey,
-      importedByUserId: session.userId,
-      totalRows: rows.length,
-      status: "processing",
-    },
-  });
+    const batch = await prisma.importBatch.create({
+      data: {
+        sourceName,
+        fileName: file.name,
+        fileStorageKey: storageKey,
+        importedByUserId: session.userId,
+        totalRows: rows.length,
+        status: "processing",
+      },
+    });
+    batchId = batch.id;
 
-  let successRows = 0;
-  let unmappedRows = 0;
-  let errorRows = 0;
-  let duplicateRows = 0;
-  let referralBonusCount = 0;
-  let referralBonusTotal = new Prisma.Decimal(0);
-  const customerTierRates = new Map<string, Prisma.Decimal>();
+    let successRows = 0;
+    let unmappedRows = 0;
+    let errorRows = 0;
+    let duplicateRows = 0;
+    let referralBonusCount = 0;
+    let referralBonusTotal = new Prisma.Decimal(0);
+    const customerTierRates = new Map<string, Prisma.Decimal>();
 
   // ============================================================
   // GỘP DÒNG THEO ĐƠN HÀNG
@@ -609,8 +641,12 @@ export async function POST(req: NextRequest) {
     data: { successRows, unmappedRows, errorRows, duplicateRows, status: "done" },
   });
 
-  return NextResponse.json({
-    batchId: batch.id,
+  // Thông báo kết quả import cho admin qua Telegram (best-effort, không block response)
+  void notifyAdminsImportResult({
+    success: true,
+    fileName: file.name,
+    importedByName: session.fullName,
+    totalRows: rows.length,
     successRows,
     unmappedRows,
     errorRows,
@@ -618,4 +654,40 @@ export async function POST(req: NextRequest) {
     referralBonusCount,
     referralBonusTotal: Number(referralBonusTotal),
   });
+
+    return NextResponse.json({
+      batchId: batch.id,
+      successRows,
+      unmappedRows,
+      errorRows,
+      duplicateRows,
+      referralBonusCount,
+      referralBonusTotal: Number(referralBonusTotal),
+    });
+  } catch (commitErr) {
+    console.error("[POST /api/orders/import] Commit failure:", commitErr);
+    const errorMessage =
+      commitErr instanceof Error ? commitErr.message : "Đã xảy ra lỗi hệ thống khi xử lý lưu dữ liệu import";
+
+    if (batchId) {
+      try {
+        await prisma.importBatch.update({
+          where: { id: batchId },
+          data: { status: "failed" },
+        });
+      } catch (updateErr) {
+        console.error("[POST /api/orders/import] Failed to update batch to failed:", updateErr);
+      }
+    }
+
+    void notifyAdminsImportResult({
+      success: false,
+      fileName: file.name,
+      importedByName: session.fullName,
+      totalRows: rows.length,
+      errorMessage,
+    });
+
+    return NextResponse.json({ error: errorMessage }, { status: 500 });
+  }
 }

@@ -25,7 +25,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     }
 
     const body = await req.json();
-    const { fullName, phone, telegramChatId, notifyOnNewCustomer, status, newPassword } = body;
+    const { fullName, phone, telegramChatId, notifyOnNewCustomer, notifyOnImport, status, newPassword } = body;
 
     const dataToUpdate: any = {};
 
@@ -46,6 +46,10 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
 
     if (notifyOnNewCustomer !== undefined) {
       dataToUpdate.notifyOnNewCustomer = Boolean(notifyOnNewCustomer);
+    }
+
+    if (notifyOnImport !== undefined) {
+      dataToUpdate.notifyOnImport = Boolean(notifyOnImport);
     }
 
     if (status !== undefined) {
@@ -83,6 +87,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
         status: true,
         telegramChatId: true,
         notifyOnNewCustomer: true,
+        notifyOnImport: true,
         mfaEnabled: true,
         createdAt: true,
         updatedAt: true,

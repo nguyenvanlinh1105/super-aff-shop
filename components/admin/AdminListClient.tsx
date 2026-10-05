@@ -15,6 +15,7 @@ import {
   Mail,
   Info,
   KeyRound,
+  FileSpreadsheet,
 } from "lucide-react";
 import { useToast } from "@/components/ui/Toast";
 import { TextInput } from "@/components/ui/TextInput";
@@ -29,6 +30,7 @@ export type AdminUser = {
   status: string;
   telegramChatId: string | null;
   notifyOnNewCustomer: boolean;
+  notifyOnImport: boolean;
   mfaEnabled: boolean;
   createdAt: string;
   updatedAt: string;
@@ -66,6 +68,7 @@ export function AdminListClient({
   const [createPhone, setCreatePhone] = useState("");
   const [createTelegramId, setCreateTelegramId] = useState("");
   const [createNotify, setCreateNotify] = useState(true);
+  const [createNotifyImport, setCreateNotifyImport] = useState(true);
   const [createLoading, setCreateLoading] = useState(false);
   const [createError, setCreateError] = useState<string | null>(null);
 
@@ -74,6 +77,7 @@ export function AdminListClient({
   const [editPhone, setEditPhone] = useState("");
   const [editTelegramId, setEditTelegramId] = useState("");
   const [editNotify, setEditNotify] = useState(true);
+  const [editNotifyImport, setEditNotifyImport] = useState(true);
   const [editLoading, setEditLoading] = useState(false);
   const [editError, setEditError] = useState<string | null>(null);
 
@@ -93,6 +97,7 @@ export function AdminListClient({
     setCreatePhone("");
     setCreateTelegramId("");
     setCreateNotify(true);
+    setCreateNotifyImport(true);
     setCreateError(null);
     setIsCreateOpen(true);
   };
@@ -113,6 +118,7 @@ export function AdminListClient({
           phone: createPhone || null,
           telegramChatId: createTelegramId || null,
           notifyOnNewCustomer: createNotify,
+          notifyOnImport: createNotifyImport,
         }),
       });
 
@@ -137,6 +143,7 @@ export function AdminListClient({
     setEditPhone(admin.phone || "");
     setEditTelegramId(admin.telegramChatId || "");
     setEditNotify(admin.notifyOnNewCustomer);
+    setEditNotifyImport(admin.notifyOnImport ?? true);
     setEditError(null);
   };
 
@@ -156,6 +163,7 @@ export function AdminListClient({
           phone: editPhone || null,
           telegramChatId: editTelegramId || null,
           notifyOnNewCustomer: editNotify,
+          notifyOnImport: editNotifyImport,
         }),
       });
 
@@ -184,10 +192,11 @@ export function AdminListClient({
       (a.phone && a.phone.includes(q)) ||
       (a.telegramChatId && a.telegramChatId.includes(q));
 
+    const hasAnyNotify = (a.notifyOnNewCustomer || a.notifyOnImport) && Boolean(a.telegramChatId);
     const matchNotify =
       filterNotify === "all" ||
-      (filterNotify === "enabled" && a.notifyOnNewCustomer && a.telegramChatId) ||
-      (filterNotify === "disabled" && (!a.notifyOnNewCustomer || !a.telegramChatId));
+      (filterNotify === "enabled" && hasAnyNotify) ||
+      (filterNotify === "disabled" && !hasAnyNotify);
 
     return matchSearch && matchNotify;
   });
@@ -331,7 +340,7 @@ export function AdminListClient({
                 </div>
               </div>
 
-              {/* Toggle thông báo Telegram */}
+              {/* Toggle thông báo Telegram: Khách đăng ký */}
               <div className="flex items-center justify-between p-4 rounded-2xl bg-neutral-50 border border-neutral-200/80">
                 <div className="flex items-center gap-3">
                   <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-100 text-amber-700">
@@ -351,6 +360,32 @@ export function AdminListClient({
                     type="checkbox"
                     checked={createNotify}
                     onChange={(e) => setCreateNotify(e.target.checked)}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-neutral-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-rose-500"></div>
+                </label>
+              </div>
+
+              {/* Toggle thông báo Telegram: Import đơn / CSV */}
+              <div className="flex items-center justify-between p-4 rounded-2xl bg-neutral-50 border border-neutral-200/80">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-sky-100 text-sky-700">
+                    <FileSpreadsheet size={18} />
+                  </div>
+                  <div>
+                    <div className="text-xs font-extrabold text-neutral-900">
+                      Nhận thông báo khi import CSV / thay đổi hệ thống
+                    </div>
+                    <div className="text-[11px] text-neutral-500">
+                      Bot Telegram sẽ báo kết quả chi tiết mỗi khi import CSV thành công hoặc thất bại (kèm lý do).
+                    </div>
+                  </div>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={createNotifyImport}
+                    onChange={(e) => setCreateNotifyImport(e.target.checked)}
                     className="sr-only peer"
                   />
                   <div className="w-11 h-6 bg-neutral-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-rose-500"></div>
@@ -468,7 +503,7 @@ export function AdminListClient({
                 </span>
               </div>
 
-              {/* Toggle thông báo Telegram */}
+              {/* Toggle thông báo Telegram: Khách đăng ký mới */}
               <div className="flex items-center justify-between p-4 rounded-2xl bg-neutral-50 border border-neutral-200/80">
                 <div className="flex items-center gap-3">
                   <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-100 text-amber-700">
@@ -490,6 +525,34 @@ export function AdminListClient({
                     type="checkbox"
                     checked={editNotify}
                     onChange={(e) => setEditNotify(e.target.checked)}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-neutral-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-rose-500"></div>
+                </label>
+              </div>
+
+              {/* Toggle thông báo Telegram: Import đơn / CSV */}
+              <div className="flex items-center justify-between p-4 rounded-2xl bg-neutral-50 border border-neutral-200/80">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-sky-100 text-sky-700">
+                    <FileSpreadsheet size={18} />
+                  </div>
+                  <div>
+                    <div className="text-xs font-extrabold text-neutral-900">
+                      Gửi tin bot Telegram khi import CSV / thay đổi hệ thống
+                    </div>
+                    <div className="text-[11px] text-neutral-500">
+                      {editNotifyImport
+                        ? "Đang BẬT: Bạn sẽ nhận kết quả import chi tiết (thành công hoặc thất bại kèm lý do)."
+                        : "Đang TẮT: Bot sẽ không gửi kết quả import CSV đến tài khoản này."}
+                    </div>
+                  </div>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={editNotifyImport}
+                    onChange={(e) => setEditNotifyImport(e.target.checked)}
                     className="sr-only peer"
                   />
                   <div className="w-11 h-6 bg-neutral-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-rose-500"></div>
@@ -598,7 +661,8 @@ export function AdminListClient({
                 filteredAdmins.map((admin) => {
                   const isSelf = admin.id === currentAdminId;
                   const hasTelegram = Boolean(admin.telegramChatId);
-                  const isNotifyActive = hasTelegram && admin.notifyOnNewCustomer;
+                  const isNotifyUserActive = hasTelegram && admin.notifyOnNewCustomer;
+                  const isNotifyImportActive = hasTelegram && admin.notifyOnImport;
 
                   return (
                     <tr
@@ -646,25 +710,29 @@ export function AdminListClient({
 
                       {/* Bot Telegram Thông Báo */}
                       <td className="px-4 py-3.5">
-                        <div className="flex flex-col gap-1">
+                        <div className="flex flex-col gap-1.5">
                           {hasTelegram ? (
-                            <div className="flex items-center gap-1.5">
+                            <div className="flex flex-wrap items-center gap-1.5">
                               <span
-                                className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-extrabold ${
-                                  isNotifyActive
-                                    ? "bg-sky-50 text-sky-700 border border-sky-200"
-                                    : "bg-neutral-100 text-neutral-600 border border-neutral-200"
+                                className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold ${
+                                  isNotifyUserActive
+                                    ? "bg-amber-50 text-amber-800 border border-amber-200"
+                                    : "bg-neutral-100 text-neutral-400 border border-neutral-200 line-through"
                                 }`}
+                                title={isNotifyUserActive ? "Đang bật thông báo người dùng mới" : "Đang tắt thông báo người dùng mới"}
                               >
-                                {isNotifyActive ? (
-                                  <>
-                                    <BellRing size={12} className="text-sky-600" /> Báo bot khi có user mới
-                                  </>
-                                ) : (
-                                  <>
-                                    <BellOff size={12} className="text-neutral-400" /> Đang tắt báo bot
-                                  </>
-                                )}
+                                <BellRing size={11} className={isNotifyUserActive ? "text-amber-600" : "text-neutral-400"} /> User mới
+                              </span>
+
+                              <span
+                                className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold ${
+                                  isNotifyImportActive
+                                    ? "bg-sky-50 text-sky-800 border border-sky-200"
+                                    : "bg-neutral-100 text-neutral-400 border border-neutral-200 line-through"
+                                }`}
+                                title={isNotifyImportActive ? "Đang bật thông báo import CSV" : "Đang tắt thông báo import CSV"}
+                              >
+                                <FileSpreadsheet size={11} className={isNotifyImportActive ? "text-sky-600" : "text-neutral-400"} /> Import CSV
                               </span>
                             </div>
                           ) : (
