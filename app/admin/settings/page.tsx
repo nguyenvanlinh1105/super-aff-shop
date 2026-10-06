@@ -8,13 +8,30 @@ import { AdminMfaSetupCard } from "@/components/admin/AdminMfaSetupCard";
 import { Settings, Code2, Info, Tags, ShieldCheck, Plug } from "lucide-react";
 import { TikTokIntegrationPanel } from "@/components/admin/TikTokIntegrationPanel";
 import { LazadaIntegrationPanel } from "@/components/admin/LazadaIntegrationPanel";
+import { ReconciliationReminderCard } from "@/components/admin/ReconciliationReminderCard";
 import { getRioHubConfigStatus } from "@/lib/riohubTikTok";
 import { getLazadaConfigStatus } from "@/lib/lazadaApi";
+import {
+  getReconciliationReminderConfig,
+  getAdminLinhTarget,
+} from "@/lib/reconciliationReminder";
+import { initReconciliationReminderScheduler } from "@/lib/reconciliationReminderScheduler";
 
 export const dynamic = "force-dynamic";
 
 export default async function AdminSettingsPage() {
-  const [activeRule, categoryRates, tiktokPlatform, lazadaPlatform] = await Promise.all([
+  // Đảm bảo background scheduler chạy
+  initReconciliationReminderScheduler();
+
+  const [
+    activeRule,
+    categoryRates,
+    tiktokPlatform,
+    lazadaPlatform,
+    reminderConfig,
+    adminLinh,
+    telegramAccount,
+  ] = await Promise.all([
     prisma.commissionRule.findFirst({
       where: { active: true },
       orderBy: { createdAt: "desc" },
@@ -22,6 +39,12 @@ export default async function AdminSettingsPage() {
     prisma.categoryCommissionRate.findMany({ orderBy: { sortOrder: "asc" } }),
     prisma.platform.findUnique({ where: { code: "TIKTOK" } }),
     prisma.platform.findUnique({ where: { code: "LAZADA" } }),
+    getReconciliationReminderConfig(),
+    getAdminLinhTarget(),
+    prisma.telegramAccount.findFirst({
+      where: { status: "active" },
+      orderBy: { createdAt: "desc" },
+    }),
   ]);
 
   return (
@@ -70,6 +93,13 @@ export default async function AdminSettingsPage() {
         </div>
         <LazadaIntegrationPanel platformStatus={lazadaPlatform?.status ?? "inactive"} config={getLazadaConfigStatus()} />
       </div>
+
+      {/* Nhắc nhở import file đối soát hàng ngày qua Telegram */}
+      <ReconciliationReminderCard
+        initialConfig={reminderConfig}
+        adminLinh={adminLinh}
+        botAccount={telegramAccount}
+      />
 
       {/* Commission rule card */}
       <div className="rounded-3xl bg-white shadow-sm border border-neutral-200/70 p-6 sm:p-8">
