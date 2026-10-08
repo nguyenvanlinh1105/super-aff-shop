@@ -86,6 +86,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
         role: true,
         status: true,
         telegramChatId: true,
+        telegramUsername: true,
         notifyOnNewCustomer: true,
         notifyOnImport: true,
         mfaEnabled: true,

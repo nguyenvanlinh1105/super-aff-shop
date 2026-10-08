@@ -30,6 +30,7 @@ model User {
 
   // ─── Admin Notification & Profile Fields ──────────────────────
   telegramChatId       String?   @map("telegram_chat_id")
+  telegramUsername     String?   @map("telegram_username")
   notifyOnNewCustomer  Boolean   @default(true) @map("notify_on_new_customer")
   notifyOnImport       Boolean   @default(true) @map("notify_on_import")
   phone                String?
@@ -47,6 +48,7 @@ model User {
   notifications    Notification[]
   chatMessages     ChatMessage[]
   pushSubscriptions PushSubscription[]
+  adminTelegramLinkCodes AdminTelegramLinkCode[]
 
   @@map("users")
 }
@@ -138,6 +140,21 @@ model TelegramLinkCode {
 
   @@index([customerId])
   @@map("telegram_link_codes")
+}
+
+// Mã liên kết Telegram dành riêng cho Quản trị viên (Admin)
+// Quét QR hoặc click deep link t.me/bot?start=adm_CODE để bot tự động liên kết Chat ID
+model AdminTelegramLinkCode {
+  id        String    @id @default(uuid())
+  code      String    @unique
+  userId    String    @map("user_id")
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime  @map("expires_at")
+  usedAt    DateTime? @map("used_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  @@index([userId])
+  @@map("admin_telegram_link_codes")
 }
 
 model Platform {

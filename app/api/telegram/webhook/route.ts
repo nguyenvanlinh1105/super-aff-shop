@@ -24,6 +24,7 @@ import {
   buildWalletMessage,
   buildWithdrawErrorMessage,
   buildWithdrawSuccessMessage,
+  escapeHtml,
   extractFirstUrl,
   extractTelegramMessage,
   mapDetectedPlatformToCode,
@@ -121,31 +122,86 @@ export async function POST(req: NextRequest) {
   let linkOutcomeMessage: string | null = null;
 
   if (command === "/start" && args[0]) {
-    const code = args[0].toUpperCase();
-    const linkCode = await prisma.telegramLinkCode.findUnique({ where: { code } });
-    const isValid = linkCode && !linkCode.usedAt && linkCode.expiresAt.getTime() > Date.now();
+    const rawCode = args[0].trim();
+    const code = rawCode.toUpperCase();
 
-    if (isValid && linkCode) {
-      // Gỡ liên kết cũ (nếu Telegram này từng tự tạo 1 customer rời rạc trước đó)
-      // để đảm bảo 1 senderId Telegram chỉ khớp đúng 1 customer duy nhất.
-      await prisma.customer.updateMany({
-        where: { telegramUserId: incoming.senderId, id: { not: linkCode.customerId } },
-        data: { telegramUserId: null, telegramUsername: null },
-      });
+    // 1. Kiểm tra nếu là mã liên kết Quản Trị Viên (Admin)
+    const adminLinkCode = await prisma.adminTelegramLinkCode.findUnique({
+      where: { code },
+      include: { user: true },
+    });
 
-      customer = await prisma.customer.update({
-        where: { id: linkCode.customerId },
-        data: { telegramUserId: incoming.senderId, telegramUsername: incoming.username },
-      });
+    if (adminLinkCode) {
+      const isValidAdmin = !adminLinkCode.usedAt && adminLinkCode.expiresAt.getTime() > Date.now();
+      if (isValidAdmin && adminLinkCode.user) {
+        // Gỡ liên kết chat này khỏi các tài khoản admin khác (nếu có) để tránh xung đột
+        await prisma.user.updateMany({
+          where: {
+            role: "admin",
+            telegramChatId: incoming.chatId,
+            id: { not: adminLinkCode.userId },
+          },
+          data: { telegramChatId: null, telegramUsername: null },
+        });
 
-      await prisma.telegramLinkCode.update({ where: { id: linkCode.id }, data: { usedAt: new Date() } });
+        const updatedAdmin = await prisma.user.update({
+          where: { id: adminLinkCode.userId },
+          data: {
+            telegramChatId: incoming.chatId,
+            telegramUsername: incoming.username || null,
+          },
+        });
 
-      linkOutcomeMessage = buildLinkSuccessMessage({
-        fullName: customer.fullName,
-        customerCode: customer.customerCode,
-      });
+        await prisma.adminTelegramLinkCode.update({
+          where: { id: adminLinkCode.id },
+          data: { usedAt: new Date() },
+        });
+
+        linkOutcomeMessage = [
+          "🎉 <b>KẾT NỐI QUẢN TRỊ VIÊN THÀNH CÔNG!</b>",
+          "",
+          `👋 Xin chào Quản trị viên <b>${escapeHtml(updatedAdmin.fullName)}</b>!`,
+          `📧 Email: <code>${escapeHtml(updatedAdmin.email)}</code>`,
+          `🆔 Telegram Chat ID: <code>${incoming.chatId}</code>`,
+          `👤 Username: ${incoming.username ? `@${incoming.username}` : "<i>Chưa đặt username</i>"}`,
+          "",
+          "✅ <b>Tài khoản của bạn đã được kết nối với hệ thống MeowBack.</b>",
+          "Từ bây giờ bot sẽ tự động gửi thông báo trực tiếp tới tài khoản Telegram này:",
+          "• 🔔 <b>Khách hàng mới đăng ký tài khoản</b>",
+          "• 📊 <b>Báo cáo kết quả Import đối soát đơn hàng CSV</b> (thành công / lỗi chi tiết)",
+          "",
+          "💡 <i>Bạn có thể đổi tài khoản hoặc hủy liên kết bất cứ lúc nào trong mục Quản trị viên trên web.</i>",
+        ].join("\n");
+      } else {
+        linkOutcomeMessage = "⚠️ <b>Mã liên kết Quản trị viên đã hết hạn hoặc đã được sử dụng.</b>\n\nVui lòng quay lại website quản trị để tạo mã kết nối mới.";
+      }
     } else {
-      linkOutcomeMessage = buildLinkExpiredMessage();
+      // 2. Kiểm tra nếu là mã liên kết Khách hàng (Customer)
+      const linkCode = await prisma.telegramLinkCode.findUnique({ where: { code } });
+      const isValid = linkCode && !linkCode.usedAt && linkCode.expiresAt.getTime() > Date.now();
+
+      if (isValid && linkCode) {
+        // Gỡ liên kết cũ (nếu Telegram này từng tự tạo 1 customer rời rạc trước đó)
+        // để đảm bảo 1 senderId Telegram chỉ khớp đúng 1 customer duy nhất.
+        await prisma.customer.updateMany({
+          where: { telegramUserId: incoming.senderId, id: { not: linkCode.customerId } },
+          data: { telegramUserId: null, telegramUsername: null },
+        });
+
+        customer = await prisma.customer.update({
+          where: { id: linkCode.customerId },
+          data: { telegramUserId: incoming.senderId, telegramUsername: incoming.username },
+        });
+
+        await prisma.telegramLinkCode.update({ where: { id: linkCode.id }, data: { usedAt: new Date() } });
+
+        linkOutcomeMessage = buildLinkSuccessMessage({
+          fullName: customer.fullName,
+          customerCode: customer.customerCode,
+        });
+      } else {
+        linkOutcomeMessage = buildLinkExpiredMessage();
+      }
     }
   }
 
@@ -479,7 +535,7 @@ export async function POST(req: NextRequest) {
     replyText = "📱 <b>Bàn phím thao tác nhanh đã mở!</b>\n\nBạn có thể bấm các nút bên dưới để sử dụng, hoặc bấm <b>[ ❌ Đóng menu ]</b> để thu gọn lại cho gọn màn hình.";
     processingStatus = "processed_menu";
   } else if (command === "/id" || command === "/myid") {
-    // Chỉ Admin trong hệ thống mới được phép xem thông tin Chat ID quản trị
+    // Hiển thị thông tin Chat ID của người dùng và nhận diện nếu là Admin
     const adminUser = await prisma.user.findFirst({
       where: {
         role: "admin",
@@ -491,6 +547,7 @@ export async function POST(req: NextRequest) {
             ? [
                 { telegramChatId: `@${incoming.username}` },
                 { telegramChatId: incoming.username },
+                { telegramUsername: incoming.username },
               ]
             : []),
           ...(customer?.id ? [{ customerId: customer.id }] : []),
@@ -498,20 +555,24 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    if (adminUser) {
-      replyText = [
-        "🆔 <b>Thông tin Telegram Quản trị viên:</b>",
-        "",
-        `• <b>Chat ID:</b> <code>${incoming.chatId}</code>`,
-        `• <b>Username:</b> ${incoming.username ? `@${incoming.username}` : "<i>Chưa đặt username</i>"}`,
-        "",
-        "💡 <i>Copy mã Chat ID này dán vào mục Quản trị viên trên web để nhận thông báo bot khi có khách đăng ký mới nhé!</i>",
-      ].join("\n");
-      processingStatus = "processed_myid_admin";
-    } else {
-      replyText = "✨ Lệnh này không khả dụng. Bạn vui lòng bấm <b>Menu</b> hoặc gõ <b>/menu</b> để khám phá các ưu đãi hoàn tiền nhé! 🎀";
-      processingStatus = "processed_myid_forbidden";
-    }
+    replyText = [
+      "🆔 <b>Thông tin Telegram của bạn:</b>",
+      "",
+      `• <b>Chat ID:</b> <code>${incoming.chatId}</code>`,
+      `• <b>User ID:</b> <code>${incoming.senderId}</code>`,
+      `• <b>Username:</b> ${incoming.username ? `@${incoming.username}` : "<i>Chưa đặt username</i>"}`,
+      ...(adminUser
+        ? [
+            "",
+            `🛡️ <b>Quản trị viên hệ thống:</b> ${escapeHtml(adminUser.fullName)} (<code>${escapeHtml(adminUser.email)}</code>)`,
+            "✅ Đã kết nối nhận thông báo quản trị thành công.",
+          ]
+        : [
+            "",
+            "💡 <i>Bạn có thể dùng mã Chat ID này hoặc quét mã QR trong trang Quản lý Admin để kết nối tự động.</i>",
+          ]),
+    ].join("\n");
+    processingStatus = "processed_myid";
   } else if (command === "/keyboard" || command === "/phim") {
     replyText = "⌨️ Đã mở bàn phím phím tắt bên dưới. Bạn có thể bấm [ ❌ Đóng menu ] để thu gọn lại bất kỳ lúc nào.";
     processingStatus = "processed_keyboard";

@@ -43,7 +43,7 @@ export type TelegramReplyKeyboard = {
 
 const URL_REGEX = /(https?:\/\/[^\s]+)/gi;
 
-function escapeHtml(value: string): string {
+export function escapeHtml(value: string): string {
   return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
 
