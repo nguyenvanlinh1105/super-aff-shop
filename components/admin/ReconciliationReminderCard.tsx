@@ -7,12 +7,17 @@ import {
   Send,
   CheckCircle2,
   AlertCircle,
+  AlertTriangle,
   Save,
   Sparkles,
   ExternalLink,
   Check,
   MessageSquare,
   Bot,
+  History,
+  Calendar,
+  Terminal,
+  Radio,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { useToast } from "@/components/ui/Toast";
@@ -230,24 +235,38 @@ export function ReconciliationReminderCard({
         </div>
 
         {/* Master Toggle Switch */}
-        <div className="flex items-center gap-3 shrink-0 self-start sm:self-auto bg-neutral-50 p-2 sm:p-2.5 rounded-2xl border border-neutral-200/70">
-          <span className="text-xs font-bold text-neutral-700">
-            {enabled ? "Bật nhắc nhở" : "Tắt nhắc nhở"}
-          </span>
+        <div className="flex items-center gap-3.5 shrink-0 self-start sm:self-auto bg-gradient-to-r from-neutral-50 via-white to-neutral-100/80 p-2 sm:px-3.5 sm:py-2 rounded-2xl border border-neutral-200 shadow-2xs">
+          <div className="flex flex-col text-right select-none">
+            <span className="text-xs font-black text-neutral-800 tracking-tight">
+              {enabled ? "Bật nhắc nhở" : "Tắt nhắc nhở"}
+            </span>
+            <span className="text-[10px] font-semibold text-neutral-400">
+              {enabled ? "Gửi lúc 07:00 sáng" : "Tạm dừng gửi"}
+            </span>
+          </div>
+
           <button
             type="button"
             role="switch"
             aria-checked={enabled}
             onClick={() => setEnabled(!enabled)}
-            className={`relative inline-flex h-7 w-13 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-rose-400 focus:ring-offset-2 ${
-              enabled ? "bg-rose-500" : "bg-neutral-300"
+            className={`relative inline-flex h-7 w-12 shrink-0 cursor-pointer rounded-full p-0.5 transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 shadow-inner ${
+              enabled
+                ? "bg-gradient-to-r from-rose-500 to-pink-500 shadow-rose-500/20"
+                : "bg-neutral-300"
             }`}
           >
             <span
-              className={`pointer-events-none inline-block h-6 w-6 transform rounded-full bg-white shadow-lg ring-0 transition duration-200 ease-in-out ${
-                enabled ? "translate-x-6" : "translate-x-0"
+              className={`pointer-events-none flex h-6 w-6 transform items-center justify-center rounded-full bg-white shadow-md ring-0 transition-transform duration-200 ease-in-out ${
+                enabled ? "translate-x-5" : "translate-x-0"
               }`}
-            />
+            >
+              <span
+                className={`w-2 h-2 rounded-full transition-colors duration-200 ${
+                  enabled ? "bg-rose-500" : "bg-neutral-400"
+                }`}
+              />
+            </span>
           </button>
         </div>
       </div>
@@ -497,48 +516,140 @@ export function ReconciliationReminderCard({
             </p>
           </div>
 
-          {/* Last Run & Status Card */}
-          <div className="rounded-2xl bg-neutral-50/80 border border-neutral-200/80 p-4.5 flex flex-col gap-3">
-            <div className="text-xs font-extrabold uppercase tracking-wider text-neutral-700 flex items-center justify-between">
-              <span>Lịch Sử Gửi Gần Nhất</span>
-              <span className="text-[10px] font-bold text-neutral-400 font-mono">
-                Log Status
-              </span>
+          {/* Last Run & Status Card — Monitoring Console Style */}
+          <div className="rounded-3xl bg-gradient-to-b from-white via-neutral-50/70 to-neutral-100/60 border border-neutral-200/90 p-5 flex flex-col gap-4 shadow-sm relative overflow-hidden">
+            {/* Header */}
+            <div className="flex items-center justify-between pb-3 border-b border-neutral-200/70">
+              <div className="flex items-center gap-2">
+                <div className="w-7 h-7 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center border border-rose-100 shadow-2xs">
+                  <History size={15} strokeWidth={2.4} />
+                </div>
+                <div>
+                  <h4 className="text-xs font-black uppercase tracking-wider text-neutral-800">
+                    Lịch Sử Gửi Gần Nhất
+                  </h4>
+                  <span className="text-[10px] text-neutral-400 font-medium">
+                    Nhật ký phát tin tự động từ hệ thống Cron
+                  </span>
+                </div>
+              </div>
+
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold text-neutral-600 bg-white border border-neutral-200 shadow-2xs font-mono">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                <span>CRON LOG</span>
+              </div>
             </div>
 
-            <div className="flex items-center justify-between py-1 border-b border-neutral-200/60 text-xs">
-              <span className="text-neutral-500 font-medium">Thời điểm gửi:</span>
-              <span className="font-extrabold text-neutral-800">
-                {formatDateTime(lastSent.at)}
-              </span>
-            </div>
-
-            <div className="flex items-center justify-between py-1 border-b border-neutral-200/60 text-xs">
-              <span className="text-neutral-500 font-medium">Kết quả:</span>
-              {lastSent.status === "success" ? (
-                <span className="inline-flex items-center gap-1 font-extrabold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-md text-[11px]">
-                  <CheckCircle2 size={12} /> Thành Công
+            {/* Status Hero Card */}
+            {lastSent.status === "success" ? (
+              <div className="rounded-2xl bg-gradient-to-r from-emerald-50 via-teal-50/50 to-emerald-50 border border-emerald-200/90 p-3.5 flex items-center justify-between shadow-2xs">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-emerald-500 text-white flex items-center justify-center shrink-0 shadow-xs">
+                    <CheckCircle2 size={18} strokeWidth={2.6} />
+                  </div>
+                  <div>
+                    <div className="text-xs font-black text-emerald-950 flex items-center gap-1.5">
+                      <span>ĐÃ PHÁT TIN THÀNH CÔNG</span>
+                    </div>
+                    <p className="text-[11px] text-emerald-700/90 font-medium">
+                      Toàn bộ quản trị viên đã nhận được tin nhắn nhắc nhở.
+                    </p>
+                  </div>
+                </div>
+                <span className="hidden sm:inline-flex items-center text-[10px] font-black uppercase font-mono px-2 py-0.5 rounded-md bg-emerald-200/70 text-emerald-900">
+                  200 OK
                 </span>
-              ) : lastSent.status === "error" ? (
-                <span className="inline-flex items-center gap-1 font-extrabold text-rose-700 bg-rose-100 px-2 py-0.5 rounded-md text-[11px]">
-                  <AlertCircle size={12} /> Thất Bại
+              </div>
+            ) : lastSent.status === "error" ? (
+              <div className="rounded-2xl bg-gradient-to-r from-rose-50 via-red-50/50 to-rose-50 border border-rose-200/90 p-3.5 flex items-center justify-between shadow-2xs">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-rose-500 text-white flex items-center justify-center shrink-0 shadow-xs">
+                    <AlertTriangle size={18} strokeWidth={2.6} />
+                  </div>
+                  <div>
+                    <div className="text-xs font-black text-rose-950 flex items-center gap-1.5">
+                      <span>GỬI TIN THẤT BẠI</span>
+                    </div>
+                    <p className="text-[11px] text-rose-700/90 font-medium">
+                      Không thể kết nối Telegram Bot. Vui lòng kiểm tra lại cấu hình.
+                    </p>
+                  </div>
+                </div>
+                <span className="hidden sm:inline-flex items-center text-[10px] font-black uppercase font-mono px-2 py-0.5 rounded-md bg-rose-200/70 text-rose-900">
+                  ERROR
                 </span>
-              ) : (
-                <span className="font-medium text-neutral-400 text-[11px]">Chưa kích hoạt</span>
-              )}
-            </div>
-
-            {lastSent.detail && (
-              <p className="text-[11px] text-neutral-600 bg-white p-2.5 rounded-xl border border-neutral-200/70 font-medium leading-relaxed">
-                {lastSent.detail}
-              </p>
+              </div>
+            ) : (
+              <div className="rounded-2xl bg-neutral-100/80 border border-neutral-200/80 p-3.5 flex items-center gap-3 text-neutral-500">
+                <Clock size={16} className="text-neutral-400" />
+                <span className="text-xs font-medium">Chưa có lượt gửi nào trong phiên làm việc này.</span>
+              </div>
             )}
 
+            {/* Metrics 2-column Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              <div className="p-3 rounded-2xl bg-white border border-neutral-200/70 shadow-2xs flex flex-col gap-1">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 flex items-center gap-1">
+                  <Clock size={11} /> Thời Điểm Phát Tin
+                </span>
+                <span className="text-xs font-black text-neutral-800 font-mono">
+                  {formatDateTime(lastSent.at)}
+                </span>
+              </div>
+
+              <div className="p-3 rounded-2xl bg-white border border-neutral-200/70 shadow-2xs flex flex-col gap-1">
+                <span className="text-[10px] font-bold uppercase tracking-wider text-neutral-400 flex items-center gap-1">
+                  <Calendar size={11} /> Lần Gửi Kế Tiếp
+                </span>
+                <span className="text-xs font-black text-rose-600 font-mono flex items-center gap-1">
+                  {enabled ? (
+                    <>
+                      <span className="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse" />
+                      {scheduledTime} sáng hôm nay/ngày mai
+                    </>
+                  ) : (
+                    "Đã tạm dừng"
+                  )}
+                </span>
+              </div>
+            </div>
+
+            {/* Terminal Log Console */}
+            {lastSent.detail && (
+              <div className="rounded-2xl bg-neutral-900 text-neutral-200 p-3.5 border border-neutral-800 shadow-inner flex flex-col gap-2 font-mono text-[11px]">
+                <div className="flex items-center justify-between pb-2 border-b border-neutral-800 text-[10px] text-neutral-400">
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-2.5 h-2.5 rounded-full bg-rose-500/80 inline-block" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-amber-500/80 inline-block" />
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500/80 inline-block" />
+                    <span className="ml-1 text-neutral-400 font-semibold flex items-center gap-1">
+                      <Terminal size={11} /> dispatch_result.log
+                    </span>
+                  </div>
+                  <span className="text-[9.5px] text-neutral-500">TELEGRAM BROADCAST</span>
+                </div>
+
+                <div className="flex items-start gap-2 text-emerald-400 leading-relaxed break-words">
+                  <span className="text-neutral-500 select-none">&gt;</span>
+                  <span>{lastSent.detail}</span>
+                </div>
+              </div>
+            )}
+
+            {/* Quick Test Action Button Footer */}
             <div className="flex items-center justify-between pt-1 text-[11px] text-neutral-500">
-              <span>Lần gửi kế tiếp:</span>
-              <span className="font-bold text-rose-600">
-                {enabled ? `${scheduledTime} sáng hôm nay/ngày mai` : "Đã tạm dừng"}
+              <span className="font-medium text-[11px]">
+                Cần kiểm tra ngay?
               </span>
+              <button
+                type="button"
+                onClick={handleTestSend}
+                disabled={isTesting}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200/80 font-bold text-xs transition-all cursor-pointer active:scale-98 disabled:opacity-50"
+              >
+                <Send size={12} />
+                <span>{isTesting ? "Đang gửi thử..." : "Bấm gửi test Telegram ngay"}</span>
+              </button>
             </div>
           </div>
         </div>

@@ -28,6 +28,8 @@ import {
   Lock,
   ShieldCheck,
   Calendar,
+  Phone,
+  Sparkles,
 } from "lucide-react";
 import { useToast } from "@/components/ui/Toast";
 import { TextInput } from "@/components/ui/TextInput";
@@ -329,38 +331,42 @@ export function AdminListClient({
     <>
       {/* ── MODAL THÊM ADMIN MỚI (GIAO DIỆN PC 2 CỘT HIỆN ĐẠI) ── */}
       {isCreateOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/50 backdrop-blur-sm fade-in">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-sm fade-in">
           <div
-            className="relative w-full max-w-3xl max-h-[92vh] flex flex-col rounded-3xl bg-white shadow-2xl border border-neutral-100 overflow-hidden"
+            className="relative w-full max-w-3xl max-h-[92vh] flex flex-col rounded-3xl bg-white shadow-2xl border border-neutral-200/80 overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
+            {/* Thanh accent màu sắc trên cùng */}
+            <div className="h-1.5 w-full bg-gradient-to-r from-rose-500 via-pink-500 to-sky-500 shrink-0" />
+
             {/* Header */}
-            <div className="flex items-center justify-between px-6 py-4.5 border-b border-neutral-100 bg-white/95 backdrop-blur-md">
+            <div className="flex items-center justify-between px-6 sm:px-7 py-4.5 border-b border-neutral-200/70 bg-gradient-to-r from-neutral-50/70 via-white to-neutral-50/40">
               <div className="flex items-center gap-3.5">
-                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-rose-500 to-pink-600 text-white shadow-sm shadow-rose-500/20">
+                <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-rose-500 to-pink-600 text-white shadow-md shadow-rose-500/25 ring-2 ring-rose-100">
                   <Shield size={20} strokeWidth={2.3} />
                 </div>
                 <div>
-                  <h3 className="text-base font-extrabold text-neutral-900 tracking-tight">Thêm Quản Trị Viên Mới</h3>
-                  <p className="text-xs text-neutral-500">Cấp tài khoản đăng nhập &amp; phân quyền truy cập hệ thống</p>
+                  <h3 className="text-base sm:text-lg font-black text-neutral-900 tracking-tight">Thêm Quản Trị Viên Mới</h3>
+                  <p className="text-xs text-neutral-500 font-medium">Cấp tài khoản đăng nhập &amp; phân quyền truy cập hệ thống</p>
                 </div>
               </div>
               <button
                 type="button"
                 onClick={() => setIsCreateOpen(false)}
-                className="h-8 w-8 flex items-center justify-center rounded-xl text-neutral-400 hover:bg-neutral-100 hover:text-neutral-700 transition-colors"
+                className="w-9 h-9 flex items-center justify-center rounded-xl text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 transition-all cursor-pointer"
+                title="Đóng"
               >
                 <X size={18} />
               </button>
             </div>
 
             {/* Form */}
-            <form onSubmit={handleCreateAdmin} className="flex-1 overflow-y-auto p-6 flex flex-col gap-5">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <form onSubmit={handleCreateAdmin} className="flex-1 overflow-y-auto p-6 sm:p-7 flex flex-col gap-5">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6">
                 {/* Cột 1: Thông tin tài khoản */}
-                <div className="flex flex-col gap-4 p-4.5 rounded-2xl bg-neutral-50/70 border border-neutral-100">
-                  <div className="text-[11px] font-black uppercase tracking-wider text-neutral-400 flex items-center gap-1.5 pb-1 border-b border-neutral-200/60">
-                    <User size={13} />
+                <div className="flex flex-col gap-4 p-4.5 rounded-2xl bg-neutral-50/70 border border-neutral-200/80 shadow-2xs">
+                  <div className="text-[11px] font-black uppercase tracking-wider text-neutral-600 flex items-center gap-1.5 pb-2 border-b border-neutral-200/60">
+                    <User size={13} className="text-rose-500" />
                     Thông Tin Tài Khoản
                   </div>
 
@@ -369,13 +375,17 @@ export function AdminListClient({
                     <label className="text-xs font-bold text-neutral-700">
                       Họ và tên <span className="text-rose-500">*</span>
                     </label>
-                    <TextInput
-                      value={createName}
-                      onChange={(e) => setCreateName(e.target.value)}
-                      placeholder="Ví dụ: Nguyễn Văn Quản Trị"
-                      required
-                      className="bg-white text-sm"
-                    />
+                    <div className="relative">
+                      <User size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none" />
+                      <input
+                        type="text"
+                        value={createName}
+                        onChange={(e) => setCreateName(e.target.value)}
+                        placeholder="Ví dụ: Nguyễn Văn Quản Trị"
+                        required
+                        className="w-full h-10 pl-9.5 pr-3.5 rounded-xl border border-neutral-200 bg-white text-xs sm:text-sm font-semibold text-neutral-900 placeholder:text-neutral-400 shadow-2xs transition-all focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/15 hover:border-neutral-300"
+                      />
+                    </div>
                   </div>
 
                   {/* Email */}
@@ -383,14 +393,17 @@ export function AdminListClient({
                     <label className="text-xs font-bold text-neutral-700">
                       Email đăng nhập <span className="text-rose-500">*</span>
                     </label>
-                    <TextInput
-                      type="email"
-                      value={createEmail}
-                      onChange={(e) => setCreateEmail(e.target.value)}
-                      placeholder="admin.moi@meowback.shop"
-                      required
-                      className="bg-white text-sm"
-                    />
+                    <div className="relative">
+                      <Mail size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none" />
+                      <input
+                        type="email"
+                        value={createEmail}
+                        onChange={(e) => setCreateEmail(e.target.value)}
+                        placeholder="admin.moi@meowback.shop"
+                        required
+                        className="w-full h-10 pl-9.5 pr-3.5 rounded-xl border border-neutral-200 bg-white text-xs sm:text-sm font-semibold text-neutral-900 placeholder:text-neutral-400 shadow-2xs transition-all focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/15 hover:border-neutral-300"
+                      />
+                    </div>
                   </div>
 
                   {/* Mật khẩu khởi tạo */}
@@ -402,27 +415,27 @@ export function AdminListClient({
                       <button
                         type="button"
                         onClick={() => setCreatePassword(generateStrongPassword())}
-                        className="inline-flex items-center gap-1 text-[11px] font-bold text-rose-600 hover:underline cursor-pointer"
+                        className="inline-flex items-center gap-1 text-[11px] font-bold text-rose-600 hover:text-rose-700 cursor-pointer"
                       >
                         <KeyRound size={12} />
                         Tạo ngẫu nhiên
                       </button>
                     </div>
                     <div className="relative">
-                      <TextInput
+                      <input
                         type="text"
                         value={createPassword}
                         onChange={(e) => setCreatePassword(e.target.value)}
                         required
-                        className="bg-white font-mono text-sm tracking-wide pr-10"
+                        className="w-full h-10 pl-3.5 pr-10 rounded-xl border border-neutral-200 bg-white font-mono text-xs sm:text-sm font-bold text-neutral-900 tracking-wide shadow-2xs transition-all focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/15"
                       />
                       <button
                         type="button"
                         onClick={() => handleCopy(createPassword, "pwd")}
-                        className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-neutral-400 hover:text-neutral-700"
-                        title="Copy mật khẩu"
+                        className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-lg text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 transition-colors"
+                        title="Sao chép mật khẩu"
                       >
-                        {copiedId === "pwd" ? <Check size={15} className="text-emerald-500" /> : <Copy size={15} />}
+                        {copiedId === "pwd" ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
                       </button>
                     </div>
                   </div>
@@ -430,149 +443,186 @@ export function AdminListClient({
                   {/* Số điện thoại */}
                   <div className="flex flex-col gap-1.5">
                     <label className="text-xs font-bold text-neutral-700">
-                      Số điện thoại (Tuỳ chọn)
+                      Số điện thoại (Tùy chọn)
                     </label>
-                    <TextInput
-                      value={createPhone}
-                      onChange={(e) => setCreatePhone(e.target.value)}
-                      placeholder="0987654321"
-                      className="bg-white text-sm"
-                    />
+                    <div className="relative">
+                      <Phone size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none" />
+                      <input
+                        type="tel"
+                        value={createPhone}
+                        onChange={(e) => setCreatePhone(e.target.value)}
+                        placeholder="Ví dụ: 0987654321"
+                        className="w-full h-10 pl-9.5 pr-3.5 rounded-xl border border-neutral-200 bg-white text-xs sm:text-sm font-semibold text-neutral-900 placeholder:text-neutral-400 shadow-2xs transition-all focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/15 hover:border-neutral-300"
+                      />
+                    </div>
                   </div>
                 </div>
 
                 {/* Cột 2: Cài đặt thông báo & Telegram ban đầu */}
-                <div className="flex flex-col gap-4 p-4.5 rounded-2xl bg-neutral-50/70 border border-neutral-100">
-                  <div className="text-[11px] font-black uppercase tracking-wider text-neutral-400 flex items-center gap-1.5 pb-1 border-b border-neutral-200/60">
+                <div className="flex flex-col gap-4 p-4.5 rounded-2xl bg-neutral-50/70 border border-neutral-200/80 shadow-2xs">
+                  <div className="text-[11px] font-black uppercase tracking-wider text-neutral-600 flex items-center gap-1.5 pb-2 border-b border-neutral-200/60">
                     <Send size={13} className="text-[#24A1DE]" />
                     Cài Đặt Thông Báo &amp; Telegram
                   </div>
 
-                  {/* Telegram Chat ID (Tuỳ chọn) */}
+                  {/* Telegram Chat ID (Tùy chọn) */}
                   <div className="flex flex-col gap-1.5">
                     <label className="text-xs font-bold text-neutral-700">
-                      Telegram Chat ID (Tuỳ chọn)
+                      Telegram Chat ID (Tùy chọn)
                     </label>
-                    <TextInput
+                    <input
+                      type="text"
                       value={createTelegramId}
                       onChange={(e) => setCreateTelegramId(e.target.value)}
                       placeholder="Ví dụ: 7558379347"
-                      className="bg-white font-mono text-sm"
+                      className="w-full h-10 px-3.5 rounded-xl border border-neutral-200 bg-white font-mono text-xs sm:text-sm font-semibold text-neutral-900 placeholder:text-neutral-400 shadow-2xs transition-all focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/15"
                     />
-                    <span className="text-[11px] text-neutral-400 leading-relaxed">
-                      💡 Sau khi tạo tài khoản, admin có thể bấm <b>Sửa</b> để quét mã QR kết nối trực tiếp với Bot cực kỳ nhanh chóng.
+                    <span className="text-[11px] text-neutral-500 leading-relaxed">
+                      💡 Sau khi tạo, admin có thể quét mã QR để kết nối tự động với Bot cực kỳ nhanh chóng.
                     </span>
                   </div>
 
                   {/* Toggle thông báo Telegram: Khách đăng ký */}
                   <div className="flex items-center justify-between p-3 rounded-xl bg-white border border-neutral-200/70 shadow-2xs">
                     <div className="flex items-center gap-2.5">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-50 text-amber-600">
+                      <div className="flex h-8.5 w-8.5 items-center justify-center rounded-xl bg-amber-50 text-amber-600 shrink-0">
                         <BellRing size={16} />
                       </div>
                       <div>
                         <div className="text-xs font-bold text-neutral-900">Báo khi có khách mới</div>
-                        <div className="text-[10.5px] text-neutral-400">Gửi tin nhắn Telegram tức thì</div>
+                        <div className="text-[11px] text-neutral-400">Gửi tin nhắn Telegram tức thì</div>
                       </div>
                     </div>
-                    <label className="relative inline-flex items-center cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={createNotify}
-                        onChange={(e) => setCreateNotify(e.target.checked)}
-                        className="sr-only peer"
+
+                    <button
+                      type="button"
+                      role="switch"
+                      aria-checked={createNotify}
+                      onClick={() => setCreateNotify(!createNotify)}
+                      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full p-0.5 transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 shadow-inner ${
+                        createNotify ? "bg-rose-500" : "bg-neutral-300"
+                      }`}
+                    >
+                      <span
+                        className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition-transform duration-200 ease-in-out ${
+                          createNotify ? "translate-x-5" : "translate-x-0"
+                        }`}
                       />
-                      <div className="w-10 h-5 bg-neutral-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-rose-500"></div>
-                    </label>
+                    </button>
                   </div>
 
                   {/* Toggle thông báo Telegram: Import CSV */}
                   <div className="flex items-center justify-between p-3 rounded-xl bg-white border border-neutral-200/70 shadow-2xs">
                     <div className="flex items-center gap-2.5">
-                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-sky-50 text-sky-600">
+                      <div className="flex h-8.5 w-8.5 items-center justify-center rounded-xl bg-sky-50 text-sky-600 shrink-0">
                         <FileSpreadsheet size={16} />
                       </div>
                       <div>
                         <div className="text-xs font-bold text-neutral-900">Báo kết quả Import CSV</div>
-                        <div className="text-[10.5px] text-neutral-400">Chi tiết thành công hoặc thất bại</div>
+                        <div className="text-[11px] text-neutral-400">Chi tiết thành công hoặc thất bại</div>
                       </div>
                     </div>
-                    <label className="relative inline-flex items-center cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={createNotifyImport}
-                        onChange={(e) => setCreateNotifyImport(e.target.checked)}
-                        className="sr-only peer"
+
+                    <button
+                      type="button"
+                      role="switch"
+                      aria-checked={createNotifyImport}
+                      onClick={() => setCreateNotifyImport(!createNotifyImport)}
+                      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full p-0.5 transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 shadow-inner ${
+                        createNotifyImport ? "bg-rose-500" : "bg-neutral-300"
+                      }`}
+                    >
+                      <span
+                        className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition-transform duration-200 ease-in-out ${
+                          createNotifyImport ? "translate-x-5" : "translate-x-0"
+                        }`}
                       />
-                      <div className="w-10 h-5 bg-neutral-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-rose-500"></div>
-                    </label>
+                    </button>
                   </div>
 
                   {/* Thông báo gửi email tự động */}
                   <div className="p-3 rounded-xl bg-emerald-50/90 border border-emerald-200/70 text-[11px] text-emerald-800 leading-relaxed flex items-start gap-2">
                     <Mail size={15} className="shrink-0 text-emerald-600 mt-0.5" />
                     <div>
-                      Hệ thống sẽ tự động gửi email thông báo kèm mật khẩu khởi tạo đến <span className="font-bold underline">{createEmail || "email quản trị viên"}</span>.
+                      Hệ thống sẽ gửi email thông báo kèm mật khẩu khởi tạo đến <span className="font-bold underline">{createEmail || "email quản trị viên"}</span>.
                     </div>
                   </div>
                 </div>
               </div>
 
               {createError && (
-                <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-600 font-bold">
-                  {createError}
+                <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-600 font-bold flex items-center gap-2">
+                  <AlertCircle size={15} />
+                  <span>{createError}</span>
                 </div>
               )}
 
               {/* Footer Buttons */}
-              <div className="flex items-center justify-end gap-3 pt-3 border-t border-neutral-100">
-                <Button type="button" variant="tertiary" onClick={() => setIsCreateOpen(false)}>
+              <div className="sticky bottom-0 -mx-6 sm:-mx-7 -mb-6 sm:-mb-7 px-6 sm:px-7 py-4 bg-neutral-50/90 backdrop-blur-md border-t border-neutral-200/80 flex items-center justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setIsCreateOpen(false)}
+                  className="h-10 px-4.5 rounded-xl border border-neutral-200 bg-white hover:bg-neutral-100 text-neutral-700 text-xs font-bold transition-all shadow-2xs cursor-pointer active:scale-98"
+                >
                   Hủy
-                </Button>
-                <Button type="submit" disabled={createLoading} className="min-w-[140px] bg-rose-600 hover:bg-rose-700">
-                  {createLoading ? "Đang xử lý..." : <><Plus size={16} className="mr-1" />Tạo Quản Trị Viên</>}
-                </Button>
+                </button>
+                <button
+                  type="submit"
+                  disabled={createLoading}
+                  className="h-10 px-5 rounded-xl bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 text-white text-xs font-extrabold shadow-md shadow-rose-500/25 active:scale-98 transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                >
+                  {createLoading ? "Đang xử lý..." : <><Plus size={16} /><span>Tạo Quản Trị Viên</span></>}
+                </button>
               </div>
             </form>
           </div>
         </div>
       )}
 
-      {/* ── MODAL SỬA ADMIN (GIAO DIỆN PC CHUYÊN NGHIỆP 2 CỘT TỶ LỆ VÀNG) ── */}
+      {/* ── MODAL SỬA ADMIN (GIAO DIỆN PC CHUYÊN NGHIỆP, THỜI THƯỢNG) ── */}
       {editingAdmin && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/50 backdrop-blur-sm fade-in">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 bg-black/60 backdrop-blur-sm fade-in">
           <div
-            className="relative w-full max-w-4xl max-h-[92vh] flex flex-col rounded-3xl bg-white shadow-2xl border border-neutral-100 overflow-hidden"
+            className="relative w-full max-w-4xl max-h-[92vh] flex flex-col rounded-3xl bg-white shadow-2xl border border-neutral-200/80 overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
+            {/* Thanh accent màu sắc trên cùng */}
+            <div className="h-1.5 w-full bg-gradient-to-r from-rose-500 via-pink-500 to-sky-500 shrink-0" />
+
             {/* Header Cao Cấp */}
-            <div className="flex items-center justify-between px-6 py-4.5 border-b border-neutral-100 bg-white/95 backdrop-blur-md">
+            <div className="flex items-center justify-between px-6 sm:px-7 py-4.5 border-b border-neutral-200/70 bg-gradient-to-r from-neutral-50/70 via-white to-neutral-50/40">
               <div className="flex items-center gap-3.5">
-                <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-rose-500 via-pink-600 to-rose-700 text-white flex items-center justify-center font-extrabold text-base shadow-sm shadow-rose-500/20 shrink-0">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-rose-500 via-pink-600 to-rose-600 text-white flex items-center justify-center font-black text-base shadow-md shadow-rose-500/25 ring-2 ring-rose-100 shrink-0">
                   {editingAdmin.fullName.slice(0, 2).toUpperCase()}
                 </div>
                 <div>
-                  <div className="flex items-center gap-2">
-                    <h3 className="text-base font-extrabold text-neutral-900 tracking-tight">
-                      Chỉnh Sửa Quản Trị Viên
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h3 className="text-base sm:text-lg font-black text-neutral-900 tracking-tight">
+                      {editingAdmin.fullName}
                     </h3>
-                    <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-rose-50 text-rose-600 border border-rose-200">
+                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10.5px] font-extrabold uppercase tracking-wider bg-rose-50 text-rose-700 border border-rose-200">
+                      <Shield size={10} className="text-rose-500" />
                       Staff Admin
                     </span>
                   </div>
-                  <p className="text-xs text-neutral-500 font-medium">{editingAdmin.email}</p>
+                  <div className="flex items-center gap-2 text-xs text-neutral-500 font-medium mt-0.5">
+                    <span>{editingAdmin.email}</span>
+                    <span className="text-neutral-300">•</span>
+                    <span className="font-mono text-[11px] text-neutral-400">ID: {editingAdmin.id.slice(0, 8)}...</span>
+                  </div>
                 </div>
               </div>
 
               <div className="flex items-center gap-3">
-                <span className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                <span className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 shadow-2xs">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
                   Đang hoạt động
                 </span>
                 <button
                   type="button"
                   onClick={() => setEditingAdmin(null)}
-                  className="h-8 w-8 flex items-center justify-center rounded-xl text-neutral-400 hover:bg-neutral-100 hover:text-neutral-700 transition-colors cursor-pointer"
+                  className="w-9 h-9 flex items-center justify-center rounded-xl text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 transition-all cursor-pointer"
+                  title="Đóng modal"
                 >
                   <X size={18} />
                 </button>
@@ -580,14 +630,18 @@ export function AdminListClient({
             </div>
 
             {/* Form Thân Modal */}
-            <form onSubmit={handleUpdateAdmin} className="flex-1 overflow-y-auto p-6 flex flex-col gap-5">
+            <form onSubmit={handleUpdateAdmin} className="flex-1 overflow-y-auto p-6 sm:p-7 flex flex-col gap-5">
               <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 sm:gap-6">
-                {/* ── CỘT TRÁI (5 PHẦN): HỒ SƠ QUẢN TRỊ ── */}
+                {/* ── CỘT TRÁI (5 PHẦN): HỒ SƠ QUẢN TRỊ & BẢO MẬT ── */}
                 <div className="lg:col-span-5 flex flex-col gap-4">
-                  <div className="p-4.5 rounded-2xl bg-neutral-50/70 border border-neutral-100 flex flex-col gap-4">
-                    <div className="text-[11px] font-black uppercase tracking-wider text-neutral-400 flex items-center gap-1.5 pb-1 border-b border-neutral-200/60">
-                      <User size={13} />
-                      Thông Tin Cá Nhân
+                  {/* Card Thông tin cá nhân */}
+                  <div className="p-4.5 rounded-2xl bg-neutral-50/70 border border-neutral-200/80 flex flex-col gap-4 shadow-2xs">
+                    <div className="flex items-center justify-between pb-2 border-b border-neutral-200/60">
+                      <div className="text-[11px] font-black uppercase tracking-wider text-neutral-600 flex items-center gap-1.5">
+                        <User size={13} className="text-rose-500" />
+                        Thông Tin Cá Nhân
+                      </div>
+                      <span className="text-[10px] font-bold text-neutral-400">Bắt buộc (*)</span>
                     </div>
 
                     {/* Họ tên */}
@@ -595,29 +649,38 @@ export function AdminListClient({
                       <label className="text-xs font-bold text-neutral-700">
                         Họ và tên <span className="text-rose-500">*</span>
                       </label>
-                      <TextInput
-                        value={editName}
-                        onChange={(e) => setEditName(e.target.value)}
-                        required
-                        className="bg-white text-sm font-medium"
-                      />
+                      <div className="relative">
+                        <User size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none" />
+                        <input
+                          type="text"
+                          value={editName}
+                          onChange={(e) => setEditName(e.target.value)}
+                          required
+                          placeholder="Ví dụ: Trần Nam"
+                          className="w-full h-10 pl-9.5 pr-3.5 rounded-xl border border-neutral-200 bg-white text-xs sm:text-sm font-semibold text-neutral-900 placeholder:text-neutral-400 shadow-2xs transition-all focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/15 hover:border-neutral-300"
+                        />
+                      </div>
                     </div>
 
-                    {/* Email (Read-only) */}
+                    {/* Email đăng nhập (Read-only) */}
                     <div className="flex flex-col gap-1.5">
                       <div className="flex items-center justify-between">
-                        <label className="text-xs font-bold text-neutral-400">
+                        <label className="text-xs font-bold text-neutral-500">
                           Email đăng nhập
                         </label>
-                        <span className="inline-flex items-center gap-1 text-[10px] font-bold text-neutral-400">
+                        <span className="inline-flex items-center gap-1 text-[10px] font-bold text-neutral-400 bg-neutral-200/60 px-1.5 py-0.2 rounded">
                           <Lock size={10} /> Cố định
                         </span>
                       </div>
-                      <TextInput
-                        value={editingAdmin.email}
-                        disabled
-                        className="bg-neutral-100 text-neutral-500 cursor-not-allowed text-sm"
-                      />
+                      <div className="relative">
+                        <Mail size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none" />
+                        <input
+                          type="email"
+                          value={editingAdmin.email}
+                          disabled
+                          className="w-full h-10 pl-9.5 pr-3.5 rounded-xl border border-neutral-200 bg-neutral-100/70 text-xs sm:text-sm font-medium text-neutral-500 cursor-not-allowed shadow-2xs select-all"
+                        />
+                      </div>
                     </div>
 
                     {/* Số điện thoại */}
@@ -625,37 +688,54 @@ export function AdminListClient({
                       <label className="text-xs font-bold text-neutral-700">
                         Số điện thoại liên hệ
                       </label>
-                      <TextInput
-                        value={editPhone}
-                        onChange={(e) => setEditPhone(e.target.value)}
-                        placeholder="0987654321"
-                        className="bg-white text-sm"
-                      />
+                      <div className="relative">
+                        <Phone size={15} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none" />
+                        <input
+                          type="tel"
+                          value={editPhone}
+                          onChange={(e) => setEditPhone(e.target.value)}
+                          placeholder="Ví dụ: 0987654321"
+                          className="w-full h-10 pl-9.5 pr-3.5 rounded-xl border border-neutral-200 bg-white text-xs sm:text-sm font-semibold text-neutral-900 placeholder:text-neutral-400 shadow-2xs transition-all focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/15 hover:border-neutral-300"
+                        />
+                      </div>
                     </div>
                   </div>
 
-                  {/* Thông tin bảo mật & hệ thống */}
-                  <div className="p-4 rounded-2xl bg-white border border-neutral-200/70 shadow-2xs flex flex-col gap-2.5 text-xs">
-                    <div className="text-[11px] font-bold uppercase tracking-wider text-neutral-400 pb-1 border-b border-neutral-100">
-                      Trạng Thái Bảo Mật
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-neutral-500">Xác thực 2MFA:</span>
-                      <span
-                        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10.5px] font-extrabold ${
-                          editingAdmin.mfaEnabled
-                            ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                            : "bg-neutral-100 text-neutral-500 border border-neutral-200"
-                        }`}
-                      >
-                        {editingAdmin.mfaEnabled ? "🛡️ Đã bật 2MFA" : "⚪ Chưa bật"}
+                  {/* Card Trạng Thái & Bảo Mật */}
+                  <div className="p-4 rounded-2xl bg-neutral-50/70 border border-neutral-200/80 flex flex-col gap-3 shadow-2xs">
+                    <div className="text-[11px] font-black uppercase tracking-wider text-neutral-600 pb-2 border-b border-neutral-200/60 flex items-center justify-between">
+                      <span className="flex items-center gap-1.5">
+                        <ShieldCheck size={13} className="text-emerald-500" />
+                        Bảo Mật &amp; Hệ Thống
                       </span>
+                      <span className="text-[10px] font-bold text-neutral-400 font-mono">STATUS</span>
                     </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-neutral-500">Ngày tạo:</span>
-                      <span className="font-mono text-neutral-700 font-medium">
-                        {new Date(editingAdmin.createdAt).toLocaleDateString("vi-VN")}
-                      </span>
+
+                    <div className="grid grid-cols-2 gap-2.5 text-xs">
+                      <div className="p-2.5 rounded-xl bg-white border border-neutral-200/70 shadow-2xs flex flex-col gap-1">
+                        <span className="text-[10.5px] font-bold text-neutral-400 flex items-center gap-1">
+                          <Shield size={11} /> Xác thực 2MFA
+                        </span>
+                        {editingAdmin.mfaEnabled ? (
+                          <span className="inline-flex items-center gap-1 text-[11px] font-extrabold text-emerald-700">
+                            <CheckCircle2 size={13} className="text-emerald-600" />
+                            Đã bật 2MFA
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 text-[11px] font-bold text-neutral-400">
+                            Chưa bật
+                          </span>
+                        )}
+                      </div>
+
+                      <div className="p-2.5 rounded-xl bg-white border border-neutral-200/70 shadow-2xs flex flex-col gap-1">
+                        <span className="text-[10.5px] font-bold text-neutral-400 flex items-center gap-1">
+                          <Calendar size={11} /> Ngày khởi tạo
+                        </span>
+                        <span className="text-[11px] font-extrabold text-neutral-800 font-mono">
+                          {new Date(editingAdmin.createdAt).toLocaleDateString("vi-VN")}
+                        </span>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -663,9 +743,9 @@ export function AdminListClient({
                 {/* ── CỘT PHẢI (7 PHẦN): TÍCH HỢP TELEGRAM BOT & THÔNG BÁO ── */}
                 <div className="lg:col-span-7 flex flex-col gap-4">
                   {/* Card Kết Nối Telegram */}
-                  <div className="p-4.5 rounded-2xl bg-neutral-50/70 border border-neutral-100 flex flex-col gap-3.5">
-                    <div className="flex items-center justify-between pb-1 border-b border-neutral-200/60">
-                      <div className="text-[11px] font-black uppercase tracking-wider text-neutral-500 flex items-center gap-1.5">
+                  <div className="p-4.5 rounded-2xl bg-neutral-50/70 border border-neutral-200/80 flex flex-col gap-3.5 shadow-2xs">
+                    <div className="flex items-center justify-between pb-2 border-b border-neutral-200/60">
+                      <div className="text-[11px] font-black uppercase tracking-wider text-neutral-600 flex items-center gap-1.5">
                         <Send size={13} className="text-[#24A1DE]" />
                         Tích Hợp Telegram Bot
                       </div>
@@ -674,7 +754,7 @@ export function AdminListClient({
                         <button
                           type="button"
                           onClick={() => setIsManualInput(true)}
-                          className="text-[11px] text-neutral-400 hover:text-neutral-700 underline cursor-pointer"
+                          className="text-[11px] text-neutral-500 hover:text-neutral-800 font-semibold transition-colors cursor-pointer"
                         >
                           Nhập Chat ID thủ công
                         </button>
@@ -692,15 +772,16 @@ export function AdminListClient({
 
                     {isManualInput ? (
                       /* Chế độ nhập thủ công */
-                      <div className="flex flex-col gap-2 p-3.5 rounded-xl bg-white border border-neutral-200">
+                      <div className="flex flex-col gap-2 p-3.5 rounded-xl bg-white border border-neutral-200 shadow-2xs">
                         <label className="text-xs font-bold text-neutral-700">
                           Telegram Chat ID số hoặc ID Nhóm (-100...)
                         </label>
-                        <TextInput
+                        <input
+                          type="text"
                           value={editTelegramId}
                           onChange={(e) => setEditTelegramId(e.target.value)}
                           placeholder="Ví dụ: 7558379347 hoặc -100xxxxxxxx"
-                          className="bg-neutral-50 font-mono text-sm"
+                          className="w-full h-10 px-3.5 rounded-xl border border-neutral-200 bg-neutral-50 font-mono text-xs sm:text-sm font-semibold text-neutral-900 placeholder:text-neutral-400 focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/15"
                         />
                         <span className="text-[11px] text-neutral-500">
                           💡 Dành cho quản trị viên muốn cài đặt ID Nhóm Telegram để cả ban quản trị cùng nhận tin.
@@ -708,13 +789,13 @@ export function AdminListClient({
                       </div>
                     ) : editTelegramId ? (
                       /* TRẠNG THÁI: ĐÃ KẾT NỐI THÀNH CÔNG */
-                      <div className="rounded-2xl bg-gradient-to-r from-emerald-50 via-teal-50/50 to-emerald-50 border border-emerald-200/90 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
+                      <div className="rounded-2xl bg-gradient-to-r from-emerald-50 via-teal-50/40 to-emerald-50 border border-emerald-200/90 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
                         <div className="flex items-center gap-3 min-w-0">
-                          <div className="w-10 h-10 rounded-2xl bg-emerald-500 text-white flex items-center justify-center shrink-0 shadow-xs">
+                          <div className="w-10 h-10 rounded-2xl bg-emerald-500 text-white flex items-center justify-center shrink-0 shadow-sm shadow-emerald-500/20">
                             <CheckCircle2 size={20} strokeWidth={2.6} />
                           </div>
                           <div className="min-w-0 flex-1">
-                            <div className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider text-emerald-800 bg-emerald-100/90 px-2 py-0.5 rounded-full mb-0.5">
+                            <div className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider text-emerald-800 bg-emerald-100/90 px-2 py-0.5 rounded-full mb-0.5">
                               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
                               <span>Đã kết nối Telegram</span>
                             </div>
@@ -740,62 +821,81 @@ export function AdminListClient({
                       </div>
                     ) : (
                       /* TRẠNG THÁI: CHƯA KẾT NỐI */
-                      <div className="rounded-2xl bg-gradient-to-br from-sky-50/80 via-blue-50/40 to-sky-50/80 border border-sky-200/80 p-4 flex flex-col gap-3">
+                      <div>
                         {linkCodeResult ? (
                           /* Khi đã tạo mã -> Hiển thị QR và Nút mở bot */
-                          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 bg-white p-3.5 rounded-2xl border border-sky-200/80 shadow-2xs">
-                            {qrDataUrl ? (
-                              <div className="bg-white p-1.5 rounded-xl border border-neutral-200 shadow-2xs shrink-0">
+                          <div className="rounded-2xl bg-white border border-sky-200/90 p-4 shadow-2xs flex flex-col sm:flex-row items-center sm:items-stretch gap-4">
+                            {/* QR Code Container */}
+                            <div className="flex flex-col items-center justify-center p-2.5 rounded-xl bg-neutral-50 border border-neutral-200/80 shrink-0">
+                              {qrDataUrl ? (
                                 <img
                                   src={qrDataUrl}
                                   alt="QR liên kết Telegram"
-                                  className="h-[110px] w-[110px] object-contain rounded-lg"
+                                  className="h-[105px] w-[105px] object-contain rounded-lg"
                                 />
-                              </div>
-                            ) : (
-                              <div className="h-[110px] w-[110px] rounded-xl bg-neutral-100 flex items-center justify-center text-xs text-neutral-400">
-                                Đang tải QR...
-                              </div>
-                            )}
+                              ) : (
+                                <div className="h-[105px] w-[105px] rounded-lg bg-neutral-100 flex items-center justify-center text-xs text-neutral-400">
+                                  Đang tạo QR...
+                                </div>
+                              )}
+                              <span className="text-[10px] font-bold text-neutral-400 mt-1">Quét bằng camera</span>
+                            </div>
 
-                            <div className="flex flex-col gap-1.5 w-full text-center sm:text-left min-w-0">
-                              <div className="text-xs font-semibold text-neutral-600">
-                                Quét mã trên điện thoại hoặc bấm nút bên dưới:
-                              </div>
+                            {/* Deep link & Code Container */}
+                            <div className="flex flex-col justify-between gap-2.5 w-full min-w-0 text-center sm:text-left">
                               <div>
-                                <code className="rounded-lg bg-sky-50 border border-sky-200 px-2.5 py-0.5 font-mono text-sm font-black tracking-widest text-sky-900">
-                                  {linkCodeResult.code}
-                                </code>
+                                <div className="text-xs font-bold text-neutral-700 mb-1">
+                                  Mã kết nối Telegram của bạn:
+                                </div>
+                                <div className="inline-flex items-center gap-2">
+                                  <code className="rounded-lg bg-sky-50 border border-sky-200/80 px-2.5 py-1 font-mono text-sm font-black tracking-widest text-sky-950 select-all">
+                                    {linkCodeResult.code}
+                                  </code>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleCopy(linkCodeResult.code, "code")}
+                                    className="p-1.5 rounded-lg text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 transition-colors cursor-pointer"
+                                    title="Copy mã liên kết"
+                                  >
+                                    {copiedId === "code" ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
+                                  </button>
+                                </div>
                               </div>
-                              <div className="flex flex-wrap gap-2 mt-1 justify-center sm:justify-start">
+
+                              <div className="flex flex-col gap-1.5">
                                 <a
                                   href={linkCodeResult.deepLink}
                                   target="_blank"
                                   rel="noreferrer"
-                                  className="inline-flex items-center justify-center gap-1.5 h-8.5 px-3.5 rounded-xl bg-[#24A1DE] hover:bg-[#1E8BC0] text-white text-xs font-bold transition-all shadow-sm active:scale-98"
+                                  className="inline-flex items-center justify-center gap-2 h-9 px-4 rounded-xl bg-[#24A1DE] hover:bg-[#1E8BC0] text-white text-xs font-extrabold transition-all shadow-md shadow-[#24A1DE]/20 active:scale-98 cursor-pointer"
                                 >
-                                  <Send size={12} />
+                                  <Send size={13} />
                                   <span>Mở Telegram để kết nối ngay</span>
-                                  <ExternalLink size={11} />
+                                  <ExternalLink size={12} />
                                 </a>
+
+                                <div className="inline-flex items-center justify-center sm:justify-start gap-1.5 text-[11px] text-sky-700 font-medium">
+                                  <span className="relative flex h-2 w-2">
+                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-sky-400 opacity-75"></span>
+                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-sky-500"></span>
+                                  </span>
+                                  <span>Đang chờ bạn mở bot &amp; nhấn <b>START</b>...</span>
+                                </div>
                               </div>
-                              <p className="text-[11px] text-sky-700 animate-pulse font-medium mt-0.5">
-                                ⏳ Đang chờ bạn mở Telegram và nhấn <b>START</b>...
-                              </p>
                             </div>
                           </div>
                         ) : (
                           /* Chưa bấm tạo mã */
-                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                          <div className="rounded-2xl bg-gradient-to-br from-sky-50/70 via-white to-sky-50/40 border border-sky-200/70 p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3.5 shadow-2xs">
                             <div className="flex items-start gap-3">
-                              <div className="w-10 h-10 rounded-2xl bg-[#24A1DE] text-white flex items-center justify-center shrink-0 shadow-sm shadow-[#24A1DE]/30">
-                                <Send size={18} className="translate-x-[-1px] translate-y-[-1px]" />
+                              <div className="w-10 h-10 rounded-2xl bg-[#24A1DE] text-white flex items-center justify-center shrink-0 shadow-md shadow-[#24A1DE]/25">
+                                <Send size={18} className="-translate-x-0.5 translate-y-0.5" />
                               </div>
                               <div>
-                                <h4 className="text-xs sm:text-sm font-bold text-neutral-900">
-                                  Kết nối với MeowBack Bot
+                                <h4 className="text-xs sm:text-sm font-black text-neutral-900">
+                                  Kết Nối Với MeowBack Bot
                                 </h4>
-                                <p className="text-[11px] text-neutral-600 mt-0.5 leading-relaxed">
+                                <p className="text-[11px] text-neutral-500 font-medium mt-0.5 leading-relaxed">
                                   Quét mã QR hoặc nhấn nút để tự động lưu Chat ID nhận thông báo khách mới &amp; đối soát CSV.
                                 </p>
                               </div>
@@ -804,7 +904,7 @@ export function AdminListClient({
                               type="button"
                               onClick={handleGenerateTelegramCode}
                               disabled={telegramLoading}
-                              className="w-full sm:w-auto h-9 px-3.5 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 text-white font-bold text-xs shadow-sm shadow-sky-500/20 active:scale-98 transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 shrink-0"
+                              className="w-full sm:w-auto h-9 px-4 rounded-xl bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 text-white font-bold text-xs shadow-md shadow-sky-500/20 active:scale-98 transition-all flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 shrink-0"
                             >
                               <Send size={13} />
                               <span>{telegramLoading ? "Đang tạo..." : "Tạo mã kết nối Telegram"}</span>
@@ -813,7 +913,7 @@ export function AdminListClient({
                         )}
 
                         {telegramError && (
-                          <div className="text-xs text-rose-600 font-semibold bg-rose-50 border border-rose-200 p-2.5 rounded-xl">
+                          <div className="text-xs text-rose-600 font-semibold bg-rose-50 border border-rose-200 p-2.5 rounded-xl mt-2.5">
                             {telegramError}
                           </div>
                         )}
@@ -822,15 +922,15 @@ export function AdminListClient({
                   </div>
 
                   {/* 2 Toggle Cài Đặt Thông Báo Tự Động */}
-                  <div className="p-4.5 rounded-2xl bg-neutral-50/70 border border-neutral-100 flex flex-col gap-3">
-                    <div className="text-[11px] font-black uppercase tracking-wider text-neutral-400 pb-1 border-b border-neutral-200/60">
+                  <div className="p-4.5 rounded-2xl bg-neutral-50/70 border border-neutral-200/80 flex flex-col gap-3 shadow-2xs">
+                    <div className="text-[11px] font-black uppercase tracking-wider text-neutral-600 pb-1 border-b border-neutral-200/60">
                       Tùy Chọn Nhận Thông Báo
                     </div>
 
                     {/* Toggle thông báo Telegram: Khách đăng ký mới */}
                     <div className="flex items-center justify-between p-3 rounded-xl bg-white border border-neutral-200/70 shadow-2xs">
                       <div className="flex items-center gap-3">
-                        <div className="flex h-8.5 w-8.5 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
+                        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-amber-50 text-amber-600 shrink-0">
                           <BellRing size={17} />
                         </div>
                         <div>
@@ -844,21 +944,28 @@ export function AdminListClient({
                           </div>
                         </div>
                       </div>
-                      <label className="relative inline-flex items-center cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={editNotify}
-                          onChange={(e) => setEditNotify(e.target.checked)}
-                          className="sr-only peer"
+
+                      <button
+                        type="button"
+                        role="switch"
+                        aria-checked={editNotify}
+                        onClick={() => setEditNotify(!editNotify)}
+                        className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full p-0.5 transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 shadow-inner ${
+                          editNotify ? "bg-rose-500" : "bg-neutral-300"
+                        }`}
+                      >
+                        <span
+                          className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition-transform duration-200 ease-in-out ${
+                            editNotify ? "translate-x-5" : "translate-x-0"
+                          }`}
                         />
-                        <div className="w-10 h-5 bg-neutral-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-rose-500"></div>
-                      </label>
+                      </button>
                     </div>
 
                     {/* Toggle thông báo Telegram: Import đơn / CSV */}
                     <div className="flex items-center justify-between p-3 rounded-xl bg-white border border-neutral-200/70 shadow-2xs">
                       <div className="flex items-center gap-3">
-                        <div className="flex h-8.5 w-8.5 items-center justify-center rounded-xl bg-sky-50 text-sky-600">
+                        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-sky-50 text-sky-600 shrink-0">
                           <FileSpreadsheet size={17} />
                         </div>
                         <div>
@@ -872,38 +979,55 @@ export function AdminListClient({
                           </div>
                         </div>
                       </div>
-                      <label className="relative inline-flex items-center cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={editNotifyImport}
-                          onChange={(e) => setEditNotifyImport(e.target.checked)}
-                          className="sr-only peer"
+
+                      <button
+                        type="button"
+                        role="switch"
+                        aria-checked={editNotifyImport}
+                        onClick={() => setEditNotifyImport(!editNotifyImport)}
+                        className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full p-0.5 transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 shadow-inner ${
+                          editNotifyImport ? "bg-rose-500" : "bg-neutral-300"
+                        }`}
+                      >
+                        <span
+                          className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition-transform duration-200 ease-in-out ${
+                            editNotifyImport ? "translate-x-5" : "translate-x-0"
+                          }`}
                         />
-                        <div className="w-10 h-5 bg-neutral-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-rose-500"></div>
-                      </label>
+                      </button>
                     </div>
                   </div>
                 </div>
               </div>
 
               {editError && (
-                <div className="p-3 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-600 font-bold">
-                  {editError}
+                <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-600 font-bold flex items-center gap-2">
+                  <AlertCircle size={15} />
+                  <span>{editError}</span>
                 </div>
               )}
 
               {/* Sticky Footer Buttons */}
-              <div className="sticky bottom-0 -mx-6 -mb-6 px-6 py-4 bg-white/95 backdrop-blur-md border-t border-neutral-100 flex items-center justify-between gap-3">
-                <span className="hidden sm:inline-block text-[11px] text-neutral-400 font-medium">
-                  💡 Thay đổi thông báo và liên kết Telegram sẽ có hiệu lực ngay.
-                </span>
+              <div className="sticky bottom-0 -mx-6 sm:-mx-7 -mb-6 sm:-mb-7 px-6 sm:px-7 py-4 bg-neutral-50/90 backdrop-blur-md border-t border-neutral-200/80 flex items-center justify-between gap-4">
+                <div className="hidden sm:flex items-center gap-2 text-xs text-neutral-500 font-medium">
+                  <Sparkles size={14} className="text-amber-500 shrink-0" />
+                  <span>Thay đổi thông báo và liên kết Telegram sẽ có hiệu lực ngay.</span>
+                </div>
                 <div className="flex items-center gap-3 w-full sm:w-auto justify-end">
-                  <Button type="button" variant="tertiary" onClick={() => setEditingAdmin(null)}>
+                  <button
+                    type="button"
+                    onClick={() => setEditingAdmin(null)}
+                    className="h-10 px-4.5 rounded-xl border border-neutral-200 bg-white hover:bg-neutral-100 text-neutral-700 text-xs font-bold transition-all shadow-2xs cursor-pointer active:scale-98"
+                  >
                     Hủy bỏ
-                  </Button>
-                  <Button type="submit" disabled={editLoading} className="min-w-[140px] bg-rose-600 hover:bg-rose-700 shadow-sm shadow-rose-500/20">
-                    {editLoading ? "Đang lưu..." : <><Save size={15} className="mr-1.5" />Lưu Thay Đổi</>}
-                  </Button>
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={editLoading}
+                    className="h-10 px-5 rounded-xl bg-gradient-to-r from-rose-500 to-pink-600 hover:from-rose-600 hover:to-pink-700 text-white text-xs font-extrabold shadow-md shadow-rose-500/25 active:scale-98 transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
+                  >
+                    {editLoading ? "Đang lưu..." : <><Save size={15} /><span>Lưu Thay Đổi</span></>}
+                  </button>
                 </div>
               </div>
             </form>
