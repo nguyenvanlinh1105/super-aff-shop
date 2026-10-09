@@ -101,7 +101,7 @@ export function ProfileSummaryCard({ customer }: ProfileSummaryCardProps) {
                   <span>ĐỐI TÁC</span>
                 </button>
               ) : (
-                <span className="inline-flex items-center justify-center px-2.5 py-1 rounded-full bg-white/90 text-primary-700 font-black text-[11px] uppercase tracking-wider shadow-sm border border-white/60 whitespace-nowrap">
+                <span className="inline-flex items-center justify-center px-2.5 py-1 rounded-full bg-gradient-to-r from-sky-400 to-cyan-400 text-white font-black text-[11px] uppercase tracking-wider shadow-sm border border-sky-300/60 whitespace-nowrap">
                   <span>THÀNH VIÊN</span>
                 </span>
               )}
