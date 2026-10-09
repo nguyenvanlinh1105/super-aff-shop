@@ -1,8 +1,10 @@
 import { buildTikTokAffiliateUrlViaAccessTrade } from "./accesstrade";
 import {
   buildRioHubSubId,
+  buildTikTokProductSnapshot,
   createRioHubTikTokProductLink,
   getRioHubConfigStatus,
+  RioHubProduct,
 } from "./riohubTikTok";
 
 export type DetectedPlatform = "shopee" | "tiktok" | "lazada" | "unknown";
@@ -15,6 +17,13 @@ export type AffiliateSubIds = {
 };
 export type BuildAffiliateUrlOptions = {
   platformCode?: string;
+};
+
+export type TikTokProductSnapshot = Awaited<ReturnType<typeof buildTikTokProductSnapshot>>;
+export type TikTokAffiliateBuildResult = {
+  affiliateUrl: string;
+  productSnapshot?: TikTokProductSnapshot | null;
+  rawProduct?: RioHubProduct | null;
 };
 
 export function detectPlatform(rawUrl: string): DetectedPlatform {
@@ -270,11 +279,11 @@ function buildLazadaAffiliateUrl(
   }
 }
 
-async function buildTikTokAffiliateUrlViaRioHub(
+export async function buildTikTokAffiliateWithSnapshot(
   normalizedUrl: string,
   trackingCode: string,
   subIds?: AffiliateSubIds,
-): Promise<string | null> {
+): Promise<TikTokAffiliateBuildResult | null> {
   const config = getRioHubConfigStatus();
   if (!config.readyForLinks) return null;
 
@@ -288,7 +297,22 @@ async function buildTikTokAffiliateUrlViaRioHub(
       productUrl: normalizedUrl,
       subId,
     });
-    return result?.affiliate_link || null;
+    if (!result?.affiliate_link) return null;
+
+    let snapshot: TikTokProductSnapshot | null = null;
+    if (result.product) {
+      try {
+        snapshot = await buildTikTokProductSnapshot(result.product);
+      } catch (e) {
+        console.warn("[RIOHUB_SNAPSHOT_WARN] Lỗi tính snapshot sản phẩm TikTok:", e);
+      }
+    }
+
+    return {
+      affiliateUrl: result.affiliate_link,
+      productSnapshot: snapshot,
+      rawProduct: result.product ?? null,
+    };
   } catch (error) {
     console.warn(
       "[RIOHUB_LINK_CONVERSION_WARN] Không tạo được link TikTok qua RioHub, chuyển sang phương thức dự phòng:",
@@ -297,3 +321,13 @@ async function buildTikTokAffiliateUrlViaRioHub(
     return null;
   }
 }
+
+async function buildTikTokAffiliateUrlViaRioHub(
+  normalizedUrl: string,
+  trackingCode: string,
+  subIds?: AffiliateSubIds,
+): Promise<string | null> {
+  const res = await buildTikTokAffiliateWithSnapshot(normalizedUrl, trackingCode, subIds);
+  return res?.affiliateUrl || null;
+}
+

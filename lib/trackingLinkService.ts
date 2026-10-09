@@ -1,8 +1,20 @@
 import { prisma } from "./prisma";
-import { normalizeUrl, buildAffiliateUrl, resolveShortLink } from "./linkConversion";
+import {
+  normalizeUrl,
+  buildAffiliateUrl,
+  resolveShortLink,
+  buildTikTokAffiliateWithSnapshot,
+  TikTokProductSnapshot,
+} from "./linkConversion";
 import { generateTrackingCode, buildShopeeSubIds } from "./tracking";
 import { buildShortUrl, generateShortCode } from "./shortLink";
-import { fetchProductInfo, extractPriceFromTitle } from "./productInfo";
+import {
+  fetchProductInfo,
+  extractPriceFromTitle,
+  extractTikTokOgInfo,
+  cleanTitle,
+  cleanImage,
+} from "./productInfo";
 import { fetchShopeeProductDetail } from "./shopeeProductApi";
 import { estimateCashback } from "./cashbackEstimate";
 
@@ -38,26 +50,84 @@ export async function createTrackingLink(params: {
     trackingCode,
     channelSource: params.channelSource,
   });
-  const affiliateUrl = await buildAffiliateUrl(normalizedUrl, trackingCode, subIds, {
-    platformCode: platform.code,
-  });
 
   const isShopee = platform.code.toUpperCase() === "SHOPEE";
+  const isTikTok = platform.code.toUpperCase() === "TIKTOK";
+
+  let affiliateUrl: string;
+  let tikTokSnapshot: TikTokProductSnapshot | null = null;
+
+  if (isTikTok) {
+    const tikTokRes = await buildTikTokAffiliateWithSnapshot(normalizedUrl, trackingCode, subIds);
+    if (tikTokRes?.affiliateUrl) {
+      affiliateUrl = tikTokRes.affiliateUrl;
+      tikTokSnapshot = tikTokRes.productSnapshot ?? null;
+    } else {
+      affiliateUrl = await buildAffiliateUrl(normalizedUrl, trackingCode, subIds, {
+        platformCode: platform.code,
+      });
+    }
+  } else {
+    affiliateUrl = await buildAffiliateUrl(normalizedUrl, trackingCode, subIds, {
+      platformCode: platform.code,
+    });
+  }
+
+  // Thu thập thông tin sản phẩm đa nguồn (ưu tiên dữ liệu sàn chuẩn -> og_info URL -> API chi tiết -> Scrape)
+  const tiktokOg = isTikTok
+    ? extractTikTokOgInfo(params.originalUrl) || extractTikTokOgInfo(resolvedUrl)
+    : null;
+
   const [productInfo, shopeeDetail] = await Promise.all([
-    fetchProductInfo(normalizedUrl),
+    !tikTokSnapshot?.productTitle && !tiktokOg?.title
+      ? fetchProductInfo(normalizedUrl)
+      : Promise.resolve(null),
     isShopee ? fetchShopeeProductDetail(normalizedUrl) : Promise.resolve(null),
   ]);
 
-  const productTitle = productInfo?.title ?? shopeeDetail?.name ?? null;
-  const productImage = productInfo?.image ?? shopeeDetail?.image ?? null;
-  // Ưu tiên: nhập tay > JSON-LD (Googlebot scrape) > Shopee internal API > Trích xuất từ tiêu đề
-  const productPrice =
-    (params.manualPrice && params.manualPrice > 0)
-      ? params.manualPrice
-      : (productInfo?.price ?? shopeeDetail?.price ?? extractPriceFromTitle(productTitle) ?? null);
-  const productSold = shopeeDetail?.sold ?? productInfo?.sold ?? null;
+  const rawTitle =
+    tikTokSnapshot?.productTitle ||
+    tiktokOg?.title ||
+    productInfo?.title ||
+    shopeeDetail?.name ||
+    null;
+  const productTitle = cleanTitle(rawTitle);
 
-  const cashback = productPrice != null ? await estimateCashback(productTitle, productPrice) : null;
+  const rawImage =
+    tikTokSnapshot?.productImage ||
+    tiktokOg?.image ||
+    productInfo?.image ||
+    shopeeDetail?.image ||
+    null;
+  const productImage = cleanImage(rawImage);
+
+  // Ưu tiên giá: Nhập tay > RioHub Snapshot > Scrape/API > Trích xuất từ tiêu đề
+  const rawPrice =
+    params.manualPrice && params.manualPrice > 0
+      ? params.manualPrice
+      : (tikTokSnapshot?.productPrice ??
+        productInfo?.price ??
+        shopeeDetail?.price ??
+        extractPriceFromTitle(productTitle) ??
+        null);
+  const productPrice = rawPrice;
+
+  const productSold =
+    tikTokSnapshot?.productSold ??
+    shopeeDetail?.sold ??
+    productInfo?.sold ??
+    null;
+
+  // Tính tiền hoàn: Nếu RioHub có snapshot với hoa hồng thật thì dùng, nếu không thì ước tính theo ngành hàng
+  const cashback =
+    tikTokSnapshot?.estimatedCashback != null
+      ? {
+          estimatedCashback: tikTokSnapshot.estimatedCashback,
+          categoryName: tikTokSnapshot.estimatedCashbackCategory || "TikTok Shop",
+        }
+      : productPrice != null
+      ? await estimateCashback(productTitle, productPrice)
+      : null;
 
   const link = await prisma.trackingLink.create({
     data: {
@@ -90,3 +160,4 @@ export async function createTrackingLink(params: {
     estimatedCashbackCategory: cashback?.categoryName ?? null,
   };
 }
+

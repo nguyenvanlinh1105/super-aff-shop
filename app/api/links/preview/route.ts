@@ -1,6 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { detectPlatform, resolveShortLink, normalizeUrl } from "@/lib/linkConversion";
-import { fetchProductInfo } from "@/lib/productInfo";
+import {
+  fetchProductInfo,
+  extractTikTokOgInfo,
+  extractPriceFromTitle,
+  cleanTitle,
+  cleanImage,
+} from "@/lib/productInfo";
+import { fetchShopeeProductDetail } from "@/lib/shopeeProductApi";
 import { estimateCashback } from "@/lib/cashbackEstimate";
 
 // Xem trước link KHÔNG cần đăng nhập — cho khách vãng lai "dùng thử trước
@@ -13,22 +20,56 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Thiếu link sản phẩm" }, { status: 400 });
   }
 
-  const platform = detectPlatform(url.trim());
+  const rawUrl = url.trim();
+  const platform = detectPlatform(rawUrl);
   if (platform === "unknown") {
     return NextResponse.json({ error: "Chỉ hỗ trợ link Shopee, TikTok Shop hoặc Lazada" }, { status: 400 });
   }
 
   try {
-    const resolved = await resolveShortLink(url.trim());
+    const resolved = await resolveShortLink(rawUrl);
     const normalized = normalizeUrl(resolved);
-    const productInfo = await fetchProductInfo(normalized);
-    const cashback = await estimateCashback(productInfo?.title ?? null, productInfo?.price ?? null);
+
+    const isTikTok = platform === "tiktok";
+    const isShopee = platform === "shopee";
+
+    // Bóc tách og_info từ link TikTok chia sẻ từ app
+    const tiktokOg = isTikTok
+      ? extractTikTokOgInfo(rawUrl) || extractTikTokOgInfo(resolved)
+      : null;
+
+    const [productInfo, shopeeDetail] = await Promise.all([
+      !tiktokOg?.title ? fetchProductInfo(normalized) : Promise.resolve(null),
+      isShopee ? fetchShopeeProductDetail(normalized) : Promise.resolve(null),
+    ]);
+
+    const rawTitle =
+      tiktokOg?.title ||
+      productInfo?.title ||
+      shopeeDetail?.name ||
+      null;
+    const title = cleanTitle(rawTitle);
+
+    const rawImage =
+      tiktokOg?.image ||
+      productInfo?.image ||
+      shopeeDetail?.image ||
+      null;
+    const image = cleanImage(rawImage);
+
+    const price =
+      productInfo?.price ??
+      shopeeDetail?.price ??
+      extractPriceFromTitle(title) ??
+      null;
+
+    const cashback = price != null ? await estimateCashback(title, price) : null;
 
     return NextResponse.json({
       platformCode: platform.toUpperCase(),
-      productTitle: productInfo?.title ?? null,
-      productImage: productInfo?.image ?? null,
-      productPrice: productInfo?.price ?? null,
+      productTitle: title,
+      productImage: image,
+      productPrice: price,
       estimatedCashback: cashback ? Number(cashback.estimatedCashback) : null,
       categoryName: cashback?.categoryName ?? null,
     });
@@ -45,3 +86,4 @@ export async function POST(req: NextRequest) {
     });
   }
 }
+

@@ -154,39 +154,96 @@ function extractShopeeIds(url: string): { shopId: string; itemId: string } | nul
   }
 }
 
-function cleanTitle(raw: string | null): string | null {
+export function extractTikTokOgInfo(rawUrl: string): { title: string | null; image: string | null } | null {
+  try {
+    const url = new URL(rawUrl.trim());
+    const ogInfoParam = url.searchParams.get("og_info");
+    if (ogInfoParam) {
+      const parsed = JSON.parse(ogInfoParam);
+      if (parsed && typeof parsed === "object") {
+        const title = typeof parsed.title === "string" ? cleanTitle(parsed.title) : null;
+        const image = typeof parsed.image === "string" ? cleanImage(parsed.image) : null;
+        if (title || image) {
+          return { title, image };
+        }
+      }
+    }
+  } catch {
+    try {
+      const match = rawUrl.match(/[?&]og_info=([^&]+)/);
+      if (match) {
+        const decoded = decodeURIComponent(match[1]);
+        const parsed = JSON.parse(decoded);
+        if (parsed && typeof parsed === "object") {
+          const title = typeof parsed.title === "string" ? cleanTitle(parsed.title) : null;
+          const image = typeof parsed.image === "string" ? cleanImage(parsed.image) : null;
+          if (title || image) {
+            return { title, image };
+          }
+        }
+      }
+    } catch {
+      // ignore
+    }
+  }
+  return null;
+}
+
+export function cleanTitle(raw: string | null | undefined): string | null {
   if (!raw) return null;
   const t = raw.trim();
-  // Bỏ qua tiêu đề fallback mặc định của Shopee khi bot bị redirect hoặc trang chưa tải xong
+  // Bỏ qua tiêu đề fallback mặc định của Shopee & TikTok khi bot bị redirect hoặc trang chưa tải xong
   if (
     /Mua và Bán Trên Ứng Dụng/i.test(t) ||
     /Shopee Việt Nam \| Mua và Bán/i.test(t) ||
     /^Shopee\s*(?:Việt Nam|Vietnam)?$/i.test(t) ||
     /^Shopee: Mua Sắm/i.test(t) ||
-    /^Đăng nhập tài khoản/i.test(t)
+    /^Đăng nhập tài khoản/i.test(t) ||
+    /^TikTok\s*Shop(?:\s*\|\s*Mua\s*sắm)?$/i.test(t) ||
+    /^TikTok$/i.test(t) ||
+    /^TikTok\s*Shop:?\s*Mua\s*sắm/i.test(t)
   ) {
     return null;
   }
   return t
-    .replace(/\s*[|\-–—]\s*Shopee\s*(?:Việt Nam|Vietnam)?$/i, "")
+    .replace(/\s*[|\-–—]\s*(?:Shopee|TikTok\s*Shop|TikTok)\s*(?:Việt Nam|Vietnam)?$/i, "")
     .replace(/&amp;/g, "&")
     .replace(/&quot;/g, '"')
     .replace(/&#39;/g, "'")
     .trim() || null;
 }
 
-function cleanImage(raw: string | null): string | null {
+export function cleanImage(raw: string | null | undefined): string | null {
   if (!raw) return null;
   const img = raw.trim();
-  // Loại bỏ ảnh logo hệ thống mặc định của Shopee
+  // Loại bỏ ảnh logo hệ thống mặc định của Shopee & TikTok
   if (
     /shopee-mobilemall-live/i.test(img) ||
     /shopee_logo/i.test(img) ||
-    /favicon/i.test(img)
+    /favicon/i.test(img) ||
+    /tts-logo/i.test(img) ||
+    /tiktokcdn.*\/SEO\/tts-logo/i.test(img) ||
+    /tiktok-logo/i.test(img)
   ) {
     return null;
   }
   return img;
+}
+
+export function resolveDisplayProductName(
+  trackingTitle?: string | null,
+  itemName?: string | null,
+  fallback = "Sản phẩm mua sắm"
+): string {
+  const cleanTracking = cleanTitle(trackingTitle);
+  const cleanItem = cleanTitle(itemName);
+  return cleanTracking || cleanItem || fallback;
+}
+
+export function resolveDisplayProductImage(
+  trackingImage?: string | null
+): string | null {
+  return cleanImage(trackingImage);
 }
 
 export type ProductInfo = {
@@ -201,6 +258,18 @@ export type ProductInfo = {
  * Hỗ trợ linh hoạt cả Shopee, TikTok Shop, Lazada.
  */
 export async function fetchProductInfo(url: string): Promise<ProductInfo | null> {
+  // 1. Kiểm tra nhanh xem link TikTok có mang theo og_info không
+  const tiktokOg = extractTikTokOgInfo(url);
+  if (tiktokOg?.title || tiktokOg?.image) {
+    const priceFromTitle = extractPriceFromTitle(tiktokOg.title);
+    return {
+      title: tiktokOg.title,
+      image: tiktokOg.image,
+      price: priceFromTitle,
+      sold: null,
+    };
+  }
+
   const candidateUrls: string[] = [];
 
   // Đối với Shopee, nếu trích xuất được shopId & itemId thì ưu tiên universal-link

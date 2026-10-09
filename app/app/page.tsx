@@ -23,6 +23,7 @@ import {
 import { ShopeeIcon, TiktokIcon, LazadaIcon } from "@/components/icons/PlatformIcons";
 import { InviteSection } from "@/components/customer/InviteSection";
 import { PhoneNumberPrompt } from "@/components/customer/PhoneNumberPrompt";
+import { resolveDisplayProductName, resolveDisplayProductImage } from "@/lib/productInfo";
 import { PwaInstallHorizontalCard } from "@/components/pwa/PwaInstallPrompt";
 import { FadeUp } from "@/components/ui/FadeUp";
 import { LiquidButton } from "@/components/ui/LiquidButton";
@@ -445,8 +446,8 @@ export default async function CustomerHomePage() {
                     const isPaid = order.payoutStatus === "paid";
                     const isApproved = order.orderStatus === "approved";
                     const isProcessing = order.orderStatus === "processing";
-                    const productImage = order.trackingLink?.productImage ?? null;
-                    const productTitle = order.trackingLink?.productTitle ?? order.itemName ?? `Đơn hàng ${order.orderExternalId}`;
+                    const productImage = resolveDisplayProductImage(order.trackingLink?.productImage);
+                    const productTitle = resolveDisplayProductName(order.trackingLink?.productTitle, order.itemName, `Đơn hàng ${order.orderExternalId}`);
 
                     return (
                       <Link

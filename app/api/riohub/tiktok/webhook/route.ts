@@ -76,6 +76,13 @@ function verifyRioHubSignature(rawBody: string, header: string, secret: string) 
 function normalizeWebhookOrder(data: any, rootPayload?: any) {
   return {
     ...data,
+    product_name:
+      data.product_name ??
+      data.item_name ??
+      data.product_title ??
+      data.goods_name ??
+      data.title ??
+      null,
     sub_id: data.sub_id ?? data.subid,
     settlement_status: data.settlement_status ?? data.order_status_raw,
     commission_gmv: data.commission_gmv ?? data.gmv,

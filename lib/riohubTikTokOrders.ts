@@ -5,6 +5,7 @@ import { notifyCustomerInApp } from "./notifications";
 import { notifyCustomerTelegram } from "./telegramNotify";
 import { buildOrderApprovedMessage, buildReferralBonusMessage } from "./telegramBot";
 import { listRioHubTikTokOrders, parseRioHubMoney, RioHubOrder } from "./riohubTikTok";
+import { cleanTitle } from "./productInfo";
 
 export type RioHubOrderSyncResult = {
   processed: number;
@@ -83,6 +84,19 @@ export async function upsertRioHubTikTokOrder(order: RioHubOrder): Promise<{
   const justApproved = status === "approved" && !wasApproved;
   const resolvedCustomerId = existing?.customerId ?? trackingLink?.customerId ?? null;
 
+  const resolvedItemName =
+    cleanTitle(order.product_name) ??
+    existing?.itemName ??
+    cleanTitle(trackingLink?.productTitle) ??
+    undefined;
+
+  if (trackingLink && resolvedItemName && !cleanTitle(trackingLink.productTitle)) {
+    await prisma.trackingLink.update({
+      where: { id: trackingLink.id },
+      data: { productTitle: resolvedItemName },
+    }).catch(() => {});
+  }
+
   const updateData: Prisma.OrderUpdateInput = {
     trackingLink: trackingLink ? { connect: { id: trackingLink.id } } : undefined,
     customer: resolvedCustomerId ? { connect: { id: resolvedCustomerId } } : undefined,
@@ -94,7 +108,7 @@ export async function upsertRioHubTikTokOrder(order: RioHubOrder): Promise<{
     clickedAt: existing?.clickedAt,
     shopName: order.shop_name ?? existing?.shopName,
     itemId: order.product_id ?? existing?.itemId,
-    itemName: order.product_name ?? existing?.itemName,
+    itemName: resolvedItemName ?? existing?.itemName,
     orderAmount: isFullyPaid ? existing?.orderAmount : orderAmount,
     grossCommissionAmount: isFullyPaid ? existing?.grossCommissionAmount : commissionAmount,
     netCommissionAmount: isFullyPaid ? existing?.netCommissionAmount : commissionAmount,
@@ -128,7 +142,7 @@ export async function upsertRioHubTikTokOrder(order: RioHubOrder): Promise<{
           completedAt,
           shopName: order.shop_name ?? undefined,
           itemId: order.product_id ?? undefined,
-          itemName: order.product_name ?? undefined,
+          itemName: resolvedItemName ?? undefined,
           orderAmount,
           grossCommissionAmount: commissionAmount,
           netCommissionAmount: commissionAmount,

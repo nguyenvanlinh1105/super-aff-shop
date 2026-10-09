@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { formatCurrency, formatDate } from "@/lib/format";
+import { resolveDisplayProductName, resolveDisplayProductImage } from "@/lib/productInfo";
 import { CustomerOrdersClient } from "@/components/customer/CustomerOrdersClient";
 
 export default async function CustomerOrdersPage({ searchParams }: { searchParams: { q?: string; page?: string; tab?: string; period?: string } }) {
@@ -94,8 +95,12 @@ export default async function CustomerOrdersPage({ searchParams }: { searchParam
       daysLeft,
       completedAtText,
       readyAtText,
-      productTitle: o.trackingLink?.productTitle ?? o.itemName ?? null,
-      productImage: o.trackingLink?.productImage ?? null,
+      productTitle: resolveDisplayProductName(
+        o.trackingLink?.productTitle,
+        o.itemName,
+        `Đơn hàng ${o.orderExternalId}`
+      ),
+      productImage: resolveDisplayProductImage(o.trackingLink?.productImage),
     };
   });
 

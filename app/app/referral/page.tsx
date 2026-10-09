@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import QRCode from "qrcode";
+import { resolveDisplayProductName } from "@/lib/productInfo";
 import { ReferralClient } from "@/components/customer/ReferralClient";
 
 export default async function ReferralPage() {
@@ -131,7 +132,7 @@ export default async function ReferralPage() {
       friendCode: friend?.customerCode ?? "",
       platformId: fo.platformId,
       orderExternalId: fo.orderExternalId,
-      itemName: fo.trackingLink?.productTitle ?? fo.itemName ?? null,
+      itemName: resolveDisplayProductName(fo.trackingLink?.productTitle, fo.itemName, `Đơn ${fo.orderExternalId}`),
       shopName: fo.shopName,
       orderStatus: fo.orderStatus,
       createdAt: fo.createdAt.toISOString(),

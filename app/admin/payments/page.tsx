@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { formatDate, formatCurrency } from "@/lib/format";
+import { resolveDisplayProductName, resolveDisplayProductImage } from "@/lib/productInfo";
 import { AdminPaymentsClient } from "@/components/admin/AdminPaymentsClient";
 import { Clock, Receipt, CheckCircle2, Hourglass } from "lucide-react";
 
@@ -202,8 +203,8 @@ export default async function AdminPaymentsPage() {
       id: o.id,
       orderExternalId: o.orderExternalId,
       platformName: o.platform?.name ?? "",
-      productTitle: o.trackingLink?.productTitle ?? o.itemName ?? null,
-      productImage: o.trackingLink?.productImage ?? null,
+      productTitle: resolveDisplayProductName(o.trackingLink?.productTitle, o.itemName, `Đơn hàng ${o.orderExternalId}`),
+      productImage: resolveDisplayProductImage(o.trackingLink?.productImage),
       productAffiliateStatus: o.productAffiliateStatus,
       customerRewardAmount: Number(o.customerRewardAmount),
       orderedAt: o.orderedAt?.toISOString() ?? null,
