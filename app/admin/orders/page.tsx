@@ -115,9 +115,19 @@ export default async function AdminOrdersPage({
   const orderByDir = searchParams.order || "desc";
   const orderBy = { [orderByField]: orderByDir };
 
+  // Đơn đã huỷ/từ chối không tính vào tổng giá trị đơn (trừ phi đang lọc xem riêng tab Đã huỷ)
+  const orderAmountWhere = tab === "cancelled"
+    ? where
+    : {
+        ...where,
+        orderStatus: where.orderStatus
+          ? where.orderStatus
+          : { notIn: ["cancelled", "rejected"] },
+      };
+
   const [
     allCount, unassignedCount, assignedCount, pendingCount, processingCount, moneyInCount, unpaidCount, paidCount, cancelledCount, completedCount, clawbackCount, referralCount,
-    orders, customers, filteredCount, sumsAgg, moneyInSumAgg, unpaidSumAgg, activeRule,
+    orders, customers, filteredCount, orderAmountAgg, sumsAgg, moneyInSumAgg, unpaidSumAgg, activeRule,
   ] = await Promise.all([
     prisma.order.count({ where: baseWhere }),
     prisma.order.count({ where: { ...baseWhere, customerId: null } }),
@@ -164,7 +174,8 @@ export default async function AdminOrdersPage({
       orderBy: { fullName: "asc" },
     }),
     prisma.order.count({ where }),
-    prisma.order.aggregate({ where, _sum: { orderAmount: true, commissionAmount: true, customerRewardAmount: true, systemProfitAmount: true, referralBonusDeducted: true } }),
+    prisma.order.aggregate({ where: orderAmountWhere, _sum: { orderAmount: true } }),
+    prisma.order.aggregate({ where, _sum: { commissionAmount: true, customerRewardAmount: true, systemProfitAmount: true, referralBonusDeducted: true } }),
     prisma.order.aggregate({ where: { ...baseWhere, orderStatus: "approved" }, _sum: { customerRewardAmount: true } }),
     prisma.order.aggregate({ where: { ...baseWhere, orderStatus: "approved", payoutStatus: { not: "paid" } }, _sum: { customerRewardAmount: true } }),
     prisma.commissionRule.findFirst({
@@ -290,7 +301,7 @@ export default async function AdminOrdersPage({
   const totalPages = Math.ceil(filteredCount / limit);
   const counts = { all: allCount, unassigned: unassignedCount, assigned: assignedCount, pending: pendingCount, processing: processingCount, moneyIn: moneyInCount, unpaid: unpaidCount, paid: paidCount, cancelled: cancelledCount, completed: completedCount, clawback: clawbackCount, referral: referralCount };
   const sums = {
-    orderAmount: Number(sumsAgg._sum.orderAmount ?? 0),
+    orderAmount: Number(orderAmountAgg._sum.orderAmount ?? 0),
     commissionAmount: Number(sumsAgg._sum.commissionAmount ?? 0),
     customerRewardAmount: Number(sumsAgg._sum.customerRewardAmount ?? 0),
     systemProfitAmount: Number(sumsAgg._sum.systemProfitAmount ?? 0),

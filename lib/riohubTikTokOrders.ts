@@ -24,6 +24,23 @@ function toUnixSeconds(val?: string | number | null): number | string | null {
     if (str.length === 13) return Math.floor(Number(str) / 1000);
     return Number(str);
   }
+  // Hỗ trợ định dạng Việt Nam DD/MM/YYYY hoặc DD/MM/YYYYTHH:mm:ss
+  const dmyMatch = str.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:[T\s](\d{1,2}):(\d{1,2})(?::(\d{1,2}))?)?$/);
+  if (dmyMatch) {
+    const [, d, m, y, h, min, s] = dmyMatch;
+    const dt = new Date(
+      Number(y),
+      Number(m) - 1,
+      Number(d),
+      h ? Number(h) : 0,
+      min ? Number(min) : 0,
+      s ? Number(s) : 0
+    );
+    if (!isNaN(dt.getTime())) {
+      return Math.floor(dt.getTime() / 1000);
+    }
+  }
+
   const parsed = new Date(str);
   if (!isNaN(parsed.getTime())) {
     return Math.floor(parsed.getTime() / 1000);

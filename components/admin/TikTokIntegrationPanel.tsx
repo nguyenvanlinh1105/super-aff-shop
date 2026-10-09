@@ -40,42 +40,70 @@ export function TikTokIntegrationPanel({ platformStatus, config }: Props) {
   // Filter mode: "create" | "update"
   const [filterMode, setFilterMode] = useState<"create" | "update">("create");
 
-  // Date picker states (YYYY-MM-DD)
+  // Date picker states formatted as DD/MM/YYYY (Ngày/tháng/năm)
   const [startDate, setStartDate] = useState<string>("");
   const [endDate, setEndDate] = useState<string>("");
   const [activePreset, setActivePreset] = useState<string | null>("30d");
   const [orderId, setOrderId] = useState("");
   const active = platformStatus === "active";
 
-  function applyPreset(preset: "today" | "yesterday" | "7d" | "30d") {
+  function formatDMY(d: Date): string {
+    const day = String(d.getDate()).padStart(2, "0");
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const year = d.getFullYear();
+    return `${day}/${month}/${year}`;
+  }
+
+  function dmyToYMD(dmy: string): string | null {
+    const clean = dmy.trim();
+    const m = clean.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    if (!m) return null;
+    const day = m[1].padStart(2, "0");
+    const month = m[2].padStart(2, "0");
+    const year = m[3];
+    return `${year}-${month}-${day}`;
+  }
+
+  function ymdToDMY(ymd: string): string {
+    const clean = ymd.trim();
+    const m = clean.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+    if (!m) return clean;
+    const year = m[1];
+    const month = m[2].padStart(2, "0");
+    const day = m[3].padStart(2, "0");
+    return `${day}/${month}/${year}`;
+  }
+
+  function applyPreset(preset: "today" | "yesterday" | "7d" | "30d" | "all") {
     setActivePreset(preset);
     const now = new Date();
     const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
     if (preset === "today") {
-      const dStr = today.toISOString().split("T")[0];
-      setStartDate(dStr);
-      setEndDate(dStr);
+      setStartDate(formatDMY(today));
+      setEndDate(formatDMY(today));
     } else if (preset === "yesterday") {
       const yesterday = new Date(today);
       yesterday.setDate(yesterday.getDate() - 1);
-      const dStr = yesterday.toISOString().split("T")[0];
-      setStartDate(dStr);
-      setEndDate(dStr);
+      setStartDate(formatDMY(yesterday));
+      setEndDate(formatDMY(yesterday));
     } else if (preset === "7d") {
       const past7 = new Date(today);
       past7.setDate(past7.getDate() - 7);
-      setStartDate(past7.toISOString().split("T")[0]);
-      setEndDate(today.toISOString().split("T")[0]);
+      setStartDate(formatDMY(past7));
+      setEndDate(formatDMY(today));
     } else if (preset === "30d") {
       const past30 = new Date(today);
       past30.setDate(past30.getDate() - 30);
-      setStartDate(past30.toISOString().split("T")[0]);
-      setEndDate(today.toISOString().split("T")[0]);
+      setStartDate(formatDMY(past30));
+      setEndDate(formatDMY(today));
+    } else if (preset === "all") {
+      setStartDate("");
+      setEndDate("");
     }
   }
 
-  // Khởi tạo mặc định 30 ngày gần nhất
+  // Khởi tạo mặc định 30 ngày gần nhất theo định dạng ngày/tháng/năm
   useEffect(() => {
     applyPreset("30d");
   }, []);
@@ -167,8 +195,11 @@ export function TikTokIntegrationPanel({ platformStatus, config }: Props) {
   async function syncOrders() {
     setLoading("sync");
 
-    const startIso = startDate ? `${startDate}T00:00:00` : null;
-    const endIso = endDate ? `${endDate}T23:59:59` : null;
+    const startYmd = dmyToYMD(startDate) || (startDate.includes("-") ? startDate : null);
+    const endYmd = dmyToYMD(endDate) || (endDate.includes("-") ? endDate : null);
+
+    const startIso = startYmd ? `${startYmd}T00:00:00` : null;
+    const endIso = endYmd ? `${endYmd}T23:59:59` : null;
 
     const res = await fetch("/api/admin/integrations/tiktok/sync", {
       method: "POST",
@@ -341,12 +372,13 @@ export function TikTokIntegrationPanel({ platformStatus, config }: Props) {
               Chọn nhanh khoảng thời gian:
             </span>
           </div>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
             {[
               { id: "today", label: "Hôm nay" },
               { id: "yesterday", label: "Hôm qua" },
               { id: "7d", label: "7 ngày qua" },
               { id: "30d", label: "30 ngày qua" },
+              { id: "all", label: "Tất cả đơn" },
             ].map((p) => {
               const active = activePreset === p.id;
               return (
@@ -354,7 +386,7 @@ export function TikTokIntegrationPanel({ platformStatus, config }: Props) {
                   key={p.id}
                   type="button"
                   onClick={() => applyPreset(p.id as any)}
-                  className={`px-2.5 py-2 rounded-xl text-xs font-bold transition-all border cursor-pointer ${
+                  className={`px-2.5 py-2 rounded-xl text-xs font-bold transition-all border cursor-pointer text-center ${
                     active
                       ? "bg-pink-50 text-pink-700 border-pink-300 shadow-2xs font-black ring-1 ring-pink-200"
                       : "bg-neutral-50/80 text-neutral-600 border-neutral-200 hover:bg-white hover:border-neutral-300"
@@ -367,38 +399,84 @@ export function TikTokIntegrationPanel({ platformStatus, config }: Props) {
           </div>
         </div>
 
-        {/* Bộ chọn Ngày: Từ ngày -> Đến ngày */}
+        {/* Bộ chọn Ngày: Từ ngày -> Đến ngày (Định dạng Ngày/Tháng/Năm) */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs font-extrabold text-neutral-700 mb-1 flex items-center gap-1">
-              <Calendar size={12} className="text-pink-500" />
-              <span>Từ ngày:</span>
-            </label>
-            <input
-              type="date"
-              value={startDate}
-              onChange={(e) => {
-                setStartDate(e.target.value);
-                setActivePreset(null);
-              }}
-              className="w-full rounded-xl border border-neutral-200 bg-neutral-50/50 px-3 py-2 text-xs font-bold text-neutral-900 focus:bg-white focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all"
-            />
+            <div className="flex items-center justify-between mb-1">
+              <label className="text-xs font-extrabold text-neutral-700 flex items-center gap-1">
+                <Calendar size={12} className="text-pink-500" />
+                <span>Từ ngày (Ngày/Tháng/Năm):</span>
+              </label>
+              {startDate && (
+                <span className="text-[10px] font-bold text-pink-600 bg-pink-50 px-1.5 py-0.2 rounded">
+                  {startDate}
+                </span>
+              )}
+            </div>
+            <div className="relative flex items-center">
+              <input
+                type="text"
+                placeholder="DD/MM/YYYY (VD: 09/10/2026)"
+                value={startDate}
+                onChange={(e) => {
+                  setStartDate(e.target.value);
+                  setActivePreset(null);
+                }}
+                className="w-full rounded-xl border border-neutral-200 bg-neutral-50/50 px-3 py-2 pr-9 text-xs font-bold text-neutral-900 focus:bg-white focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all font-mono"
+              />
+              <input
+                type="date"
+                value={dmyToYMD(startDate) || ""}
+                onChange={(e) => {
+                  if (e.target.value) {
+                    setStartDate(ymdToDMY(e.target.value));
+                    setActivePreset(null);
+                  }
+                }}
+                className="absolute right-2.5 w-5 h-5 opacity-0 cursor-pointer z-10"
+                title="Bấm để chọn ngày từ lịch"
+              />
+              <Calendar size={15} className="absolute right-2.5 text-neutral-400 pointer-events-none" />
+            </div>
           </div>
 
           <div>
-            <label className="block text-xs font-extrabold text-neutral-700 mb-1 flex items-center gap-1">
-              <Calendar size={12} className="text-pink-500" />
-              <span>Đến ngày:</span>
-            </label>
-            <input
-              type="date"
-              value={endDate}
-              onChange={(e) => {
-                setEndDate(e.target.value);
-                setActivePreset(null);
-              }}
-              className="w-full rounded-xl border border-neutral-200 bg-neutral-50/50 px-3 py-2 text-xs font-bold text-neutral-900 focus:bg-white focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all"
-            />
+            <div className="flex items-center justify-between mb-1">
+              <label className="text-xs font-extrabold text-neutral-700 flex items-center gap-1">
+                <Calendar size={12} className="text-pink-500" />
+                <span>Đến ngày (Ngày/Tháng/Năm):</span>
+              </label>
+              {endDate && (
+                <span className="text-[10px] font-bold text-pink-600 bg-pink-50 px-1.5 py-0.2 rounded">
+                  {endDate}
+                </span>
+              )}
+            </div>
+            <div className="relative flex items-center">
+              <input
+                type="text"
+                placeholder="DD/MM/YYYY (VD: 09/10/2026)"
+                value={endDate}
+                onChange={(e) => {
+                  setEndDate(e.target.value);
+                  setActivePreset(null);
+                }}
+                className="w-full rounded-xl border border-neutral-200 bg-neutral-50/50 px-3 py-2 pr-9 text-xs font-bold text-neutral-900 focus:bg-white focus:border-pink-500 focus:ring-2 focus:ring-pink-200 transition-all font-mono"
+              />
+              <input
+                type="date"
+                value={dmyToYMD(endDate) || ""}
+                onChange={(e) => {
+                  if (e.target.value) {
+                    setEndDate(ymdToDMY(e.target.value));
+                    setActivePreset(null);
+                  }
+                }}
+                className="absolute right-2.5 w-5 h-5 opacity-0 cursor-pointer z-10"
+                title="Bấm để chọn ngày từ lịch"
+              />
+              <Calendar size={15} className="absolute right-2.5 text-neutral-400 pointer-events-none" />
+            </div>
           </div>
         </div>
 

@@ -622,8 +622,21 @@ export function AdminOrdersClient({
                     </td>
 
                     {/* 4. Amount */}
-                    <td className="px-4 py-3 text-right font-semibold text-neutral-700 tabular-nums whitespace-nowrap min-w-[100px]" data-label="Giá trị đơn">
-                      {formatCurrency(o.orderAmount || 0)}
+                    <td className="px-4 py-3 text-right tabular-nums whitespace-nowrap min-w-[100px]" data-label="Giá trị đơn">
+                      {o.orderStatus === "cancelled" || o.orderStatus === "rejected" ? (
+                        <div className="flex flex-col items-end">
+                          <span className="line-through text-neutral-400 font-normal text-xs" title="Đơn đã huỷ — không tính vào tổng giá trị đơn">
+                            {formatCurrency(o.orderAmount || 0)}
+                          </span>
+                          <span className="text-[9.5px] font-bold text-neutral-400">
+                            (Đã huỷ)
+                          </span>
+                        </div>
+                      ) : (
+                        <span className="font-semibold text-neutral-700">
+                          {formatCurrency(o.orderAmount || 0)}
+                        </span>
+                      )}
                     </td>
 
                     {/* 5. Hoa hồng trước thuế */}
