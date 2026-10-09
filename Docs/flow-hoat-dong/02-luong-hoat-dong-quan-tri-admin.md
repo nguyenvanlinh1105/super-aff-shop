@@ -169,7 +169,7 @@ Nơi thiết lập các "luật chơi" của trang web:
 - **Tỷ lệ hoàn tiền cho khách:** Đang đặt mặc định là 80% (bạn có thể đổi thành 75%, 85% tùy chiến lược kinh doanh).
 - **Tỷ lệ giữ lại của hệ thống:** Đang đặt mặc định là 20%.
 - **Tỷ lệ thưởng giới thiệu bạn bè:** Thưởng 5% cho người giới thiệu.
-- **Mức rút tiền tối thiểu:** Đặt mặc định là 50.000 VNĐ (để tránh việc khách yêu cầu rút vài nghìn đồng khiến bạn mất công chuyển khoản nhiều lần).
+- **Mức rút tiền tối thiểu:** Đặt mặc định là 10.000 VNĐ.
 
 ---
 

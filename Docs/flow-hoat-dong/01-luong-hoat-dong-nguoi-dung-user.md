@@ -134,7 +134,7 @@ Trước khi rút tiền lần đầu, bạn cần cài đặt 2 thông tin bả
 
 ### Bước 6: Rút tiền mặt về tài khoản ngân hàng (Ting Ting!)
 
-1. Khi số tiền tích lũy trong ví đạt từ mức tối thiểu quy định (thường từ **50.000 VNĐ** trở lên), nút **"Rút tiền"** sẽ sáng lên.
+1. Khi số tiền tích lũy trong ví đạt từ mức tối thiểu quy định (từ **10.000 VNĐ** trở lên), nút **"Rút tiền"** sẽ sáng lên.
 2. Bạn vào mục **"Ví tiền"** -> Bấm nút **"Rút tiền"**.
 3. Điền số tiền bạn muốn rút (ví dụ: 100.000đ hoặc rút toàn bộ số dư).
 4. Nhập **Mã PIN 6 số** mà bạn đã tạo ở Bước 5.

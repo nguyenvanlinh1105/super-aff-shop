@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { CalendarDays, ExternalLink, Package, Gift, ChevronDown, CheckCircle2, Clock, Truck, Wallet, Check } from "lucide-react";
+import { CalendarDays, ExternalLink, Package, Gift, ChevronDown, CheckCircle2, Clock, Truck, Wallet, Check, Copy } from "lucide-react";
 import { Pagination } from "@/components/ui/Pagination";
 import { FloatingElement } from "@/components/ui/FloatingElement";
 import { ServerSearchInput } from "@/components/ui/ServerSearchInput";
 import { PeriodSelect } from "@/components/ui/PeriodSelect";
 import { CustomSelect } from "@/components/ui/CustomSelect";
+import { useToast } from "@/components/ui/Toast";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -61,8 +62,18 @@ export function CustomerOrdersClient({ orders, totalPages, currentPage, counts }
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
+  const { toast } = useToast();
+  const [copiedId, setCopiedId] = useState<string | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const currentTab = searchParams.get("tab") || "all";
+
+  const handleCopyOrderCode = (e: React.MouseEvent, code: string) => {
+    e.stopPropagation();
+    navigator.clipboard.writeText(code);
+    setCopiedId(code);
+    toast.success(`Đã sao chép mã đơn: ${code}`, "Đã copy");
+    setTimeout(() => setCopiedId(null), 1500);
+  };
 
   const handleTabChange = (tab: string) => {
     const params = new URLSearchParams(searchParams);
@@ -200,12 +211,48 @@ export function CustomerOrdersClient({ orders, totalPages, currentPage, counts }
             {orders.map((o) => (
               <div
                 key={o.id}
-                className={`group flex flex-col sm:flex-row sm:items-center justify-between gap-md rounded-2xl p-4 sm:p-5 transition-all shadow-2xs ${
+                className={`group flex flex-col justify-between gap-3.5 rounded-2xl p-4 sm:p-5 transition-all shadow-2xs ${
                   o.sourceType === "referral"
                     ? "border-[1.5px] border-purple-300 bg-purple-50/40 hover:border-purple-400 hover:shadow-cute"
                     : "border-[1.5px] border-primary-300 bg-white hover:border-primary-400 hover:shadow-cute hover:bg-primary-50/20"
                 }`}
               >
+                {/* ─── Header: Căn trái cùng mép thẻ, hiển thị sàn + mã đơn + ngày tháng ─── */}
+                <div className="flex items-center justify-between gap-2 pb-2.5 border-b border-neutral-100 flex-wrap">
+                  <div className="flex items-center gap-2 flex-wrap min-w-0">
+                    <span className={`text-[10px] sm:text-[10.5px] font-extrabold uppercase px-2 py-0.5 rounded-md border shadow-2xs ${
+                      o.sourceType === "referral"
+                        ? "bg-purple-50 text-purple-600 border-purple-200"
+                        : "bg-neutral-50 text-neutral-600 border-neutral-200"
+                    }`}>
+                      {o.sourceType === "referral" ? "🎁 Hoa hồng giới thiệu" : o.platformName}
+                    </span>
+
+                    {/* Mã đơn hàng căn trái cùng, thiết kế chip nổi bật & có nút sao chép */}
+                    <button
+                      type="button"
+                      onClick={(e) => handleCopyOrderCode(e, o.orderExternalId)}
+                      title="Bấm để sao chép mã đơn"
+                      className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-neutral-100/90 hover:bg-neutral-200/80 text-neutral-700 hover:text-neutral-900 border border-neutral-200/80 font-mono text-[11px] sm:text-[11.5px] font-bold transition-all active:scale-95 cursor-pointer max-w-[210px] sm:max-w-none shadow-2xs group/code"
+                    >
+                      <span className="text-[10px] uppercase font-sans font-extrabold text-neutral-400">Mã:</span>
+                      <span className="truncate">{o.orderExternalId}</span>
+                      {copiedId === o.orderExternalId ? (
+                        <Check size={11} className="text-emerald-500 shrink-0" strokeWidth={3} />
+                      ) : (
+                        <Copy size={11} className="text-neutral-400 group-hover/code:text-primary-600 shrink-0" />
+                      )}
+                    </button>
+                  </div>
+
+                  <span className="text-[11px] sm:text-[11.5px] font-medium text-neutral-400 flex items-center gap-1 shrink-0 ml-auto">
+                    <CalendarDays size={12} />
+                    {o.createdAt}
+                  </span>
+                </div>
+
+                {/* ─── Thân Card: Ảnh, Tên sản phẩm, Trạng thái & Tiền hoàn ─── */}
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
                   <div className="flex items-start gap-3 min-w-0 flex-1">
                     {/* Thumbnail: Image or Platform Icon */}
                     <div className="relative shrink-0">
@@ -236,29 +283,9 @@ export function CustomerOrdersClient({ orders, totalPages, currentPage, counts }
 
                     {/* Content */}
                     <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-1.5 flex-wrap">
-                        <span className={`text-[10.5px] font-extrabold uppercase px-1.5 py-0.2 rounded border ${
-                          o.sourceType === "referral"
-                            ? "bg-purple-50 text-purple-600 border-purple-200"
-                            : "bg-neutral-50 text-neutral-600 border-neutral-200"
-                        }`}>
-                          {o.sourceType === "referral" ? "🎁 Hoa hồng giới thiệu" : o.platformName}
-                        </span>
-                        <span className="text-neutral-300">•</span>
-                        <span className="text-[11.5px] font-medium text-neutral-400 flex items-center gap-1">
-                          <CalendarDays size={12} />
-                          {o.createdAt}
-                        </span>
-                      </div>
-
                       {/* Tên sản phẩm */}
-                      <div className="mt-1 text-[13.5px] sm:text-[14.5px] font-bold text-neutral-900 group-hover:text-primary-600 transition-colors line-clamp-2 leading-snug">
+                      <div className="text-[13.5px] sm:text-[14.5px] font-bold text-neutral-900 group-hover:text-primary-600 transition-colors line-clamp-2 leading-snug">
                         {o.productTitle || `Đơn hàng ${o.orderExternalId}`}
-                      </div>
-
-                      {/* Mã đơn hàng */}
-                      <div className="mt-0.5 text-[11px] font-medium text-neutral-400 font-mono">
-                        Mã đơn: {o.orderExternalId}
                       </div>
 
                       {o.sourceType === "referral" && (
@@ -267,6 +294,7 @@ export function CustomerOrdersClient({ orders, totalPages, currentPage, counts }
                         </div>
                       )}
 
+                      {/* Trạng thái đơn hàng */}
                       <div className="mt-1.5 flex items-center gap-xs">
                         {getStatusBadge(o)}
                       </div>
@@ -279,7 +307,7 @@ export function CustomerOrdersClient({ orders, totalPages, currentPage, counts }
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-6 mt-3 sm:mt-0 pt-3 border-t border-primary-100/90 sm:border-0 sm:pt-0">
+                  <div className="flex items-center justify-between sm:justify-end gap-3 sm:gap-6 pt-3 sm:pt-0 border-t border-neutral-100 sm:border-0">
                     <div className="flex items-center gap-4 sm:gap-6">
                       <div>
                         <div className="text-[10.5px] font-bold uppercase tracking-wider text-neutral-400">
@@ -309,6 +337,7 @@ export function CustomerOrdersClient({ orders, totalPages, currentPage, counts }
                       </motion.div>
                     </button>
                   </div>
+                </div>
 
                   {/* Status Timeline */}
                   <AnimatePresence>

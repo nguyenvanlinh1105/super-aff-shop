@@ -473,7 +473,9 @@ export function CustomerWalletClient({
             <div className="rounded-2xl bg-gradient-to-br from-primary-50/70 via-rose-50/40 to-white p-4 border border-primary-200/80 shadow-2xs">
               <div className="flex items-center justify-between">
                 <span className="text-[11.5px] font-bold text-neutral-500 uppercase tracking-wider">Số dư rút được</span>
-                <span className="text-[11px] font-extrabold text-primary-600">Tối thiểu 50k</span>
+                <span className="text-[11px] font-extrabold text-primary-600">
+                  Tối thiểu {Math.round(MIN_WITHDRAW_AMOUNT / 1000)}k
+                </span>
               </div>
               <div className="mt-1.5 text-2xl sm:text-3xl font-black text-primary-600 tabular-nums">
                 {formatCurrency(stats.available)}

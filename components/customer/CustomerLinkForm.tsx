@@ -375,27 +375,7 @@ export function CustomerLinkForm({
               </div>
             </div>
 
-            {/* BẢNG MẪU TIỀN HOÀN THEO CÁC MỐC ĐƠN HÀNG (TỰ ĐỘNG THEO NGÀNH HÀNG) */}
-            {(!result.productPrice || Number(result.productPrice) <= 0) &&
-              result.sampleCashbacks &&
-              result.sampleCashbacks.length > 0 && (
-                <div className="mt-3.5 rounded-2xl bg-gradient-to-r from-emerald-50/90 via-teal-50/50 to-primary-50/60 p-2.5 sm:p-3 border border-emerald-100/90 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                  <div className="flex items-center gap-1.5 text-[11px] sm:text-xs font-black text-emerald-800 shrink-0">
-                    <Sparkles size={13} className="text-emerald-600 fill-emerald-500/30" />
-                    <span>Ước tính theo giá trị đơn:</span>
-                  </div>
-                  <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
-                    {result.sampleCashbacks.map((s, idx) => (
-                      <span
-                        key={idx}
-                        className="rounded-lg bg-white/90 px-2 py-1 text-[10.5px] sm:text-[11.5px] font-black text-emerald-700 border border-emerald-200/60 shadow-2xs"
-                      >
-                        Đơn {Math.round(s.orderAmount / 1000)}k → ~{formatCurrency(s.cashback)}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
+
 
             {/* CHỈ HIỂN THỊ BUTTON MUA NGAY */}
             <div className="mt-4 pt-3.5 border-t border-neutral-100">
