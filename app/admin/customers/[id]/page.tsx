@@ -40,6 +40,7 @@ export default async function CustomerDetailPage({ params }: { params: { id: str
         paymentBatches: { orderBy: { createdAt: "desc" }, take: 20 },
         referredBy: { select: { id: true, fullName: true, customerCode: true, phone: true } },
         referredUsers: { select: { id: true, fullName: true, customerCode: true }, orderBy: { fullName: "asc" } },
+        partnerRatePeriods: { orderBy: { startsAt: "desc" } },
       },
     }),
     prisma.customer.findMany({
@@ -380,6 +381,14 @@ export default async function CustomerDetailPage({ params }: { params: { id: str
           isPartner={customer.isPartner}
           referredBy={customer.referredBy}
           referredUsers={customer.referredUsers}
+          partnerRatePeriods={customer.partnerRatePeriods.map((p) => ({
+            id: p.id,
+            rate: Number(p.rate),
+            startsAt: p.startsAt.toISOString(),
+            endsAt: p.endsAt ? p.endsAt.toISOString() : null,
+            note: p.note,
+            createdAt: p.createdAt.toISOString(),
+          }))}
           customers={allCustomers
             .filter((c) => c.id !== customer.id)
             .map((c) => ({ id: c.id, label: `${c.fullName} (${c.customerCode})` }))}

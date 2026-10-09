@@ -15,7 +15,22 @@ type ChatMessage = {
 
 function formatTime(iso: string) {
   try {
-    return new Intl.DateTimeFormat("vi-VN", { hour: "2-digit", minute: "2-digit" }).format(new Date(iso));
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return "";
+
+    const timeStr = new Intl.DateTimeFormat("vi-VN", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    }).format(d);
+
+    const dateStr = new Intl.DateTimeFormat("vi-VN", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    }).format(d);
+
+    return `${timeStr} · ${dateStr}`;
   } catch {
     return "";
   }
@@ -305,9 +320,9 @@ export function CommunityChat({
                 {/* Message Bubble Container */}
                 <div className={`flex flex-col gap-1 max-w-[80%] sm:max-w-[70%] ${isMine ? "items-end" : "items-start"}`}>
                   {/* Sender Name & Role */}
-                  <div className="flex items-center gap-1.5 px-1">
+                  <div className="flex items-center gap-1.5 px-1 flex-wrap">
                     {isMsgAdmin ? (
-                      <span className="inline-flex items-center gap-1 text-[11px] font-black text-primary-600 bg-primary-100/90 px-2 py-0.5 rounded-full border border-primary-200/60">
+                      <span className="inline-flex items-center gap-1 text-[11px] font-black text-primary-600 bg-primary-100/90 px-2 py-0.5 rounded-full border border-primary-200/60 shrink-0">
                         <span>Đội ngũ MeowBack</span>
                         <Heart size={10} className="fill-primary-500 text-primary-500" />
                       </span>
@@ -316,7 +331,12 @@ export function CommunityChat({
                         {isMine ? "Bạn" : m.user?.fullName}
                       </span>
                     )}
-                    <span className="text-[10px] text-neutral-400 font-medium">{formatTime(m.createdAt)}</span>
+                    <span
+                      title={new Date(m.createdAt).toLocaleString("vi-VN")}
+                      className="text-[10px] text-neutral-400 font-medium whitespace-nowrap"
+                    >
+                      {formatTime(m.createdAt)}
+                    </span>
                   </div>
 
                   {/* Bubble Content Row (relative để nút xoá nằm ở ngoài cùng) */}

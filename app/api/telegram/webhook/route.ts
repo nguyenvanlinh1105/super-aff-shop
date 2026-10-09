@@ -90,8 +90,25 @@ export async function POST(req: NextRequest) {
     },
   });
 
-  if (!account || account.status !== "active") {
-    return NextResponse.json({ ok: true, skipped: "No active Telegram account" });
+  let activeAccount = account;
+  if (!activeAccount || activeAccount.status !== "active") {
+    if (process.env.TELEGRAM_BOT_TOKEN) {
+      const appUrl = (process.env.NEXT_PUBLIC_APP_URL || "https://meowback.shop").replace(/\/+$/, "");
+      activeAccount = await prisma.telegramAccount.upsert({
+        where: { id: "default-telegram-account" },
+        update: { status: "active", webhookUrl: `${appUrl}/api/telegram/webhook` },
+        create: {
+          id: "default-telegram-account",
+          botName: "MeowBack Hoàn Tiền Bot",
+          botUsername: "meowback_bot",
+          botTokenHint: process.env.TELEGRAM_BOT_TOKEN.slice(-8),
+          webhookUrl: `${appUrl}/api/telegram/webhook`,
+          status: "active",
+        },
+      });
+    } else {
+      return NextResponse.json({ ok: true, skipped: "No active Telegram account" });
+    }
   }
 
   if (!incoming.senderId || !incoming.chatId) {
@@ -644,7 +661,7 @@ export async function POST(req: NextRequest) {
 
   await prisma.telegramMessageLog.create({
     data: {
-      telegramAccountId: account.id,
+      telegramAccountId: activeAccount?.id ?? account?.id ?? null,
       customerId: customer.id,
       direction: "out",
       senderId: incoming.chatId,

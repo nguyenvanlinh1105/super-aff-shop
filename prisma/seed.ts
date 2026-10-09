@@ -133,7 +133,7 @@ async function seedCategoryCommissionRates() {
     { id: "category-rate-2", name: "Phụ Kiện Thời Trang", keywords: "túi xách,ví,thắt lưng,mũ,nón,kính mát,kính mắt,trang sức,dây chuyền,vòng tay,bông tai,phụ kiện tóc,găng tay", rate: 12.28, sortOrder: 2 },
     { id: "category-rate-3", name: "Túi Ví Nam", keywords: "ví nam,ví cầm tay nam", rate: 12, sortOrder: 3 },
     { id: "category-rate-4", name: "Sắc Đẹp", keywords: "kem,serum,mỹ phẩm,son,sữa rửa mặt,dưỡng da,toner,mặt nạ,nước hoa,dầu gội,dầu xả,trang điểm,tẩy trang", rate: 10.69, sortOrder: 4 },
-    { id: "category-rate-5", name: "Thời Trang Nữ", keywords: "áo nữ,đầm,váy,chân váy,quần nữ,babydoll,vest nữ,jumpsuit,bộ nữ,đồ lót,đồ ngủ,quần jean nữ", rate: 10.6, sortOrder: 5 },
+    { id: "category-rate-5", name: "Thời Trang Nữ", keywords: "áo nữ,áo dài,ao dai,đầm,váy,chân váy,quần nữ,babydoll,vest nữ,jumpsuit,bộ nữ,đồ lót,đồ ngủ,quần jean nữ,chiết eo", rate: 10.6, sortOrder: 5 },
     { id: "category-rate-6", name: "Túi Ví Nữ", keywords: "túi xách nữ,túi đeo chéo,túi quai xách,ví nữ", rate: 9.44, sortOrder: 6 },
     { id: "category-rate-7", name: "Văn Phòng Phẩm", keywords: "giấy,sổ,bút,văn phòng phẩm,quà tặng giấy gói", rate: 9.5, sortOrder: 7 },
     { id: "category-rate-8", name: "Thời Trang Nam", keywords: "áo nam,quần nam,quần jean nam,sơ mi nam,áo thun nam,áo polo nam", rate: 9.37, sortOrder: 8 },

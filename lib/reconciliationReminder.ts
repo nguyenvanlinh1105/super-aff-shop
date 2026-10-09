@@ -17,8 +17,8 @@ export const SETTING_KEY_RECONCILIATION_REMINDER = "RECONCILIATION_REMINDER_CONF
 
 export const DEFAULT_RECONCILIATION_CONFIG: ReconciliationReminderConfig = {
   enabled: true,
-  scheduledTime: "07:00",
-  targetMode: "LINH_ONLY",
+  scheduledTime: "21:30",
+  targetMode: "ALL_ADMINS",
   targetAdminId: "c422ad26-ddf6-4a1d-b729-bae0dcaf54e7", // Admin Nguyễn Văn Linh
   customMessage: null,
   lastSentAt: null,
@@ -278,7 +278,7 @@ export async function sendReconciliationReminder(isTest: boolean = false): Promi
       `⏰ <b>NHẮC NHỞ ĐỐI SOÁT HÀNG NGÀY</b>`,
       ``,
       `Chào bạn <b>${escapeHtml(r.name)}</b>! 👋`,
-      `Đã đến <b>${config.scheduledTime || "07:00"} sáng</b> rồi, hãy tải lên và <b>import file đối soát của khách hàng</b> (Shopee/Lazada) để hệ thống kịp thời cập nhật đơn hàng, đối soát hoa hồng & số dư khả dụng nhé! 📑✨`,
+      `Đã đến <b>${config.scheduledTime || "21:30"}</b> rồi, hãy tải lên và <b>import file đối soát của khách hàng</b> (Shopee/Lazada) để hệ thống kịp thời cập nhật đơn hàng, đối soát hoa hồng & số dư khả dụng nhé! 📑✨`,
     ];
 
     if (config.customMessage && config.customMessage.trim()) {

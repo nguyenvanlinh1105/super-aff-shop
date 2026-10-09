@@ -93,3 +93,48 @@ export function isWithinReferralWindow(
 
   return referenceDate.getTime() <= expirationDate.getTime();
 }
+
+export const PARTNER_RATE_PRESETS = [
+  { value: 0.03, percent: 3, label: "3%" },
+  { value: 0.05, percent: 5, label: "5%" },
+  { value: 0.07, percent: 7, label: "7%" },
+  { value: 0.10, percent: 10, label: "10%" },
+] as const;
+
+/**
+ * Tra cứu tỷ lệ hoa hồng đối tác hiệu lực tại thời điểm đơn hàng phát sinh (referenceDate).
+ * Bảo đảm tính toàn vẹn lịch sử (Temporal Point-in-Time rate resolution):
+ * - Đơn phát sinh ở giai đoạn nào sẽ hưởng đúng % của giai đoạn đó.
+ * - Ví dụ: 01/10-01/11 là 7%, 01/11-01/12 là 10% -> đơn tháng 10 vẫn nhận đúng 7%, không bị ghi đè.
+ * - Nếu đối tác chưa cấu hình khoảng riêng hoặc nằm ngoài các khoảng, fallback về tỷ lệ mặc định.
+ */
+export async function getEffectivePartnerRate(
+  partnerCustomerId: string,
+  referenceDate: Date = new Date(),
+  fallbackRate: Prisma.Decimal | number = new Prisma.Decimal(0.05)
+): Promise<Prisma.Decimal> {
+  const fallback = typeof fallbackRate === "number" ? new Prisma.Decimal(fallbackRate) : fallbackRate;
+
+  try {
+    const period = await prisma.partnerRatePeriod.findFirst({
+      where: {
+        customerId: partnerCustomerId,
+        startsAt: { lte: referenceDate },
+        OR: [
+          { endsAt: null },
+          { endsAt: { gte: referenceDate } },
+        ],
+      },
+      orderBy: { startsAt: "desc" },
+    });
+
+    if (period) {
+      return new Prisma.Decimal(period.rate);
+    }
+  } catch (error) {
+    console.error("Lỗi khi tra cứu partnerRatePeriod:", error);
+  }
+
+  return fallback;
+}
+

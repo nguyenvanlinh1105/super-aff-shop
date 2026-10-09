@@ -525,7 +525,6 @@ export function mapDetectedPlatformToCode(url: string): "SHOPEE" | "TIKTOK" | nu
 }
 
 export const TELEGRAM_BOT_COMMANDS = [
-  { command: "menu", description: "📱 Mở menu thao tác" },
   { command: "close", description: "❌ Đóng menu (cho gọn màn hình)" },
   { command: "deals", description: "🏷️ Ưu đãi hot đang chạy" },
   { command: "wallet", description: "💰 Số dư ví hoàn tiền" },

@@ -117,7 +117,7 @@ export default async function AdminOrdersPage({
 
   const [
     allCount, unassignedCount, assignedCount, pendingCount, processingCount, moneyInCount, unpaidCount, paidCount, cancelledCount, completedCount, clawbackCount, referralCount,
-    orders, customers, filteredCount, sumsAgg, moneyInSumAgg, unpaidSumAgg,
+    orders, customers, filteredCount, sumsAgg, moneyInSumAgg, unpaidSumAgg, activeRule,
   ] = await Promise.all([
     prisma.order.count({ where: baseWhere }),
     prisma.order.count({ where: { ...baseWhere, customerId: null } }),
@@ -131,7 +131,26 @@ export default async function AdminOrdersPage({
     prisma.order.count({ where: { ...baseWhere, orderStatus: "completed" } }),
     prisma.order.count({ where: { ...baseWhere, orderStatus: "clawback" } }),
     prisma.order.count({ where: { ...baseWhere, sourceType: "referral" } }),
-    prisma.order.findMany({ where, orderBy, skip, take: limit, include: { platform: true, customer: true } }),
+    prisma.order.findMany({
+      where,
+      orderBy,
+      skip,
+      take: limit,
+      include: {
+        platform: true,
+        customer: {
+          include: {
+            referredBy: {
+              include: {
+                partnerRatePeriods: {
+                  orderBy: { startsAt: "desc" },
+                },
+              },
+            },
+          },
+        },
+      },
+    }),
     prisma.customer.findMany({
       include: {
         user: { select: { email: true } },
@@ -142,7 +161,13 @@ export default async function AdminOrdersPage({
     prisma.order.aggregate({ where, _sum: { orderAmount: true, commissionAmount: true, customerRewardAmount: true, systemProfitAmount: true, referralBonusDeducted: true } }),
     prisma.order.aggregate({ where: { ...baseWhere, orderStatus: "approved" }, _sum: { customerRewardAmount: true } }),
     prisma.order.aggregate({ where: { ...baseWhere, orderStatus: "approved", payoutStatus: { not: "paid" } }, _sum: { customerRewardAmount: true } }),
+    prisma.commissionRule.findFirst({
+      where: { active: true },
+      orderBy: { createdAt: "desc" },
+    }),
   ]);
+
+  const defaultReferralRate = Number(activeRule?.referralRate ?? 0.05);
 
   const customerOptions = customers.map((c) => ({
     id: c.id,
@@ -153,28 +178,82 @@ export default async function AdminOrdersPage({
     subLabel: [c.customerCode, c.user?.email, c.phone].filter(Boolean).join(" • "),
   }));
 
-  const mappedOrders = orders.map((o) => ({
-    id: o.id,
-    orderExternalId: o.orderExternalId,
-    itemName: o.itemName,
-    platformName: o.platform.name,
-    customerName: o.customer?.fullName ?? null,
-    customerId: o.customerId,
-    trackingCode: o.trackingCode,
-    sourceType: o.sourceType,
-    orderAmount: Number(o.orderAmount ?? 0),
-    commissionAmount: Number(o.commissionAmount),
-    customerRewardAmount: Number(o.customerRewardAmount),
-    systemProfitAmount: Number(o.systemProfitAmount),
-    referralBonusDeducted: Number(o.referralBonusDeducted),
-    orderStatus: o.orderStatus,
-    payoutStatus: o.payoutStatus,
-    orderedAt: o.orderedAt?.toISOString() ?? null,
-    completedAt: o.completedAt?.toISOString() ?? null,
-    clawbackWarning: o.orderStatus === "completed" && o.completedAt
-      ? (new Date().getTime() - new Date(o.completedAt).getTime()) > 15 * 24 * 60 * 60 * 1000
-      : false,
-  }));
+  const mappedOrders = orders.map((o) => {
+    let referralInfo: {
+      referrerName: string;
+      referrerCode: string;
+      isPartner: boolean;
+      ratePercent: number;
+      bonusAmount: number;
+    } | null = null;
+
+    if (o.sourceType === "referral") {
+      referralInfo = {
+        referrerName: o.customer?.fullName ?? "Người giới thiệu",
+        referrerCode: o.customer?.customerCode ?? "",
+        isPartner: o.customer?.isPartner ?? false,
+        ratePercent: 5,
+        bonusAmount: Number(o.customerRewardAmount),
+      };
+    } else if (o.customer?.referredBy) {
+      const ref = o.customer.referredBy;
+      const refDate = o.orderedAt ?? o.createdAt ?? new Date();
+      let rateDecimal = defaultReferralRate;
+
+      if (ref.isPartner) {
+        const matchedPeriod = ref.partnerRatePeriods?.find((p) => {
+          const s = new Date(p.startsAt);
+          const e = p.endsAt ? new Date(p.endsAt) : null;
+          return s <= refDate && (!e || e >= refDate);
+        });
+        if (matchedPeriod) {
+          rateDecimal = Number(matchedPeriod.rate);
+        }
+      }
+
+      const ratePercent = Math.round(rateDecimal * 100);
+      let bonusAmount = Number(o.referralBonusDeducted);
+
+      // Nếu đơn chưa ghi nhận số tiền trích (đang pending/processing)
+      // thì tính dự kiến theo phần tiền sau thuế để admin tiện theo dõi
+      if (bonusAmount <= 0 && o.orderStatus !== "cancelled" && o.orderStatus !== "rejected" && o.orderStatus !== "clawback") {
+        const afterTax = Number(o.customerRewardAmount) + Number(o.systemProfitAmount);
+        bonusAmount = Math.round(afterTax * rateDecimal);
+      }
+
+      referralInfo = {
+        referrerName: ref.fullName,
+        referrerCode: ref.customerCode,
+        isPartner: ref.isPartner,
+        ratePercent,
+        bonusAmount,
+      };
+    }
+
+    return {
+      id: o.id,
+      orderExternalId: o.orderExternalId,
+      itemName: o.itemName,
+      platformName: o.platform.name,
+      customerName: o.customer?.fullName ?? null,
+      customerId: o.customerId,
+      trackingCode: o.trackingCode,
+      sourceType: o.sourceType,
+      orderAmount: Number(o.orderAmount ?? 0),
+      commissionAmount: Number(o.commissionAmount),
+      customerRewardAmount: Number(o.customerRewardAmount),
+      systemProfitAmount: Number(o.systemProfitAmount),
+      referralBonusDeducted: Number(o.referralBonusDeducted),
+      referralInfo,
+      orderStatus: o.orderStatus,
+      payoutStatus: o.payoutStatus,
+      orderedAt: o.orderedAt?.toISOString() ?? null,
+      completedAt: o.completedAt?.toISOString() ?? null,
+      clawbackWarning: o.orderStatus === "completed" && o.completedAt
+        ? (new Date().getTime() - new Date(o.completedAt).getTime()) > 15 * 24 * 60 * 60 * 1000
+        : false,
+    };
+  });
 
   const totalPages = Math.ceil(filteredCount / limit);
   const counts = { all: allCount, unassigned: unassignedCount, assigned: assignedCount, pending: pendingCount, processing: processingCount, moneyIn: moneyInCount, unpaid: unpaidCount, paid: paidCount, cancelled: cancelledCount, completed: completedCount, clawback: clawbackCount, referral: referralCount };

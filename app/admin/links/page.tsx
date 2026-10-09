@@ -1,22 +1,27 @@
 import { prisma } from "@/lib/prisma";
 import { AdminLinksClient } from "@/components/admin/AdminLinksClient";
 import { Link2, CheckCircle, MousePointerClick } from "lucide-react";
+import { resolveDisplayProductName, resolveDisplayProductImage } from "@/lib/productInfo";
 
 export default async function AdminLinksPage({ searchParams }: { searchParams: { q?: string; page?: string; sort?: string; order?: string; tab?: string } }) {
   const page = Number(searchParams.page) || 1;
   const limit = 10;
   const skip = (page - 1) * limit;
-  const q = searchParams.q || "";
+  const q = searchParams.q?.trim() || "";
 
-  const where: any = {};
+  const baseWhere: any = {};
   if (q) {
-    where.OR = [
-      { trackingCode: { contains: q } },
-      { shortCode: { contains: q } },
-      { channelSource: { contains: q } },
-      { customer: { fullName: { contains: q } } },
+    baseWhere.OR = [
+      { trackingCode: { contains: q, mode: "insensitive" } },
+      { shortCode: { contains: q, mode: "insensitive" } },
+      { channelSource: { contains: q, mode: "insensitive" } },
+      { customer: { fullName: { contains: q, mode: "insensitive" } } },
+      { customer: { customerCode: { contains: q, mode: "insensitive" } } },
+      { productTitle: { contains: q, mode: "insensitive" } },
     ];
   }
+
+  const where: any = { ...baseWhere };
 
   const orderByField = searchParams.sort || "createdAt";
   const orderByDir = searchParams.order || "desc";
@@ -26,7 +31,16 @@ export default async function AdminLinksPage({ searchParams }: { searchParams: {
   if (tab === "active") where.status = "active";
   if (tab === "stopped") where.status = "stopped";
 
-  const [customers, platforms, links, filteredCount, totalCount, activeCount, stoppedCount, clicksAgg] = await Promise.all([
+  const [
+    customers,
+    platforms,
+    links,
+    filteredCount,
+    totalCount,
+    activeCount,
+    stoppedCount,
+    clicksAgg,
+  ] = await Promise.all([
     prisma.customer.findMany({ where: { status: "active" }, orderBy: { fullName: "asc" } }),
     prisma.platform.findMany({ where: { status: "active" }, orderBy: { name: "asc" } }),
     prisma.trackingLink.findMany({
@@ -37,9 +51,9 @@ export default async function AdminLinksPage({ searchParams }: { searchParams: {
       include: { customer: true, platform: true },
     }),
     prisma.trackingLink.count({ where }),
-    prisma.trackingLink.count(),
-    prisma.trackingLink.count({ where: { status: "active" } }),
-    prisma.trackingLink.count({ where: { status: "stopped" } }),
+    prisma.trackingLink.count({ where: baseWhere }),
+    prisma.trackingLink.count({ where: { ...baseWhere, status: "active" } }),
+    prisma.trackingLink.count({ where: { ...baseWhere, status: "stopped" } }),
     prisma.trackingLink.aggregate({ where, _sum: { clicks: true } }),
   ]);
 
@@ -53,8 +67,8 @@ export default async function AdminLinksPage({ searchParams }: { searchParams: {
     channelSource: l.channelSource,
     clicks: l.clicks,
     status: l.status,
-    productTitle: l.productTitle,
-    productImage: l.productImage,
+    productTitle: resolveDisplayProductName(l.productTitle, null, `Sản phẩm ${l.platform.name}`),
+    productImage: resolveDisplayProductImage(l.productImage),
   }));
 
   const totalPages = Math.ceil(filteredCount / limit);
@@ -80,8 +94,17 @@ export default async function AdminLinksPage({ searchParams }: { searchParams: {
                 Quản Lý Link Affiliate
               </h1>
               <p className="mt-1 text-xs text-neutral-600 font-medium">
-                <span className="font-bold text-sky-700">{activeCount.toLocaleString()}</span> link đang hoạt động • Tích lũy{" "}
-                <span className="font-extrabold text-indigo-700 tabular-nums">{totalClicks.toLocaleString()}</span> lượt nhấp click
+                {q ? (
+                  <>
+                    Tìm thấy <span className="font-bold text-sky-700">{totalCount.toLocaleString()}</span> link phù hợp (<span className="font-bold text-emerald-700">{activeCount.toLocaleString()}</span> đang hoạt động) • Tích lũy{" "}
+                    <span className="font-extrabold text-indigo-700 tabular-nums">{totalClicks.toLocaleString()}</span> lượt nhấp click
+                  </>
+                ) : (
+                  <>
+                    <span className="font-bold text-sky-700">{activeCount.toLocaleString()}</span> link đang hoạt động • Tích lũy{" "}
+                    <span className="font-extrabold text-indigo-700 tabular-nums">{totalClicks.toLocaleString()}</span> lượt nhấp click
+                  </>
+                )}
               </p>
             </div>
           </div>
@@ -103,7 +126,9 @@ export default async function AdminLinksPage({ searchParams }: { searchParams: {
               <Link2 size={22} strokeWidth={2.2} />
             </div>
             <div>
-              <div className="text-[10px] font-extrabold uppercase tracking-widest text-neutral-400">Tổng Link Khởi Tạo</div>
+              <div className="text-[10px] font-extrabold uppercase tracking-widest text-neutral-400">
+                {q ? "Link Phù Hợp" : "Tổng Link Khởi Tạo"}
+              </div>
               <div className="text-2xl font-black text-neutral-900 tabular-nums leading-tight">{totalCount.toLocaleString()}</div>
             </div>
           </div>
@@ -141,7 +166,7 @@ export default async function AdminLinksPage({ searchParams }: { searchParams: {
             <img src="/meow-back-voucher.png" alt="" className="h-7 w-7 object-contain rounded-lg" />
             <h2 className="text-sm font-extrabold text-neutral-900 tracking-tight">Lịch Sử Link Đã Khởi Tạo</h2>
           </div>
-          <span className="text-xs font-extrabold text-neutral-500 bg-neutral-100 px-3 py-1 rounded-full">{totalCount} link</span>
+          <span className="text-xs font-extrabold text-neutral-500 bg-neutral-100 px-3 py-1 rounded-full">{filteredCount} link</span>
         </div>
         <div className="p-6">
           <AdminLinksClient

@@ -11,7 +11,8 @@ export async function notifyCustomerTelegram(customerId: string, message: string
       prisma.telegramAccount.findFirst({ where: { status: "active" }, orderBy: { createdAt: "desc" } }),
     ]);
 
-    if (!customer?.telegramUserId || !account) return;
+    if (!customer?.telegramUserId) return;
+    if (!account && !process.env.TELEGRAM_BOT_TOKEN) return;
 
     const result = await sendTelegramTextMessage({
       chatId: customer.telegramUserId,
@@ -21,7 +22,7 @@ export async function notifyCustomerTelegram(customerId: string, message: string
 
     await prisma.telegramMessageLog.create({
       data: {
-        telegramAccountId: account.id,
+        telegramAccountId: account?.id ?? null,
         customerId: customer.id,
         direction: "out",
         senderId: null,

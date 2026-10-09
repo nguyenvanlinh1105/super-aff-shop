@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import QRCode from "qrcode";
 import { resolveDisplayProductName } from "@/lib/productInfo";
 import { ReferralClient } from "@/components/customer/ReferralClient";
+import { getEffectivePartnerRate } from "@/lib/commission";
 
 export default async function ReferralPage() {
   const session = await getSession();
@@ -75,7 +76,10 @@ export default async function ReferralPage() {
 
   const approvedReferralOrders = referralOrders.filter((o) => o.orderStatus === "approved");
   const totalReferralCommission = approvedReferralOrders.reduce((sum, order) => sum + Number(order.customerRewardAmount), 0);
-  const referralRate = activeRule?.referralRate ? Number(activeRule.referralRate) : 0.05;
+  const rawRuleRate = activeRule?.referralRate ? Number(activeRule.referralRate) : 0.05;
+  const referralRate = customer?.isPartner
+    ? Number(await getEffectivePartnerRate(customer.id, new Date(), rawRuleRate))
+    : rawRuleRate;
   const maxReferralOrders = activeRule?.maxReferralOrders ?? 5;
   const referralValidityMonths = activeRule?.referralValidityMonths ?? 6;
 

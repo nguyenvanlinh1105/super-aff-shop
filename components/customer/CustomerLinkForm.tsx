@@ -22,6 +22,10 @@ type LinkResult = {
   productImage: string | null;
   productPrice: number | string | null;
   estimatedCashback: number | string | null;
+  categoryName?: string | null;
+  categoryRate?: number | null;
+  customerEffectiveRate?: number | null;
+  sampleCashbacks?: { orderAmount: number; cashback: number }[] | null;
 };
 
 const PLATFORM_META: Record<string, {
@@ -134,6 +138,10 @@ export function CustomerLinkForm({
       productImage: data.link.productImage ?? null,
       productPrice: data.link.productPrice ?? null,
       estimatedCashback: data.link.estimatedCashback ?? null,
+      categoryName: data.link.categoryName ?? null,
+      categoryRate: data.link.categoryRate ?? null,
+      customerEffectiveRate: data.link.customerEffectiveRate ?? null,
+      sampleCashbacks: data.link.sampleCashbacks ?? null,
     });
     setOriginalUrl("");
     toast.success("Tạo link hoàn tiền thành công! Bạn có thể sao chép và mua sắm ngay.", "Tạo link thành công");
@@ -281,14 +289,19 @@ export function CustomerLinkForm({
             title="Chạm vào để mở sàn & mua ngay"
           >
             {/* Top Tag & Platform */}
-            <div className="mb-3.5 flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2">
+            <div className="mb-3.5 flex items-center justify-between gap-2 flex-wrap">
+              <div className="flex items-center gap-2 flex-wrap">
                 <span
                   className="rounded-full px-2.5 py-0.5 text-[11px] font-black text-white shadow-2xs"
                   style={{ backgroundColor: meta.color }}
                 >
                   {selectedPlatform?.label ?? "Sàn mua sắm"}
                 </span>
+                {result.categoryName && (
+                  <span className="rounded-full px-2.5 py-0.5 text-[10.5px] font-extrabold bg-primary-50 text-primary-800 border border-primary-200/60 shadow-2xs">
+                    🏷️ {result.categoryName}
+                  </span>
+                )}
                 <span className="font-mono text-[11px] text-neutral-400 truncate">
                   {result.trackingCode}
                 </span>
@@ -314,60 +327,75 @@ export function CustomerLinkForm({
                 </p>
 
                 {/* GIÁ SẢN PHẨM & ƯỚC TÍNH TIỀN HOÀN CHO KHÁCH HÀNG */}
-                <div className="flex items-center justify-between gap-2 flex-wrap pt-1">
-                  {/* Giá sản phẩm */}
+                <div className="flex items-center justify-between gap-2 pt-1">
                   {result.productPrice && Number(result.productPrice) > 0 ? (
-                    <div>
-                      <span className="text-[10px] text-neutral-400 font-semibold block leading-none">
-                        Giá sản phẩm
-                      </span>
-                      <span className="text-xs sm:text-[13px] font-black text-neutral-900 tabular-nums">
-                        {formatCurrency(result.productPrice)}
-                      </span>
-                    </div>
-                  ) : (
-                    <div>
-                      <span className="text-[10px] text-neutral-400 font-semibold block leading-none">
-                        Tỷ lệ hoàn tiền
-                      </span>
-                      <span className="text-xs font-black text-rose-600">
-                        Lên tới 10% - 15% ✨
-                      </span>
-                    </div>
-                  )}
+                    /* Có giá sản phẩm */
+                    <>
+                      <div>
+                        <span className="text-[10px] text-neutral-400 font-bold block leading-none mb-0.5">
+                          Giá sản phẩm
+                        </span>
+                        <span className="text-xs sm:text-[13px] font-black text-neutral-900 tabular-nums">
+                          {formatCurrency(result.productPrice)}
+                        </span>
+                      </div>
 
-                  {/* Ước tính tiền hoàn */}
-                  {result.estimatedCashback && Number(result.estimatedCashback) > 0 ? (
-                    <div className="text-right">
-                      <span className="text-[10px] text-emerald-600 font-bold block leading-none">
-                        Hoàn tiền ước tính
-                      </span>
-                      <span className="text-xs sm:text-[13px] font-black text-emerald-600 tabular-nums">
-                        +{formatCurrency(result.estimatedCashback)} 🎀
-                      </span>
-                    </div>
-                  ) : result.productPrice && Number(result.productPrice) > 0 ? (
-                    <div className="text-right">
-                      <span className="text-[10px] text-emerald-600 font-bold block leading-none">
-                        Hoàn tiền ước tính
-                      </span>
-                      <span className="text-xs sm:text-[13px] font-black text-emerald-600 tabular-nums">
-                        ~ +{formatCurrency(Math.round(Number(result.productPrice) * 0.05))} 🎀
-                      </span>
-                    </div>
+                      <div className="text-right">
+                        <span className="text-[10px] text-emerald-600 font-bold block leading-none mb-0.5">
+                          Hoàn tiền ước tính
+                        </span>
+                        <span className="text-xs sm:text-[13px] font-black text-emerald-600 tabular-nums">
+                          +{formatCurrency(result.estimatedCashback ?? Math.round(Number(result.productPrice) * 0.05))} 🎀
+                        </span>
+                      </div>
+                    </>
                   ) : (
-                    <div className="text-right">
-                      <span className="text-[10px] text-neutral-400 font-semibold block leading-none">
-                        Tiền hoàn về ví
-                      </span>
-                      <span className="text-xs font-black text-emerald-600">
-                        Tự động sau khi nhận hàng
-                      </span>
-                    </div>
+                    /* Chưa có giá sản phẩm: Tối giản, bỏ chữ thừa, 1 dòng gọn gàng */
+                    <>
+                      <div>
+                        <span className="text-[10px] text-neutral-400 font-bold block leading-none mb-0.5">
+                          Tỷ lệ hoàn tiền
+                        </span>
+                        <span className="text-xs sm:text-[13px] font-black text-rose-600">
+                          {result.customerEffectiveRate != null
+                            ? `~${Number(result.customerEffectiveRate).toFixed(1)}%`
+                            : "Lên tới 10% - 15%"} ✨
+                        </span>
+                      </div>
+
+                      <div className="text-right">
+                        <span className="inline-flex items-center gap-1 text-[11px] sm:text-xs font-bold text-emerald-700 bg-emerald-50/90 px-2.5 py-1 rounded-full border border-emerald-200/70 shadow-2xs whitespace-nowrap">
+                          <span>Tự động hoàn về ví</span>
+                          <span>🎀</span>
+                        </span>
+                      </div>
+                    </>
                   )}
                 </div>
               </div>
             </div>
+
+            {/* BẢNG MẪU TIỀN HOÀN THEO CÁC MỐC ĐƠN HÀNG (TỰ ĐỘNG THEO NGÀNH HÀNG) */}
+            {(!result.productPrice || Number(result.productPrice) <= 0) &&
+              result.sampleCashbacks &&
+              result.sampleCashbacks.length > 0 && (
+                <div className="mt-3.5 rounded-2xl bg-gradient-to-r from-emerald-50/90 via-teal-50/50 to-primary-50/60 p-2.5 sm:p-3 border border-emerald-100/90 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <div className="flex items-center gap-1.5 text-[11px] sm:text-xs font-black text-emerald-800 shrink-0">
+                    <Sparkles size={13} className="text-emerald-600 fill-emerald-500/30" />
+                    <span>Ước tính theo giá trị đơn:</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                    {result.sampleCashbacks.map((s, idx) => (
+                      <span
+                        key={idx}
+                        className="rounded-lg bg-white/90 px-2 py-1 text-[10.5px] sm:text-[11.5px] font-black text-emerald-700 border border-emerald-200/60 shadow-2xs"
+                      >
+                        Đơn {Math.round(s.orderAmount / 1000)}k → ~{formatCurrency(s.cashback)}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
 
             {/* CHỈ HIỂN THỊ BUTTON MUA NGAY */}
             <div className="mt-4 pt-3.5 border-t border-neutral-100">

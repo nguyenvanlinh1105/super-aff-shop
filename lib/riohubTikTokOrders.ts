@@ -1,6 +1,6 @@
 import { Prisma } from "@prisma/client";
 import { prisma } from "./prisma";
-import { getActiveCommissionRule, isWithinReferralWindow, splitCommission } from "./commission";
+import { getActiveCommissionRule, isWithinReferralWindow, splitCommission, getEffectivePartnerRate } from "./commission";
 import { notifyCustomerInApp } from "./notifications";
 import { notifyCustomerTelegram } from "./telegramNotify";
 import { buildOrderApprovedMessage, buildReferralBonusMessage } from "./telegramBot";
@@ -15,6 +15,22 @@ export type RioHubOrderSyncResult = {
   unmapped: number;
 };
 
+function toUnixSeconds(val?: string | number | null): number | string | null {
+  if (!val) return null;
+  if (typeof val === "number") return val;
+  const str = String(val).trim();
+  if (!str) return null;
+  if (/^\d{10,13}$/.test(str)) {
+    if (str.length === 13) return Math.floor(Number(str) / 1000);
+    return Number(str);
+  }
+  const parsed = new Date(str);
+  if (!isNaN(parsed.getTime())) {
+    return Math.floor(parsed.getTime() / 1000);
+  }
+  return str;
+}
+
 export async function syncRioHubTikTokOrders(params: {
   timeStart?: string | number | null;
   timeEnd?: string | number | null;
@@ -27,14 +43,19 @@ export async function syncRioHubTikTokOrders(params: {
   const pageSize = 200;
   const maxPages = params.maxPages ?? 20;
 
+  const normalizedTimeStart = toUnixSeconds(params.timeStart);
+  const normalizedTimeEnd = toUnixSeconds(params.timeEnd);
+  const normalizedUpdateTimeStart = toUnixSeconds(params.updateTimeStart);
+  const normalizedUpdateTimeEnd = toUnixSeconds(params.updateTimeEnd);
+
   for (let page = 1; page <= maxPages; page++) {
     const response = await listRioHubTikTokOrders({
       page,
       pageSize,
-      timeStart: params.timeStart,
-      timeEnd: params.timeEnd,
-      updateTimeStart: params.updateTimeStart,
-      updateTimeEnd: params.updateTimeEnd,
+      timeStart: normalizedTimeStart,
+      timeEnd: normalizedTimeEnd,
+      updateTimeStart: normalizedUpdateTimeStart,
+      updateTimeEnd: normalizedUpdateTimeEnd,
       orderId: params.orderId,
     });
 
@@ -272,8 +293,12 @@ async function handleApprovedRioHubOrder(orderId: string) {
 
   if (!isPartner && referrerBonusCount >= maxOrders) return;
 
+  const effectiveRate = isPartner
+    ? await getEffectivePartnerRate(customerData.referredById, referenceDate, referralRate)
+    : referralRate;
+
   const afterTaxAmount = new Prisma.Decimal(order.customerRewardAmount).add(new Prisma.Decimal(order.systemProfitAmount));
-  const bonusAmount = afterTaxAmount.mul(referralRate).toDecimalPlaces(0);
+  const bonusAmount = afterTaxAmount.mul(effectiveRate).toDecimalPlaces(0);
   const systemProfitAfterReferral = new Prisma.Decimal(order.systemProfitAmount).sub(bonusAmount);
 
   await prisma.order.update({

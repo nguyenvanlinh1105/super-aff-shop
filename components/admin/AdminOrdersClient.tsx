@@ -39,6 +39,13 @@ type Order = {
   customerRewardAmount: number;
   systemProfitAmount: number;
   referralBonusDeducted: number;
+  referralInfo?: {
+    referrerName: string;
+    referrerCode: string;
+    isPartner: boolean;
+    ratePercent: number;
+    bonusAmount: number;
+  } | null;
   orderStatus: string;
   payoutStatus: string;
   orderedAt: string | null;
@@ -458,63 +465,64 @@ export function AdminOrdersClient({
       <div className="rounded-3xl bg-white shadow-sm border border-neutral-200/70 overflow-hidden flex flex-col w-full">
 
         {/* Summary Header Matrix */}
-        <div className="bg-gradient-to-r from-rose-50/60 via-neutral-50 to-white border-b border-neutral-200/70 p-5 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-          <div className="flex flex-col">
-            <span className="text-[10px] font-extrabold text-neutral-400 uppercase tracking-widest mb-1">Giá Trị Đơn</span>
-            <span className="text-base font-black text-neutral-900 leading-none tabular-nums">
+        <div className="bg-gradient-to-r from-rose-50/60 via-neutral-50 to-white border-b border-neutral-200/70 p-4 sm:p-5 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
+          <div className="flex flex-col min-w-0">
+            <span className="text-[10px] font-extrabold text-neutral-400 uppercase tracking-wider mb-1 whitespace-nowrap">Giá Trị Đơn</span>
+            <span className="text-base font-black text-neutral-900 leading-none tabular-nums whitespace-nowrap">
               {formatCurrency(sums.orderAmount)}
             </span>
           </div>
-          <div className="flex flex-col">
-            <span className="text-[10px] font-extrabold text-neutral-400 uppercase tracking-widest mb-1">HH Trước Thuế</span>
-            <span className="text-base font-black text-neutral-700 leading-none tabular-nums">
+          <div className="flex flex-col min-w-0">
+            <span className="text-[10px] font-extrabold text-neutral-400 uppercase tracking-wider mb-1 whitespace-nowrap">HH Trước Thuế</span>
+            <span className="text-base font-black text-neutral-700 leading-none tabular-nums whitespace-nowrap">
               {formatCurrency(sums.commissionAmount)}
             </span>
           </div>
-          <div className="flex flex-col">
-            <span className="text-[10px] font-extrabold text-emerald-700 uppercase tracking-widest mb-1">💰 Tiền Đã Về</span>
-            <span className="text-base font-black text-emerald-700 leading-none tabular-nums">
+          <div className="flex flex-col min-w-0">
+            <span className="text-[10px] font-extrabold text-emerald-700 uppercase tracking-wider mb-1 whitespace-nowrap">💰 Tiền Đã Về</span>
+            <span className="text-base font-black text-emerald-700 leading-none tabular-nums whitespace-nowrap">
               {formatCurrency(sums.moneyInTotal)}
             </span>
           </div>
-          <div className="flex flex-col">
-            <span className="text-[10px] font-extrabold text-rose-600 uppercase tracking-widest mb-1">Tổng Hoàn Khách</span>
-            <span className="text-base font-black text-rose-600 leading-none tabular-nums">
+          <div className="flex flex-col min-w-0">
+            <span className="text-[10px] font-extrabold text-rose-600 uppercase tracking-wider mb-1 whitespace-nowrap">Tổng Hoàn Khách</span>
+            <span className="text-base font-black text-rose-600 leading-none tabular-nums whitespace-nowrap">
               {formatCurrency(sums.customerRewardAmount)}
             </span>
           </div>
-          <div className="flex flex-col">
-            <span className="text-[10px] font-extrabold text-neutral-400 uppercase tracking-widest mb-1">Admin Lợi Nhuận</span>
-            <span className="text-base font-black text-neutral-700 leading-none tabular-nums">
+          <div className="flex flex-col min-w-0">
+            <span className="text-[10px] font-extrabold text-neutral-400 uppercase tracking-wider mb-1 whitespace-nowrap">Admin Lợi Nhuận</span>
+            <span className="text-base font-black text-neutral-700 leading-none tabular-nums whitespace-nowrap">
               {formatCurrency(sums.systemProfitAmount)}
             </span>
           </div>
-          <div className="flex flex-col">
-            <span className="text-[10px] font-extrabold text-purple-600 uppercase tracking-widest mb-1">🎁 Trích Giới Thiệu</span>
-            <span className="text-base font-black text-purple-600 leading-none tabular-nums">
+          <div className="flex flex-col min-w-0">
+            <span className="text-[10px] font-extrabold text-purple-600 uppercase tracking-wider mb-1 whitespace-nowrap">🎁 Trích Giới Thiệu</span>
+            <span className="text-base font-black text-purple-600 leading-none tabular-nums whitespace-nowrap">
               {formatCurrency(sums.referralBonusDeductedTotal)}
             </span>
           </div>
         </div>
 
         <div className="responsive-table overflow-x-auto">
-          <table className="w-full text-left text-xs min-w-[1140px]">
+          <table className="w-full text-left text-xs min-w-[1360px]">
             <thead>
               <tr className="border-b border-neutral-100 bg-neutral-50/80">
-                <th className="px-4 py-3 font-extrabold uppercase tracking-wider text-neutral-400 text-[10px]">Đơn hàng / Tracking</th>
+                <th className="px-4 py-3 font-extrabold uppercase tracking-wider text-neutral-400 text-[10px] whitespace-nowrap">Đơn hàng / Tracking</th>
                 <th className="px-4 py-3 font-extrabold uppercase tracking-wider text-neutral-400 text-[10px] whitespace-nowrap min-w-[140px]">Khách hàng</th>
-                <th className="px-4 py-3 font-extrabold uppercase tracking-wider text-neutral-400 text-[10px]">Thời Gian</th>
-                <th className="px-4 py-3 font-extrabold uppercase tracking-wider text-neutral-400 text-[10px] text-right">Giá trị đơn</th>
-                <th className="px-4 py-3 font-extrabold uppercase tracking-wider text-neutral-400 text-[10px] text-right">HH Trước Thuế</th>
-                <th className="px-4 py-3 font-extrabold uppercase tracking-wider text-rose-600 text-[10px] text-right">Tiền Hoàn / Giữ Lại</th>
-                <th className="px-4 py-3 font-extrabold uppercase tracking-wider text-neutral-400 text-[10px] w-[150px]">Trạng thái</th>
-                <th className="px-4 py-3 font-extrabold uppercase tracking-wider text-neutral-400 text-[10px] min-w-[320px]">Thao tác</th>
+                <th className="px-4 py-3 font-extrabold uppercase tracking-wider text-neutral-400 text-[10px] whitespace-nowrap">Thời Gian</th>
+                <th className="px-4 py-3 font-extrabold uppercase tracking-wider text-neutral-400 text-[10px] text-right whitespace-nowrap">Giá trị đơn</th>
+                <th className="px-4 py-3 font-extrabold uppercase tracking-wider text-neutral-400 text-[10px] text-right whitespace-nowrap">HH Trước Thuế</th>
+                <th className="px-4 py-3 font-extrabold uppercase tracking-wider text-rose-600 text-[10px] text-right whitespace-nowrap">Tiền Hoàn / Giữ Lại</th>
+                <th className="px-4 py-3 font-extrabold uppercase tracking-wider text-purple-600 text-[10px] text-right whitespace-nowrap">Trích Giới Thiệu</th>
+                <th className="px-4 py-3 font-extrabold uppercase tracking-wider text-neutral-400 text-[10px] whitespace-nowrap w-[150px]">Trạng thái</th>
+                <th className="px-4 py-3 font-extrabold uppercase tracking-wider text-neutral-400 text-[10px] whitespace-nowrap min-w-[320px]">Thao tác</th>
               </tr>
             </thead>
             <tbody>
               {orders.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="py-10 text-center">
+                  <td colSpan={9} className="py-10 text-center">
                     <div className="flex flex-col items-center gap-2">
                       <div className="w-10 h-10 rounded-xl bg-neutral-100 p-1 border border-neutral-200/80 shadow-2xs overflow-hidden flex items-center justify-center shrink-0">
                         <img src="/logo-200.png" alt="MeowBack Orders" className="h-full w-full object-contain rounded-lg" />
@@ -598,6 +606,53 @@ export function AdminOrdersClient({
                           title="Số tiền trích từ phần hệ thống giữ trả người giới thiệu"
                         >
                           🎁 -{formatCurrency(o.referralBonusDeducted)} cho GT
+                        </div>
+                      )}
+                    </td>
+
+                    {/* Trích Giới Thiệu */}
+                    <td className="px-4 py-3 text-right" data-label="Trích Giới Thiệu">
+                      {o.sourceType === "referral" ? (
+                        <div className="flex flex-col items-end gap-0.5">
+                          <span className="font-black text-xs tabular-nums text-purple-600">
+                            +{formatCurrency(o.customerRewardAmount)}
+                          </span>
+                          <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md text-[9.5px] font-black bg-purple-100 text-purple-700">
+                            🎁 Đơn nhận thưởng
+                          </span>
+                        </div>
+                      ) : o.referralInfo ? (
+                        <div className="flex flex-col items-end gap-0.5">
+                          <div className="font-black text-xs tabular-nums text-purple-600">
+                            {o.referralInfo.bonusAmount > 0
+                              ? `+${formatCurrency(o.referralInfo.bonusAmount)}`
+                              : "0đ"}
+                          </div>
+                          <div className="flex items-center gap-1 flex-wrap justify-end">
+                            <span className="inline-flex items-center px-1.5 py-0.2 rounded font-black text-[9.5px] bg-purple-100 text-purple-800 border border-purple-200">
+                              {o.referralInfo.ratePercent}%
+                            </span>
+                            {o.referralInfo.isPartner && (
+                              <span
+                                className="inline-flex items-center gap-0.5 px-1 py-0.2 rounded font-black text-[8.5px] bg-amber-100 text-amber-900 border border-amber-200"
+                                title="Đối tác hệ thống"
+                              >
+                                ⭐ Đối tác
+                              </span>
+                            )}
+                          </div>
+                          <div
+                            className="text-[10.5px] font-bold text-neutral-700 max-w-[140px] truncate"
+                            title={`Người GT: ${o.referralInfo.referrerName} (${o.referralInfo.referrerCode})`}
+                          >
+                            {o.referralInfo.referrerName}
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="text-right">
+                          <span className="text-[11px] text-neutral-400 font-semibold" title="Không có người giới thiệu">
+                            —
+                          </span>
                         </div>
                       )}
                     </td>

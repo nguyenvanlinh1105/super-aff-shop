@@ -24,6 +24,7 @@ export function LazadaIntegrationPanel({ platformStatus, config }: Props) {
   const modal = useModal();
   const { toast } = useToast();
   const [loading, setLoading] = useState<string | null>(null);
+  const [selectedDays, setSelectedDays] = useState<number>(30);
   const active = platformStatus === "active";
 
   async function togglePlatform() {
@@ -115,7 +116,7 @@ export function LazadaIntegrationPanel({ platformStatus, config }: Props) {
     const res = await fetch("/api/admin/integrations/lazada/sync", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({}),
+      body: JSON.stringify({ days: selectedDays }),
     });
     const data = await res.json().catch(() => ({}));
     setLoading(null);
@@ -174,60 +175,129 @@ export function LazadaIntegrationPanel({ platformStatus, config }: Props) {
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-        <div className="rounded-2xl border border-neutral-100 p-6">
-          <div className="mb-4 flex items-center justify-between gap-4">
-            <div className="flex items-center gap-2">
-              <Power size={16} className="text-neutral-500" />
-              <div className="text-[14px] font-bold text-neutral-900">Nền tảng Lazada</div>
+    <div className="flex flex-col gap-5">
+      {/* ─── HÀNG 1: TRẠNG THÁI NỀN TẢNG & CẤU HÌNH LAZADA ─── */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {/* Nền tảng Lazada */}
+        <div className="rounded-2xl border border-neutral-100 bg-neutral-50/50 p-4 sm:p-5 flex flex-col justify-between">
+          <div>
+            <div className="mb-2 flex items-center justify-between gap-2">
+              <div className="flex items-center gap-1.5 font-extrabold text-xs text-neutral-900">
+                <Power size={14} className="text-neutral-500" />
+                <span>Trạng Thái Nền Tảng</span>
+              </div>
+              <Badge tone={active ? "positive" : "warning"} dot>
+                {active ? "Đang bật" : "Tạm tắt"}
+              </Badge>
             </div>
-            <Badge tone={active ? "positive" : "warning"} dot>
-              {active ? "Đang bật" : "Tạm tắt"}
-            </Badge>
+            <p className="text-[11.5px] leading-relaxed text-neutral-500 mb-3">
+              Khi tạm tắt, Lazada sẽ ẩn khỏi màn tạo link và API sẽ từ chối tạo link Lazada mới.
+            </p>
           </div>
-          <p className="mb-4 text-[13px] leading-relaxed text-neutral-500">
-            Khi tạm tắt, Lazada sẽ ẩn khỏi màn tạo link và API sẽ từ chối tạo link Lazada mới.
-          </p>
-          <Button type="button" variant={active ? "danger" : "primary"} onClick={togglePlatform} disabled={loading === "toggle"}>
-            <Power size={16} />
-            {active ? "Tạm tắt Lazada" : "Bật Lazada"}
+          <Button
+            type="button"
+            variant={active ? "danger" : "primary"}
+            className="w-full justify-center text-xs"
+            onClick={togglePlatform}
+            disabled={loading === "toggle"}
+          >
+            <Power size={14} />
+            <span>{active ? "Tạm tắt Lazada" : "Bật Lazada"}</span>
           </Button>
         </div>
 
-        <div className="rounded-2xl border border-neutral-100 p-6">
-          <div className="mb-4 flex items-center gap-2">
-            <Activity size={16} className="text-neutral-500" />
-            <div className="text-[14px] font-bold text-neutral-900">Cấu hình Lazada Open API</div>
+        {/* Cấu hình Lazada Open API */}
+        <div className="rounded-2xl border border-neutral-100 bg-neutral-50/50 p-4 sm:p-5 flex flex-col justify-between">
+          <div>
+            <div className="mb-2.5 flex items-center justify-between gap-2">
+              <div className="flex items-center gap-1.5 font-extrabold text-xs text-neutral-900">
+                <Activity size={14} className="text-neutral-500" />
+                <span>Cấu Hình Lazada</span>
+              </div>
+              <span className="font-mono text-[11px] text-neutral-500 font-bold">
+                TOP API
+              </span>
+            </div>
+            <div className="grid grid-cols-2 gap-1.5 text-[11px] mb-2">
+              <Status label="App key" ok={config.hasAppKey} />
+              <Status label="App secret" ok={config.hasAppSecret} />
+              <Status label="Access token" ok={config.hasAccessToken} />
+              <Status label="Sẵn sàng" ok={config.ready} />
+            </div>
           </div>
-          <div className="grid grid-cols-2 gap-2 text-[12px]">
-            <Status label="App key" ok={config.hasAppKey} />
-            <Status label="App secret" ok={config.hasAppSecret} />
-            <Status label="Access token" ok={config.hasAccessToken} />
-            <Status label="Sẵn sàng" ok={config.ready} />
-          </div>
-          <div className="mt-4 rounded-xl bg-neutral-50 p-3 text-[12px] text-neutral-500">
-            <div>Base URL: <span className="font-mono">{config.baseUrl}</span></div>
-          </div>
-          <Button type="button" variant="secondary" className="mt-4" onClick={testConnection} disabled={loading === "test"}>
-            <Activity size={16} />
-            Kiểm tra kết nối
+          <Button
+            type="button"
+            variant="secondary"
+            className="w-full justify-center text-xs mt-1"
+            onClick={testConnection}
+            disabled={loading === "test"}
+          >
+            <Activity size={14} />
+            <span>Kiểm tra kết nối</span>
           </Button>
         </div>
       </div>
 
-      <div className="rounded-2xl border border-neutral-100 p-6">
-        <div className="mb-4 flex items-center gap-2">
-          <RefreshCw size={16} className="text-neutral-500" />
-          <div className="text-[14px] font-bold text-neutral-900">Đồng bộ đơn Lazada</div>
+      {/* ─── HÀNG 2: ĐỒNG BỘ ĐƠN HÀNG LAZADA ─── */}
+      <div className="rounded-2xl border border-neutral-200/90 bg-white p-4 sm:p-5 shadow-xs flex flex-col gap-4">
+        <div className="flex items-center justify-between border-b border-neutral-100 pb-3 flex-wrap gap-2">
+          <div className="flex items-center gap-2">
+            <div className="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center font-black">
+              <RefreshCw size={14} />
+            </div>
+            <div className="text-[13.5px] font-black text-neutral-900">Đồng Bộ Đơn Hàng Lazada</div>
+          </div>
+          <span className="text-[11px] font-bold text-neutral-400">
+            Conversion Report API
+          </span>
         </div>
-        <div className="flex items-center gap-4">
-          <Button type="button" onClick={syncOrders} disabled={loading === "sync"}>
-            <RefreshCw size={16} />
-            Đồng bộ ngay
+
+        {/* Nút chọn nhanh số ngày quét */}
+        <div>
+          <div className="flex items-center justify-between mb-1.5">
+            <span className="text-[11px] font-extrabold uppercase tracking-wider text-neutral-400">
+              Chọn khoảng thời gian quét:
+            </span>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            {[
+              { days: 7, label: "7 ngày qua" },
+              { days: 14, label: "14 ngày qua" },
+              { days: 30, label: "30 ngày qua" },
+              { days: 60, label: "60 ngày qua" },
+            ].map((p) => {
+              const active = selectedDays === p.days;
+              return (
+                <button
+                  key={p.days}
+                  type="button"
+                  onClick={() => setSelectedDays(p.days)}
+                  className={`px-2.5 py-2 rounded-xl text-xs font-bold transition-all border cursor-pointer ${
+                    active
+                      ? "bg-blue-50 text-blue-700 border-blue-300 shadow-2xs font-black ring-1 ring-blue-200"
+                      : "bg-neutral-50/80 text-neutral-600 border-neutral-200 hover:bg-white hover:border-neutral-300"
+                  }`}
+                >
+                  {p.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Nút hành động Đồng bộ */}
+        <div className="pt-1 flex flex-col sm:flex-row items-center gap-3">
+          <Button
+            type="button"
+            onClick={syncOrders}
+            disabled={loading === "sync"}
+            className="w-full sm:w-auto whitespace-nowrap bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-extrabold shadow-sm text-xs px-5 py-2.5 rounded-xl cursor-pointer shrink-0"
+          >
+            <span>{loading === "sync" ? "Đang đồng bộ..." : "Đồng bộ đơn"}</span>
           </Button>
-          <p className="text-[12px] text-neutral-500">
-            Quét 30 ngày gần nhất qua Lazada Conversion Report, map đúng khách theo subId đã gắn khi tạo link.
+
+          <p className="text-[11px] text-neutral-400 font-medium leading-relaxed">
+            Quét {selectedDays} ngày gần nhất qua Conversion Report, tự map đúng khách theo subId.
           </p>
         </div>
       </div>
@@ -237,9 +307,11 @@ export function LazadaIntegrationPanel({ platformStatus, config }: Props) {
 
 function Status({ label, ok }: { label: string; ok: boolean }) {
   return (
-    <div className="flex items-center justify-between rounded-lg bg-neutral-50 px-3 py-1.5">
-      <span className="text-neutral-500">{label}</span>
-      <span className={ok ? "font-bold text-emerald-600" : "font-bold text-amber-600"}>{ok ? "OK" : "Thiếu"}</span>
+    <div className="flex items-center justify-between rounded-lg bg-white border border-neutral-200/80 px-2 py-1 shadow-2xs">
+      <span className="text-neutral-500 font-medium">{label}</span>
+      <span className={ok ? "font-bold text-emerald-600" : "font-bold text-amber-600"}>
+        {ok ? "OK" : "Thiếu"}
+      </span>
     </div>
   );
 }

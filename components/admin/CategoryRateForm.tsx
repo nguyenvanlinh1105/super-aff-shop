@@ -6,10 +6,16 @@ import { Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { TextInput } from "@/components/ui/TextInput";
 
+function cleanNumberInput(raw: string): string {
+  if (raw === "") return "";
+  if (raw === "0" || raw.startsWith("0.")) return raw;
+  return raw.replace(/^0+(?=\d)/, "");
+}
+
 type Row = {
   name: string;
   keywords: string;
-  rate: number;
+  rate: number | string;
   isDefault: boolean;
 };
 
@@ -43,7 +49,12 @@ export function CategoryRateForm({ initialRows }: { initialRows: Row[] }) {
     const res = await fetch("/api/settings/category-rates", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ rates: rows }),
+      body: JSON.stringify({
+        rates: rows.map((r) => ({
+          ...r,
+          rate: Number(r.rate) || 0,
+        })),
+      }),
     });
 
     setLoading(false);
@@ -103,7 +114,12 @@ export function CategoryRateForm({ initialRows }: { initialRows: Row[] }) {
                     min={0}
                     max={100}
                     value={row.rate}
-                    onChange={(e) => updateRow(i, { rate: Number(e.target.value) })}
+                    onChange={(e) => updateRow(i, { rate: cleanNumberInput(e.target.value) })}
+                    onBlur={() => {
+                      if (row.rate === "" || isNaN(Number(row.rate))) {
+                        updateRow(i, { rate: 0 });
+                      }
+                    }}
                     className="h-9 text-[13px]"
                   />
                 </td>

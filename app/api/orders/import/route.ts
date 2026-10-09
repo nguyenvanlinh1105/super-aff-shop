@@ -7,7 +7,7 @@ import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
 import { parseImportCsv } from "@/lib/csvImport";
 import { parseShopeeAffiliateCsv } from "@/lib/shopeeAffiliateCsv";
-import { getActiveCommissionRule, splitCommission, isWithinReferralWindow, isSettlementReady, getCustomerTierRate } from "@/lib/commission";
+import { getActiveCommissionRule, splitCommission, isWithinReferralWindow, isSettlementReady, getCustomerTierRate, getEffectivePartnerRate } from "@/lib/commission";
 import { notifyCustomerTelegram } from "@/lib/telegramNotify";
 import { buildOrderApprovedMessage, buildReferralBonusMessage } from "@/lib/telegramBot";
 import { notifyCustomerInApp } from "@/lib/notifications";
@@ -556,17 +556,17 @@ export async function POST(req: NextRequest) {
             if (isPartner || referrerBonusCount < maxOrders) {
               // ============================================================
               // Hoa hồng giới thiệu được TRÍCH TỪ PHẦN HỆ THỐNG GIỮ, không
-              // đụng vào 80% của khách (B) — đúng chủ trương: đơn của B thay
-              // vì hệ thống giữ đủ systemRate% (vd 20%) thì giữ lại
-              // (systemRate - referralRate)% (vd 15%), phần chênh lệch
-              // (vd 5%) chuyển cho người giới thiệu (A). B không mất gì.
-              //
-              // afterTaxAmount dựng lại từ 2 số ĐÃ lưu trên đơn gốc (thay vì
-              // suy ngược từ customerRate hiện tại) để không lệch nếu rule
-              // hoa hồng đã đổi giữa lúc đơn được tính và lúc đơn được duyệt.
+              // đụng vào 80% của khách (B).
+              // Nếu là ĐỐI TÁC (isPartner), tỷ lệ được tra cứu chính xác theo
+              // khoảng thời gian hiệu lực tại thời điểm đơn phát sinh (referenceDate)
+              // (vd: 1/10-1/11 là 7%, 1/11-1/12 là 10%), bảo toàn toàn bộ quá khứ.
               // ============================================================
+              const effectiveRate = isPartner
+                ? await getEffectivePartnerRate(customerData.referredById, referenceDate, referralRate)
+                : referralRate;
+
               const afterTaxAmount = split.customerRewardAmount.add(split.systemProfitAmount);
-              const bonusAmount = afterTaxAmount.mul(referralRate).toDecimalPlaces(0);
+              const bonusAmount = afterTaxAmount.mul(effectiveRate).toDecimalPlaces(0);
               const systemProfitAfterReferral = split.systemProfitAmount.sub(bonusAmount);
               referralBonusCount++;
               referralBonusTotal = referralBonusTotal.add(bonusAmount);

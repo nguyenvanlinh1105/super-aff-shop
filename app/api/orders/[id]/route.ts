@@ -5,7 +5,7 @@ import { getSession } from "@/lib/auth";
 import { notifyCustomerTelegram } from "@/lib/telegramNotify";
 import { buildOrderApprovedMessage, buildReferralBonusMessage } from "@/lib/telegramBot";
 import { notifyCustomerInApp } from "@/lib/notifications";
-import { isWithinReferralWindow, isSettlementReady, SETTLEMENT_DAYS } from "@/lib/commission";
+import { isWithinReferralWindow, isSettlementReady, SETTLEMENT_DAYS, getEffectivePartnerRate } from "@/lib/commission";
 
 export async function PATCH(req: NextRequest, { params }: { params: { id: string } }) {
   const session = await getSession();
@@ -162,13 +162,18 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
         if (isPartner || referrerBonusCount < maxOrders) {
           // ============================================================
           // Hoa hồng giới thiệu TRÍCH TỪ PHẦN HỆ THỐNG GIỮ, không đụng vào
-          // 80% của khách (B) — cùng công thức và lý do như trong
-          // orders/import/route.ts.
+          // 80% của khách (B).
+          // Đối tác (isPartner) được tra cứu tỷ lệ theo khoảng thời gian hiệu lực
+          // tại thời điểm đơn phát sinh (referenceDate) (3%, 5%, 7%, 10%...).
           // ============================================================
+          const effectiveRate = isPartner
+            ? await getEffectivePartnerRate(customerData.referredById, referenceDate, referralRate)
+            : referralRate;
+
           const afterTaxAmount = new Prisma.Decimal(updated.customerRewardAmount).add(
             new Prisma.Decimal(updated.systemProfitAmount)
           );
-          const bonusAmount = afterTaxAmount.mul(referralRate).toDecimalPlaces(0);
+          const bonusAmount = afterTaxAmount.mul(effectiveRate).toDecimalPlaces(0);
           const systemProfitAfterReferral = new Prisma.Decimal(updated.systemProfitAmount).sub(bonusAmount);
 
           await prisma.order.update({

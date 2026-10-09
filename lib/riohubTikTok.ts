@@ -211,6 +211,9 @@ export async function buildTikTokProductSnapshot(product: RioHubProduct | null) 
     productSold: typeof product.units_sold === "number" ? product.units_sold : null,
     estimatedCashback: cashback?.estimatedCashback ?? null,
     estimatedCashbackCategory: cashback?.categoryName ?? null,
+    categoryRate: cashback?.categoryRate ?? null,
+    customerEffectiveRate: cashback?.customerEffectiveRate ?? null,
+    sampleCashbacks: cashback?.sampleCashbacks ?? undefined,
   };
 }
 

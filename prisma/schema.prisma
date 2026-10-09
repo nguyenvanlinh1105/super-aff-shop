@@ -102,6 +102,7 @@ model Customer {
   telegramMessageLogs TelegramMessageLog[]
   telegramLinkCodes   TelegramLinkCode[]
   withdrawRequests    WithdrawRequest[]
+  partnerRatePeriods  PartnerRatePeriod[]
 
   @@index([phone])
   @@index([zaloUserId])
@@ -411,6 +412,27 @@ model CategoryCommissionRate {
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
 
   @@map("category_commission_rates")
+}
+
+// Cấu hình tỷ lệ hoa hồng đối tác theo từng khoảng thời gian (Temporal Rates).
+// Cho phép admin gán % (3, 5, 7, 10...) cho từng đối tác cụ thể kèm mốc bắt đầu
+// và kết thúc. Khi tính hoa hồng đơn hàng, hệ thống đối chiếu thời điểm phát sinh
+// đơn để áp dụng đúng mức % của giai đoạn đó mà không làm ảnh hưởng quá khứ.
+model PartnerRatePeriod {
+  id         String    @id @default(uuid())
+  customerId String    @map("customer_id")
+  rate       Decimal   // % hoa hồng đối tác nhận (vd: 0.03, 0.05, 0.07, 0.10)
+  startsAt   DateTime  @map("starts_at")
+  endsAt     DateTime? @map("ends_at") // null = vô thời hạn từ startsAt
+  note       String?
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @default(now()) @updatedAt @map("updated_at")
+
+  customer   Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  @@index([customerId])
+  @@index([startsAt, endsAt])
+  @@map("partner_rate_periods")
 }
 
 model PaymentBatch {

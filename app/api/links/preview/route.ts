@@ -63,15 +63,18 @@ export async function POST(req: NextRequest) {
       extractPriceFromTitle(title) ??
       null;
 
-    const cashback = price != null ? await estimateCashback(title, price) : null;
+    const cashback = await estimateCashback(title, price);
 
     return NextResponse.json({
       platformCode: platform.toUpperCase(),
       productTitle: title,
       productImage: image,
       productPrice: price,
-      estimatedCashback: cashback ? Number(cashback.estimatedCashback) : null,
+      estimatedCashback: cashback?.estimatedCashback != null ? Number(cashback.estimatedCashback) : null,
       categoryName: cashback?.categoryName ?? null,
+      categoryRate: cashback?.categoryRate != null ? Number(cashback.categoryRate) : null,
+      customerEffectiveRate: cashback?.customerEffectiveRate != null ? Number(cashback.customerEffectiveRate) : null,
+      sampleCashbacks: cashback?.sampleCashbacks ?? null,
     });
   } catch {
     // Không lấy được thông tin sản phẩm (link lạ, site chặn bot...) — vẫn
@@ -83,6 +86,9 @@ export async function POST(req: NextRequest) {
       productPrice: null,
       estimatedCashback: null,
       categoryName: null,
+      categoryRate: null,
+      customerEffectiveRate: null,
+      sampleCashbacks: null,
     });
   }
 }

@@ -24,6 +24,15 @@ interface CustomerSettingsClientProps {
     email: string;
     createdAt: Date;
     isPartner: boolean;
+    partnerRatePercent?: number;
+    partnerPeriodText?: string;
+    partnerRatePeriods?: Array<{
+      id: string;
+      rate: number;
+      startsAt: string;
+      endsAt: string | null;
+      note: string | null;
+    }>;
     hasPaymentPin?: boolean;
     hasBankInfo?: boolean;
     hasTelegram?: boolean;

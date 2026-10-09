@@ -1,6 +1,6 @@
 import { Prisma } from "@prisma/client";
 import { prisma } from "./prisma";
-import { getActiveCommissionRule, isWithinReferralWindow, isSettlementReady, splitCommission } from "./commission";
+import { getActiveCommissionRule, isWithinReferralWindow, isSettlementReady, splitCommission, getEffectivePartnerRate } from "./commission";
 import { notifyCustomerInApp } from "./notifications";
 import { notifyCustomerTelegram } from "./telegramNotify";
 import { buildOrderApprovedMessage, buildReferralBonusMessage } from "./telegramBot";
@@ -321,8 +321,12 @@ async function handleApprovedLazadaOrder(orderId: string) {
 
   if (!isPartner && referrerBonusCount >= maxOrders) return;
 
+  const effectiveRate = isPartner
+    ? await getEffectivePartnerRate(customerData.referredById, referenceDate, referralRate)
+    : referralRate;
+
   const afterTaxAmount = new Prisma.Decimal(order.customerRewardAmount).add(new Prisma.Decimal(order.systemProfitAmount));
-  const bonusAmount = afterTaxAmount.mul(referralRate).toDecimalPlaces(0);
+  const bonusAmount = afterTaxAmount.mul(effectiveRate).toDecimalPlaces(0);
   const systemProfitAfterReferral = new Prisma.Decimal(order.systemProfitAmount).sub(bonusAmount);
 
   await prisma.order.update({

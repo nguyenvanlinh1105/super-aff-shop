@@ -3,9 +3,14 @@ import { prisma } from "./prisma";
 import { getActiveCommissionRule, splitCommission } from "./commission";
 
 export type CashbackEstimate = {
-  estimatedCashback: Prisma.Decimal;
+  estimatedCashback: Prisma.Decimal | null;
   categoryName: string;
   categoryRate: Prisma.Decimal;
+  customerEffectiveRate?: Prisma.Decimal;
+  sampleCashbacks?: {
+    orderAmount: number;
+    cashback: number;
+  }[];
 };
 
 function stripDiacritics(text: string): string {
@@ -31,17 +36,17 @@ export async function estimateCashback(
   price: number | null,
   realGrossCommission?: number | null
 ): Promise<CashbackEstimate | null> {
+  const rule = await getActiveCommissionRule();
+
   if (realGrossCommission != null && realGrossCommission > 0) {
-    const rule = await getActiveCommissionRule();
     const split = splitCommission(realGrossCommission, rule);
     return {
       estimatedCashback: split.customerRewardAmount,
       categoryName: "Hoa hồng thực tế sản phẩm",
       categoryRate: split.customerRate,
+      customerEffectiveRate: split.customerRate,
     };
   }
-
-  if (!price || price <= 0) return null;
 
   const categories = await prisma.categoryCommissionRate.findMany({ orderBy: { sortOrder: "asc" } });
   if (categories.length === 0) return null;
@@ -60,13 +65,38 @@ export async function estimateCashback(
     categories.find((c) => c.isDefault) ??
     categories[categories.length - 1];
 
+  const taxRate = rule?.taxRate != null ? new Prisma.Decimal(rule.taxRate) : new Prisma.Decimal(10.98);
+  const customerRate = rule ? new Prisma.Decimal(rule.customerRate) : new Prisma.Decimal(80);
+  const afterTaxMultiplier = new Prisma.Decimal(100).sub(taxRate).div(100);
+  const customerEffectiveRate = new Prisma.Decimal(matched.rate).mul(afterTaxMultiplier).mul(customerRate).div(100);
+
+  const samples = [100000, 200000, 500000].map((amt) => {
+    const gross = new Prisma.Decimal(amt).mul(matched.rate).div(100);
+    const split = splitCommission(gross, rule);
+    return {
+      orderAmount: amt,
+      cashback: Math.round(Number(split.customerRewardAmount)),
+    };
+  });
+
+  if (!price || price <= 0) {
+    return {
+      estimatedCashback: null,
+      categoryName: matched.name,
+      categoryRate: matched.rate,
+      customerEffectiveRate,
+      sampleCashbacks: samples,
+    };
+  }
+
   const grossCommission = new Prisma.Decimal(price).mul(matched.rate).div(100);
-  const rule = await getActiveCommissionRule();
   const split = splitCommission(grossCommission, rule);
 
   return {
     estimatedCashback: split.customerRewardAmount,
     categoryName: matched.name,
     categoryRate: matched.rate,
+    customerEffectiveRate,
+    sampleCashbacks: samples,
   };
 }

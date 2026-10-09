@@ -109,22 +109,21 @@ export async function POST(req: NextRequest) {
       manualPrice: typeof productPrice === "number" && productPrice > 0 ? productPrice : null,
     });
 
+    const linkPayload = {
+      ...result.link,
+      generatedLink: result.generatedLink,
+      subId: result.subId,
+      shortCode: result.shortCode,
+      categoryName: result.categoryName,
+      categoryRate: result.categoryRate,
+      customerEffectiveRate: result.customerEffectiveRate,
+      sampleCashbacks: result.sampleCashbacks,
+    };
+
     return NextResponse.json({
       success: true,
-      data: [
-        {
-          ...result.link,
-          generatedLink: result.generatedLink,
-          subId: result.subId,
-          shortCode: result.shortCode,
-        },
-      ],
-      link: {
-        ...result.link,
-        generatedLink: result.generatedLink,
-        subId: result.subId,
-        shortCode: result.shortCode,
-      },
+      data: [linkPayload],
+      link: linkPayload,
     });
   } catch (error) {
     return NextResponse.json(

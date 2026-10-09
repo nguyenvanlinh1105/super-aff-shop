@@ -118,16 +118,17 @@ export async function createTrackingLink(params: {
     productInfo?.sold ??
     null;
 
-  // Tính tiền hoàn: Nếu RioHub có snapshot với hoa hồng thật thì dùng, nếu không thì ước tính theo ngành hàng
+  // Tính tiền hoàn: Nếu RioHub có snapshot với hoa hồng thật thì dùng, nếu không thì tự động ước tính theo ngành hàng
   const cashback =
     tikTokSnapshot?.estimatedCashback != null
       ? {
           estimatedCashback: tikTokSnapshot.estimatedCashback,
           categoryName: tikTokSnapshot.estimatedCashbackCategory || "TikTok Shop",
+          categoryRate: tikTokSnapshot.categoryRate ?? null,
+          customerEffectiveRate: tikTokSnapshot.customerEffectiveRate ?? null,
+          sampleCashbacks: tikTokSnapshot.sampleCashbacks ?? undefined,
         }
-      : productPrice != null
-      ? await estimateCashback(productTitle, productPrice)
-      : null;
+      : await estimateCashback(productTitle, productPrice);
 
   const link = await prisma.trackingLink.create({
     data: {
@@ -158,6 +159,10 @@ export async function createTrackingLink(params: {
     shortUrl,
     subId: subIds.subId2,
     estimatedCashbackCategory: cashback?.categoryName ?? null,
+    categoryName: cashback?.categoryName ?? null,
+    categoryRate: cashback?.categoryRate != null ? Number(cashback.categoryRate) : null,
+    customerEffectiveRate: cashback?.customerEffectiveRate != null ? Number(cashback.customerEffectiveRate) : null,
+    sampleCashbacks: cashback?.sampleCashbacks ?? null,
   };
 }
 

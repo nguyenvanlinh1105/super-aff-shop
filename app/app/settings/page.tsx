@@ -12,29 +12,52 @@ export default async function CustomerSettingsPage({ searchParams }: { searchPar
 
   const defaultTab = searchParams?.tab || "profile";
 
-  const customer = await prisma.customer.findUnique({
-    where: { id: session.customerId },
-    select: { 
-      id: true,
-      fullName: true, 
-      phone: true,
-      address: true,
-      createdAt: true,
-      isPartner: true,
-      paymentPin: true,
-      bankName: true,
-      bankAccountNumber: true,
-      telegramUsername: true,
-      telegramUserId: true,
-      user: { select: { email: true } }
-    },
-  });
+  const [customer, activeRule] = await Promise.all([
+    prisma.customer.findUnique({
+      where: { id: session.customerId },
+      select: { 
+        id: true,
+        fullName: true, 
+        phone: true,
+        address: true,
+        createdAt: true,
+        isPartner: true,
+        paymentPin: true,
+        bankName: true,
+        bankAccountNumber: true,
+        telegramUsername: true,
+        telegramUserId: true,
+        user: { select: { email: true } },
+        partnerRatePeriods: { orderBy: { startsAt: "desc" } },
+      },
+    }),
+    prisma.commissionRule.findFirst({
+      where: { active: true },
+      orderBy: { createdAt: "desc" },
+    }),
+  ]);
 
   if (!customer) redirect("/login");
 
   const hasPin = !!customer.paymentPin;
   const hasBank = !!(customer.bankName && customer.bankAccountNumber);
   const hasTelegram = !!(customer.telegramUserId || customer.telegramUsername);
+
+  // Tính toán tỷ lệ đối tác hiệu lực hiện tại
+  const now = new Date();
+  const activePartnerPeriod = customer.partnerRatePeriods.find(
+    (p) => p.startsAt <= now && (!p.endsAt || p.endsAt >= now)
+  );
+  const fallbackPartnerRate = activeRule?.referralRate ? Math.round(Number(activeRule.referralRate) * 100) : 5;
+  const partnerCurrentPercent = activePartnerPeriod
+    ? Math.round(Number(activePartnerPeriod.rate) * 100)
+    : fallbackPartnerRate;
+
+  const partnerPeriodText = activePartnerPeriod
+    ? activePartnerPeriod.endsAt
+      ? `${new Date(activePartnerPeriod.startsAt).toLocaleDateString("vi-VN")} - ${new Date(activePartnerPeriod.endsAt).toLocaleDateString("vi-VN")}`
+      : `Từ ${new Date(activePartnerPeriod.startsAt).toLocaleDateString("vi-VN")} (Vô thời hạn)`
+    : "Vô thời hạn";
 
   return (
     <div className="flex w-full flex-col gap-6 sm:gap-7">
@@ -101,6 +124,15 @@ export default async function CustomerSettingsPage({ searchParams }: { searchPar
           email: customer.user?.email || "",
           createdAt: customer.createdAt,
           isPartner: customer.isPartner,
+          partnerRatePercent: partnerCurrentPercent,
+          partnerPeriodText,
+          partnerRatePeriods: customer.partnerRatePeriods.map((p) => ({
+            id: p.id,
+            rate: Math.round(Number(p.rate) * 100),
+            startsAt: p.startsAt.toISOString(),
+            endsAt: p.endsAt ? p.endsAt.toISOString() : null,
+            note: p.note,
+          })),
           hasPaymentPin: hasPin,
           hasBankInfo: hasBank,
           hasTelegram: hasTelegram,

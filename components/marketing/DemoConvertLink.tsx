@@ -16,6 +16,9 @@ type PreviewResult = {
   productPrice: number | null;
   estimatedCashback: number | null;
   categoryName: string | null;
+  categoryRate?: number | null;
+  customerEffectiveRate?: number | null;
+  sampleCashbacks?: { orderAmount: number; cashback: number }[] | null;
 };
 
 const SAMPLE_LINKS = [
@@ -296,6 +299,8 @@ export function DemoConvertLink() {
                   <p className="text-[13px] sm:text-[14.5px] font-black text-emerald-600 mt-0.5">
                     {preview.estimatedCashback
                       ? `Nhận lại ~${formatVnd(preview.estimatedCashback)} về ví 🎀`
+                      : preview.customerEffectiveRate != null
+                      ? `Ngành ${preview.categoryName ?? "sản phẩm"}: Hoàn ~${Number(preview.customerEffectiveRate).toFixed(1)}% về ví 🎀`
                       : "Link hợp lệ! Nhận hoàn tiền ngay."}
                   </p>
                 </div>
