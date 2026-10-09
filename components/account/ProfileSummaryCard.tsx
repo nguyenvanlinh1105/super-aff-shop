@@ -36,7 +36,7 @@ export function ProfileSummaryCard({ customer }: ProfileSummaryCardProps) {
 
   const memberCode = `MB-${customer.id.substring(0, 8).toUpperCase()}`;
   const effectivePercent = customer.partnerRatePercent ?? (customer.isPartner ? 10 : 5);
-  const periodText = customer.partnerPeriodText || "Trọn đời (Vô thời hạn)";
+  const periodText = customer.partnerPeriodText || "Bắt đầu đến Vô thời hạn";
 
   const handleCopyCode = async () => {
     try {
@@ -95,15 +95,13 @@ export function ProfileSummaryCard({ customer }: ProfileSummaryCardProps) {
                 <button
                   type="button"
                   onClick={() => setShowBenefitsModal(true)}
-                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-400 hover:bg-amber-300 text-amber-950 font-black text-[11px] uppercase tracking-wider shadow-sm transition-all hover:scale-105 active:scale-95 cursor-pointer border border-amber-200"
+                  className="inline-flex items-center justify-center px-3 py-1.5 rounded-full bg-amber-400 hover:bg-amber-300 text-amber-950 font-black text-[11px] uppercase tracking-wider shadow-sm transition-all hover:scale-105 active:scale-95 cursor-pointer border border-amber-200 whitespace-nowrap"
                   title="Bấm để xem quyền lợi đối tác"
                 >
-                  <img src="/partner_gold_badge.jpg" alt="" className="w-4 h-4 rounded-full object-cover" />
-                  <span>⭐ ĐỐI TÁC</span>
+                  <span>ĐỐI TÁC</span>
                 </button>
               ) : (
-                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white/90 text-primary-700 font-black text-[11px] uppercase tracking-wider shadow-sm border border-white/60">
-                  <img src="/member_pink_badge.jpg" alt="" className="w-4 h-4 rounded-full object-cover" />
+                <span className="inline-flex items-center justify-center px-2.5 py-1 rounded-full bg-white/90 text-primary-700 font-black text-[11px] uppercase tracking-wider shadow-sm border border-white/60 whitespace-nowrap">
                   <span>THÀNH VIÊN</span>
                 </span>
               )}
@@ -111,32 +109,8 @@ export function ProfileSummaryCard({ customer }: ProfileSummaryCardProps) {
           </div>
         </div>
 
-        {/* ── Body Card (Bỏ avatar to, cực kỳ gọn và tiện ích) ── */}
-        <div className="p-4 sm:p-5 flex flex-col gap-4">
-          {/* Dòng mã ID & Ngày tham gia */}
-          <div className="flex items-center justify-between gap-2 flex-wrap bg-neutral-50/90 rounded-2xl p-2.5 sm:px-3 border border-neutral-100">
-            <button
-              type="button"
-              onClick={handleCopyCode}
-              className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-white text-neutral-700 hover:text-primary-600 text-xs font-bold transition-all border border-neutral-200/80 shadow-2xs cursor-pointer group"
-              title="Bấm để sao chép mã thành viên"
-            >
-              <span className="text-[11px] text-neutral-400 font-semibold">Mã ID:</span>
-              <span className="font-mono font-black text-neutral-800 group-hover:text-primary-600">
-                {memberCode}
-              </span>
-              {copied ? (
-                <Check size={12} className="text-emerald-600 shrink-0" />
-              ) : (
-                <Copy size={12} className="text-neutral-400 group-hover:text-primary-500 shrink-0" />
-              )}
-            </button>
-
-            <span className="text-[11px] text-neutral-500 font-semibold">
-              Gia nhập: <strong className="text-neutral-700">{formatDate(customer.createdAt)}</strong>
-            </span>
-          </div>
-
+        {/* ── Body Card (Dạng List sạch sẽ, tinh tế & dễ nhìn) ── */}
+        <div className="p-4 sm:p-5 flex flex-col gap-3.5">
           {/* ── KHỐI QUYỀN LỢI ĐỐI TÁC (CHỈ HIỂN THỊ KHI LÀ ĐỐI TÁC) ── */}
           {customer.isPartner && (
             <div
@@ -182,104 +156,112 @@ export function ProfileSummaryCard({ customer }: ProfileSummaryCardProps) {
                     hoa hồng trích từ mỗi đơn bạn bè
                   </span>
                 </div>
-                <div className="text-[11px] font-semibold text-amber-900/90 flex items-center gap-1">
-                  <span>📅</span>
+                <div className="text-[11px] font-semibold text-amber-900/90 flex items-center gap-1 whitespace-nowrap">
                   <span className="font-bold">{periodText}</span>
                 </div>
               </div>
             </div>
           )}
 
-          {/* ── Bảng trạng thái tài khoản (Gọn gàng 2 cột, không icon rườm rà) ── */}
-          <div className="rounded-2xl bg-neutral-50/70 border border-neutral-100 p-3 sm:p-3.5">
-            <div className="text-[10.5px] font-black uppercase tracking-wider text-neutral-400 mb-2 px-0.5">
-              Trạng thái xác thực
+          {/* ── Danh sách thông tin tài khoản dạng List sạch sẽ, dễ nhìn ── */}
+          <div className="rounded-2xl bg-white border border-neutral-200/80 divide-y divide-neutral-100 overflow-hidden shadow-2xs">
+            {/* 1. Mã ID */}
+            <div className="flex items-center justify-between p-3 sm:px-3.5 hover:bg-neutral-50/50 transition-colors">
+              <span className="text-neutral-500 font-bold text-xs">Mã ID</span>
+              <button
+                type="button"
+                onClick={handleCopyCode}
+                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-neutral-100 hover:bg-rose-50 text-neutral-800 hover:text-rose-600 font-mono font-black text-xs transition-all border border-neutral-200/80 cursor-pointer group active:scale-95"
+                title="Bấm để sao chép mã"
+              >
+                <span>{memberCode}</span>
+                {copied ? (
+                  <Check size={12} className="text-emerald-600 shrink-0" />
+                ) : (
+                  <Copy size={12} className="text-neutral-400 group-hover:text-rose-500 shrink-0" />
+                )}
+              </button>
             </div>
-            <div className="grid grid-cols-2 gap-2 text-xs">
-              {/* Email */}
-              <div className="flex items-center justify-between bg-white px-2.5 py-1.5 rounded-xl border border-neutral-150 shadow-2xs">
-                <span className="text-neutral-600 font-medium text-[11.5px]">Email</span>
-                <span className="inline-flex items-center gap-1 font-bold text-emerald-600 text-[11px]">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+
+            {/* 2. Email */}
+            <div className="flex items-center justify-between p-3 sm:px-3.5 hover:bg-neutral-50/50 transition-colors gap-2">
+              <span className="text-neutral-500 font-bold text-xs shrink-0">Email</span>
+              <div className="flex items-center gap-2 min-w-0 justify-end">
+                <span className="font-semibold text-neutral-800 text-[11.5px] sm:text-xs text-right truncate" title={customer.email}>
+                  {customer.email}
+                </span>
+                <span className="inline-flex items-center gap-1 font-bold text-emerald-600 text-[10.5px] bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/60 shrink-0 whitespace-nowrap">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
                   Đã xác thực
                 </span>
               </div>
+            </div>
 
-              {/* Mã PIN */}
-              <div className="flex items-center justify-between bg-white px-2.5 py-1.5 rounded-xl border border-neutral-150 shadow-2xs">
-                <span className="text-neutral-600 font-medium text-[11.5px]">Mã PIN</span>
-                {customer.hasPaymentPin ? (
-                  <span className="inline-flex items-center gap-1 font-bold text-emerald-600 text-[11px]">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                    Đã bật
-                  </span>
-                ) : (
-                  <span className="inline-flex items-center gap-1 font-bold text-amber-600 text-[11px]">
-                    <span className="w-1.5 h-1.5 rounded-full bg-amber-400" />
-                    Chưa cài
-                  </span>
-                )}
-              </div>
-
-              {/* Ngân hàng */}
-              <div className="flex items-center justify-between bg-white px-2.5 py-1.5 rounded-xl border border-neutral-150 shadow-2xs">
-                <span className="text-neutral-600 font-medium text-[11.5px]">Ngân hàng</span>
-                {customer.hasBankInfo ? (
-                  <span className="inline-flex items-center gap-1 font-bold text-emerald-600 text-[11px]">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                    Đã liên kết
-                  </span>
-                ) : (
-                  <span className="inline-flex items-center gap-1 font-semibold text-neutral-400 text-[11px]">
-                    <span className="w-1.5 h-1.5 rounded-full bg-neutral-300" />
-                    Chưa liên kết
-                  </span>
-                )}
-              </div>
-
-              {/* Telegram */}
-              <div className="flex items-center justify-between bg-white px-2.5 py-1.5 rounded-xl border border-neutral-150 shadow-2xs">
-                <span className="text-neutral-600 font-medium text-[11.5px]">Telegram</span>
+            {/* 3. Telegram */}
+            <div className="flex items-center justify-between p-3 sm:px-3.5 hover:bg-neutral-50/50 transition-colors">
+              <span className="text-neutral-500 font-bold text-xs">Telegram</span>
+              <a
+                href="#telegram-integration"
+                className="cursor-pointer group"
+                title="Bấm để kết nối hoặc quản lý Telegram"
+              >
                 {customer.hasTelegram ? (
-                  <span className="inline-flex items-center gap-1 font-bold text-blue-600 text-[11px]">
+                  <span className="inline-flex items-center gap-1 font-bold text-blue-600 text-[11px] bg-blue-50 group-hover:bg-blue-100 px-2.5 py-0.5 rounded-full border border-blue-200/60 transition-colors">
                     <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
                     Đã kết nối
                   </span>
                 ) : (
-                  <span className="inline-flex items-center gap-1 font-semibold text-neutral-400 text-[11px]">
-                    <span className="w-1.5 h-1.5 rounded-full bg-neutral-300" />
+                  <span className="inline-flex items-center gap-1 font-semibold text-neutral-400 group-hover:text-blue-700 text-[11px] bg-neutral-100 group-hover:bg-blue-50 px-2.5 py-0.5 rounded-full border border-transparent group-hover:border-blue-200 transition-colors">
+                    <span className="w-1.5 h-1.5 rounded-full bg-neutral-300 group-hover:bg-blue-500" />
                     Chưa kết nối
                   </span>
                 )}
-              </div>
+              </a>
             </div>
-          </div>
 
-          {/* ── Lối tắt tiện ích (Gọn xinh) ── */}
-          <div className="grid grid-cols-3 gap-2 pt-0.5">
-            <Link
-              href="/app/refunds"
-              className="flex flex-col items-center justify-center p-2.5 rounded-2xl bg-primary-50/70 hover:bg-primary-100 text-primary-900 border border-primary-200/60 transition-all text-center group active:scale-95 shadow-2xs"
-            >
-              <span className="text-sm">🔗</span>
-              <span className="text-[11px] font-bold mt-1 line-clamp-1 group-hover:text-primary-600">Tạo link</span>
-            </Link>
+            {/* 4. Ngân hàng */}
+            <div className="flex items-center justify-between p-3 sm:px-3.5 hover:bg-neutral-50/50 transition-colors">
+              <span className="text-neutral-500 font-bold text-xs">Ngân hàng</span>
+              <Link
+                href="/app/wallet"
+                className="cursor-pointer group"
+                title="Bấm để xem và liên kết tài khoản ngân hàng"
+              >
+                {customer.hasBankInfo ? (
+                  <span className="inline-flex items-center gap-1 font-bold text-emerald-600 text-[11px] bg-emerald-50 group-hover:bg-emerald-100 px-2.5 py-0.5 rounded-full border border-emerald-200/60 transition-colors">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                    Đã liên kết
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 font-semibold text-neutral-400 group-hover:text-emerald-700 text-[11px] bg-neutral-100 group-hover:bg-emerald-50 px-2.5 py-0.5 rounded-full border border-transparent group-hover:border-emerald-200 transition-colors">
+                    <span className="w-1.5 h-1.5 rounded-full bg-neutral-300 group-hover:bg-emerald-500" />
+                    Chưa liên kết
+                  </span>
+                )}
+              </Link>
+            </div>
 
-            <Link
-              href="/app/wallet"
-              className="flex flex-col items-center justify-center p-2.5 rounded-2xl bg-emerald-50/70 hover:bg-emerald-100 text-emerald-950 border border-emerald-200/60 transition-all text-center group active:scale-95 shadow-2xs"
-            >
-              <span className="text-sm">👛</span>
-              <span className="text-[11px] font-bold mt-1 line-clamp-1 group-hover:text-emerald-700">Rút tiền</span>
-            </Link>
-
-            <Link
-              href="/app/referral"
-              className="flex flex-col items-center justify-center p-2.5 rounded-2xl bg-purple-50/70 hover:bg-purple-100 text-purple-950 border border-purple-200/60 transition-all text-center group active:scale-95 shadow-2xs"
-            >
-              <span className="text-sm">🎁</span>
-              <span className="text-[11px] font-bold mt-1 line-clamp-1 group-hover:text-purple-700">Mời bạn</span>
-            </Link>
+            {/* 5. Mã PIN rút tiền */}
+            <div className="flex items-center justify-between p-3 sm:px-3.5 hover:bg-neutral-50/50 transition-colors">
+              <span className="text-neutral-500 font-bold text-xs">Mã PIN rút tiền</span>
+              <a
+                href="#pin-security"
+                className="cursor-pointer group"
+                title="Bấm để cài đặt hoặc quản lý mã PIN rút tiền"
+              >
+                {customer.hasPaymentPin ? (
+                  <span className="inline-flex items-center gap-1 font-bold text-emerald-600 text-[11px] bg-emerald-50 group-hover:bg-emerald-100 px-2.5 py-0.5 rounded-full border border-emerald-200/60 transition-colors">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                    Đã cài đặt
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 font-semibold text-neutral-400 group-hover:text-amber-700 text-[11px] bg-neutral-100 group-hover:bg-amber-50 px-2.5 py-0.5 rounded-full border border-transparent group-hover:border-amber-200 transition-colors">
+                    <span className="w-1.5 h-1.5 rounded-full bg-neutral-300 group-hover:bg-amber-500" />
+                    Chưa cài đặt
+                  </span>
+                )}
+              </a>
+            </div>
           </div>
         </div>
       </div>
@@ -316,50 +298,41 @@ export function ProfileSummaryCard({ customer }: ProfileSummaryCardProps) {
               </div>
             </div>
 
-            {/* Box Tỷ lệ nổi bật Gọn gàng */}
-            <div className="rounded-2xl bg-gradient-to-br from-amber-50 via-rose-50/50 to-amber-50/80 p-3.5 border-2 border-amber-300 shadow-xs flex items-center justify-between gap-3">
-              <div>
-                <span className="text-[10.5px] font-extrabold text-amber-900 uppercase tracking-wider block">
-                  Tỷ lệ hoa hồng hiện tại
+            {/* Box Tỷ lệ nổi bật Gọn gàng (Không icon tràn viền) */}
+            <div className="rounded-2xl bg-gradient-to-br from-amber-50 via-rose-50/50 to-amber-50/80 p-3.5 border-2 border-amber-300 shadow-xs flex flex-col gap-1">
+              <span className="text-[10.5px] font-extrabold text-amber-900 uppercase tracking-wider block">
+                Tỷ lệ hoa hồng hiện tại
+              </span>
+              <div className="flex items-baseline gap-1.5">
+                <span className="text-3xl font-black text-rose-600 leading-tight tabular-nums">
+                  +{effectivePercent}%
                 </span>
-                <div className="flex items-baseline gap-1.5 mt-0.5">
-                  <span className="text-3xl font-black text-rose-600 leading-tight tabular-nums">
-                    +{effectivePercent}%
-                  </span>
-                  <span className="text-[11px] font-bold text-neutral-700">
-                    / mỗi đơn bạn bè
-                  </span>
-                </div>
-                <span className="text-[11px] text-amber-900/90 font-medium block mt-0.5">
-                  📅 Hiệu lực: <strong className="text-neutral-900">{periodText}</strong>
+                <span className="text-[11px] font-bold text-neutral-700">
+                  / mỗi đơn bạn bè
                 </span>
               </div>
-              <div className="w-11 h-11 rounded-xl overflow-hidden shrink-0 shadow-xs border border-amber-200 bg-white p-0.5">
-                <img
-                  src="/partner_benefits_gift.jpg"
-                  alt=""
-                  className="w-full h-full object-cover rounded-lg"
-                />
-              </div>
+              <span className="text-[10.5px] sm:text-[11px] text-amber-900/90 font-medium block mt-0.5 whitespace-nowrap">
+                Hiệu lực: <strong className="text-neutral-900">{periodText}</strong>
+              </span>
             </div>
 
-            {/* Danh sách 3 đặc quyền súc tích (1 dòng mỗi cái, cực gọn) */}
-            <div className="rounded-2xl bg-neutral-50/90 border border-neutral-150 p-2.5 flex flex-col gap-1.5 text-[11.5px]">
-              <div className="flex items-center gap-2">
-                <span className="text-xs shrink-0">♾️</span>
-                <span className="text-neutral-700">
+            {/* Danh sách 3 đặc quyền súc tích (1 dòng mỗi cái, cực gọn, không icon) */}
+            <div className="rounded-2xl bg-neutral-50/90 border border-neutral-150 p-2.5 flex flex-col gap-1.5 text-[11px] sm:text-[11.5px]">
+              <div className="flex items-center gap-1.5 whitespace-nowrap">
+                <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" />
+                <span className="text-neutral-700 truncate">
                   <strong className="text-neutral-900">Không giới hạn đơn:</strong> Nhận hoa hồng trọn đời
                 </span>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="text-xs shrink-0">⏳</span>
-                <span className="text-neutral-700">
-                  <strong className="text-neutral-900">Vô thời hạn:</strong> Tính vĩnh viễn, không chặn 6 tháng
+              <div className="flex items-center gap-1.5 whitespace-nowrap">
+                <span className="w-1.5 h-1.5 rounded-full bg-rose-500 shrink-0" />
+                <span className="text-neutral-700 truncate">
+                  <strong className="text-neutral-900">Vô thời hạn:</strong> Tính vĩnh viễn trọn đời
                 </span>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="text-xs shrink-0">💎</span>
-                <span className="text-neutral-700">
+              <div className="flex items-center gap-1.5 whitespace-nowrap">
+                <span className="w-1.5 h-1.5 rounded-full bg-purple-500 shrink-0" />
+                <span className="text-neutral-700 truncate">
                   <strong className="text-neutral-900">Ưu đãi linh hoạt:</strong> Tỷ lệ cao theo từng chiến dịch
                 </span>
               </div>

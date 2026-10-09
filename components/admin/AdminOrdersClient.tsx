@@ -21,6 +21,8 @@ import {
   Gift,
   Calendar,
   CalendarDays,
+  ShoppingBag,
+  Package,
   type LucideIcon,
 } from "lucide-react";
 import type { ComboboxOption } from "@/components/ui/SearchableSelect";
@@ -29,6 +31,7 @@ type Order = {
   id: string;
   orderExternalId: string;
   itemName: string | null;
+  productImage?: string | null;
   platformName: string;
   customerName: string | null;
   customerId: string | null;
@@ -505,17 +508,17 @@ export function AdminOrdersClient({
         </div>
 
         <div className="responsive-table overflow-x-auto">
-          <table className="w-full text-left text-xs min-w-[1360px]">
+          <table className="w-full text-left text-xs min-w-[1440px]">
             <thead>
               <tr className="border-b border-neutral-100 bg-neutral-50/80">
-                <th className="px-4 py-3 font-extrabold uppercase tracking-wider text-neutral-400 text-[10px] whitespace-nowrap">Đơn hàng / Tracking</th>
+                <th className="px-4 py-3 font-extrabold uppercase tracking-wider text-neutral-400 text-[10px] whitespace-nowrap min-w-[280px]">Đơn hàng / Tracking</th>
                 <th className="px-4 py-3 font-extrabold uppercase tracking-wider text-neutral-400 text-[10px] whitespace-nowrap min-w-[140px]">Khách hàng</th>
-                <th className="px-4 py-3 font-extrabold uppercase tracking-wider text-neutral-400 text-[10px] whitespace-nowrap">Thời Gian</th>
-                <th className="px-4 py-3 font-extrabold uppercase tracking-wider text-neutral-400 text-[10px] text-right whitespace-nowrap">Giá trị đơn</th>
-                <th className="px-4 py-3 font-extrabold uppercase tracking-wider text-neutral-400 text-[10px] text-right whitespace-nowrap">HH Trước Thuế</th>
-                <th className="px-4 py-3 font-extrabold uppercase tracking-wider text-rose-600 text-[10px] text-right whitespace-nowrap">Tiền Hoàn / Giữ Lại</th>
-                <th className="px-4 py-3 font-extrabold uppercase tracking-wider text-purple-600 text-[10px] text-right whitespace-nowrap">Trích Giới Thiệu</th>
-                <th className="px-4 py-3 font-extrabold uppercase tracking-wider text-neutral-400 text-[10px] whitespace-nowrap w-[150px]">Trạng thái</th>
+                <th className="px-4 py-3 font-extrabold uppercase tracking-wider text-neutral-400 text-[10px] whitespace-nowrap min-w-[110px]">Thời Gian</th>
+                <th className="px-4 py-3 font-extrabold uppercase tracking-wider text-neutral-400 text-[10px] text-right whitespace-nowrap min-w-[100px]">Giá trị đơn</th>
+                <th className="px-4 py-3 font-extrabold uppercase tracking-wider text-neutral-400 text-[10px] text-right whitespace-nowrap min-w-[100px]">HH Trước Thuế</th>
+                <th className="px-4 py-3 font-extrabold uppercase tracking-wider text-rose-600 text-[10px] text-right whitespace-nowrap min-w-[130px]">Tiền Hoàn / Giữ Lại</th>
+                <th className="px-4 py-3 font-extrabold uppercase tracking-wider text-purple-600 text-[10px] text-right whitespace-nowrap min-w-[140px]">Trích Giới Thiệu</th>
+                <th className="px-4 py-3 font-extrabold uppercase tracking-wider text-neutral-400 text-[10px] whitespace-nowrap min-w-[150px] w-[150px]">Trạng thái</th>
                 <th className="px-4 py-3 font-extrabold uppercase tracking-wider text-neutral-400 text-[10px] whitespace-nowrap min-w-[320px]">Thao tác</th>
               </tr>
             </thead>
@@ -534,37 +537,73 @@ export function AdminOrdersClient({
               ) : (
                 orders.map((o) => (
                   <tr key={o.id} className={`border-b border-neutral-100 transition-colors ${o.orderStatus === "clawback" ? "bg-rose-50/50" : o.sourceType === "referral" ? "bg-purple-50/40" : o.clawbackWarning ? "bg-amber-50/40" : "hover:bg-rose-50/20"}`}>
-                    {/* Order Info */}
-                    <td className="px-4 py-3" data-label="Đơn hàng / Tracking">
-                      <div className="flex flex-col items-end sm:items-start text-right sm:text-left min-w-0 flex-1 overflow-hidden">
-                        <div className="font-mono font-bold text-neutral-900 flex items-center justify-end sm:justify-start gap-1.5 text-xs truncate max-w-full">
-                          {o.clawbackWarning && (
-                            <span title="Quá 15 ngày — kiểm tra Shopee đã thanh toán chưa">
-                              <AlertTriangle size={14} className="text-amber-500 shrink-0" />
-                            </span>
-                          )}
-                          <span className="truncate">{o.orderExternalId}</span>
-                        </div>
-                        {o.itemName && (
-                          <div className="mt-0.5 max-w-[180px] sm:max-w-[260px] truncate text-[11px] font-medium text-neutral-600" title={o.itemName}>
-                            {o.itemName}
-                          </div>
-                        )}
-                        <div className="mt-1 flex items-center justify-end sm:justify-start gap-1.5 flex-wrap max-w-full">
-                          {o.sourceType === "referral" ? (
-                            <span className="inline-flex items-center gap-1 rounded-md bg-purple-100 px-1.5 py-0.5 text-[9px] font-black text-purple-700 shrink-0">
-                              🎁 Hoa hồng GT
-                            </span>
+                    {/* 1. Order Info */}
+                    <td className="px-4 py-3 min-w-[280px]" data-label="Đơn hàng / Tracking">
+                      <div className="flex items-center gap-3">
+                        {/* Thumbnail ảnh sản phẩm / Fallback nhận diện sàn */}
+                        <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl border border-neutral-200/80 shadow-2xs overflow-hidden shrink-0 bg-neutral-100 flex items-center justify-center relative group">
+                          {o.productImage ? (
+                            <img
+                              src={o.productImage}
+                              alt={o.itemName || "Sản phẩm"}
+                              className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-110"
+                              loading="lazy"
+                            />
+                          ) : o.sourceType === "referral" ? (
+                            <div className="w-full h-full flex items-center justify-center bg-purple-50 text-purple-600 font-bold text-base" title="Đơn hoa hồng giới thiệu">
+                              🎁
+                            </div>
+                          ) : o.platformName?.toLowerCase().includes("shopee") ? (
+                            <div className="w-full h-full flex flex-col items-center justify-center bg-orange-50 text-orange-500" title="Shopee">
+                              <ShoppingBag size={18} strokeWidth={2.2} />
+                            </div>
+                          ) : o.platformName?.toLowerCase().includes("tiktok") ? (
+                            <div className="w-full h-full flex flex-col items-center justify-center bg-neutral-900 text-rose-400" title="TikTok Shop">
+                              <ShoppingBag size={18} strokeWidth={2.2} />
+                            </div>
+                          ) : o.platformName?.toLowerCase().includes("lazada") ? (
+                            <div className="w-full h-full flex flex-col items-center justify-center bg-blue-50 text-blue-600" title="Lazada">
+                              <ShoppingBag size={18} strokeWidth={2.2} />
+                            </div>
                           ) : (
-                            <span className="rounded-md bg-neutral-100 px-1.5 py-0.5 text-[9px] font-black text-neutral-600 uppercase shrink-0">{o.platformName}</span>
+                            <div className="w-full h-full flex items-center justify-center bg-neutral-100 text-neutral-400">
+                              <Package size={18} strokeWidth={2} />
+                            </div>
                           )}
-                          <span className="font-mono text-[10px] text-neutral-400 truncate max-w-[120px] sm:max-w-none">{o.trackingCode || "No tracking"}</span>
+                        </div>
+
+                        <div className="flex flex-col items-end sm:items-start text-right sm:text-left min-w-0 flex-1 overflow-hidden">
+                          <div className="font-mono font-bold text-neutral-900 flex items-center justify-end sm:justify-start gap-1.5 text-xs truncate max-w-full">
+                            {o.clawbackWarning && (
+                              <span title="Quá 15 ngày — kiểm tra Shopee đã thanh toán chưa">
+                                <AlertTriangle size={14} className="text-amber-500 shrink-0" />
+                              </span>
+                            )}
+                            <span className="truncate">{o.orderExternalId || "—"}</span>
+                          </div>
+                          {o.itemName ? (
+                            <div className="mt-0.5 max-w-[180px] sm:max-w-[260px] truncate text-[11px] font-medium text-neutral-600" title={o.itemName}>
+                              {o.itemName}
+                            </div>
+                          ) : (
+                            <div className="mt-0.5 text-[11px] text-neutral-400 italic">—</div>
+                          )}
+                          <div className="mt-1 flex items-center justify-end sm:justify-start gap-1.5 flex-wrap max-w-full">
+                            {o.sourceType === "referral" ? (
+                              <span className="inline-flex items-center gap-1 rounded-md bg-purple-100 px-1.5 py-0.5 text-[9px] font-black text-purple-700 shrink-0">
+                                🎁 Hoa hồng GT
+                              </span>
+                            ) : (
+                              <span className="rounded-md bg-neutral-100 px-1.5 py-0.5 text-[9px] font-black text-neutral-600 uppercase shrink-0">{o.platformName || "—"}</span>
+                            )}
+                            <span className="font-mono text-[10px] text-neutral-400 truncate max-w-[120px] sm:max-w-none">{o.trackingCode || "—"}</span>
+                          </div>
                         </div>
                       </div>
                     </td>
 
-                    {/* Customer */}
-                    <td className="px-4 py-3 whitespace-nowrap" data-label="Khách hàng">
+                    {/* 2. Customer */}
+                    <td className="px-4 py-3 whitespace-nowrap min-w-[140px]" data-label="Khách hàng">
                       {o.customerName ? (
                         <span className="font-extrabold text-neutral-900 whitespace-nowrap">{o.customerName}</span>
                       ) : (
@@ -574,31 +613,31 @@ export function AdminOrdersClient({
                       )}
                     </td>
 
-                    {/* Dates */}
-                    <td className="px-4 py-3" data-label="Thời Gian">
+                    {/* 3. Dates */}
+                    <td className="px-4 py-3 whitespace-nowrap min-w-[110px]" data-label="Thời Gian">
                       <div className="text-[10px] text-neutral-500 font-medium space-y-0.5">
                         <div><span className="font-bold text-neutral-400 mr-1">ĐH:</span>{formatDate(o.orderedAt)}</div>
                         <div><span className="font-bold text-neutral-400 mr-1">HT:</span>{formatDate(o.completedAt)}</div>
                       </div>
                     </td>
 
-                    {/* Amount */}
-                    <td className="px-4 py-3 text-right font-semibold text-neutral-700 tabular-nums" data-label="Giá trị đơn">
-                      {formatCurrency(o.orderAmount)}
+                    {/* 4. Amount */}
+                    <td className="px-4 py-3 text-right font-semibold text-neutral-700 tabular-nums whitespace-nowrap min-w-[100px]" data-label="Giá trị đơn">
+                      {formatCurrency(o.orderAmount || 0)}
                     </td>
 
-                    {/* Hoa hồng trước thuế */}
-                    <td className="px-4 py-3 text-right font-medium text-neutral-500 tabular-nums" data-label="HH Trước Thuế">
-                      {formatCurrency(o.commissionAmount)}
+                    {/* 5. Hoa hồng trước thuế */}
+                    <td className="px-4 py-3 text-right font-medium text-neutral-500 tabular-nums whitespace-nowrap min-w-[100px]" data-label="HH Trước Thuế">
+                      {formatCurrency(o.commissionAmount || 0)}
                     </td>
 
-                    {/* Commissions */}
-                    <td className="px-4 py-3 text-right" data-label="Tiền Hoàn / Giữ Lại">
+                    {/* 6. Commissions */}
+                    <td className="px-4 py-3 text-right whitespace-nowrap min-w-[130px]" data-label="Tiền Hoàn / Giữ Lại">
                       <div className={`font-black text-xs tabular-nums ${o.customerRewardAmount < 0 ? "text-rose-600" : "text-rose-600"}`}>
-                        {formatCurrency(o.customerRewardAmount)}
+                        {formatCurrency(o.customerRewardAmount || 0)}
                       </div>
                       <div className="text-[10px] font-medium text-neutral-400 mt-0.5 tabular-nums">
-                        Giữ: {formatCurrency(o.systemProfitAmount)}
+                        Giữ: {formatCurrency(o.systemProfitAmount || 0)}
                       </div>
                       {o.referralBonusDeducted > 0 && (
                         <div
@@ -610,12 +649,12 @@ export function AdminOrdersClient({
                       )}
                     </td>
 
-                    {/* Trích Giới Thiệu */}
-                    <td className="px-4 py-3 text-right" data-label="Trích Giới Thiệu">
+                    {/* 7. Trích Giới Thiệu */}
+                    <td className="px-4 py-3 text-right whitespace-nowrap min-w-[140px]" data-label="Trích Giới Thiệu">
                       {o.sourceType === "referral" ? (
                         <div className="flex flex-col items-end gap-0.5">
                           <span className="font-black text-xs tabular-nums text-purple-600">
-                            +{formatCurrency(o.customerRewardAmount)}
+                            +{formatCurrency(o.customerRewardAmount || 0)}
                           </span>
                           <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-md text-[9.5px] font-black bg-purple-100 text-purple-700">
                             🎁 Đơn nhận thưởng
@@ -649,16 +688,17 @@ export function AdminOrdersClient({
                           </div>
                         </div>
                       ) : (
-                        <div className="text-right">
-                          <span className="text-[11px] text-neutral-400 font-semibold" title="Không có người giới thiệu">
-                            —
+                        <div className="flex flex-col items-end gap-0.5 text-right whitespace-nowrap">
+                          <span className="font-bold text-xs tabular-nums text-neutral-400">0đ</span>
+                          <span className="inline-flex items-center gap-1 text-[9.5px] font-semibold text-neutral-400 bg-neutral-100 px-1.5 py-0.5 rounded">
+                            — Không GT
                           </span>
                         </div>
                       )}
                     </td>
 
-                    {/* Statuses */}
-                    <td className="px-4 py-3" data-label="Trạng thái">
+                    {/* 8. Statuses */}
+                    <td className="px-4 py-3 whitespace-nowrap min-w-[150px] w-[150px]" data-label="Trạng thái">
                       <div className="flex flex-wrap items-center justify-end gap-1 sm:justify-start">
                         <Badge tone={orderStatusTone[o.orderStatus] ?? "neutral"} dot>
                           {orderStatusLabel[o.orderStatus] ?? o.orderStatus}
@@ -675,8 +715,8 @@ export function AdminOrdersClient({
                       </div>
                     </td>
 
-                    {/* Actions */}
-                    <td className="px-4 py-3" data-label="Thao tác">
+                    {/* 9. Actions */}
+                    <td className="px-4 py-3 min-w-[320px]" data-label="Thao tác">
                       <OrderActions
                         orderId={o.id}
                         orderStatus={o.orderStatus}

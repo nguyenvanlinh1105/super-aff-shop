@@ -55,8 +55,8 @@ export default async function CustomerSettingsPage({ searchParams }: { searchPar
 
   const partnerPeriodText = activePartnerPeriod
     ? activePartnerPeriod.endsAt
-      ? `${new Date(activePartnerPeriod.startsAt).toLocaleDateString("vi-VN")} - ${new Date(activePartnerPeriod.endsAt).toLocaleDateString("vi-VN")}`
-      : `Từ ${new Date(activePartnerPeriod.startsAt).toLocaleDateString("vi-VN")} (Vô thời hạn)`
+      ? `Từ ${new Date(activePartnerPeriod.startsAt).toLocaleDateString("vi-VN")} đến ${new Date(activePartnerPeriod.endsAt).toLocaleDateString("vi-VN")}`
+      : `Bắt đầu từ ${new Date(activePartnerPeriod.startsAt).toLocaleDateString("vi-VN")} đến Vô thời hạn`
     : "Vô thời hạn";
 
   return (

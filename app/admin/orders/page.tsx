@@ -138,6 +138,12 @@ export default async function AdminOrdersPage({
       take: limit,
       include: {
         platform: true,
+        trackingLink: {
+          select: {
+            productImage: true,
+            productTitle: true,
+          },
+        },
         customer: {
           include: {
             referredBy: {
@@ -166,6 +172,25 @@ export default async function AdminOrdersPage({
       orderBy: { createdAt: "desc" },
     }),
   ]);
+
+  // Thu thập thêm ảnh sản phẩm từ TrackingLink nếu đơn chưa gắn trực tiếp trackingLinkId
+  const lookupCodes = orders
+    .map((o) => o.trackingCode || o.subId1)
+    .filter((c): c is string => Boolean(c));
+
+  const matchedTrackingLinks = lookupCodes.length > 0
+    ? await prisma.trackingLink.findMany({
+        where: {
+          trackingCode: { in: lookupCodes },
+          productImage: { not: null },
+        },
+        select: { trackingCode: true, productImage: true },
+      })
+    : [];
+
+  const trackingImageMap = new Map(
+    matchedTrackingLinks.map((l) => [l.trackingCode, l.productImage])
+  );
 
   const defaultReferralRate = Number(activeRule?.referralRate ?? 0.05);
 
@@ -230,10 +255,17 @@ export default async function AdminOrdersPage({
       };
     }
 
+    const productImage =
+      o.trackingLink?.productImage ??
+      (o.trackingCode ? trackingImageMap.get(o.trackingCode) : null) ??
+      (o.subId1 ? trackingImageMap.get(o.subId1) : null) ??
+      null;
+
     return {
       id: o.id,
       orderExternalId: o.orderExternalId,
       itemName: o.itemName,
+      productImage,
       platformName: o.platform.name,
       customerName: o.customer?.fullName ?? null,
       customerId: o.customerId,

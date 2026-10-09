@@ -182,6 +182,13 @@ export function OrderActions({
           </Button>
         )}
 
+        {/* Đơn đã duyệt và đã hoàn tất chi trả cho khách */}
+        {orderStatus === "approved" && payoutStatus === "paid" && (
+          <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
+            <CheckCircle size={12} strokeWidth={2.2} /> Đã hoàn tất
+          </span>
+        )}
+
         {/* Xác nhận clawback */}
         {orderStatus === "approved" && payoutStatus !== "paid" && showClawbackConfirm && (
           <div className="flex items-center gap-xs">
@@ -211,6 +218,11 @@ export function OrderActions({
         {/* Cancelled */}
         {orderStatus === "cancelled" && (
           <span className="text-[11px] font-bold text-gray-400">Đã huỷ</span>
+        )}
+
+        {/* Rejected */}
+        {orderStatus === "rejected" && (
+          <span className="text-[11px] font-bold text-rose-500">Từ chối</span>
         )}
       </div>
 
