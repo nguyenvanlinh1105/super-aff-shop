@@ -267,6 +267,16 @@
       justify-content: flex-start !important;
       text-align: left !important;
     }
+    .responsive-table td[data-label="Thao tác" i] {
+      flex-direction: column !important;
+      align-items: stretch !important;
+      text-align: left !important;
+      gap: 6px !important;
+    }
+    .responsive-table td[data-label="Thao tác" i]::before {
+      margin-bottom: 2px !important;
+      margin-right: 0 !important;
+    }
     .responsive-table td[colspan] { display: block; text-align: center; }
   }
 

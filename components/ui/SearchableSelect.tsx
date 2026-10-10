@@ -79,18 +79,18 @@ export function SearchableSelect({
   // Khi đã chọn 1 khách hàng: hiển thị thẻ khách hàng đã chọn + nút gỡ/đổi
   if (selected) {
     return (
-      <div className={`flex flex-col gap-1 ${className}`}>
+      <div className={`flex flex-col gap-1.5 ${className}`}>
         <div
-          className={`flex items-center justify-between gap-1.5 rounded-xl border border-emerald-300 bg-emerald-50/90 text-emerald-900 shadow-2xs transition-all ${
-            isSm ? "px-2 py-1 text-xs" : "px-3 py-2 text-sm"
+          className={`flex items-center justify-between gap-2 rounded-xl border border-emerald-300 bg-emerald-50/90 text-emerald-900 shadow-2xs transition-all ${
+            isSm ? "h-10 px-3 text-xs" : "h-11 px-3.5 text-sm"
           }`}
         >
           <div className="flex items-center gap-1.5 min-w-0">
-            <Check size={isSm ? 13 : 15} className="text-emerald-600 shrink-0" />
+            <Check size={isSm ? 14 : 16} className="text-emerald-600 shrink-0" />
             <div className="truncate font-bold leading-tight">
               <span>{selected.label}</span>
               {selected.code && (
-                <span className="ml-1 text-[10px] font-mono font-semibold px-1 py-0.2 rounded bg-emerald-200/70 text-emerald-800">
+                <span className="ml-1 text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded bg-emerald-200/70 text-emerald-800">
                   {selected.code}
                 </span>
               )}
@@ -100,9 +100,9 @@ export function SearchableSelect({
             type="button"
             onClick={() => onChange("")}
             title="Đổi hoặc chọn khách khác"
-            className="rounded p-0.5 text-emerald-700 hover:bg-emerald-200 hover:text-emerald-950 transition-colors shrink-0"
+            className="rounded-lg p-1 text-emerald-700 hover:bg-emerald-200 hover:text-emerald-950 transition-colors shrink-0"
           >
-            <X size={isSm ? 12 : 14} />
+            <X size={isSm ? 13 : 15} />
           </button>
         </div>
         {selected.email && (
@@ -116,12 +116,12 @@ export function SearchableSelect({
 
   // Khi chưa chọn khách hàng: hiển thị Ô tìm kiếm (Tên/Mã/Email) + Selection dropdown (select)
   return (
-    <div className={`flex flex-col gap-1 ${className}`}>
+    <div className={`flex flex-col gap-1.5 ${className}`}>
       {/* 1. Ô tìm kiếm lọc theo Tên, Email, Mã KH */}
       <div className="relative flex items-center">
         <Search
-          size={isSm ? 12 : 14}
-          className="pointer-events-none absolute left-2 text-neutral-400"
+          size={isSm ? 14 : 16}
+          className="pointer-events-none absolute left-2.5 text-neutral-400"
         />
         <input
           type="text"
@@ -129,20 +129,20 @@ export function SearchableSelect({
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleInputKeyDown}
           placeholder={placeholder}
-          className={`w-full rounded-lg border border-neutral-200 bg-white font-medium text-neutral-900 placeholder:text-neutral-400 focus:border-rose-400 focus:outline-none focus:ring-1 focus:ring-rose-200 hover:border-neutral-300 transition-colors ${
+          className={`w-full rounded-xl border border-neutral-200 bg-white font-medium text-neutral-900 placeholder:text-neutral-400 focus:border-rose-400 focus:outline-none focus:ring-1 focus:ring-rose-200 hover:border-neutral-300 transition-colors ${
             isSm
-              ? "pl-6 pr-6 py-1 text-[11px]"
-              : "pl-8 pr-8 py-2 text-xs"
+              ? "h-10 pl-8 pr-8 text-xs"
+              : "h-11 pl-9 pr-9 text-sm"
           } ${inputClassName}`}
         />
         {query && (
           <button
             type="button"
             onClick={() => setQuery("")}
-            className="absolute right-1.5 p-0.5 text-neutral-400 hover:text-neutral-600 rounded"
+            className="absolute right-2 p-1 text-neutral-400 hover:text-neutral-600 rounded-lg transition-colors"
             title="Xóa tìm kiếm"
           >
-            <X size={isSm ? 11 : 13} />
+            <X size={isSm ? 13 : 15} />
           </button>
         )}
       </div>
@@ -152,10 +152,10 @@ export function SearchableSelect({
         <select
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className={`w-full rounded-lg border border-neutral-200 bg-white font-bold text-neutral-800 shadow-2xs focus:border-rose-400 focus:outline-none focus:ring-1 focus:ring-rose-200 hover:border-neutral-300 transition-colors cursor-pointer truncate ${
+          className={`w-full rounded-xl border border-neutral-200 bg-white font-bold text-neutral-800 shadow-2xs focus:border-rose-400 focus:outline-none focus:ring-1 focus:ring-rose-200 hover:border-neutral-300 transition-colors cursor-pointer truncate ${
             isSm
-              ? "px-2 py-1 text-xs"
-              : "px-3 py-2 text-xs"
+              ? "h-10 px-3 text-xs"
+              : "h-11 px-3.5 text-sm"
           }`}
         >
           <option value="" disabled={filtered.length > 0}>

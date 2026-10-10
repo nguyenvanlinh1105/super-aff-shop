@@ -58,31 +58,31 @@ export function OrderActions({
   }
 
   return (
-    <div className="flex flex-col gap-xs">
+    <div className="flex flex-col gap-2 w-full">
       {/* Gán khách hàng */}
       {!hasCustomer && (
-        <div className="flex items-center gap-2">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full">
           <SearchableSelect
             options={customers}
             value={customerId}
             onChange={setCustomerId}
             placeholder="Tìm tên, mã, email..."
             size="sm"
-            className="w-[230px]"
+            className="w-full sm:w-[220px]"
           />
           <Button
             variant="secondary"
             size="sm"
             disabled={!customerId || loading}
             onClick={() => patch({ customerId })}
-            className={`transition-all duration-200 shrink-0 ${
+            className={`h-10 transition-all duration-200 shrink-0 w-full sm:w-auto justify-center font-bold ${
               customerId
-                ? "!bg-rose-500 !text-white !border-rose-500 font-black shadow-md hover:!bg-rose-600 ring-2 ring-rose-200"
+                ? "!bg-rose-500 !text-white !border-rose-500 shadow-md hover:!bg-rose-600 ring-2 ring-rose-200"
                 : "opacity-40 cursor-not-allowed"
             }`}
           >
-            <UserPlus size={13} strokeWidth={2} />
-            Gán
+            <UserPlus size={14} strokeWidth={2.2} />
+            <span>{loading ? "Đang gán..." : customerId ? "Xác nhận gán" : "Gán khách"}</span>
           </Button>
         </div>
       )}
@@ -100,45 +100,48 @@ export function OrderActions({
       )}
 
       {canChangeCustomer && editingCustomer && (
-        <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full">
           <SearchableSelect
             options={customers}
             value={customerId}
             onChange={setCustomerId}
             placeholder="Chọn khách mới..."
             size="sm"
-            className="w-[230px]"
+            className="w-full sm:w-[220px]"
           />
-          <Button
-            variant="secondary"
-            size="sm"
-            disabled={!customerId || loading}
-            onClick={() => { patch({ customerId }); setEditingCustomer(false); }}
-            className={`transition-all duration-200 shrink-0 ${
-              customerId
-                ? "!bg-rose-500 !text-white !border-rose-500 font-black shadow-md hover:!bg-rose-600 ring-2 ring-rose-200"
-                : "opacity-40 cursor-not-allowed"
-            }`}
-          >
-            <UserPlus size={13} strokeWidth={2} />
-            Lưu
-          </Button>
-          <Button
-            variant="secondary"
-            size="sm"
-            disabled={loading}
-            onClick={() => { patch({ customerId: null }); setEditingCustomer(false); }}
-            title="Bỏ gán, chuyển đơn về Chưa map khách"
-          >
-            Bỏ gán
-          </Button>
-          <button
-            type="button"
-            onClick={() => { setEditingCustomer(false); setCustomerId(""); }}
-            className="flex h-8 w-8 items-center justify-center rounded-lg text-gray-400 hover:bg-gray-100 hover:text-gray-700 transition-colors"
-          >
-            <X size={14} />
-          </button>
+          <div className="flex items-center gap-1.5 w-full sm:w-auto">
+            <Button
+              variant="secondary"
+              size="sm"
+              disabled={!customerId || loading}
+              onClick={() => { patch({ customerId }); setEditingCustomer(false); }}
+              className={`h-10 flex-1 sm:flex-initial transition-all duration-200 shrink-0 justify-center font-bold ${
+                customerId
+                  ? "!bg-rose-500 !text-white !border-rose-500 shadow-md hover:!bg-rose-600 ring-2 ring-rose-200"
+                  : "opacity-40 cursor-not-allowed"
+              }`}
+            >
+              <UserPlus size={13} strokeWidth={2} />
+              <span>{loading ? "Đang lưu..." : "Lưu"}</span>
+            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              disabled={loading}
+              onClick={() => { patch({ customerId: null }); setEditingCustomer(false); }}
+              title="Bỏ gán, chuyển đơn về Chưa map khách"
+              className="h-10 flex-1 sm:flex-initial justify-center"
+            >
+              Bỏ gán
+            </Button>
+            <button
+              type="button"
+              onClick={() => { setEditingCustomer(false); setCustomerId(""); }}
+              className="flex h-10 w-10 items-center justify-center rounded-xl text-gray-400 hover:bg-gray-100 hover:text-gray-700 transition-colors shrink-0"
+            >
+              <X size={14} />
+            </button>
+          </div>
         </div>
       )}
 
@@ -150,6 +153,7 @@ export function OrderActions({
             size="sm"
             disabled={loading}
             onClick={() => patch({ orderStatus: "approved" })}
+            className="h-10"
           >
             <CheckCircle size={13} strokeWidth={1.75} />
             Duyệt

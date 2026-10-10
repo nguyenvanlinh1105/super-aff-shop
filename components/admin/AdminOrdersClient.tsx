@@ -511,7 +511,7 @@ export function AdminOrdersClient({
           <table className="w-full text-left text-xs min-w-[1440px]">
             <thead>
               <tr className="border-b border-neutral-100 bg-neutral-50/80">
-                <th className="px-4 py-3 font-extrabold uppercase tracking-wider text-neutral-400 text-[10px] whitespace-nowrap min-w-[280px]">Đơn hàng / Tracking</th>
+                <th className="px-4 py-3 font-extrabold uppercase tracking-wider text-neutral-400 text-[10px] whitespace-nowrap min-w-[280px] max-w-[400px] w-[360px]">Đơn hàng / Tracking</th>
                 <th className="px-4 py-3 font-extrabold uppercase tracking-wider text-neutral-400 text-[10px] whitespace-nowrap min-w-[140px]">Khách hàng</th>
                 <th className="px-4 py-3 font-extrabold uppercase tracking-wider text-neutral-400 text-[10px] whitespace-nowrap min-w-[110px]">Thời Gian</th>
                 <th className="px-4 py-3 font-extrabold uppercase tracking-wider text-neutral-400 text-[10px] text-right whitespace-nowrap min-w-[100px]">Giá trị đơn</th>
@@ -538,10 +538,10 @@ export function AdminOrdersClient({
                 orders.map((o) => (
                   <tr key={o.id} className={`border-b border-neutral-100 transition-colors ${o.orderStatus === "clawback" ? "bg-rose-50/50" : o.sourceType === "referral" ? "bg-purple-50/40" : o.clawbackWarning ? "bg-amber-50/40" : "hover:bg-rose-50/20"}`}>
                     {/* 1. Order Info */}
-                    <td className="px-4 py-3 min-w-[280px]" data-label="Đơn hàng / Tracking">
-                      <div className="flex items-center gap-3">
+                    <td className="px-4 py-3 min-w-[280px] max-w-[400px] w-[360px]" data-label="">
+                      <div className="flex items-start gap-3 w-full">
                         {/* Thumbnail ảnh sản phẩm / Fallback nhận diện sàn */}
-                        <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl border border-neutral-200/80 shadow-2xs overflow-hidden shrink-0 bg-neutral-100 flex items-center justify-center relative group">
+                        <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl border border-neutral-200/80 shadow-2xs overflow-hidden shrink-0 bg-neutral-100 flex items-center justify-center relative group mt-0.5">
                           {o.productImage ? (
                             <img
                               src={o.productImage}
@@ -572,23 +572,26 @@ export function AdminOrdersClient({
                           )}
                         </div>
 
-                        <div className="flex flex-col items-end sm:items-start text-right sm:text-left min-w-0 flex-1 overflow-hidden">
-                          <div className="font-mono font-bold text-neutral-900 flex items-center justify-end sm:justify-start gap-1.5 text-xs truncate max-w-full">
+                        <div className="flex flex-col items-start text-left min-w-0 flex-1">
+                          <div className="font-mono font-bold text-neutral-900 flex items-center justify-start gap-1.5 text-xs max-w-full">
                             {o.clawbackWarning && (
                               <span title="Quá 15 ngày — kiểm tra Shopee đã thanh toán chưa">
                                 <AlertTriangle size={14} className="text-amber-500 shrink-0" />
                               </span>
                             )}
-                            <span className="truncate">{o.orderExternalId || "—"}</span>
+                            <span className="break-all">{o.orderExternalId || "—"}</span>
                           </div>
                           {o.itemName ? (
-                            <div className="mt-0.5 max-w-[180px] sm:max-w-[260px] truncate text-[11px] font-medium text-neutral-600" title={o.itemName}>
+                            <div
+                              className="mt-1 max-w-full text-[11.5px] font-medium text-neutral-700 leading-snug whitespace-normal break-words line-clamp-3 sm:line-clamp-4"
+                              title={o.itemName}
+                            >
                               {o.itemName}
                             </div>
                           ) : (
                             <div className="mt-0.5 text-[11px] text-neutral-400 italic">—</div>
                           )}
-                          <div className="mt-1 flex items-center justify-end sm:justify-start gap-1.5 flex-wrap max-w-full">
+                          <div className="mt-1.5 flex items-center justify-start gap-1.5 flex-wrap max-w-full">
                             {o.sourceType === "referral" ? (
                               <span className="inline-flex items-center gap-1 rounded-md bg-purple-100 px-1.5 py-0.5 text-[9px] font-black text-purple-700 shrink-0">
                                 🎁 Hoa hồng GT
@@ -596,7 +599,7 @@ export function AdminOrdersClient({
                             ) : (
                               <span className="rounded-md bg-neutral-100 px-1.5 py-0.5 text-[9px] font-black text-neutral-600 uppercase shrink-0">{o.platformName || "—"}</span>
                             )}
-                            <span className="font-mono text-[10px] text-neutral-400 truncate max-w-[120px] sm:max-w-none">{o.trackingCode || "—"}</span>
+                            <span className="font-mono text-[10px] text-neutral-400 truncate max-w-[160px] sm:max-w-none">{o.trackingCode || "—"}</span>
                           </div>
                         </div>
                       </div>
