@@ -1,6 +1,8 @@
+import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { ImportOrdersWizard } from "@/components/admin/ImportOrdersWizard";
+import { ArrowLeft } from "lucide-react";
 
 export default async function AdminOrdersImportPage() {
   const rawPlatforms = await prisma.platform.findMany();
@@ -31,6 +33,12 @@ export default async function AdminOrdersImportPage() {
               </p>
             </div>
           </div>
+          <Link
+            href="/admin/orders"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-white border border-rose-200 text-rose-700 hover:bg-rose-50 text-xs sm:text-[13px] font-bold shadow-xs hover:shadow transition-all shrink-0 active:scale-95"
+          >
+            <ArrowLeft size={15} /> Danh sách đơn hàng
+          </Link>
         </div>
       </div>
 

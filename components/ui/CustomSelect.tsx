@@ -21,6 +21,7 @@ interface CustomSelectProps {
   buttonClassName?: string;
   menuClassName?: string;
   align?: "left" | "right";
+  direction?: "down" | "up" | "auto";
   ariaLabel?: string;
   wrapLabels?: boolean;
   showCountInButton?: boolean;
@@ -37,6 +38,7 @@ export function CustomSelect({
   buttonClassName = "",
   menuClassName = "",
   align = "left",
+  direction = "auto",
   ariaLabel,
   wrapLabels = false,
   showCountInButton = false,
@@ -45,6 +47,9 @@ export function CustomSelect({
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const [effectiveAlign, setEffectiveAlign] = useState<"left" | "right">(align);
+  const [effectiveDirection, setEffectiveDirection] = useState<"down" | "up">(
+    direction === "up" ? "up" : "down"
+  );
 
   const isFullWidth = fullWidthMenu ?? className.includes("w-full");
 
@@ -52,16 +57,36 @@ export function CustomSelect({
     setEffectiveAlign(align);
   }, [align]);
 
-  // Prevent right-edge overflow on mobile when not full width
+  // Handle alignment and direction
   useEffect(() => {
-    if (isOpen && containerRef.current && !isFullWidth) {
+    if (direction === "up") {
+      setEffectiveDirection("up");
+    } else if (direction === "down") {
+      setEffectiveDirection("down");
+    }
+
+    if (isOpen && containerRef.current) {
       const rect = containerRef.current.getBoundingClientRect();
       const viewportWidth = window.innerWidth;
-      if (align === "left" && viewportWidth - rect.left < 260 && rect.right > 260) {
+      const viewportHeight = window.innerHeight;
+
+      // Prevent right-edge overflow on mobile when not full width
+      if (!isFullWidth && align === "left" && viewportWidth - rect.left < 260 && rect.right > 260) {
         setEffectiveAlign("right");
       }
+
+      // Auto detect direction: if not enough room below (< 260px) and more room above, flip up!
+      if (direction === "auto") {
+        const spaceBelow = viewportHeight - rect.bottom;
+        const spaceAbove = rect.top;
+        if (spaceBelow < 260 && spaceAbove > spaceBelow) {
+          setEffectiveDirection("up");
+        } else {
+          setEffectiveDirection("down");
+        }
+      }
     }
-  }, [isOpen, align, isFullWidth]);
+  }, [isOpen, align, direction, isFullWidth]);
 
   const selectedOption = options.find((opt) => opt.value === value);
 
@@ -144,7 +169,8 @@ export function CustomSelect({
         <div
           role="listbox"
           className={cn(
-            "absolute top-full mt-1.5 z-50 rounded-2xl border border-primary-100/90 bg-white p-1.5 shadow-xl shadow-primary-500/10 backdrop-blur-md animate-in fade-in zoom-in-95 duration-150 max-h-64 overflow-y-auto overflow-x-hidden scrollbar-none scrollbar-hide [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
+            "absolute z-50 rounded-2xl border border-primary-100/90 bg-white p-1.5 shadow-xl shadow-primary-500/10 backdrop-blur-md animate-in fade-in zoom-in-95 duration-150 max-h-72 overflow-y-auto overflow-x-hidden scrollbar-none scrollbar-hide [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
+            effectiveDirection === "up" ? "bottom-full mb-1.5" : "top-full mt-1.5",
             isFullWidth
               ? "left-0 right-0 w-full min-w-0 max-w-full"
               : cn(

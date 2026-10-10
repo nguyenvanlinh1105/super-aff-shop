@@ -2,6 +2,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { Button } from "@/components/ui/Button";
 import { AdminOrdersClient } from "@/components/admin/AdminOrdersClient";
+import { OrdersHeaderActions } from "@/components/admin/OrdersHeaderActions";
 import { Upload, ShoppingCart, Wallet, Clock, HelpCircle } from "lucide-react";
 import { formatCurrency } from "@/lib/format";
 
@@ -337,6 +338,7 @@ export default async function AdminOrdersPage({
               </p>
             </div>
           </div>
+          <OrdersHeaderActions />
         </div>
       </div>
 

@@ -239,9 +239,9 @@ export function CreateDealForm() {
           Thêm Deal Mới
         </Button>
       ) : (
-        <div className="rounded-3xl bg-white shadow-cute border border-primary-100/80 overflow-hidden mb-lg">
+        <div className="rounded-3xl bg-white shadow-cute border border-primary-100/80 mb-lg">
           {/* Header */}
-          <div className="flex items-center justify-between px-xl py-lg border-b border-primary-100/80 bg-gradient-to-r from-primary-50/80 via-primary-50 to-pink-50">
+          <div className="flex items-center justify-between px-xl py-lg border-b border-primary-100/80 bg-gradient-to-r from-primary-50/80 via-primary-50 to-pink-50 rounded-t-3xl">
             <div className="flex items-center gap-sm">
               <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary-100 text-primary-600">
                 <Flame size={18} strokeWidth={2} />
@@ -517,6 +517,7 @@ export function CreateDealForm() {
                       ]}
                       placeholder="— Không chọn —"
                       className="w-full"
+                      direction="up"
                       buttonClassName="h-11 bg-neutral-50 text-[13.5px] border-primary-100/80"
                       ariaLabel="Danh mục"
                     />
