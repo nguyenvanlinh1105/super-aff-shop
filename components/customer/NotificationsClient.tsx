@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { Pagination } from "@/components/ui/Pagination";
 import { useToast } from "@/components/ui/Toast";
+import { markNotificationIdsAsSeen } from "@/lib/notificationClient";
 
 type Notification = {
   id: string;
@@ -443,6 +444,7 @@ export function NotificationsClient({
 
   // Click vào card → Mở popup đọc nội dung đầy đủ (KHÔNG redirect)
   const handleCardClick = (n: Notification) => {
+    markNotificationIdsAsSeen(n.id);
     onMarkRead(n);
     setSelectedNotification(n);
   };
@@ -450,6 +452,7 @@ export function NotificationsClient({
   // Click vào action link text → redirect đến trang tương ứng
   const handleActionLinkClick = (e: React.MouseEvent, n: Notification) => {
     e.stopPropagation(); // Ngăn không kích hoạt handleCardClick
+    markNotificationIdsAsSeen(n.id);
     onMarkRead(n);
     const targetUrl = getNotificationTargetUrl(n);
     if (targetUrl) {
@@ -459,6 +462,7 @@ export function NotificationsClient({
 
   const handleSingleMarkReadBtn = (e: React.MouseEvent, n: Notification) => {
     e.stopPropagation();
+    markNotificationIdsAsSeen(n.id);
     onMarkRead(n);
     toast.success(`Đã đánh dấu đã đọc "${n.title}" 🎀`, "Đã đọc");
   };
@@ -714,19 +718,13 @@ export function NotificationsClient({
                         <span>{formatNotificationTime(n.createdAt)}</span>
                       </span>
 
-                      {!n.isRead ? (
-                        <button
-                          type="button"
-                          onClick={(e) => handleSingleMarkReadBtn(e, n)}
-                          title="Đánh dấu đã đọc"
-                          className="flex items-center justify-center h-5 w-5 sm:h-auto sm:w-auto sm:px-1.5 sm:py-0.5 rounded-md text-[10px] sm:text-[10.5px] font-bold text-neutral-400 hover:text-primary-600 hover:bg-white border border-transparent hover:border-primary-200 shadow-2xs transition-all cursor-pointer shrink-0"
+                      {n.isRead && (
+                        <span
+                          title="Thông báo này đã được đọc"
+                          className="inline-flex items-center gap-1 text-[10px] sm:text-[10.5px] font-medium text-neutral-400 shrink-0"
                         >
-                          <Check size={11} strokeWidth={2.5} />
-                          <span className="hidden sm:inline ml-0.5">Đã đọc</span>
-                        </button>
-                      ) : (
-                        <span title="Đã xem" className="text-emerald-500/80 shrink-0 flex items-center">
-                          <CheckCheck size={12} strokeWidth={2.5} />
+                          <CheckCheck size={12} strokeWidth={2.4} className="text-emerald-500" />
+                          <span className="hidden sm:inline">Đã đọc</span>
                         </span>
                       )}
                     </div>

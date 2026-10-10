@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import { TrendingUp, TrendingDown, ChevronLeft, ChevronRight, ZoomIn, Calendar } from "lucide-react";
+import { TrendingUp, TrendingDown, ChevronLeft, ChevronRight, ZoomIn, Calendar, Layers, BarChart3 } from "lucide-react";
 import { formatCurrency } from "@/lib/format";
 import { CustomSelect } from "@/components/ui/CustomSelect";
 
@@ -68,15 +68,15 @@ export function AdminRevenueChart({ orderData }: AdminRevenueChartProps) {
     }));
   }, [orderData]);
 
-  // Chỉ lấy những NĂM có dữ liệu thực tế (sắp xếp giảm dần)
+  // Danh sách các NĂM hợp lệ (năm hiện tại, các năm gần kề và các năm có dữ liệu thực tế)
   const availableYears = useMemo(() => {
-    if (parsedOrders.length === 0) return [currentYear];
-    const years = new Set<number>();
+    const baseYears = [currentYear + 1, currentYear, currentYear - 1, currentYear - 2, currentYear - 3];
+    const years = new Set<number>(baseYears);
     for (const o of parsedOrders) {
       years.add(o._date.getFullYear());
     }
-    const arr = Array.from(years).sort((a, b) => b - a);
-    return arr.length > 0 ? arr : [currentYear];
+    // Sắp xếp giảm dần: ví dụ [2027, 2026, 2025, 2024, 2023]
+    return Array.from(years).sort((a, b) => b - a);
   }, [parsedOrders, currentYear]);
 
   // MẶC ĐỊNH: Hiển thị tháng hiện tại (viewLevel = "month" để xem 4-5 tuần)
@@ -87,8 +87,8 @@ export function AdminRevenueChart({ orderData }: AdminRevenueChartProps) {
     return years.includes(currentYear) ? currentYear : (years[0] || currentYear);
   });
 
-  // Chỉ lấy những THÁNG có dữ liệu trong selectedYear
-  const availableMonthsInYear = useMemo(() => {
+  // Danh sách đầy đủ 12 THÁNG trong selectedYear kèm thống kê đơn hàng
+  const allMonthsInYear = useMemo(() => {
     const map = new Map<number, { count: number; commission: number; reward: number; profit: number }>();
     for (const o of parsedOrders) {
       if (o._date.getFullYear() !== selectedYear) continue;
@@ -100,15 +100,15 @@ export function AdminRevenueChart({ orderData }: AdminRevenueChartProps) {
       cur.profit += o.profit;
       map.set(m, cur);
     }
-    return Array.from(map.entries())
-      .filter(([_, val]) => val.count > 0)
-      .map(([m, val]) => ({
+    return Array.from({ length: 12 }, (_, m) => {
+      const stats = map.get(m) ?? { count: 0, commission: 0, reward: 0, profit: 0 };
+      return {
         month: m,
         name: MONTH_NAMES[m],
         fullName: `Tháng ${m + 1}`,
-        ...val,
-      }))
-      .sort((a, b) => a.month - b.month);
+        ...stats,
+      };
+    });
   }, [parsedOrders, selectedYear]);
 
   // MẶC ĐỊNH: Tháng hiện tại
@@ -116,18 +116,17 @@ export function AdminRevenueChart({ orderData }: AdminRevenueChartProps) {
     return currentMonth;
   });
 
-  // Tự động đồng bộ selectedMonth với tháng gần nhất có dữ liệu khi đổi năm sang năm khác
-  useEffect(() => {
-    if (selectedYear !== currentYear && availableMonthsInYear.length > 0) {
-      const exists = availableMonthsInYear.some((m) => m.month === selectedMonth);
-      if (!exists) {
-        setSelectedMonth(availableMonthsInYear[availableMonthsInYear.length - 1].month);
-      }
-    }
-  }, [selectedYear, availableMonthsInYear, selectedMonth, currentYear]);
-
+  const [selectedQuarter, setSelectedQuarter] = useState<number | null>(null); // null = cả 4 quý, 0..3 = Quý 1..Quý 4
   const [selectedWeekStart, setSelectedWeekStart] = useState<string | null>(null); // ISO date of Monday
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 640);
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   // Tổng hợp cả năm
   const yearTotals = useMemo(() => {
@@ -145,6 +144,56 @@ export function AdminRevenueChart({ orderData }: AdminRevenueChartProps) {
     }
     return { commission, reward, profit, count };
   }, [parsedOrders, selectedYear]);
+
+  // Tổng hợp dữ liệu theo 4 Quý (phục vụ chọn Quý và chọn Tháng của Quý)
+  const quartersSummary = useMemo(() => {
+    return [0, 1, 2, 3].map((q) => {
+      const startM = q * 3;
+      let count = 0;
+      let commission = 0;
+      let reward = 0;
+      let profit = 0;
+      for (const o of parsedOrders) {
+        if (o._date.getFullYear() !== selectedYear) continue;
+        const m = o._date.getMonth();
+        if (m >= startM && m <= startM + 2) {
+          count++;
+          commission += o.commission;
+          reward += o.reward;
+          profit += o.profit;
+        }
+      }
+      return {
+        quarter: q,
+        label: `Quý ${q + 1}`,
+        monthsLabel: `T${startM + 1}–T${startM + 3}`,
+        count,
+        commission,
+        reward,
+        profit,
+        months: [startM, startM + 1, startM + 2].map((m) => {
+          const mData = allMonthsInYear[m];
+          return {
+            month: m,
+            name: MONTH_NAMES[m],
+            fullName: `Tháng ${m + 1}`,
+            count: mData ? mData.count : 0,
+            commission: mData ? mData.commission : 0,
+            reward: mData ? mData.reward : 0,
+            profit: mData ? mData.profit : 0,
+          };
+        }),
+      };
+    });
+  }, [parsedOrders, selectedYear, allMonthsInYear]);
+
+  // Tổng hợp quý đang chọn
+  const quarterTotals = useMemo(() => {
+    if (selectedQuarter !== null && quartersSummary[selectedQuarter]) {
+      return quartersSummary[selectedQuarter];
+    }
+    return { commission: 0, reward: 0, profit: 0, count: 0 };
+  }, [selectedQuarter, quartersSummary]);
 
   // Tổng hợp tháng đang chọn
   const monthTotals = useMemo(() => {
@@ -187,8 +236,31 @@ export function AdminRevenueChart({ orderData }: AdminRevenueChartProps) {
       return buckets;
     }
 
-    // 2. Chế độ xem theo 4 Quý (Q1 - Q4)
+    // 2. Chế độ xem theo Quý
     if (viewLevel === "quarter") {
+      // 2A. Nếu đã chọn 1 Quý cụ thể -> Hiển thị 3 tháng của Quý đó!
+      if (selectedQuarter !== null) {
+        const startMonth = selectedQuarter * 3;
+        const qMonths: ChartItem[] = [
+          { label: MONTH_NAMES[startMonth], subLabel: `Tháng ${startMonth + 1}`, commission: 0, reward: 0, profit: 0, count: 0 },
+          { label: MONTH_NAMES[startMonth + 1], subLabel: `Tháng ${startMonth + 2}`, commission: 0, reward: 0, profit: 0, count: 0 },
+          { label: MONTH_NAMES[startMonth + 2], subLabel: `Tháng ${startMonth + 3}`, commission: 0, reward: 0, profit: 0, count: 0 },
+        ];
+        for (const o of parsedOrders) {
+          if (o._date.getFullYear() !== selectedYear) continue;
+          const m = o._date.getMonth();
+          if (m >= startMonth && m <= startMonth + 2) {
+            const idx = m - startMonth;
+            qMonths[idx].commission += o.commission;
+            qMonths[idx].reward += o.reward;
+            qMonths[idx].profit += o.profit;
+            qMonths[idx].count += 1;
+          }
+        }
+        return qMonths;
+      }
+
+      // 2B. Nếu chưa chọn Quý cụ thể -> Hiển thị cả 4 Quý (Q1 - Q4)
       const quarters: ChartItem[] = [
         { label: "Quý 1", subLabel: "T1 – T3", commission: 0, reward: 0, profit: 0, count: 0 },
         { label: "Quý 2", subLabel: "T4 – T6", commission: 0, reward: 0, profit: 0, count: 0 },
@@ -295,19 +367,10 @@ export function AdminRevenueChart({ orderData }: AdminRevenueChartProps) {
     }
 
     return [];
-  }, [viewLevel, selectedYear, selectedMonth, selectedWeekStart, parsedOrders, currentYear, currentMonth]);
+  }, [viewLevel, selectedYear, selectedMonth, selectedQuarter, selectedWeekStart, parsedOrders, currentYear, currentMonth]);
 
   // ═══ Growth calculation ═══
   const growthInfo = useMemo(() => {
-    if (viewLevel === "year") {
-      if (availableMonthsInYear.length < 2) return { pct: 0, prevLabel: "", currentLabel: "" };
-      const last = availableMonthsInYear[availableMonthsInYear.length - 1];
-      const prev = availableMonthsInYear[availableMonthsInYear.length - 2];
-      const pct = prev.commission > 0
-        ? Math.round(((last.commission - prev.commission) / prev.commission) * 100)
-        : 0;
-      return { pct, prevLabel: prev.name, currentLabel: last.name };
-    }
     const itemsWithData = chartItems.filter((m) => m.count > 0);
     if (itemsWithData.length < 2) return { pct: 0, prevLabel: "", currentLabel: "" };
     const last = itemsWithData[itemsWithData.length - 1];
@@ -316,15 +379,25 @@ export function AdminRevenueChart({ orderData }: AdminRevenueChartProps) {
       ? Math.round(((last.commission - prev.commission) / prev.commission) * 100)
       : 0;
     return { pct, prevLabel: prev.label, currentLabel: last.label };
-  }, [viewLevel, availableMonthsInYear, chartItems]);
+  }, [chartItems]);
 
   // ═══ Active / Hovered item ═══
   const activeIdx = hoveredIdx !== null ? hoveredIdx : chartItems.length - 1;
   const activeItem = chartItems[activeIdx] ?? chartItems[chartItems.length - 1];
   const maxVal = Math.max(...chartItems.map((m) => m.commission), 1);
 
-  // ═══ SVG Layout ═══
-  const PLOT = { left: 46, right: 584, top: 40, bottom: 165 };
+  // ═══ SVG Layout (Tối ưu riêng cho Mobile & Desktop) ═══
+  const viewBoxWidth = isMobile ? (viewLevel === "year" ? 520 : 380) : 600;
+  const viewBoxHeight = isMobile ? 260 : 230;
+
+  const PLOT = useMemo(() => {
+    if (isMobile) {
+      const rightX = (viewLevel === "year" ? 520 : 380) - 18;
+      return { left: 38, right: rightX, top: 30, bottom: 195 };
+    }
+    return { left: 48, right: 582, top: 32, bottom: 175 };
+  }, [isMobile, viewLevel]);
+
   const n = chartItems.length;
   const getX = (i: number) => PLOT.left + 14 + i * ((PLOT.right - PLOT.left - 28) / Math.max(n - 1, 1));
   const getY = (val: number) => PLOT.bottom - (val / maxVal) * (PLOT.bottom - PLOT.top);
@@ -389,18 +462,24 @@ export function AdminRevenueChart({ orderData }: AdminRevenueChartProps) {
   const handleDrillDown = (idx: number) => {
     if (viewLevel === "year") {
       const targetItem = chartItems[idx];
-      if (!targetItem || targetItem.count === 0) return;
+      if (!targetItem) return;
       setSelectedMonth(idx);
       setViewLevel("month");
       setSelectedWeekStart(null);
       setHoveredIdx(null);
     } else if (viewLevel === "quarter") {
-      const startMonth = idx * 3;
-      const mInQ = availableMonthsInYear.find((m) => m.month >= startMonth && m.month <= startMonth + 2);
-      setSelectedMonth(mInQ ? mInQ.month : startMonth);
-      setViewLevel("month");
-      setSelectedWeekStart(null);
-      setHoveredIdx(null);
+      if (selectedQuarter === null) {
+        // Chạm vào 1 trong 4 quý -> Xem 3 tháng của Quý đó!
+        setSelectedQuarter(idx);
+        setHoveredIdx(null);
+      } else {
+        // Đang xem 3 tháng của quý -> Chạm vào tháng để xem chi tiết tuần!
+        const targetMonth = selectedQuarter * 3 + idx;
+        setSelectedMonth(targetMonth);
+        setViewLevel("month");
+        setSelectedWeekStart(null);
+        setHoveredIdx(null);
+      }
     } else if (viewLevel === "month") {
       const firstDay = new Date(selectedYear, selectedMonth, 1);
       const lastDay = new Date(selectedYear, selectedMonth + 1, 0);
@@ -429,27 +508,105 @@ export function AdminRevenueChart({ orderData }: AdminRevenueChartProps) {
       setSelectedWeekStart(null);
       setHoveredIdx(null);
     } else if (viewLevel === "month") {
-      setViewLevel("quarter");
+      if (selectedQuarter !== null) {
+        setViewLevel("quarter"); // quay lại xem 3 tháng của quý
+      } else {
+        setViewLevel("quarter");
+      }
+      setSelectedWeekStart(null);
       setHoveredIdx(null);
     } else if (viewLevel === "quarter") {
-      setViewLevel("year");
+      if (selectedQuarter !== null) {
+        setSelectedQuarter(null); // từ 3 tháng quay lại 4 quý
+      } else {
+        setViewLevel("year"); // từ 4 quý quay lại cả năm
+      }
       setHoveredIdx(null);
     }
   };
+
+  // ═══ Quick Stepper Handlers ═══
+  const handlePrevMonth = () => {
+    if (selectedMonth > 0) {
+      setSelectedMonth(selectedMonth - 1);
+    } else {
+      const curYearIdx = availableYears.indexOf(selectedYear);
+      if (curYearIdx < availableYears.length - 1) {
+        setSelectedYear(availableYears[curYearIdx + 1]);
+        setSelectedMonth(11);
+      }
+    }
+    setSelectedWeekStart(null);
+    setHoveredIdx(null);
+  };
+
+  const handleNextMonth = () => {
+    if (selectedMonth < 11) {
+      setSelectedMonth(selectedMonth + 1);
+    } else {
+      const curYearIdx = availableYears.indexOf(selectedYear);
+      if (curYearIdx > 0) {
+        setSelectedYear(availableYears[curYearIdx - 1]);
+        setSelectedMonth(0);
+      }
+    }
+    setSelectedWeekStart(null);
+    setHoveredIdx(null);
+  };
+
+  const isAtMinMonth =
+    selectedMonth === 0 && availableYears.indexOf(selectedYear) >= availableYears.length - 1;
+  const isAtMaxMonth =
+    selectedMonth === 11 && availableYears.indexOf(selectedYear) <= 0;
+
+  const handlePrevYear = () => {
+    const curIdx = availableYears.indexOf(selectedYear);
+    if (curIdx < availableYears.length - 1) {
+      setSelectedYear(availableYears[curIdx + 1]);
+      setHoveredIdx(null);
+    }
+  };
+
+  const handleNextYear = () => {
+    const curIdx = availableYears.indexOf(selectedYear);
+    if (curIdx > 0) {
+      setSelectedYear(availableYears[curIdx - 1]);
+      setHoveredIdx(null);
+    }
+  };
+
+  const isAtMinYear = availableYears.indexOf(selectedYear) >= availableYears.length - 1;
+  const isAtMaxYear = availableYears.indexOf(selectedYear) <= 0;
 
   // ═══ Breadcrumb ═══
   const breadcrumb = useMemo(() => {
     const parts: { label: string; onClick?: () => void }[] = [];
     parts.push({
       label: `Năm ${selectedYear}`,
-      onClick: viewLevel !== "year" ? () => { setViewLevel("year"); setHoveredIdx(null); } : undefined,
+      onClick: viewLevel !== "year" ? () => { setViewLevel("year"); setSelectedQuarter(null); setHoveredIdx(null); } : undefined,
     });
     if (viewLevel === "quarter") {
-      parts.push({
-        label: "Theo 4 Quý",
-      });
+      if (selectedQuarter !== null) {
+        parts.push({
+          label: "4 Quý",
+          onClick: () => { setSelectedQuarter(null); setHoveredIdx(null); },
+        });
+        parts.push({
+          label: `Quý ${selectedQuarter + 1} (T${selectedQuarter * 3 + 1}–T${selectedQuarter * 3 + 3})`,
+        });
+      } else {
+        parts.push({
+          label: "Theo 4 Quý",
+        });
+      }
     }
     if (viewLevel === "month" || viewLevel === "week") {
+      if (selectedQuarter !== null) {
+        parts.push({
+          label: `Quý ${selectedQuarter + 1}`,
+          onClick: () => { setViewLevel("quarter"); setHoveredIdx(null); },
+        });
+      }
       parts.push({
         label: `${MONTH_NAMES[selectedMonth]} (Theo tuần)`,
         onClick: viewLevel === "week" ? () => { setViewLevel("month"); setSelectedWeekStart(null); setHoveredIdx(null); } : undefined,
@@ -464,7 +621,7 @@ export function AdminRevenueChart({ orderData }: AdminRevenueChartProps) {
       });
     }
     return parts;
-  }, [viewLevel, selectedYear, selectedMonth, selectedWeekStart]);
+  }, [viewLevel, selectedYear, selectedMonth, selectedWeekStart, selectedQuarter]);
 
   // ═══ Summary Cards Calculations ═══
   const summaryDisplay = useMemo(() => {
@@ -475,6 +632,7 @@ export function AdminRevenueChart({ orderData }: AdminRevenueChartProps) {
         commission: it.commission,
         reward: it.reward,
         profit: it.profit,
+        count: it.count,
       };
     }
 
@@ -484,15 +642,26 @@ export function AdminRevenueChart({ orderData }: AdminRevenueChartProps) {
         commission: yearTotals.commission,
         reward: yearTotals.reward,
         profit: yearTotals.profit,
+        count: yearTotals.count,
       };
     }
 
     if (viewLevel === "quarter") {
+      if (selectedQuarter !== null) {
+        return {
+          title: `Quý ${selectedQuarter + 1} (${quarterTotals.count} đơn)`,
+          commission: quarterTotals.commission,
+          reward: quarterTotals.reward,
+          profit: quarterTotals.profit,
+          count: quarterTotals.count,
+        };
+      }
       return {
         title: `4 Quý năm ${selectedYear} (${yearTotals.count} đơn)`,
         commission: yearTotals.commission,
         reward: yearTotals.reward,
         profit: yearTotals.profit,
+        count: yearTotals.count,
       };
     }
 
@@ -502,6 +671,7 @@ export function AdminRevenueChart({ orderData }: AdminRevenueChartProps) {
         commission: monthTotals.commission,
         reward: monthTotals.reward,
         profit: monthTotals.profit,
+        count: monthTotals.count,
       };
     }
 
@@ -514,17 +684,24 @@ export function AdminRevenueChart({ orderData }: AdminRevenueChartProps) {
       commission: totalComm,
       reward: totalRew,
       profit: totalProf,
+      count: totalCount,
     };
-  }, [hoveredIdx, chartItems, viewLevel, selectedYear, selectedMonth, yearTotals, monthTotals]);
+  }, [hoveredIdx, chartItems, viewLevel, selectedYear, selectedMonth, selectedQuarter, yearTotals, quarterTotals, monthTotals]);
 
   // ═══ Subtitle text ═══
   const subtitleText = useMemo(() => {
-    if (viewLevel === "year") return "Hiển thị 12 tháng • Click vào tháng có dữ liệu để xem chi tiết theo tuần";
-    if (viewLevel === "quarter") return "Hiển thị 4 Quý • Click vào từng quý để xem chi tiết các tuần";
-    if (viewLevel === "month") return `Hiển thị 4 tuần của ${MONTH_NAMES[selectedMonth]}/${selectedYear} • Click vào tuần để xem theo ngày`;
-    return "Hover vào từng ngày để xem chi tiết";
-  }, [viewLevel, selectedMonth, selectedYear]);
+    if (viewLevel === "year") return "Hiển thị 12 tháng • Chạm vào tháng để xem chi tiết theo tuần";
+    if (viewLevel === "quarter") {
+      if (selectedQuarter !== null) {
+        return `Hiển thị 3 tháng của Quý ${selectedQuarter + 1} • Chạm vào tháng để xem chi tiết các tuần`;
+      }
+      return "Hiển thị 4 Quý • Chạm vào từng quý để xem 3 tháng của quý đó";
+    }
+    if (viewLevel === "month") return `Hiển thị các tuần của ${MONTH_NAMES[selectedMonth]}/${selectedYear} • Chạm vào tuần để xem theo ngày`;
+    return "Chạm vào từng ngày để hiển thị số tiền đầy đủ";
+  }, [viewLevel, selectedMonth, selectedYear, selectedQuarter]);
 
+  const canGoBack = viewLevel === "week" || (viewLevel === "month" && selectedQuarter !== null) || (viewLevel === "quarter" && selectedQuarter !== null);
   const canDrill = viewLevel !== "week";
 
   // Handle empty data
@@ -543,9 +720,9 @@ export function AdminRevenueChart({ orderData }: AdminRevenueChartProps) {
   }
 
   return (
-    <div className="rounded-3xl bg-white p-6 sm:p-8 shadow-sm border border-neutral-200/70 flex flex-col">
+    <div className="rounded-3xl bg-white p-4 sm:p-7 shadow-sm border border-neutral-200/70 flex flex-col">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-2xl bg-rose-50 p-1 flex items-center justify-center shadow-xs border border-rose-100 shrink-0 overflow-hidden">
             <img src="/meow-back-analytics.png" alt="Analytics" className="w-full h-full object-contain" />
@@ -572,262 +749,392 @@ export function AdminRevenueChart({ orderData }: AdminRevenueChartProps) {
         </div>
       </div>
 
-      {/* Navigation Bar + Filter Controls */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 mb-4">
-        {/* Breadcrumb */}
-        <div className="flex items-center gap-1.5 text-xs font-bold flex-wrap">
-          {viewLevel === "week" && (
+      {/* ═══════════════════════════════════════════════════════════════════
+          BỘ ĐIỀU KHIỂN MOBILE FIRST (ĐƠN GIẢN - GỌN GÀNG - DỄ THAO TÁC)
+          1. Tabs chuyển chế độ (Theo Tháng / Theo Quý / Cả năm)
+          2. Breadcrumb / Nút Quay lại
+          3. Dòng chọn thời gian tối ưu cho từng chế độ (1 dòng duy nhất)
+          4. 3 Thẻ thống kê tài chính rõ ràng, không cắt chữ
+          ═══════════════════════════════════════════════════════════════════ */}
+      <div className="flex flex-col gap-2.5 mb-4">
+        {/* 1. Tabs chuyển chế độ */}
+        <div className="grid grid-cols-3 w-full bg-neutral-100 p-1 rounded-2xl border border-neutral-200/80">
+          <button
+            type="button"
+            onClick={() => {
+              setViewLevel("month");
+              setSelectedWeekStart(null);
+              setHoveredIdx(null);
+            }}
+            className={`py-2 px-1 rounded-xl text-xs font-bold text-center transition-all flex items-center justify-center gap-1.5 ${
+              viewLevel === "month" || viewLevel === "week"
+                ? "bg-white text-rose-600 shadow-xs font-black"
+                : "text-neutral-600 hover:text-neutral-900"
+            }`}
+          >
+            <Calendar size={14} strokeWidth={2.4} />
+            <span>Theo Tháng</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setViewLevel("quarter");
+              setSelectedWeekStart(null);
+              setHoveredIdx(null);
+            }}
+            className={`py-2 px-1 rounded-xl text-xs font-bold text-center transition-all flex items-center justify-center gap-1.5 ${
+              viewLevel === "quarter"
+                ? "bg-white text-rose-600 shadow-xs font-black"
+                : "text-neutral-600 hover:text-neutral-900"
+            }`}
+          >
+            <Layers size={14} strokeWidth={2.4} />
+            <span>Theo Quý</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setViewLevel("year");
+              setSelectedQuarter(null);
+              setSelectedWeekStart(null);
+              setHoveredIdx(null);
+            }}
+            className={`py-2 px-1 rounded-xl text-xs font-bold text-center transition-all flex items-center justify-center gap-1.5 ${
+              viewLevel === "year"
+                ? "bg-white text-rose-600 shadow-xs font-black"
+                : "text-neutral-600 hover:text-neutral-900"
+            }`}
+          >
+            <BarChart3 size={14} strokeWidth={2.4} />
+            <span>Cả năm</span>
+          </button>
+        </div>
+
+        {/* 2. Nút Quay lại khi đang xem chi tiết tuần */}
+        {canGoBack && (
+          <div className="flex items-center justify-between gap-2 bg-rose-50/80 border border-rose-200/80 px-2.5 py-1.5 rounded-xl">
             <button
+              type="button"
               onClick={handleGoBack}
-              className="flex items-center gap-1 text-rose-600 hover:text-rose-700 transition-colors mr-1 px-2.5 py-1.5 rounded-xl hover:bg-rose-50 border border-rose-200/70 shadow-2xs font-extrabold"
+              className="flex items-center gap-1 text-rose-600 hover:text-rose-700 font-extrabold text-xs py-1 px-2.5 rounded-lg bg-white shadow-2xs border border-rose-200/60 active:scale-95 transition-all shrink-0"
             >
               <ChevronLeft size={14} strokeWidth={2.5} />
               <span>Quay lại</span>
             </button>
-          )}
-          {breadcrumb.map((part, i) => (
-            <span key={i} className="flex items-center gap-1.5">
-              {i > 0 && <span className="text-neutral-300">›</span>}
-              {part.onClick ? (
-                <button
-                  onClick={part.onClick}
-                  className="text-rose-600 hover:text-rose-700 hover:underline transition-colors font-bold"
-                >
-                  {part.label}
-                </button>
-              ) : (
-                <span className="text-neutral-800 font-extrabold bg-neutral-100 px-2 py-0.5 rounded-lg">
-                  {part.label}
+            <div className="flex items-center gap-1 text-xs font-bold text-neutral-600 overflow-x-auto scrollbar-none">
+              {breadcrumb.map((part, i) => (
+                <span key={i} className="flex items-center gap-1 shrink-0">
+                  {i > 0 && <span className="text-neutral-300">›</span>}
+                  {part.onClick ? (
+                    <button
+                      onClick={part.onClick}
+                      className="text-rose-600 hover:text-rose-700 hover:underline font-bold"
+                    >
+                      {part.label}
+                    </button>
+                  ) : (
+                    <span className="text-neutral-900 font-black bg-white px-2 py-0.5 rounded-md shadow-2xs">
+                      {part.label}
+                    </span>
+                  )}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* 3. DÒNG THỜI GIAN THEO CHẾ ĐỘ: 1 DÒNG DUY NHẤT, GỌN GÀNG, KHÔNG RỐI */}
+        {(viewLevel === "month" || viewLevel === "week") && (
+          <div className="flex items-center justify-between gap-1.5 bg-neutral-50 p-1 rounded-2xl border border-neutral-200 shadow-2xs">
+            <button
+              type="button"
+              onClick={handlePrevMonth}
+              disabled={isAtMinMonth}
+              className="w-10 h-10 rounded-xl bg-white hover:bg-neutral-100 text-neutral-700 disabled:opacity-20 disabled:cursor-not-allowed transition-all flex items-center justify-center shrink-0 shadow-2xs border border-neutral-200/80 active:scale-95"
+              title="Tháng trước"
+              aria-label="Tháng trước"
+            >
+              <ChevronLeft size={18} strokeWidth={2.5} />
+            </button>
+
+            <div className="flex-1 flex items-center justify-center gap-1.5 min-w-0">
+              <CustomSelect
+                value={String(selectedMonth)}
+                onChange={(val) => {
+                  setSelectedMonth(Number(val));
+                  setSelectedWeekStart(null);
+                  setHoveredIdx(null);
+                }}
+                options={allMonthsInYear.map((m) => ({
+                  value: String(m.month),
+                  label: `Tháng ${m.month + 1}`,
+                  count: m.count > 0 ? `${m.count} đơn` : undefined,
+                }))}
+                className="flex-1 max-w-[135px] min-w-[105px]"
+                buttonClassName="h-9 bg-white border-neutral-200 shadow-2xs text-xs font-black text-neutral-900 px-2.5 justify-center"
+                ariaLabel="Chọn tháng"
+              />
+
+              <CustomSelect
+                value={String(selectedYear)}
+                onChange={(val) => {
+                  setSelectedYear(Number(val));
+                  setSelectedWeekStart(null);
+                  setHoveredIdx(null);
+                }}
+                options={availableYears.map((y) => ({
+                  value: String(y),
+                  label: `Năm ${y}`,
+                }))}
+                className="flex-1 max-w-[135px] min-w-[115px]"
+                buttonClassName="h-9 bg-white border-neutral-200 shadow-2xs text-xs font-black text-neutral-900 px-2.5 justify-center"
+                ariaLabel="Chọn năm"
+              />
+            </div>
+
+            <button
+              type="button"
+              onClick={handleNextMonth}
+              disabled={isAtMaxMonth}
+              className="w-10 h-10 rounded-xl bg-white hover:bg-neutral-100 text-neutral-700 disabled:opacity-20 disabled:cursor-not-allowed transition-all flex items-center justify-center shrink-0 shadow-2xs border border-neutral-200/80 active:scale-95"
+              title="Tháng sau"
+              aria-label="Tháng sau"
+            >
+              <ChevronRight size={18} strokeWidth={2.5} />
+            </button>
+          </div>
+        )}
+
+        {viewLevel === "quarter" && (
+          <div className="flex flex-col gap-2">
+            {/* Dòng chọn Năm */}
+            <div className="flex items-center justify-between bg-neutral-50 p-1 rounded-2xl border border-neutral-200 shadow-2xs">
+              <button
+                type="button"
+                onClick={handlePrevYear}
+                disabled={isAtMinYear}
+                className="w-10 h-10 rounded-xl bg-white hover:bg-neutral-100 text-neutral-700 disabled:opacity-20 disabled:cursor-not-allowed transition-all flex items-center justify-center shrink-0 shadow-2xs border border-neutral-200/80 active:scale-95"
+                title="Năm trước"
+                aria-label="Năm trước"
+              >
+                <ChevronLeft size={18} strokeWidth={2.5} />
+              </button>
+
+              <div className="flex-1 flex items-center justify-center gap-1.5 px-2 min-w-0">
+                <CustomSelect
+                  value={String(selectedYear)}
+                  onChange={(val) => {
+                    setSelectedYear(Number(val));
+                    setHoveredIdx(null);
+                  }}
+                  options={availableYears.map((y) => ({
+                    value: String(y),
+                    label: `Năm ${y}`,
+                  }))}
+                  className="max-w-[135px] w-full min-w-[115px]"
+                  buttonClassName="h-9 bg-white border-neutral-200 shadow-2xs text-xs font-black text-neutral-900 px-2.5 justify-center"
+                  ariaLabel="Chọn năm"
+                />
+                {yearTotals.count > 0 && (
+                  <span className="text-[11px] font-bold text-neutral-500 shrink-0">
+                    ({yearTotals.count} đơn)
+                  </span>
+                )}
+              </div>
+
+              <button
+                type="button"
+                onClick={handleNextYear}
+                disabled={isAtMaxYear}
+                className="w-10 h-10 rounded-xl bg-white hover:bg-neutral-100 text-neutral-700 disabled:opacity-20 disabled:cursor-not-allowed transition-all flex items-center justify-center shrink-0 shadow-2xs border border-neutral-200/80 active:scale-95"
+                title="Năm sau"
+                aria-label="Năm sau"
+              >
+                <ChevronRight size={18} strokeWidth={2.5} />
+              </button>
+            </div>
+
+            {/* 4 Quý chia đều */}
+            <div className="grid grid-cols-4 gap-1.5 bg-neutral-100 p-1 rounded-2xl border border-neutral-200/80">
+              {quartersSummary.map((q) => {
+                const isActive = selectedQuarter === q.quarter;
+                return (
+                  <button
+                    key={q.quarter}
+                    type="button"
+                    onClick={() => {
+                      if (selectedQuarter === q.quarter) {
+                        setSelectedQuarter(null);
+                      } else {
+                        setSelectedQuarter(q.quarter);
+                      }
+                      setHoveredIdx(null);
+                    }}
+                    className={`py-2 px-1 rounded-xl text-xs font-bold text-center transition-all ${
+                      isActive
+                        ? "bg-rose-600 text-white shadow-xs font-black"
+                        : "bg-white hover:bg-neutral-50 text-neutral-700 border border-neutral-200/60 shadow-2xs"
+                    }`}
+                  >
+                    <div>{q.label}</div>
+                    <div className={`text-[10px] mt-0.5 ${isActive ? "text-rose-100" : "text-neutral-400 font-normal"}`}>
+                      {q.count > 0 ? `${q.count} đơn` : "0 đơn"}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* KHI ĐÃ CHỌN 1 QUÝ: Hiển thị ngay 3 tháng của Quý đó */}
+            {selectedQuarter !== null && (
+              <div className="flex flex-col gap-1.5 p-2 rounded-2xl bg-rose-50/70 border border-rose-200/70 shadow-2xs animate-in fade-in duration-150">
+                <div className="flex items-center justify-between px-1 text-[11px] font-bold text-rose-900">
+                  <span>Các tháng của {quartersSummary[selectedQuarter].label}:</span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedQuarter(null);
+                      setHoveredIdx(null);
+                    }}
+                    className="text-rose-600 text-[11px] font-extrabold hover:underline"
+                  >
+                    Xem cả 4 quý ›
+                  </button>
+                </div>
+                <div className="grid grid-cols-3 gap-1.5">
+                  {quartersSummary[selectedQuarter].months.map((m) => {
+                    return (
+                      <button
+                        key={m.month}
+                        type="button"
+                        onClick={() => {
+                          setSelectedMonth(m.month);
+                          setViewLevel("month");
+                          setSelectedWeekStart(null);
+                          setHoveredIdx(null);
+                        }}
+                        className="flex flex-col items-center justify-center p-2 rounded-xl bg-white hover:bg-rose-100/60 text-rose-950 border border-rose-200/60 shadow-2xs active:scale-95 transition-all text-center"
+                      >
+                        <span className="text-xs font-black">{m.fullName}</span>
+                        <span className="text-[10px] text-neutral-500 font-medium mt-0.5">
+                          {m.count > 0 ? `${m.count} đơn` : "0 đơn"}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {viewLevel === "year" && (
+          <div className="flex items-center justify-between bg-neutral-50 p-1 rounded-2xl border border-neutral-200 shadow-2xs">
+            <button
+              type="button"
+              onClick={handlePrevYear}
+              disabled={isAtMinYear}
+              className="w-10 h-10 rounded-xl bg-white hover:bg-neutral-100 text-neutral-700 disabled:opacity-20 disabled:cursor-not-allowed transition-all flex items-center justify-center shrink-0 shadow-2xs border border-neutral-200/80 active:scale-95"
+              title="Năm trước"
+              aria-label="Năm trước"
+            >
+              <ChevronLeft size={18} strokeWidth={2.5} />
+            </button>
+
+            <div className="flex-1 flex items-center justify-center gap-1.5 px-2 min-w-0">
+              <CustomSelect
+                value={String(selectedYear)}
+                onChange={(val) => {
+                  setSelectedYear(Number(val));
+                  setHoveredIdx(null);
+                }}
+                options={availableYears.map((y) => ({
+                  value: String(y),
+                  label: `Năm ${y}`,
+                }))}
+                className="max-w-[135px] w-full min-w-[115px]"
+                buttonClassName="h-9 bg-white border-neutral-200 shadow-2xs text-xs font-black text-neutral-900 px-2.5 justify-center"
+                ariaLabel="Chọn năm"
+              />
+              {yearTotals.count > 0 && (
+                <span className="text-[11px] font-bold text-neutral-500 shrink-0">
+                  ({yearTotals.count} đơn)
                 </span>
               )}
-            </span>
-          ))}
-        </div>
+            </div>
 
-        {/* Filter Controls: Quick Segmented Switcher + Chọn Năm + Chọn Kỳ */}
-        <div className="flex items-center gap-2 self-start lg:self-auto flex-wrap">
-          {/* Quick Segmented View Mode Tabs */}
-          <div className="flex items-center rounded-xl bg-neutral-100/90 p-0.5 border border-neutral-200/80 shadow-2xs">
             <button
               type="button"
-              onClick={() => {
-                setSelectedMonth(currentMonth);
-                setViewLevel("month");
-                setSelectedWeekStart(null);
-                setHoveredIdx(null);
-              }}
-              className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
-                viewLevel === "month" && selectedMonth === currentMonth
-                  ? "bg-white text-rose-600 shadow-xs font-black"
-                  : "text-neutral-600 hover:text-neutral-900"
-              }`}
-            >
-              📅 Tháng {currentMonth + 1}
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setViewLevel("quarter");
-                setSelectedWeekStart(null);
-                setHoveredIdx(null);
-              }}
-              className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
-                viewLevel === "quarter"
-                  ? "bg-white text-rose-600 shadow-xs font-black"
-                  : "text-neutral-600 hover:text-neutral-900"
-              }`}
-            >
-              🏛️ Theo Quý
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setViewLevel("year");
-                setSelectedWeekStart(null);
-                setHoveredIdx(null);
-              }}
-              className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
-                viewLevel === "year"
-                  ? "bg-white text-rose-600 shadow-xs font-black"
-                  : "text-neutral-600 hover:text-neutral-900"
-              }`}
-            >
-              📊 Cả năm
-            </button>
-          </div>
-
-          {/* 1. BỘ CHỌN NĂM (Chỉ các năm có dữ liệu) */}
-          <div className="flex items-center rounded-xl bg-neutral-100/90 p-0.5 border border-neutral-200/80 shadow-2xs">
-            <button
-              onClick={() => {
-                const curIdx = availableYears.indexOf(selectedYear);
-                if (curIdx < availableYears.length - 1) {
-                  const newYear = availableYears[curIdx + 1];
-                  setSelectedYear(newYear);
-                  setViewLevel("month");
-                  setHoveredIdx(null);
-                }
-              }}
-              disabled={availableYears.indexOf(selectedYear) >= availableYears.length - 1}
-              className="p-1 rounded-lg hover:bg-white text-neutral-600 hover:text-neutral-900 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-              title="Năm trước"
-            >
-              <ChevronLeft size={15} strokeWidth={2.5} />
-            </button>
-
-            <CustomSelect
-              value={String(selectedYear)}
-              onChange={(val) => {
-                const y = Number(val);
-                setSelectedYear(y);
-                setHoveredIdx(null);
-              }}
-              options={availableYears.map((y) => ({
-                value: String(y),
-                label: `Năm ${y}`,
-              }))}
-              className="w-[95px]"
-              buttonClassName="h-7 border-transparent hover:border-neutral-200 bg-transparent text-xs font-black text-neutral-900 px-2"
-              ariaLabel="Chọn năm"
-            />
-
-            <button
-              onClick={() => {
-                const curIdx = availableYears.indexOf(selectedYear);
-                if (curIdx > 0) {
-                  const newYear = availableYears[curIdx - 1];
-                  setSelectedYear(newYear);
-                  setViewLevel("month");
-                  setHoveredIdx(null);
-                }
-              }}
-              disabled={availableYears.indexOf(selectedYear) <= 0}
-              className="p-1 rounded-lg hover:bg-white text-neutral-600 hover:text-neutral-900 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              onClick={handleNextYear}
+              disabled={isAtMaxYear}
+              className="w-10 h-10 rounded-xl bg-white hover:bg-neutral-100 text-neutral-700 disabled:opacity-20 disabled:cursor-not-allowed transition-all flex items-center justify-center shrink-0 shadow-2xs border border-neutral-200/80 active:scale-95"
               title="Năm sau"
+              aria-label="Năm sau"
             >
-              <ChevronRight size={15} strokeWidth={2.5} />
+              <ChevronRight size={18} strokeWidth={2.5} />
             </button>
           </div>
+        )}
+      </div>
 
-          {/* 2. BỘ CHỌN KỲ CHI TIẾT (Tháng / Quý / Cả năm) */}
-          <div className="flex items-center rounded-xl bg-rose-50/70 p-0.5 border border-rose-200/80 shadow-2xs">
-            {viewLevel === "month" && (
-              <button
-                onClick={() => {
-                  const curIdx = availableMonthsInYear.findIndex((m) => m.month === selectedMonth);
-                  if (curIdx > 0) {
-                    setSelectedMonth(availableMonthsInYear[curIdx - 1].month);
-                    setHoveredIdx(null);
-                  }
-                }}
-                disabled={availableMonthsInYear.findIndex((m) => m.month === selectedMonth) <= 0}
-                className="p-1 rounded-lg hover:bg-white text-rose-700 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                title="Tháng trước"
-              >
-                <ChevronLeft size={15} strokeWidth={2.5} />
-              </button>
-            )}
+      {/* ═══════════════════════════════════════════════════════════════════
+          3 THẺ KPI TÀI CHÍNH: ĐƠN GIẢN, GỌN GÀNG, KHÔNG CẮT CHỮ
+          ═══════════════════════════════════════════════════════════════════ */}
+      <div className="grid grid-cols-3 gap-2 sm:gap-3 mb-4">
+        {/* Card 1: HOA HỒNG */}
+        <div className="flex flex-col justify-between p-2.5 sm:p-3 rounded-2xl bg-rose-50/70 border border-rose-200/80 shadow-2xs min-w-0">
+          <div className="flex items-center gap-1.5 text-[11px] font-bold text-rose-700 min-w-0">
+            <span className="w-2 h-2 rounded-full bg-rose-500 shrink-0" />
+            <span className="truncate">Hoa hồng</span>
+          </div>
+          <div className="text-sm sm:text-base font-black text-rose-950 my-1 truncate tabular-nums">
+            {formatCurrency(summaryDisplay.commission)}
+          </div>
+          <div className="text-[10px] font-semibold text-rose-600 truncate">
+            {summaryDisplay.count > 0 ? `${summaryDisplay.count} đơn hàng` : "0 đơn"}
+          </div>
+        </div>
 
-            <CustomSelect
-              value={
-                viewLevel === "year"
-                  ? "year"
-                  : viewLevel === "quarter"
-                  ? "quarter"
-                  : `month_${selectedMonth}`
-              }
-              onChange={(val) => {
-                if (val === "year") {
-                  setViewLevel("year");
-                  setSelectedWeekStart(null);
-                  setHoveredIdx(null);
-                } else if (val === "quarter") {
-                  setViewLevel("quarter");
-                  setSelectedWeekStart(null);
-                  setHoveredIdx(null);
-                } else if (val.startsWith("month_")) {
-                  const mIdx = Number(val.replace("month_", ""));
-                  setSelectedMonth(mIdx);
-                  setViewLevel("month");
-                  setSelectedWeekStart(null);
-                  setHoveredIdx(null);
-                }
-              }}
-              options={[
-                {
-                  value: `month_${currentMonth}`,
-                  label: `📅 ${MONTH_NAMES[currentMonth]}/${selectedYear} (Theo tuần) • Mặc định`,
-                },
-                { value: "quarter", label: `🏛️ Theo 4 Quý năm ${selectedYear}` },
-                { value: "year", label: `📊 Cả năm ${selectedYear} (12 tháng)` },
-                ...availableMonthsInYear
-                  .filter((m) => m.month !== currentMonth)
-                  .map((m) => ({
-                    value: `month_${m.month}`,
-                    label: `📅 ${m.fullName} (${m.count} đơn)`,
-                  })),
-              ]}
-              className="w-[185px]"
-              buttonClassName="h-7 border-transparent hover:border-rose-200 bg-transparent text-xs font-black text-rose-900 px-2"
-              ariaLabel="Chọn kỳ hiển thị"
-            />
+        {/* Card 2: HOÀN CHO KHÁCH */}
+        <div className="flex flex-col justify-between p-2.5 sm:p-3 rounded-2xl bg-amber-50/70 border border-amber-200/80 shadow-2xs min-w-0">
+          <div className="flex items-center gap-1.5 text-[11px] font-bold text-amber-700 min-w-0">
+            <span className="w-2 h-2 rounded-full bg-amber-500 shrink-0" />
+            <span className="truncate">Hoàn khách</span>
+          </div>
+          <div className="text-sm sm:text-base font-black text-amber-950 my-1 truncate tabular-nums">
+            {formatCurrency(summaryDisplay.reward)}
+          </div>
+          <div className="text-[10px] font-semibold text-amber-700 truncate">
+            {summaryDisplay.commission > 0
+              ? `${Math.round((summaryDisplay.reward / summaryDisplay.commission) * 100)}% hoàn`
+              : "0% hoàn"}
+          </div>
+        </div>
 
-            {viewLevel === "month" && (
-              <button
-                onClick={() => {
-                  const curIdx = availableMonthsInYear.findIndex((m) => m.month === selectedMonth);
-                  if (curIdx >= 0 && curIdx < availableMonthsInYear.length - 1) {
-                    setSelectedMonth(availableMonthsInYear[curIdx + 1].month);
-                    setHoveredIdx(null);
-                  }
-                }}
-                disabled={
-                  availableMonthsInYear.findIndex((m) => m.month === selectedMonth) >=
-                  availableMonthsInYear.length - 1
-                }
-                className="p-1 rounded-lg hover:bg-white text-rose-700 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                title="Tháng sau"
-              >
-                <ChevronRight size={15} strokeWidth={2.5} />
-              </button>
-            )}
+        {/* Card 3: LỢI NHUẬN RÒNG */}
+        <div className="flex flex-col justify-between p-2.5 sm:p-3 rounded-2xl bg-emerald-50/70 border border-emerald-200/80 shadow-2xs min-w-0">
+          <div className="flex items-center gap-1.5 text-[11px] font-bold text-emerald-700 min-w-0">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
+            <span className="truncate">Lợi nhuận</span>
+          </div>
+          <div className="text-sm sm:text-base font-black text-emerald-950 my-1 truncate tabular-nums">
+            {formatCurrency(summaryDisplay.profit)}
+          </div>
+          <div className="text-[10px] font-semibold text-emerald-700 truncate">
+            {summaryDisplay.commission > 0
+              ? `${Math.round((summaryDisplay.profit / summaryDisplay.commission) * 100)}% lãi`
+              : "0% lãi"}
           </div>
         </div>
       </div>
 
-      {/* Summary chips */}
-      <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-5 p-3.5 rounded-2xl bg-neutral-50/90 border border-neutral-200/70 transition-all">
-        <div className="flex flex-col">
-          <span className="text-[10px] font-extrabold uppercase text-rose-600 tracking-wider truncate">
-            Hoa hồng {summaryDisplay.title}
-          </span>
-          <span className="text-sm sm:text-base font-black text-neutral-900 tabular-nums">
-            {formatCurrency(summaryDisplay.commission)}
-          </span>
-        </div>
-        <div className="flex flex-col">
-          <span className="text-[10px] font-extrabold uppercase text-amber-600 tracking-wider truncate">
-            Hoàn khách {summaryDisplay.title}
-          </span>
-          <span className="text-sm sm:text-base font-black text-neutral-900 tabular-nums">
-            {formatCurrency(summaryDisplay.reward)}
-          </span>
-        </div>
-        <div className="flex flex-col">
-          <span className="text-[10px] font-extrabold uppercase text-emerald-600 tracking-wider truncate">
-            Lợi nhuận {summaryDisplay.title}
-          </span>
-          <span className="text-sm sm:text-base font-black text-emerald-700 tabular-nums">
-            {formatCurrency(summaryDisplay.profit)}
-          </span>
-        </div>
-      </div>
-
-      {/* Interactive SVG Smooth Spline 3-Line Graph */}
-      <div className="relative w-full">
+      {/* Interactive SVG Smooth Spline 3-Line Graph (To rõ, trực quan, chiều cao vượt trội trên mobile) */}
+      <div className={`relative w-full ${isMobile && viewLevel === "year" ? "overflow-x-auto pb-2 scrollbar-none" : ""}`}>
         <svg
-          viewBox="0 0 600 215"
-          className="w-full h-auto select-none overflow-visible"
+          viewBox={`0 0 ${viewBoxWidth} ${viewBoxHeight}`}
+          className={`select-none overflow-visible ${
+            isMobile && viewLevel === "year" ? "min-w-[500px] h-[260px]" : "w-full h-auto"
+          }`}
           role="img"
           aria-label="Biểu đồ xu hướng doanh thu"
           onMouseLeave={() => setHoveredIdx(null)}
@@ -932,7 +1239,7 @@ export function AdminRevenueChart({ orderData }: AdminRevenueChartProps) {
                 strokeWidth={hoveredIdx === i ? 3 : 2.5}
                 className="transition-all"
               />
-              {hoveredIdx !== i && (
+              {hoveredIdx !== i && p.val > 0 && (
                 <text x={p.x} y={p.y - 8} textAnchor="middle" className="text-[10px] font-black fill-rose-600 font-mono">
                   {fmtShort(p.val)}
                 </text>
@@ -951,7 +1258,7 @@ export function AdminRevenueChart({ orderData }: AdminRevenueChartProps) {
                 strokeWidth="2"
                 className="transition-all"
               />
-              {hoveredIdx !== i && p.val > 0 && Math.abs(p.y - commPoints[i].y) > 16 && (
+              {hoveredIdx !== i && p.val > 0 && Math.abs(p.y - commPoints[i].y) > 26 && (
                 <text x={p.x} y={p.y - 7} textAnchor="middle" className="text-[9px] font-extrabold fill-amber-600 font-mono">
                   {fmtShort(p.val)}
                 </text>
@@ -980,7 +1287,7 @@ export function AdminRevenueChart({ orderData }: AdminRevenueChartProps) {
             const canDrillThisItem = canDrill && (viewLevel !== "year" || hasData);
 
             // Smart tooltip positioning
-            const tooltipBoxX = Math.max(10, Math.min(cx - 90, 410));
+            const tooltipBoxX = Math.max(10, Math.min(cx - 85, viewBoxWidth - 185));
             const commY = commPoints[i]?.y ?? PLOT.bottom;
             const tooltipBoxY = commY < 100 ? commY + 14 : commY - 72;
 

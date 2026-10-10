@@ -25,6 +25,8 @@ type ChatMessage = {
   user: { fullName: string; role: string };
 };
 
+import { markNotificationIdsAsSeen } from "@/lib/notificationClient";
+
 interface Props {
   initialNotifications: Notification[];
   initialUnreadCount: number;
@@ -62,8 +64,14 @@ export function NotificationsPageClient({
   const [unreadCount, setUnreadCount] = useState(initialUnreadCount);
   const [markingAll, setMarkingAll] = useState(false);
 
+  // Khi người dùng đã vào trang Thông báo xem qua, tự động đánh dấu đã xem (seen)
+  // trong localStorage để lần sau không bao giờ hiện popup/toast lại cho các thông báo này nữa!
   useEffect(() => {
     setNotifications(initialNotifications);
+    const ids = initialNotifications.map((x) => x.id);
+    if (ids.length > 0) {
+      markNotificationIdsAsSeen(ids);
+    }
   }, [initialNotifications]);
 
   useEffect(() => {

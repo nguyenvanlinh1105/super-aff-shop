@@ -12,21 +12,31 @@ export async function GET(req: NextRequest) {
   const limit = Number(req.nextUrl.searchParams.get("limit")) || 5;
   const skip = (page - 1) * limit;
 
-  const [notifications, unreadCount, totalCount] = await Promise.all([
-    prisma.notification.findMany({
-      where: { userId: session.userId },
-      orderBy: { createdAt: "desc" },
-      skip,
-      take: limit,
-    }),
-    prisma.notification.count({ where: { userId: session.userId, isRead: false } }),
-    prisma.notification.count({ where: { userId: session.userId } }),
-  ]);
+  try {
+    const [notifications, unreadCount, totalCount] = await Promise.all([
+      prisma.notification.findMany({
+        where: { userId: session.userId },
+        orderBy: { createdAt: "desc" },
+        skip,
+        take: limit,
+      }),
+      prisma.notification.count({ where: { userId: session.userId, isRead: false } }),
+      prisma.notification.count({ where: { userId: session.userId } }),
+    ]);
 
-  return NextResponse.json({
-    notifications,
-    unreadCount,
-    totalPages: Math.ceil(totalCount / limit),
-    currentPage: page,
-  });
+    return NextResponse.json({
+      notifications,
+      unreadCount,
+      totalPages: Math.ceil(totalCount / limit) || 1,
+      currentPage: page,
+    });
+  } catch (error) {
+    console.error("Notifications fetch error:", error);
+    return NextResponse.json({
+      notifications: [],
+      unreadCount: 0,
+      totalPages: 1,
+      currentPage: 1,
+    });
+  }
 }

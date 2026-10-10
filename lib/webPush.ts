@@ -34,9 +34,24 @@ export type PushPayload = {
   tag?: string;
 };
 
+async function cleanupSubscription(endpoint: string) {
+  try {
+    const dbAny = prisma as any;
+    if (dbAny.pushSubscription?.deleteMany) {
+      await dbAny.pushSubscription.deleteMany({
+        where: { endpoint },
+      });
+    } else {
+      await prisma.$executeRaw`
+        DELETE FROM "push_subscriptions" WHERE "endpoint" = ${endpoint}
+      `;
+    }
+  } catch (_) {}
+}
+
 /**
  * Gửi Web Push Notification tới 1 subscription đơn lẻ.
- * Tự động xóa subscription nếu token đã hết hạn (HTTP 410 hoặc 404).
+ * Tự động xóa subscription nếu token đã hết hạn (HTTP 410 hoặc 404) hoặc key không hợp lệ.
  */
 export async function sendWebPush(
   subscription: { id?: string; endpoint: string; p256dh: string; auth: string },
@@ -44,6 +59,19 @@ export async function sendWebPush(
 ): Promise<boolean> {
   if (!vapidPublicKey || !vapidPrivateKey) {
     console.warn("VAPID keys not configured. Skipping push notification.");
+    return false;
+  }
+
+  // Kiểm tra tính hợp lệ của khóa p256dh trước khi gửi (chuỗi base64 phải giải mã ra đúng 65 bytes)
+  try {
+    const rawKey = Buffer.from(subscription.p256dh, "base64");
+    if (rawKey.length !== 65) {
+      console.warn(`Push subscription has invalid p256dh length (${rawKey.length} bytes != 65) for endpoint. Auto-cleaning...`);
+      await cleanupSubscription(subscription.endpoint);
+      return false;
+    }
+  } catch {
+    await cleanupSubscription(subscription.endpoint);
     return false;
   }
 
@@ -69,22 +97,12 @@ export async function sendWebPush(
     return true;
   } catch (err: any) {
     // 410 Gone hoặc 404 Not Found: token trên thiết bị đã bị hủy hoặc người dùng đã tắt quyền
-    if (err.statusCode === 410 || err.statusCode === 404) {
-      console.log(`Push subscription expired for ${subscription.endpoint}. Cleaning up...`);
-      try {
-        const dbAny = prisma as any;
-        if (dbAny.pushSubscription?.deleteMany) {
-          await dbAny.pushSubscription.deleteMany({
-            where: { endpoint: subscription.endpoint },
-          });
-        } else {
-          await prisma.$executeRaw`
-            DELETE FROM "push_subscriptions" WHERE "endpoint" = ${subscription.endpoint}
-          `;
-        }
-      } catch (_) {}
+    // Hoặc lỗi định dạng khóa p256dh: tự động dọn dẹp subscription hỏng
+    if (err.statusCode === 410 || err.statusCode === 404 || err.message?.includes("65 bytes")) {
+      console.log(`Push subscription invalid or expired for ${subscription.endpoint}. Cleaning up...`);
+      await cleanupSubscription(subscription.endpoint);
     } else {
-      console.error("Web Push sendNotification error:", err);
+      console.warn("Web Push sendNotification notice:", err.message || err);
     }
     return false;
   }

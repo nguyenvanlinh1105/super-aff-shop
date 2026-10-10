@@ -76,34 +76,45 @@ export function BroadcastForm() {
     if (!title.trim() || !message.trim()) return;
 
     const confirmed = await modal.confirm({
-      title: "Phát thông báo cho toàn bộ khách hàng?",
+      title: "Xác nhận phát thông báo",
+      compact: true,
+      icon: <Megaphone size={18} className="text-white" />,
       message: (
-        <div className="flex flex-col gap-3 text-left w-full my-1.5">
-          <p className="text-[13px] text-neutral-600 text-center font-medium leading-relaxed">
-            Thông báo này sẽ gửi tức thì tới <strong>tất cả thành viên</strong> qua chuông thông báo trên app và web.
-          </p>
-
-          <div className="rounded-2xl bg-white/95 border border-primary-200/80 p-3.5 flex flex-col gap-2.5 shadow-2xs">
-            <div className="flex items-start gap-2">
-              <span className="shrink-0 text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-rose-100 text-rose-700 mt-0.5">
+        <div className="flex flex-col gap-2.5 text-left w-full">
+          <div className="rounded-2xl bg-rose-50/50 border border-rose-100/80 p-3.5 flex flex-col gap-2.5">
+            <div>
+              <span className="text-[10px] font-black uppercase tracking-wider text-rose-600 block mb-0.5">
                 Tiêu đề
               </span>
-              <span className="text-[13px] font-black text-neutral-900 line-clamp-2">{title}</span>
+              <p className="text-[13px] font-black text-neutral-900 leading-snug">
+                {title}
+              </p>
             </div>
 
-            <div className="flex items-center gap-2">
-              <span className="shrink-0 text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md bg-purple-100 text-purple-700">
-                Khi bấm
-              </span>
-              <span className="text-[11.5px] font-mono font-bold text-neutral-600 truncate">{link || "/app (Trang chủ)"}</span>
-            </div>
-
-            {message && (
-              <div className="pt-2 border-t border-neutral-100 text-[12px] text-neutral-600 font-medium line-clamp-3 leading-relaxed bg-neutral-50/70 p-2.5 rounded-xl border border-neutral-100">
-                &ldquo;{message}&rdquo;
+            {link && (
+              <div>
+                <span className="text-[10px] font-black uppercase tracking-wider text-purple-600 block mb-0.5">
+                  Đường dẫn khi bấm
+                </span>
+                <p className="text-xs font-mono font-bold text-neutral-600 truncate">
+                  {link}
+                </p>
               </div>
             )}
+
+            <div>
+              <span className="text-[10px] font-black uppercase tracking-wider text-neutral-500 block mb-0.5">
+                Nội dung thông báo
+              </span>
+              <div className="text-[12.5px] text-neutral-700 font-medium leading-relaxed bg-white p-3 rounded-xl border border-rose-100 whitespace-pre-line max-h-44 overflow-y-auto scrollbar-none">
+                {message}
+              </div>
+            </div>
           </div>
+
+          <p className="text-[11px] text-neutral-400 font-medium text-center">
+            Thông báo sẽ gửi tức thì tới <strong>tất cả thành viên</strong> qua chuông app & web.
+          </p>
         </div>
       ),
       confirmText: "Gửi thông báo ngay",
@@ -134,27 +145,26 @@ export function BroadcastForm() {
 
   return (
     <div className="rounded-3xl bg-white p-4 sm:p-6 md:p-8 shadow-sm border border-neutral-200/70 flex flex-col gap-6">
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-2xl bg-rose-50 flex items-center justify-center shadow-xs border border-rose-100 shrink-0 text-rose-600">
-            <Megaphone size={20} strokeWidth={2} />
-          </div>
-          <div>
-            <h2 className="text-base sm:text-lg font-extrabold text-neutral-900 tracking-tight">Phát Thông Báo Toàn Hệ Thống</h2>
-            <p className="text-xs text-neutral-500 font-medium">Gửi thông báo tức thì tới tất cả người dùng MeowBack</p>
-          </div>
+      {/* Header: Gọn gàng trên Mobile, không ngắt dòng chữ */}
+      <div className="flex items-center gap-3">
+        <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-rose-500 to-pink-600 text-white flex items-center justify-center shadow-md shadow-rose-500/25 shrink-0">
+          <Megaphone size={19} strokeWidth={2.4} />
         </div>
-
-        <span className="text-[10px] font-black uppercase tracking-wider text-rose-600 bg-rose-50 px-2.5 py-1 rounded-xl border border-rose-200/80 shrink-0">
-          Broadcast Center
-        </span>
+        <div className="min-w-0 flex-1">
+          <h2 className="text-base sm:text-lg font-black text-neutral-900 tracking-tight">
+            Phát Thông Báo Hệ Thống
+          </h2>
+          <p className="text-xs text-neutral-500 font-medium truncate">
+            Gửi thông báo tức thì tới toàn bộ người dùng MeowBack
+          </p>
+        </div>
       </div>
 
       {/* Preset Quick Selectors */}
-      <div className="flex flex-col gap-2.5 p-3.5 rounded-2xl bg-rose-50/50 border border-rose-100/80">
-        <div className="text-xs font-extrabold text-rose-900 flex items-center gap-1.5">
+      <div className="flex flex-col gap-2 p-3 sm:p-4 rounded-2xl bg-rose-50/60 border border-rose-100">
+        <div className="text-xs font-black text-rose-900 flex items-center gap-1.5">
           <Sparkles size={14} className="text-rose-500 shrink-0" />
-          <span>Mẫu thông báo sẵn có (Click để điền nhanh):</span>
+          <span>Mẫu thông báo soạn sẵn:</span>
         </div>
 
         {/* Mobile View: Dùng CustomSelect tinh tế, không chiếm nhiều diện tích màn hình */}
@@ -170,11 +180,12 @@ export function BroadcastForm() {
               const p = PRESET_TEMPLATES[Number(val)];
               if (p) applyPreset(p, Number(val));
             }}
-            placeholder="— Chọn mẫu thông báo sẵn có —"
+            placeholder="— Chọn mẫu soạn sẵn —"
             icon={<Sparkles size={15} className="text-rose-500" />}
             className="w-full"
+            fullWidthMenu={true}
             wrapLabels={true}
-            ariaLabel="Mẫu thông báo sẵn có"
+            ariaLabel="Mẫu thông báo soạn sẵn"
           />
         </div>
 
@@ -226,10 +237,10 @@ export function BroadcastForm() {
             </label>
             <div className="flex flex-wrap gap-1.5 mb-2">
               {[
-                { label: "🛍️ Săn Deals Hot", path: "/app/deals" },
-                { label: "👛 Ví tiền & Rút tiền", path: "/app/wallet" },
-                { label: "📦 Đơn hàng hoàn tiền", path: "/app/orders" },
-                { label: "🎁 Mời bạn bè & Hoa hồng", path: "/app/referral" },
+                { label: "🛍️ Săn Deals", path: "/app/deals" },
+                { label: "👛 Ví tiền", path: "/app/wallet" },
+                { label: "📦 Đơn hàng", path: "/app/orders" },
+                { label: "🎁 Giới thiệu", path: "/app/referral" },
                 { label: "🏠 Trang chủ", path: "/app" },
               ].map((btn) => (
                 <button

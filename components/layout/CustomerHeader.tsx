@@ -20,6 +20,8 @@ import {
   FileText,
   ShieldCheck,
   ExternalLink,
+  Sparkles,
+  ArrowRight,
 } from "lucide-react";
 import { LogoMeowBack, IconBow } from "@/components/icons/CatRibbonIcons";
 import { cn } from "@/lib/utils";
@@ -45,6 +47,36 @@ const MAIN_HEADER_NAV = [
   { href: "/app/referral", label: "Mời bạn bè", icon: UserPlus },
 ];
 
+function playNotificationChime() {
+  try {
+    const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+    if (!AudioCtx) return;
+    const ctx = new AudioCtx();
+    const now = ctx.currentTime;
+    const osc1 = ctx.createOscillator();
+    const gain1 = ctx.createGain();
+    osc1.type = "sine";
+    osc1.frequency.setValueAtTime(659.25, now);
+    gain1.gain.setValueAtTime(0.08, now);
+    gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+    osc1.connect(gain1);
+    gain1.connect(ctx.destination);
+    osc1.start(now);
+    osc1.stop(now + 0.3);
+
+    const osc2 = ctx.createOscillator();
+    const gain2 = ctx.createGain();
+    osc2.type = "sine";
+    osc2.frequency.setValueAtTime(987.77, now + 0.1);
+    gain2.gain.setValueAtTime(0.12, now + 0.1);
+    gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+    osc2.connect(gain2);
+    gain2.connect(ctx.destination);
+    osc2.start(now + 0.1);
+    osc2.stop(now + 0.5);
+  } catch {}
+}
+
 export function CustomerHeader({
   unreadCount = 0,
   sections,
@@ -57,11 +89,53 @@ export function CustomerHeader({
   const [isOpen, setIsOpen] = useState(false);
   const [count, setCount] = useState(unreadCount);
   const [isBumping, setIsBumping] = useState(false);
+  const [showTooltip, setShowTooltip] = useState(false);
+
+  const handleDismissTooltip = () => {
+    setShowTooltip(false);
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem("meowback_bell_tooltip_dismissed_count", String(count));
+    }
+  };
 
   // Sync khi prop unreadCount từ server thay đổi (ví dụ khi chuyển trang hoặc SSR)
   useEffect(() => {
     setCount(unreadCount);
   }, [unreadCount]);
+
+  // Hiển thị toast trỏ vào chuông khi có thông báo mới mà không ở trang notifications
+  useEffect(() => {
+    if (count > 0 && !pathname?.startsWith("/app/notifications")) {
+      const dismissed =
+        typeof window !== "undefined"
+          ? sessionStorage.getItem("meowback_bell_tooltip_dismissed_count")
+          : null;
+      if (dismissed !== String(count)) {
+        const timer = setTimeout(() => {
+          setShowTooltip(true);
+          setIsBumping(true);
+          setTimeout(() => setIsBumping(false), 800);
+          playNotificationChime();
+        }, 600);
+        return () => clearTimeout(timer);
+      }
+    } else {
+      setShowTooltip(false);
+      if (pathname?.startsWith("/app/notifications") && typeof window !== "undefined") {
+        sessionStorage.setItem("meowback_bell_tooltip_dismissed_count", String(count));
+      }
+    }
+  }, [count, pathname]);
+
+  // Tự động đóng toast trỏ chuông sau 10 giây
+  useEffect(() => {
+    if (showTooltip) {
+      const timer = setTimeout(() => {
+        handleDismissTooltip();
+      }, 10000);
+      return () => clearTimeout(timer);
+    }
+  }, [showTooltip, count]);
 
   // Lắng nghe sự kiện thông báo realtime để chuông cập nhật ngay lập tức
   useEffect(() => {
@@ -168,12 +242,13 @@ export function CustomerHeader({
               <LogoMeowBack />
             </Link>
 
-            <div className="flex items-center gap-3 sm:gap-4">
+            <div className="flex items-center gap-3 sm:gap-4 relative">
               {/* Chuông thông báo hồng */}
               <Link
                 href="/app/notifications"
+                onClick={handleDismissTooltip}
                 title="Thông báo"
-                className="relative p-2 text-primary-500 hover:text-primary-600 transition-transform active:scale-95 rounded-full hover:bg-primary-50/60"
+                className="relative p-2 text-primary-500 hover:text-primary-600 transition-transform active:scale-95 rounded-full hover:bg-primary-50/60 block"
               >
                 <Bell size={24} strokeWidth={2.25} className={isBumping ? "animate-bounce" : ""} />
                 {count > 0 && (
@@ -196,6 +271,77 @@ export function CustomerHeader({
               >
                 <Menu size={28} strokeWidth={2.5} />
               </button>
+
+              {/* Popover / Toast trỏ trực diện vào tâm chuông (chuẩn tỉ lệ mobile & desktop) */}
+              {showTooltip && count > 0 && !pathname?.startsWith("/app/notifications") && (
+                <div
+                  role="alert"
+                  className="absolute right-0 top-full mt-3 z-50 w-[min(calc(100vw-2.5rem),330px)] rounded-[26px] bg-white p-3.5 sm:p-4 shadow-[0_20px_50px_-12px_rgba(255,109,158,0.35)] border-2 border-primary-200 ring-4 ring-primary-500/10 animate-in fade-in slide-in-from-top-2 duration-300 select-none overflow-visible"
+                >
+                  {/* Decorative subtle pink glow */}
+                  <div className="absolute -top-8 -left-8 w-24 h-24 bg-primary-100/60 rounded-full blur-xl pointer-events-none" />
+
+                  {/* Mũi tên nhọn trỏ thẳng vào tâm chuông */}
+                  <div className="absolute -top-[9px] right-[63px] sm:right-[67px] w-4 h-4 bg-white border-t-2 border-l-2 border-primary-200 rotate-45 z-10" />
+
+                  {/* Nút tắt */}
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      e.preventDefault();
+                      handleDismissTooltip();
+                    }}
+                    className="absolute top-3 right-3 w-6 h-6 rounded-full text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 flex items-center justify-center transition-colors cursor-pointer z-20"
+                    title="Đóng thông báo"
+                  >
+                    <X size={13} strokeWidth={2.5} />
+                  </button>
+
+                  <Link
+                    href="/app/notifications"
+                    onClick={handleDismissTooltip}
+                    className="flex items-start gap-3 group cursor-pointer relative z-10"
+                  >
+                    {/* Avatar linh vật mèo 3D */}
+                    <div className="relative shrink-0">
+                      <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-pink-400 via-rose-500 to-primary-500 p-[2px] shadow-md shadow-primary-500/25 flex items-center justify-center group-hover:scale-105 transition-transform">
+                        <div className="w-full h-full rounded-[14px] bg-white p-1 flex items-center justify-center overflow-hidden">
+                          <img
+                            src="/meow-back-mascot.png"
+                            alt="MeowBack Mascot"
+                            className="w-full h-full object-contain"
+                          />
+                        </div>
+                      </div>
+                      <span className="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-rose-500 text-white text-[9px] font-black ring-2 ring-white">
+                        🔔
+                      </span>
+                    </div>
+
+                    <div className="min-w-0 flex-1 pr-3">
+                      <div className="flex items-center gap-1 text-[10px] sm:text-[10.5px] font-black uppercase tracking-wider text-primary-600 mb-0.5">
+                        <Sparkles size={11} className="text-accent-bow shrink-0 animate-pulse" />
+                        <span>Thông báo mới</span>
+                      </div>
+                      <p className="text-[13px] font-black text-neutral-900 leading-snug">
+                        Bạn có <span className="text-primary-600 font-black px-1.5 py-0.2 bg-primary-100/90 rounded-md shadow-2xs">{count}</span> thông báo mới nè! 🐾
+                      </p>
+                      
+                      {/* Action row with CTA pill button */}
+                      <div className="mt-2.5 flex items-center justify-between gap-1">
+                        <span className="text-[11px] text-neutral-500 font-medium truncate">
+                          Nhấn để xem chi tiết
+                        </span>
+                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-primary-500 via-rose-500 to-pink-500 text-white text-[11px] font-black shadow-cute group-hover:shadow-cute-lg group-hover:scale-105 active:scale-95 transition-all shrink-0">
+                          <span>Xem ngay</span>
+                          <ArrowRight size={11} strokeWidth={2.5} className="group-hover:translate-x-0.5 transition-transform" />
+                        </span>
+                      </div>
+                    </div>
+                  </Link>
+                </div>
+              )}
             </div>
           </div>
 

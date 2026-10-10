@@ -115,7 +115,7 @@ function SingleToast({
       transition={{ type: "spring", stiffness: 450, damping: 30 }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
-      className={`group relative pointer-events-auto flex w-full max-w-[400px] items-start gap-3 rounded-2xl border p-4 backdrop-blur-md transition-shadow hover:shadow-cute-lg ${style.container}`}
+      className={`group relative pointer-events-auto flex w-full max-w-[400px] items-start gap-3 rounded-2xl border p-4 backdrop-blur-md transition-shadow hover:shadow-cute-lg overflow-hidden ${style.container}`}
     >
       {/* Icon */}
       <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl shadow-xs ${style.iconBg}`}>
@@ -135,21 +135,25 @@ function SingleToast({
       {/* Close button */}
       <button
         onClick={() => onDismiss(toast.id)}
-        className="shrink-0 -mr-1 -mt-1 rounded-xl p-1.5 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-800 transition-colors"
+        className="shrink-0 -mr-1 -mt-1 rounded-xl p-1.5 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-800 transition-colors cursor-pointer"
         aria-label="Đóng thông báo"
       >
         <X size={15} strokeWidth={2.5} />
       </button>
 
-      {/* Progress timer bar */}
-      {duration > 0 && !isHovered && (
-        <motion.div
-          initial={{ scaleX: 1 }}
-          animate={{ scaleX: 0 }}
-          transition={{ duration: duration / 1000, ease: "linear" }}
-          style={{ originX: 0 }}
-          className={`absolute bottom-0 left-3 right-3 h-[2px] rounded-full opacity-60 ${style.progressBar}`}
-        />
+      {/* Progress timer bar (nằm trọn dưới đáy và bo góc hoàn hảo theo khung thẻ) */}
+      {duration > 0 && (
+        <div className="absolute bottom-0 left-0 right-0 h-[3px] bg-neutral-200/40">
+          {!isHovered && (
+            <motion.div
+              initial={{ scaleX: 1 }}
+              animate={{ scaleX: 0 }}
+              transition={{ duration: duration / 1000, ease: "linear" }}
+              style={{ originX: 0 }}
+              className={`h-full w-full opacity-80 ${style.progressBar}`}
+            />
+          )}
+        </div>
       )}
     </motion.div>
   );

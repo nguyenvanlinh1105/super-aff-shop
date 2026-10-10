@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { ChevronDown, Check } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export interface CustomSelectOption {
   value: string;
@@ -22,6 +23,8 @@ interface CustomSelectProps {
   align?: "left" | "right";
   ariaLabel?: string;
   wrapLabels?: boolean;
+  showCountInButton?: boolean;
+  fullWidthMenu?: boolean;
 }
 
 export function CustomSelect({
@@ -36,9 +39,29 @@ export function CustomSelect({
   align = "left",
   ariaLabel,
   wrapLabels = false,
+  showCountInButton = false,
+  fullWidthMenu,
 }: CustomSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const [effectiveAlign, setEffectiveAlign] = useState<"left" | "right">(align);
+
+  const isFullWidth = fullWidthMenu ?? className.includes("w-full");
+
+  useEffect(() => {
+    setEffectiveAlign(align);
+  }, [align]);
+
+  // Prevent right-edge overflow on mobile when not full width
+  useEffect(() => {
+    if (isOpen && containerRef.current && !isFullWidth) {
+      const rect = containerRef.current.getBoundingClientRect();
+      const viewportWidth = window.innerWidth;
+      if (align === "left" && viewportWidth - rect.left < 260 && rect.right > 260) {
+        setEffectiveAlign("right");
+      }
+    }
+  }, [isOpen, align, isFullWidth]);
 
   const selectedOption = options.find((opt) => opt.value === value);
 
@@ -78,28 +101,30 @@ export function CustomSelect({
   };
 
   return (
-    <div ref={containerRef} className={`relative select-none ${className}`}>
+    <div ref={containerRef} className={cn("relative select-none", className)}>
       {/* Trigger Button */}
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
         aria-expanded={isOpen}
         aria-label={ariaLabel || selectedOption?.label || placeholder}
-        className={`group flex h-11 w-full items-center justify-between gap-2 rounded-2xl border bg-white px-3.5 text-left text-[13px] font-bold transition-all cursor-pointer shadow-2xs focus:outline-none active:scale-[0.98] ${
+        className={cn(
+          "group flex h-11 w-full items-center justify-between gap-1.5 rounded-2xl border bg-white px-3 text-left text-[13px] font-bold transition-all cursor-pointer shadow-2xs focus:outline-none active:scale-[0.98]",
           isOpen
             ? "border-primary-400 ring-2 ring-primary-100 shadow-cute"
-            : "border-neutral-200/90 hover:border-primary-300 hover:shadow-sm"
-        } ${buttonClassName}`}
+            : "border-neutral-200/90 hover:border-primary-300 hover:shadow-sm",
+          buttonClassName
+        )}
       >
-        <div className="flex items-center gap-2 min-w-0 flex-1">
+        <div className="flex items-center gap-1.5 min-w-0 flex-1">
           {(selectedOption?.icon ?? icon) && (
             <span className="shrink-0">{selectedOption?.icon ?? icon}</span>
           )}
           <span className="truncate text-neutral-800 font-bold">
             {selectedOption ? selectedOption.label : placeholder}
           </span>
-          {selectedOption?.count !== undefined && (
-            <span className="shrink-0 rounded-full bg-primary-100/90 text-primary-700 px-1.5 py-0.5 text-[10.5px] font-black leading-none">
+          {showCountInButton && selectedOption?.count !== undefined && (
+            <span className="shrink-0 rounded-full bg-primary-100/90 text-primary-700 px-1.5 py-0.5 text-[10px] font-black leading-none whitespace-nowrap">
               {selectedOption.count}
             </span>
           )}
@@ -118,9 +143,16 @@ export function CustomSelect({
       {isOpen && (
         <div
           role="listbox"
-          className={`absolute ${
-            align === "right" ? "right-0" : "left-0"
-          } top-full mt-1.5 z-50 w-full min-w-full max-w-full max-h-64 overflow-y-auto overflow-x-hidden rounded-2xl border border-primary-100/90 bg-white/98 p-1.5 shadow-xl shadow-primary-500/10 backdrop-blur-md animate-in fade-in zoom-in-95 duration-150 ${menuClassName}`}
+          className={cn(
+            "absolute top-full mt-1.5 z-50 rounded-2xl border border-primary-100/90 bg-white p-1.5 shadow-xl shadow-primary-500/10 backdrop-blur-md animate-in fade-in zoom-in-95 duration-150 max-h-64 overflow-y-auto overflow-x-hidden scrollbar-none scrollbar-hide [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
+            isFullWidth
+              ? "left-0 right-0 w-full min-w-0 max-w-full"
+              : cn(
+                  effectiveAlign === "right" ? "right-0" : "left-0",
+                  "min-w-full w-max max-w-[calc(100vw-2rem)] sm:max-w-xs"
+                ),
+            menuClassName
+          )}
         >
           {options.length === 0 ? (
             <div className="py-3 px-3 text-center text-xs font-semibold text-neutral-400">
@@ -149,7 +181,7 @@ export function CustomSelect({
                       className={
                         wrapLabels
                           ? "whitespace-normal break-words line-clamp-2 leading-snug"
-                          : "truncate"
+                          : "whitespace-nowrap truncate"
                       }
                     >
                       {opt.label}

@@ -121,7 +121,7 @@ export function CustomerGlobalUI({ platforms }: { platforms: PlatformOption[] })
                 ESC
               </div>
             </div>
-            <div className="max-h-[350px] overflow-y-auto p-2">
+            <div className="max-h-[350px] overflow-y-auto p-2 scrollbar-none scrollbar-hide [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               {filteredItems.length === 0 ? (
                 <div className="py-8 text-center text-sm text-neutral-500">
                   Không tìm thấy kết quả phù hợp.

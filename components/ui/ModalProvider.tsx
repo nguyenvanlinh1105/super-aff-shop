@@ -1,7 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, useCallback, useEffect, ReactNode } from "react";
-import { X } from "lucide-react";
+import { X, AlertTriangle, AlertCircle, Check, Bell } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { IconBow } from "@/components/icons/CatRibbonIcons";
 import { useToast } from "./Toast";
@@ -15,6 +15,9 @@ export interface ModalOptions {
   iconType?: "danger" | "info" | "warning" | "success";
   confirmText?: string;
   cancelText?: string;
+  compact?: boolean;
+  icon?: ReactNode;
+  hideMascot?: boolean;
 }
 
 interface ModalContextType {
@@ -138,64 +141,101 @@ export function ModalProvider({ children }: { children: ReactNode }) {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.92, y: 10 }}
               transition={{ type: "spring", stiffness: 420, damping: 28 }}
-              className="relative w-full max-w-[430px] rounded-[32px] bg-gradient-to-b from-rose-50/70 via-white to-white p-6 sm:p-8 shadow-[0_20px_60px_-15px_rgba(255,109,158,0.35)] border border-primary-100/90 my-auto overflow-hidden text-neutral-900"
+              className={`relative w-full max-w-[430px] rounded-[30px] ${
+                options.compact
+                  ? "bg-white p-4 sm:p-5 border border-neutral-200/90 shadow-2xl max-h-[min(90vh,620px)] flex flex-col"
+                  : "bg-gradient-to-b from-rose-50/70 via-white to-white p-6 sm:p-8 border border-primary-100/90 shadow-[0_20px_60px_-15px_rgba(255,109,158,0.35)]"
+              } my-auto overflow-hidden text-neutral-900`}
             >
               {/* Decorative background glow & sparkles */}
-              <div className="absolute -top-12 -right-12 w-36 h-36 rounded-full bg-gradient-to-br from-primary-200/35 to-pink-200/20 blur-2xl pointer-events-none" />
-              <div className="absolute -bottom-12 -left-12 w-36 h-36 rounded-full bg-gradient-to-tr from-rose-200/30 to-amber-200/20 blur-2xl pointer-events-none" />
+              {!options.compact && (
+                <>
+                  <div className="absolute -top-12 -right-12 w-36 h-36 rounded-full bg-gradient-to-br from-primary-200/35 to-pink-200/20 blur-2xl pointer-events-none" />
+                  <div className="absolute -bottom-12 -left-12 w-36 h-36 rounded-full bg-gradient-to-tr from-rose-200/30 to-amber-200/20 blur-2xl pointer-events-none" />
+                </>
+              )}
 
               {/* Close Button */}
               <button
                 onClick={() => handleClose(false)}
-                className="absolute right-4 top-4 rounded-full p-2 text-neutral-400 hover:bg-rose-50 hover:text-rose-600 transition-colors z-10 cursor-pointer"
+                className="absolute right-3.5 top-3.5 rounded-full p-2 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-700 transition-colors z-20 cursor-pointer"
                 aria-label="Đóng"
               >
                 <X size={18} strokeWidth={2.5} />
               </button>
 
-              <div className="relative z-10 flex flex-col items-center text-center gap-3.5">
-                {/* Mascot Icon with 3D Ring & Floating Mini-badge */}
-                <div className="relative">
-                  <div
-                    className={`w-20 h-20 rounded-3xl bg-gradient-to-br ${mascot.gradient} flex items-center justify-center p-2 shadow-cute border-2 border-white ring-4 ${mascot.ring} transition-transform`}
-                  >
-                    <img
-                      src="/meowback_lucky_cat_logo.png"
-                      alt="MeowBack Mascot"
-                      className="w-full h-full object-contain drop-shadow-xs"
-                    />
+              {options.compact ? (
+                /* Compact Header for Content-Heavy Modals */
+                <>
+                  <div className="relative z-10 flex items-center gap-2.5 w-full pb-3 border-b border-neutral-100 text-left pr-8 shrink-0">
+                    <div
+                      className={`w-9 h-9 rounded-2xl flex items-center justify-center shrink-0 text-white shadow-sm ring-2 ring-white ${mascot.badgeBg}`}
+                    >
+                      {options.icon || (
+                        options.iconType === "danger" ? <AlertTriangle size={17} /> :
+                        options.iconType === "warning" ? <AlertCircle size={17} /> :
+                        options.iconType === "success" ? <Check size={17} /> :
+                        <Bell size={17} />
+                      )}
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <h3 className="text-[15px] sm:text-base font-black text-neutral-900 tracking-tight leading-snug">
+                        {options.title}
+                      </h3>
+                    </div>
                   </div>
-                  <div
-                    className={`absolute -bottom-1 -right-1 flex h-7 w-7 items-center justify-center rounded-full text-white shadow-sm ring-2 ring-white text-[12px] font-black ${mascot.badgeBg} ${mascot.badgeAnim}`}
-                  >
-                    {mascot.badgeIcon}
-                  </div>
-                </div>
 
-                {/* Sub ribbon pill */}
-                <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-white/95 border border-primary-200/70 text-[10.5px] font-black uppercase tracking-wider text-primary-600 shadow-2xs">
-                  <IconBow className="w-3.5 h-3.5 text-accent-bow" />
-                  <span>{options.type === "confirm" ? "Xác nhận hành động 🐾" : "Thông báo MeowBack 🐾"}</span>
-                </div>
-
-                {/* Title & Message */}
-                <div className="w-full">
-                  <h3 className="text-lg sm:text-[20px] font-black text-neutral-900 leading-tight mb-2 tracking-tight">
-                    {options.title}
-                  </h3>
-                  <div className="text-[13.5px] text-neutral-600 leading-relaxed font-medium">
+                  {/* Message Content with automatic scroll if long */}
+                  <div className="relative z-10 w-full flex-1 overflow-y-auto scrollbar-none py-2 text-[13px] text-neutral-600 font-medium">
                     {options.message}
                   </div>
+                </>
+              ) : (
+                /* Standard Mascot Dialog */
+                <div className="relative z-10 flex flex-col items-center text-center gap-3.5">
+                  {/* Mascot Icon with 3D Ring & Floating Mini-badge */}
+                  <div className="relative">
+                    <div
+                      className={`w-20 h-20 rounded-3xl bg-gradient-to-br ${mascot.gradient} flex items-center justify-center p-2 shadow-cute border-2 border-white ring-4 ${mascot.ring} transition-transform`}
+                    >
+                      <img
+                        src="/meowback_lucky_cat_logo.png"
+                        alt="MeowBack Mascot"
+                        className="w-full h-full object-contain drop-shadow-xs"
+                      />
+                    </div>
+                    <div
+                      className={`absolute -bottom-1 -right-1 flex h-7 w-7 items-center justify-center rounded-full text-white shadow-sm ring-2 ring-white text-[12px] font-black ${mascot.badgeBg} ${mascot.badgeAnim}`}
+                    >
+                      {mascot.badgeIcon}
+                    </div>
+                  </div>
+
+                  {/* Sub ribbon pill */}
+                  <div className="inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full bg-white/95 border border-primary-200/70 text-[10.5px] font-black uppercase tracking-wider text-primary-600 shadow-2xs">
+                    <IconBow className="w-3.5 h-3.5 text-accent-bow" />
+                    <span>{options.type === "confirm" ? "Xác nhận hành động 🐾" : "Thông báo MeowBack 🐾"}</span>
+                  </div>
+
+                  {/* Title & Message */}
+                  <div className="w-full">
+                    <h3 className="text-lg sm:text-[20px] font-black text-neutral-900 leading-tight mb-2 tracking-tight">
+                      {options.title}
+                    </h3>
+                    <div className="text-[13.5px] text-neutral-600 leading-relaxed font-medium">
+                      {options.message}
+                    </div>
+                  </div>
                 </div>
-              </div>
+              )}
 
               {/* Action Buttons */}
-              <div className="relative z-10 mt-6 flex items-center gap-3 w-full">
+              <div className={`relative z-10 ${options.compact ? "mt-2 pt-2.5 border-t border-neutral-100" : "mt-6"} flex items-center gap-3 w-full shrink-0`}>
                 {options.type === "confirm" && (
                   <button
                     type="button"
                     onClick={() => handleClose(false)}
-                    className="flex-1 h-11 sm:h-12 flex items-center justify-center rounded-2xl border-2 border-neutral-200/90 bg-white hover:bg-neutral-50 hover:border-neutral-300 text-neutral-700 font-extrabold text-[13px] sm:text-[14px] px-3 shadow-2xs transition-all active:scale-95 cursor-pointer text-center whitespace-nowrap"
+                    className="flex-1 h-11 sm:h-11 flex items-center justify-center rounded-2xl border-2 border-neutral-200/90 bg-white hover:bg-neutral-50 hover:border-neutral-300 text-neutral-700 font-extrabold text-[13px] px-3 shadow-2xs transition-all active:scale-95 cursor-pointer text-center whitespace-nowrap"
                   >
                     {options.cancelText || "Hủy bỏ"}
                   </button>
@@ -203,7 +243,7 @@ export function ModalProvider({ children }: { children: ReactNode }) {
                 <button
                   type="button"
                   onClick={() => handleClose(true)}
-                  className={`flex-1 h-11 sm:h-12 flex items-center justify-center rounded-2xl font-black text-[13px] sm:text-[14px] px-3 text-white shadow-cute hover:shadow-cute-lg transition-all hover:scale-[1.02] active:scale-95 cursor-pointer text-center whitespace-nowrap ${
+                  className={`flex-1 h-11 sm:h-11 flex items-center justify-center rounded-2xl font-black text-[13px] px-3 text-white shadow-cute hover:shadow-cute-lg transition-all hover:scale-[1.02] active:scale-95 cursor-pointer text-center whitespace-nowrap ${
                     options.iconType === "danger"
                       ? "bg-gradient-to-r from-rose-500 to-red-600 hover:from-rose-600 hover:to-red-700"
                       : "bg-gradient-to-r from-primary-500 via-rose-500 to-pink-500 hover:from-primary-600 hover:to-rose-600"

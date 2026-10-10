@@ -775,7 +775,7 @@ export function CustomerWalletClient({
 
                   {/* Dropdown danh sách ngân hàng */}
                   {showBankOptions && (
-                    <div className="absolute z-30 mt-1.5 max-h-[260px] w-full overflow-y-auto rounded-2xl border border-primary-200/90 bg-white p-2 shadow-2xl animate-in fade-in duration-150 [scrollbar-width:thin]">
+                    <div className="absolute z-30 mt-1.5 max-h-[260px] w-full overflow-y-auto rounded-2xl border border-primary-200/90 bg-white p-2 shadow-2xl animate-in fade-in duration-150 scrollbar-none scrollbar-hide [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
                       {/* Tiêu đề trạng thái kết quả */}
                       <div className="px-2.5 py-1.5 text-[11px] font-extrabold uppercase tracking-wider text-neutral-400 border-b border-neutral-100 mb-1 flex items-center justify-between">
                         <span>

@@ -14,6 +14,7 @@ import {
   Clock,
   XCircle,
   BarChart3,
+  Wallet,
 } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { formatCurrency } from "@/lib/format";
@@ -453,54 +454,114 @@ export default async function AdminDashboardPage() {
         </div>
       </div>
 
-      {/* 4 KPI CARDS */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
-        <div className="group relative overflow-hidden rounded-3xl bg-white p-5 sm:p-6 shadow-sm border border-neutral-200/70 hover:border-rose-200 transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-50 text-rose-600 font-black text-xl border border-rose-100 group-hover:scale-105 transition-transform">
-              &#128101;
+      {/* 4 KPI CARDS: 4 MÀU SẮC BIỆT LẬP, HIỆN ĐẠI, SẮC SẢO */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
+        {/* Card 1: Khách hàng (Sắc Hồng Rose / Pink) */}
+        <div className="group relative overflow-hidden rounded-2xl sm:rounded-3xl bg-gradient-to-br from-rose-50/70 via-white to-pink-50/50 p-3.5 sm:p-5 shadow-xs border border-rose-200/80 hover:border-rose-300 hover:shadow-md hover:shadow-rose-500/10 transition-all duration-300 hover:-translate-y-1 flex flex-col justify-between">
+          <Users className="pointer-events-none absolute -bottom-2 -right-2 h-20 w-20 text-rose-500/[0.06] -rotate-12 transition-transform group-hover:scale-110" />
+
+          <div className="relative z-10 flex items-center justify-between gap-1.5 mb-2.5">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-gradient-to-br from-rose-500 to-pink-600 text-white flex items-center justify-center shadow-md shadow-rose-500/25 shrink-0 group-hover:scale-105 transition-transform">
+              <Users size={18} strokeWidth={2.4} />
             </div>
-            <span className="rounded-full bg-rose-50 border border-rose-100 px-2.5 py-0.5 text-[10px] font-black uppercase text-rose-600 tracking-wider">Thành viên</span>
+            <span className="rounded-full bg-rose-100/90 text-rose-700 border border-rose-200/80 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider whitespace-nowrap shadow-2xs">
+              Thành viên
+            </span>
           </div>
-          <div className="text-xs font-bold uppercase tracking-wider text-neutral-400 mb-1">Tổng Khách Hàng</div>
-          <div className="text-2xl sm:text-3xl font-black text-neutral-900 tabular-nums leading-tight">{totalCustomers.toLocaleString()}</div>
-          <div className="mt-1 text-[11px] text-neutral-500 font-medium">Tài khoản đã kích hoạt</div>
+
+          <div className="relative z-10">
+            <div className="text-[11px] font-extrabold uppercase tracking-wider text-rose-900/60 mb-0.5">
+              Khách hàng
+            </div>
+            <div className="text-2xl sm:text-3xl font-black text-rose-950 tabular-nums leading-tight">
+              {totalCustomers.toLocaleString()}
+            </div>
+            <div className="mt-1 flex items-center text-[10px] sm:text-[11px] font-semibold text-rose-600/90 truncate">
+              <span className="w-1.5 h-1.5 rounded-full bg-rose-500 mr-1.5 shrink-0" />
+              <span>Tài khoản kích hoạt</span>
+            </div>
+          </div>
         </div>
 
-        <div className="group relative overflow-hidden rounded-3xl bg-white p-5 sm:p-6 shadow-sm border border-neutral-200/70 hover:border-sky-200 transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-50 text-sky-600 font-black text-xl border border-sky-100 group-hover:scale-105 transition-transform">
-              &#128279;
+        {/* Card 2: Link tracking (Sắc Xanh Biển Sky / Blue) */}
+        <div className="group relative overflow-hidden rounded-2xl sm:rounded-3xl bg-gradient-to-br from-sky-50/70 via-white to-blue-50/50 p-3.5 sm:p-5 shadow-xs border border-sky-200/80 hover:border-sky-300 hover:shadow-md hover:shadow-sky-500/10 transition-all duration-300 hover:-translate-y-1 flex flex-col justify-between">
+          <Link2 className="pointer-events-none absolute -bottom-2 -right-2 h-20 w-20 text-sky-500/[0.06] -rotate-12 transition-transform group-hover:scale-110" />
+
+          <div className="relative z-10 flex items-center justify-between gap-1.5 mb-2.5">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-gradient-to-br from-sky-500 to-blue-600 text-white flex items-center justify-center shadow-md shadow-sky-500/25 shrink-0 group-hover:scale-105 transition-transform">
+              <Link2 size={18} strokeWidth={2.4} />
             </div>
-            <span className="rounded-full bg-sky-50 border border-sky-100 px-2.5 py-0.5 text-[10px] font-black uppercase text-sky-700 tracking-wider">Affiliate</span>
+            <span className="rounded-full bg-sky-100/90 text-sky-700 border border-sky-200/80 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider whitespace-nowrap shadow-2xs">
+              Affiliate
+            </span>
           </div>
-          <div className="text-xs font-bold uppercase tracking-wider text-neutral-400 mb-1">Link Tracking</div>
-          <div className="text-2xl sm:text-3xl font-black text-neutral-900 tabular-nums leading-tight">{totalLinks.toLocaleString()}</div>
-          <div className="mt-1 text-[11px] text-neutral-500 font-medium">Link đã khởi tạo</div>
+
+          <div className="relative z-10">
+            <div className="text-[11px] font-extrabold uppercase tracking-wider text-sky-900/60 mb-0.5">
+              Link Tracking
+            </div>
+            <div className="text-2xl sm:text-3xl font-black text-sky-950 tabular-nums leading-tight">
+              {totalLinks.toLocaleString()}
+            </div>
+            <div className="mt-1 flex items-center text-[10px] sm:text-[11px] font-semibold text-sky-600/90 truncate">
+              <span className="w-1.5 h-1.5 rounded-full bg-sky-500 mr-1.5 shrink-0" />
+              <span>Link đã khởi tạo</span>
+            </div>
+          </div>
         </div>
 
-        <div className="group relative overflow-hidden rounded-3xl bg-white p-5 sm:p-6 shadow-sm border border-neutral-200/70 hover:border-amber-200 transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-amber-50 text-amber-600 font-black text-xl border border-amber-100 group-hover:scale-105 transition-transform">
-              &#128230;
+        {/* Card 3: Tổng đơn hàng (Sắc Vàng Cam Amber / Orange) */}
+        <div className="group relative overflow-hidden rounded-2xl sm:rounded-3xl bg-gradient-to-br from-amber-50/70 via-white to-orange-50/50 p-3.5 sm:p-5 shadow-xs border border-amber-200/80 hover:border-amber-300 hover:shadow-md hover:shadow-amber-500/10 transition-all duration-300 hover:-translate-y-1 flex flex-col justify-between">
+          <Package className="pointer-events-none absolute -bottom-2 -right-2 h-20 w-20 text-amber-500/[0.06] -rotate-12 transition-transform group-hover:scale-110" />
+
+          <div className="relative z-10 flex items-center justify-between gap-1.5 mb-2.5">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-gradient-to-br from-amber-500 to-orange-500 text-white flex items-center justify-center shadow-md shadow-amber-500/25 shrink-0 group-hover:scale-105 transition-transform">
+              <Package size={18} strokeWidth={2.4} />
             </div>
-            <span className="rounded-full bg-amber-50 border border-amber-100 px-2.5 py-0.5 text-[10px] font-black uppercase text-amber-700 tracking-wider">Giao dịch</span>
+            <span className="rounded-full bg-amber-100/90 text-amber-800 border border-amber-200/80 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider whitespace-nowrap shadow-2xs">
+              Giao dịch
+            </span>
           </div>
-          <div className="text-xs font-bold uppercase tracking-wider text-neutral-400 mb-1">Tổng Đơn Hàng</div>
-          <div className="text-2xl sm:text-3xl font-black text-neutral-900 tabular-nums leading-tight">{totalOrders.toLocaleString()}</div>
-          <div className="mt-1 text-[11px] text-neutral-500 font-medium">Đơn hàng đối soát</div>
+
+          <div className="relative z-10">
+            <div className="text-[11px] font-extrabold uppercase tracking-wider text-amber-900/60 mb-0.5">
+              Tổng Đơn Hàng
+            </div>
+            <div className="text-2xl sm:text-3xl font-black text-amber-950 tabular-nums leading-tight">
+              {totalOrders.toLocaleString()}
+            </div>
+            <div className="mt-1 flex items-center text-[10px] sm:text-[11px] font-semibold text-amber-700/90 truncate">
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-500 mr-1.5 shrink-0" />
+              <span>Đơn hàng đối soát</span>
+            </div>
+          </div>
         </div>
 
-        <div className="group relative overflow-hidden rounded-3xl bg-gradient-to-br from-white via-[#F4FBF7] to-[#E6F8EE] p-5 sm:p-6 shadow-sm border border-emerald-200/80 hover:border-emerald-300 transition-all duration-300 hover:-translate-y-1 hover:shadow-md">
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-100 text-emerald-700 font-black text-xl shadow-xs group-hover:scale-105 transition-transform">
-              &#128184;
+        {/* Card 4: Đã chi trả (Sắc Xanh Ngọc Emerald / Teal) */}
+        <div className="group relative overflow-hidden rounded-2xl sm:rounded-3xl bg-gradient-to-br from-emerald-50/70 via-white to-teal-50/50 p-3.5 sm:p-5 shadow-xs border border-emerald-200/80 hover:border-emerald-300 hover:shadow-md hover:shadow-emerald-500/10 transition-all duration-300 hover:-translate-y-1 flex flex-col justify-between">
+          <CircleDollarSign className="pointer-events-none absolute -bottom-2 -right-2 h-20 w-20 text-emerald-500/[0.06] -rotate-12 transition-transform group-hover:scale-110" />
+
+          <div className="relative z-10 flex items-center justify-between gap-1.5 mb-2.5">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center shadow-md shadow-emerald-500/25 shrink-0 group-hover:scale-105 transition-transform">
+              <CircleDollarSign size={18} strokeWidth={2.4} />
             </div>
-            <span className="rounded-full bg-emerald-100/80 border border-emerald-200 px-2.5 py-0.5 text-[10px] font-black uppercase text-emerald-800 tracking-wider">Đã hoàn</span>
+            <span className="rounded-full bg-emerald-100/90 text-emerald-800 border border-emerald-200/80 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider whitespace-nowrap shadow-2xs">
+              Đã hoàn
+            </span>
           </div>
-          <div className="text-xs font-bold uppercase tracking-wider text-emerald-800/60 mb-1">Đã Chi Trả</div>
-          <div className="text-xl sm:text-2xl font-black text-emerald-900 tabular-nums leading-tight">{formatCurrency(paid)}</div>
-          <div className="mt-1 text-[11px] text-emerald-700 font-medium">Đã rút về TK ngân hàng</div>
+
+          <div className="relative z-10">
+            <div className="text-[11px] font-extrabold uppercase tracking-wider text-emerald-900/60 mb-0.5">
+              Đã Chi Trả
+            </div>
+            <div className="text-xl sm:text-2xl lg:text-3xl font-black text-emerald-950 tabular-nums leading-tight truncate">
+              {formatCurrency(paid)}
+            </div>
+            <div className="mt-1 flex items-center text-[10px] sm:text-[11px] font-semibold text-emerald-700/90 truncate">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 shrink-0" />
+              <span>Đã rút về TK ngân hàng</span>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -887,8 +948,8 @@ export default async function AdminDashboardPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 divide-y sm:divide-y-0 sm:divide-x divide-neutral-100">
           <div className="p-6">
             <div className="flex items-center gap-2.5 mb-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-amber-50 text-amber-600 font-black border border-amber-100 shadow-xs">
-                &#128091;
+              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-amber-50 text-amber-600 border border-amber-100 shadow-xs">
+                <Wallet size={20} strokeWidth={2.3} className="text-amber-600" />
               </div>
               <div>
                 <span className="text-sm font-extrabold text-neutral-900 block">Công Nợ Ví Khách Hàng</span>
@@ -903,8 +964,8 @@ export default async function AdminDashboardPage() {
           </div>
           <div className="p-6">
             <div className="flex items-center gap-2.5 mb-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700 font-black border border-emerald-100 shadow-xs">
-                &#9989;
+              <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700 border border-emerald-100 shadow-xs">
+                <CheckCircle2 size={20} strokeWidth={2.3} className="text-emerald-700" />
               </div>
               <div>
                 <span className="text-sm font-extrabold text-neutral-900 block">Đã Chi Trả Thành Công</span>

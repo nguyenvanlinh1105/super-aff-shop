@@ -1,12 +1,17 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { X, ArrowRight, Bell, Sparkles } from "lucide-react";
 import {
   getNotificationTargetUrl,
   getNotificationActionLabel,
 } from "@/components/customer/NotificationsClient";
+import {
+  getSeenNotificationIds,
+  markNotificationIdsAsSeen,
+  isNotificationSeen,
+} from "@/lib/notificationClient";
 
 type NotificationItem = {
   id: string;
@@ -57,30 +62,37 @@ function playNotificationChime() {
 
 export function AppNotificationBanner() {
   const router = useRouter();
+  const pathname = usePathname();
   const [activeNotification, setActiveNotification] = useState<NotificationItem | null>(null);
+  const [unseenTotalCount, setUnseenTotalCount] = useState<number>(1);
   const [visible, setVisible] = useState(false);
-  const lastKnownIdRef = useRef<string | null>(null);
+  const lastShownIdRef = useRef<string | null>(null);
   const dismissTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Hiển thị thông báo dạng App Push Banner (chỉ hiển thị trên giao diện In-App của website)
-  const showBanner = useCallback((notif: NotificationItem) => {
+  const showBanner = useCallback((notif: NotificationItem, totalCount = 1) => {
+    // Không hiện banner nếu người dùng đang ở ngay trang /app/notifications
+    if (pathname?.startsWith("/app/notifications")) return;
+
     setActiveNotification(notif);
+    setUnseenTotalCount(totalCount);
     setVisible(true);
     playNotificationChime();
 
-    // LƯU Ý: KHÔNG gọi `new Notification()` ở đây!
-    // Hệ thống đã có Web Push Service Worker (`sw.js`) chịu trách nhiệm gửi thông báo màn hình khóa / OS.
-    // Nếu gọi thêm `new Notification()`, người dùng sẽ nhận 2 thông báo trên cùng 1 thiết bị.
-
     if (dismissTimerRef.current) clearTimeout(dismissTimerRef.current);
-    // Tự động đóng sau 7 giây
+    // Tự động đóng sau 8 giây — và đánh dấu đã xem để không hiện lại lần sau
     dismissTimerRef.current = setTimeout(() => {
+      markNotificationIdsAsSeen(notif.id);
       setVisible(false);
-    }, 7000);
-  }, []);
+    }, 8000);
+  }, [pathname]);
 
   const closeBanner = (e?: React.MouseEvent) => {
     e?.stopPropagation();
+    if (activeNotification) {
+      // Đánh dấu thông báo này là đã xem vào localStorage để không hiện lại nữa
+      markNotificationIdsAsSeen(activeNotification.id);
+    }
     setVisible(false);
     if (dismissTimerRef.current) clearTimeout(dismissTimerRef.current);
   };
@@ -88,28 +100,25 @@ export function AppNotificationBanner() {
   const handleBannerClick = async () => {
     if (!activeNotification) return;
     const n = activeNotification;
+
+    // Đánh dấu đã xem popup vào localStorage để không hiện lại banner nữa
+    markNotificationIdsAsSeen(n.id);
     closeBanner();
 
-    // Đánh dấu đã đọc trên server
-    try {
-      void fetch(`/api/notifications/${n.id}`, { method: "PATCH" });
-      if (typeof window !== "undefined") {
-        window.dispatchEvent(new CustomEvent("meowback-unread-delta", { detail: -1 }));
-      }
-    } catch {}
-
-    // Chuyển hướng thông minh tới đúng trang (Deals, Ví, Đơn hàng...)
-    const targetUrl = getNotificationTargetUrl(n);
-    if (targetUrl) {
-      router.push(targetUrl);
-    }
+    // Chuyển hướng người dùng đến trang xem thông báo (hoặc link đính kèm).
+    // Lưu ý: KHÔNG tự ý đánh dấu đã đọc ở đây để người dùng vào danh sách vẫn thấy tin mới.
+    const targetUrl = getNotificationTargetUrl(n) || "/app/notifications";
+    router.push(targetUrl);
   };
 
   // Khởi tạo & Polling kiểm tra thông báo mới
   useEffect(() => {
     let isMounted = true;
 
-    async function checkNewNotifications(isInitial = false) {
+    async function checkNewNotifications() {
+      // Đang ở trang thông báo thì không cần bắn popup banner
+      if (pathname?.startsWith("/app/notifications")) return;
+
       try {
         const res = await fetch("/api/notifications?page=1", { cache: "no-store" });
         if (!res.ok) return;
@@ -125,36 +134,43 @@ export function AppNotificationBanner() {
         const list: NotificationItem[] = data.notifications || [];
         if (list.length === 0) return;
 
-        const latest = list[0];
+        // Lọc ra các thông báo CHƯA ĐỌC mà người dùng CHƯA TỪNG CLICK XEM (chưa có trong localStorage)
+        const seenIds = getSeenNotificationIds();
+        const unreadUnseen = list.filter((n) => !n.isRead && !seenIds.has(n.id));
 
-        // Lần đầu tải trang: chỉ ghi nhận ID mới nhất, không bắn popup thông báo cũ
-        if (isInitial) {
-          lastKnownIdRef.current = latest.id;
-          return;
-        }
+        if (unreadUnseen.length === 0) return;
 
-        // Các lần kiểm tra sau: nếu có thông báo mới chưa đọc và ID khác lần trước
-        if (lastKnownIdRef.current && latest.id !== lastKnownIdRef.current && !latest.isRead) {
-          lastKnownIdRef.current = latest.id;
-          if (isMounted) {
-            showBanner(latest);
-          }
+        const latest = unreadUnseen[0];
+
+        // Tránh bắn lại cùng một thông báo liên tục
+        if (lastShownIdRef.current === latest.id) return;
+
+        lastShownIdRef.current = latest.id;
+        if (isMounted) {
+          showBanner(latest, unreadUnseen.length);
         }
       } catch {}
     }
 
-    // Kiểm tra lần đầu
-    void checkNewNotifications(true);
+    // Kiểm tra ngay khi tải trang
+    void checkNewNotifications();
 
     // Polling định kỳ mỗi 15 giây
     const interval = setInterval(() => {
-      void checkNewNotifications(false);
+      void checkNewNotifications();
     }, 15000);
 
-    // Lắng nghe sự kiện tức thì khi Admin phát thông báo trên cùng trình duyệt
+    // Lắng nghe sự kiện yêu cầu kiểm tra thông báo ngay lập tức
+    const handleCheckTrigger = () => {
+      void checkNewNotifications();
+    };
+    window.addEventListener("meowback-check-notifications" as any, handleCheckTrigger);
+
+    // Lắng nghe sự kiện tức thì khi có thông báo mới phát ra
     const handleLocalBroadcast = (e: CustomEvent<NotificationItem>) => {
-      if (e.detail) {
-        showBanner(e.detail);
+      if (e.detail && !isNotificationSeen(e.detail.id)) {
+        lastShownIdRef.current = e.detail.id;
+        showBanner(e.detail, 1);
       }
     };
     window.addEventListener("meowback-notification" as any, handleLocalBroadcast);
@@ -172,9 +188,11 @@ export function AppNotificationBanner() {
           isRead: false,
           createdAt: new Date().toISOString(),
         };
-        lastKnownIdRef.current = item.id;
-        if (isMounted) {
-          showBanner(item);
+        if (!isNotificationSeen(item.id)) {
+          lastShownIdRef.current = item.id;
+          if (isMounted) {
+            showBanner(item, 1);
+          }
         }
       }
     };
@@ -186,6 +204,7 @@ export function AppNotificationBanner() {
     return () => {
       isMounted = false;
       clearInterval(interval);
+      window.removeEventListener("meowback-check-notifications" as any, handleCheckTrigger);
       window.removeEventListener("meowback-notification" as any, handleLocalBroadcast);
       if (typeof navigator !== "undefined" && "serviceWorker" in navigator) {
         navigator.serviceWorker.removeEventListener("message", handleSwMessage);
@@ -194,7 +213,7 @@ export function AppNotificationBanner() {
     };
   }, [showBanner]);
 
-  if (!visible || !activeNotification) return null;
+  if (!visible || !activeNotification || pathname?.startsWith("/app/notifications")) return null;
 
   const targetUrl = getNotificationTargetUrl(activeNotification);
   const actionLabel = getNotificationActionLabel(targetUrl);
@@ -202,7 +221,7 @@ export function AppNotificationBanner() {
   return (
     <aside
       aria-label="Thông báo mới"
-      className="fixed top-3 left-1/2 -translate-x-1/2 z-[9999] w-[92%] max-w-md pointer-events-auto select-none"
+      className="fixed top-3 left-1/2 -translate-x-1/2 z-[99999] w-[94%] max-w-md pointer-events-auto select-none"
     >
       <div
         role="button"
@@ -214,7 +233,7 @@ export function AppNotificationBanner() {
             handleBannerClick();
           }
         }}
-        className="group relative flex items-start gap-3 rounded-2xl sm:rounded-3xl bg-white/95 backdrop-blur-xl p-3.5 sm:p-4 shadow-2xl border border-rose-300/80 hover:border-rose-400 transition-all duration-300 animate-in slide-in-from-top-4 fade-in cursor-pointer hover:scale-[1.01] active:scale-[0.99] ring-4 ring-rose-500/10"
+        className="group relative flex items-start gap-3 rounded-2xl sm:rounded-3xl bg-white/95 backdrop-blur-xl p-3.5 sm:p-4 shadow-2xl border border-rose-300/90 hover:border-rose-400 transition-all duration-300 animate-in slide-in-from-top-4 fade-in cursor-pointer hover:scale-[1.01] active:scale-[0.99] ring-4 ring-rose-500/10"
       >
         {/* App Mascot Icon */}
         <div className="relative h-11 w-11 shrink-0">
@@ -233,13 +252,18 @@ export function AppNotificationBanner() {
         {/* Content */}
         <div className="flex-1 min-w-0 pr-6">
           <div className="flex items-center gap-1.5 text-[11px] font-black uppercase tracking-wider text-rose-600 mb-0.5">
-            <Sparkles size={11} className="text-rose-500" />
-            <span>MeowBack App</span>
-            <span className="text-neutral-300 font-normal">•</span>
-            <span className="text-neutral-400 font-bold lowercase">vừa xong</span>
+            <Sparkles size={11} className="text-rose-500 shrink-0" />
+            <span className="truncate">MeowBack Thông Báo</span>
+            <span className="text-neutral-300 font-normal shrink-0">•</span>
+            <span className="text-neutral-400 font-bold lowercase shrink-0">mới</span>
+            {unseenTotalCount > 1 && (
+              <span className="ml-auto bg-rose-500 text-white text-[9.5px] font-black px-1.5 py-0.2 rounded-full shrink-0">
+                +{unseenTotalCount - 1} tin khác
+              </span>
+            )}
           </div>
 
-          <h4 className="text-xs sm:text-[13.5px] font-black text-neutral-900 leading-snug truncate">
+          <h4 className="text-xs sm:text-[13.5px] font-black text-neutral-900 leading-snug line-clamp-1">
             {activeNotification.title}
           </h4>
 

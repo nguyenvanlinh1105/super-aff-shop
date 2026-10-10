@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { getSession } from "@/lib/auth";
 import { AdminSidebar } from "@/components/layout/AdminSidebar";
+import { AppNotificationBanner } from "@/components/ui/AppNotificationBanner";
 
 import { prisma } from "@/lib/prisma";
 
@@ -72,6 +73,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           {children}
         </div>
       </main>
+      <AppNotificationBanner />
     </div>
   );
 }
