@@ -15,6 +15,7 @@ import {
   Link2,
 } from "lucide-react";
 import { Pagination } from "@/components/ui/Pagination";
+import { CustomSelect } from "@/components/ui/CustomSelect";
 import { formatDate } from "@/lib/format";
 import { ShopeeIcon, TiktokIcon, LazadaIcon } from "@/components/icons/PlatformIcons";
 
@@ -234,18 +235,21 @@ export function QuickLinksHistoryClient({
 
           <div className="flex items-center gap-2">
             <span className="text-xs text-neutral-500 font-semibold hidden md:inline">Hiển thị:</span>
-            <select
-              value={pageSize}
-              onChange={(e) => {
-                setPageSize(Number(e.target.value));
+            <CustomSelect
+              value={String(pageSize)}
+              onChange={(val) => {
+                setPageSize(Number(val));
                 setCurrentPage(1);
               }}
-              className="h-9 rounded-xl border border-neutral-200 bg-white px-2.5 text-xs font-bold text-neutral-700 focus:border-rose-400 focus:outline-none shadow-2xs cursor-pointer"
-            >
-              <option value={5}>5 link/trang</option>
-              <option value={10}>10 link/trang</option>
-              <option value={20}>20 link/trang</option>
-            </select>
+              options={[
+                { value: "5", label: "5 link/trang" },
+                { value: "10", label: "10 link/trang" },
+                { value: "20", label: "20 link/trang" },
+              ]}
+              className="w-[125px]"
+              buttonClassName="h-9 text-xs font-bold text-neutral-700"
+              ariaLabel="Hiển thị mỗi trang"
+            />
           </div>
         </div>
 
@@ -280,39 +284,43 @@ export function QuickLinksHistoryClient({
 
           {/* Sắp xếp */}
           <div className="md:col-span-3">
-            <div className="relative">
-              <ArrowUpDown size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none" />
-              <select
-                value={sortBy}
-                onChange={(e) => {
-                  setSortBy(e.target.value as any);
-                  setCurrentPage(1);
-                }}
-                className="h-10 w-full rounded-2xl bg-white pl-8 pr-3 text-xs font-bold text-neutral-700 border border-neutral-200/90 focus:border-rose-400 focus:outline-none shadow-2xs cursor-pointer appearance-none"
-              >
-                <option value="newest">Mới nhất trước</option>
-                <option value="oldest">Cũ nhất trước</option>
-                <option value="clicks">Lượt click cao nhất</option>
-                <option value="name_asc">Tên khách hàng (A-Z)</option>
-                <option value="product_asc">Tên sản phẩm (A-Z)</option>
-              </select>
-            </div>
+            <CustomSelect
+              value={sortBy}
+              onChange={(val) => {
+                setSortBy(val as any);
+                setCurrentPage(1);
+              }}
+              icon={<ArrowUpDown size={13} className="text-neutral-400" />}
+              options={[
+                { value: "newest", label: "Mới nhất trước" },
+                { value: "oldest", label: "Cũ nhất trước" },
+                { value: "clicks", label: "Lượt click cao nhất" },
+                { value: "name_asc", label: "Tên khách hàng (A-Z)" },
+                { value: "product_asc", label: "Tên sản phẩm (A-Z)" },
+              ]}
+              className="w-full"
+              buttonClassName="h-10 text-xs font-bold text-neutral-700"
+              ariaLabel="Sắp xếp"
+            />
           </div>
 
           {/* Lọc Người Sở Hữu */}
           <div className="md:col-span-3">
-            <select
+            <CustomSelect
               value={ownerFilter}
-              onChange={(e) => {
-                setOwnerFilter(e.target.value as any);
+              onChange={(val) => {
+                setOwnerFilter(val as any);
                 setCurrentPage(1);
               }}
-              className="h-10 w-full rounded-2xl bg-white px-3 text-xs font-bold text-neutral-700 border border-neutral-200/90 focus:border-rose-400 focus:outline-none shadow-2xs cursor-pointer"
-            >
-              <option value="ALL">Tất cả người tạo</option>
-              <option value="CUSTOMER">Chỉ khách hàng cá nhân</option>
-              <option value="SYSTEM">Chỉ link chia sẻ công khai</option>
-            </select>
+              options={[
+                { value: "ALL", label: "Tất cả người tạo" },
+                { value: "CUSTOMER", label: "Chỉ khách hàng cá nhân" },
+                { value: "SYSTEM", label: "Chỉ link chia sẻ công khai" },
+              ]}
+              className="w-full"
+              buttonClassName="h-10 text-xs font-bold text-neutral-700"
+              ariaLabel="Lọc người sở hữu"
+            />
           </div>
         </div>
 

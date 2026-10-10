@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -19,6 +19,7 @@ import {
   Info,
 } from "lucide-react";
 import { PARTNER_RATE_PRESETS } from "@/lib/commission";
+import { CustomSelect, type CustomSelectOption } from "@/components/ui/CustomSelect";
 
 type Option = { id: string; label: string };
 type LinkedCustomer = { id: string; fullName: string; customerCode: string };
@@ -542,18 +543,22 @@ export function PartnerSettings({
 
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3 w-full min-w-0">
           <div className="relative flex-1 min-w-0 w-full">
-            <select
-              className="w-full max-w-full rounded-2xl border border-neutral-200 bg-neutral-50/80 px-3.5 sm:px-4 py-2.5 sm:py-3 text-xs font-extrabold text-neutral-900 focus:border-rose-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-rose-500/20 transition-all cursor-pointer box-border"
+            <CustomSelect
               value={referrerSelect}
-              onChange={(e) => setReferrerSelect(e.target.value)}
-            >
-              <option value="">— Đăng ký trực tiếp (Không có người giới thiệu) —</option>
-              {customers.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.label}
-                </option>
-              ))}
-            </select>
+              onChange={setReferrerSelect}
+              options={[
+                { value: "", label: "— Đăng ký trực tiếp (Không có người giới thiệu) —" },
+                ...customers.map((c) => ({
+                  value: c.id,
+                  label: c.label,
+                })),
+              ]}
+              placeholder="— Đăng ký trực tiếp (Không có người giới thiệu) —"
+              className="w-full"
+              buttonClassName="bg-neutral-50/80 hover:bg-white text-xs font-extrabold text-neutral-900 border-neutral-200"
+              wrapLabels={true}
+              ariaLabel="Người Giới Thiệu Khách Này"
+            />
           </div>
 
           <button

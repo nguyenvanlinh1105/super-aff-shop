@@ -216,8 +216,8 @@ export function AdminCustomersClient({
             value={currentTab}
             onChange={(val) => handleTabChange(val)}
             icon={<Users size={15} className="text-rose-500" />}
-            className="min-w-[210px] sm:min-w-[220px]"
-            menuClassName="min-w-[240px]"
+            className="w-full sm:w-[220px]"
+            menuClassName="w-full sm:min-w-[240px]"
             ariaLabel="Phân loại khách hàng"
           />
 
@@ -243,8 +243,8 @@ export function AdminCustomersClient({
               handleSortChange(field, dir);
             }}
             icon={<ArrowUpDown size={15} className="text-amber-500" />}
-            className="min-w-[210px] sm:min-w-[230px]"
-            menuClassName="min-w-[250px]"
+            className="w-full sm:w-[240px]"
+            menuClassName="w-full sm:min-w-[250px]"
             ariaLabel="Sắp xếp khách hàng"
           />
         </div>

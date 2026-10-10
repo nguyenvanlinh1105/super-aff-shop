@@ -133,7 +133,7 @@ export function BroadcastForm() {
   }
 
   return (
-    <div className="rounded-3xl bg-white p-6 sm:p-8 shadow-sm border border-neutral-200/70 flex flex-col gap-6">
+    <div className="rounded-3xl bg-white p-4 sm:p-6 md:p-8 shadow-sm border border-neutral-200/70 flex flex-col gap-6">
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">
           <div className="w-10 h-10 rounded-2xl bg-rose-50 flex items-center justify-center shadow-xs border border-rose-100 shrink-0 text-rose-600">
@@ -173,6 +173,7 @@ export function BroadcastForm() {
             placeholder="— Chọn mẫu thông báo sẵn có —"
             icon={<Sparkles size={15} className="text-rose-500" />}
             className="w-full"
+            wrapLabels={true}
             ariaLabel="Mẫu thông báo sẵn có"
           />
         </div>

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Copy, CheckCircle2, Link as LinkIcon, RefreshCw, Zap, Sparkles, ExternalLink, Globe, Smartphone, Send, ArrowRight } from "lucide-react";
 import { TextInput } from "@/components/ui/TextInput";
-import { Select } from "@/components/ui/Select";
+import { CustomSelect } from "@/components/ui/CustomSelect";
 import { SearchableSelect } from "@/components/ui/SearchableSelect";
 
 type Option = { id: string; label: string };
@@ -129,15 +129,14 @@ export function QuickLinkForm({
                 <label className="text-xs font-black text-neutral-800 uppercase tracking-wider">
                   🛍️ Nền Tảng Sàn
                 </label>
-                <Select
+                <CustomSelect
                   value={platformId}
-                  onChange={(e) => setPlatformId(e.target.value)}
-                  className="h-12 bg-white rounded-2xl border-neutral-200/80 text-sm shadow-xs font-extrabold text-neutral-900"
-                >
-                  {platforms.map((p) => (
-                    <option key={p.id} value={p.id}>{p.label}</option>
-                  ))}
-                </Select>
+                  onChange={setPlatformId}
+                  options={platforms.map((p) => ({ value: p.id, label: p.label }))}
+                  className="w-full"
+                  buttonClassName="h-12 bg-white rounded-2xl border-neutral-200/80 text-sm shadow-xs font-extrabold text-neutral-900"
+                  ariaLabel="Nền Tảng Sàn"
+                />
               </div>
             </div>
 

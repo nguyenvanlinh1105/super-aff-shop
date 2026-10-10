@@ -29,6 +29,7 @@ import { useModal } from "@/components/ui/ModalProvider";
 import { useToast } from "@/components/ui/Toast";
 import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { Pagination } from "@/components/ui/Pagination";
+import { CustomSelect } from "@/components/ui/CustomSelect";
 import { DEAL_CATEGORIES } from "@/lib/dealCategories";
 import { DEAL_LINK_TYPES, type DealLinkType } from "@/lib/dealLinkTypes";
 import { dealExpiryEndOfDay } from "@/lib/dealExpiry";
@@ -360,16 +361,18 @@ function EditDealModal({
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-md">
             <div className="flex flex-col gap-xs">
               <label className="text-[12px] font-bold text-neutral-600 uppercase tracking-wide">Danh mục</label>
-              <select
+              <CustomSelect
                 value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                className="h-11 w-full rounded-2xl bg-neutral-50 px-md text-[14px] font-medium text-neutral-900 border border-neutral-200 focus:outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-200/50 transition-all"
-              >
-                <option value="">— Không chọn —</option>
-                {DEAL_CATEGORIES.map((c) => (
-                  <option key={c} value={c}>{c}</option>
-                ))}
-              </select>
+                onChange={setCategory}
+                options={[
+                  { value: "", label: "— Không chọn —" },
+                  ...DEAL_CATEGORIES.map((c) => ({ value: c, label: c })),
+                ]}
+                placeholder="— Không chọn —"
+                className="w-full"
+                buttonClassName="h-11 bg-neutral-50 text-[14px] border-neutral-200"
+                ariaLabel="Danh mục"
+              />
             </div>
             <div className="flex flex-col gap-xs">
               <div className="flex items-center justify-between">
@@ -716,17 +719,20 @@ export function AdminDealList({
             <span className="text-[11px] font-bold text-neutral-500 uppercase tracking-wider shrink-0">
               Trạng thái:
             </span>
-            <select
+            <CustomSelect
               value={currentStatus}
-              onChange={(e) => updateQuery({ status: e.target.value })}
-              className="h-10 px-3 rounded-xl bg-white border border-neutral-200/80 text-xs font-bold text-neutral-800 focus:outline-none focus:border-amber-400 shadow-xs cursor-pointer"
-            >
-              <option value="all">Tất cả trạng thái</option>
-              <option value="active">🟢 Đang hiển thị</option>
-              <option value="hidden">⚪ Đã ẩn</option>
-              <option value="expired">🔴 Đã hết hạn</option>
-              <option value="expiring_soon">🟡 Sắp hết hạn (trong 24h)</option>
-            </select>
+              onChange={(val) => updateQuery({ status: val })}
+              options={[
+                { value: "all", label: "Tất cả trạng thái" },
+                { value: "active", label: "🟢 Đang hiển thị" },
+                { value: "hidden", label: "⚪ Đã ẩn" },
+                { value: "expired", label: "🔴 Đã hết hạn" },
+                { value: "expiring_soon", label: "🟡 Sắp hết hạn (trong 24h)" },
+              ]}
+              className="w-[170px] shrink-0"
+              buttonClassName="h-10 text-xs font-bold"
+              ariaLabel="Lọc trạng thái"
+            />
           </div>
 
           {/* Lọc Danh Mục */}
@@ -734,18 +740,17 @@ export function AdminDealList({
             <span className="text-[11px] font-bold text-neutral-500 uppercase tracking-wider shrink-0">
               Danh mục:
             </span>
-            <select
+            <CustomSelect
               value={currentCategory}
-              onChange={(e) => updateQuery({ category: e.target.value })}
-              className="h-10 px-3 rounded-xl bg-white border border-neutral-200/80 text-xs font-bold text-neutral-800 focus:outline-none focus:border-amber-400 shadow-xs cursor-pointer max-w-[170px] truncate"
-            >
-              <option value="">Tất cả danh mục</option>
-              {DEAL_CATEGORIES.map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-            </select>
+              onChange={(val) => updateQuery({ category: val })}
+              options={[
+                { value: "", label: "Tất cả danh mục" },
+                ...DEAL_CATEGORIES.map((c) => ({ value: c, label: c })),
+              ]}
+              className="w-[160px] shrink-0"
+              buttonClassName="h-10 text-xs font-bold"
+              ariaLabel="Lọc danh mục"
+            />
           </div>
 
           {/* Số deal / trang */}
@@ -753,16 +758,19 @@ export function AdminDealList({
             <span className="text-[11px] font-bold text-neutral-500 uppercase tracking-wider shrink-0">
               Xem:
             </span>
-            <select
-              value={pageSize}
-              onChange={(e) => updateQuery({ limit: e.target.value, page: "1" })}
-              className="h-10 px-2.5 rounded-xl bg-white border border-neutral-200/80 text-xs font-bold text-neutral-800 focus:outline-none focus:border-amber-400 shadow-xs cursor-pointer"
-            >
-              <option value="10">10 / trang</option>
-              <option value="25">25 / trang</option>
-              <option value="50">50 / trang</option>
-              <option value="100">100 / trang</option>
-            </select>
+            <CustomSelect
+              value={String(pageSize)}
+              onChange={(val) => updateQuery({ limit: val, page: "1" })}
+              options={[
+                { value: "10", label: "10 / trang" },
+                { value: "25", label: "25 / trang" },
+                { value: "50", label: "50 / trang" },
+                { value: "100", label: "100 / trang" },
+              ]}
+              className="w-[115px] shrink-0"
+              buttonClassName="h-10 text-xs font-bold"
+              ariaLabel="Số deal mỗi trang"
+            />
           </div>
         </div>
 
@@ -775,14 +783,17 @@ export function AdminDealList({
             </div>
 
             {/* Chọn trường ngày: Ngày hết hạn hoặc Ngày tạo deal */}
-            <select
+            <CustomSelect
               value={currentDateField}
-              onChange={(e) => updateQuery({ dateField: e.target.value })}
-              className="h-8 px-2 rounded-lg bg-white border border-neutral-200 text-[11px] font-black text-neutral-700 focus:outline-none shadow-xs cursor-pointer mr-1"
-            >
-              <option value="expiresAt">Theo: Ngày hết hạn</option>
-              <option value="createdAt">Theo: Ngày tạo deal</option>
-            </select>
+              onChange={(val) => updateQuery({ dateField: val })}
+              options={[
+                { value: "expiresAt", label: "Theo: Ngày hết hạn" },
+                { value: "createdAt", label: "Theo: Ngày tạo deal" },
+              ]}
+              className="w-[165px] shrink-0 mr-1"
+              buttonClassName="h-8 text-[11px] font-black"
+              ariaLabel="Trường ngày"
+            />
 
             {/* Các nút mốc thời gian nhanh */}
             {[

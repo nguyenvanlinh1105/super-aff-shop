@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect } from "react";
 import { TrendingUp, TrendingDown, ChevronLeft, ChevronRight, ZoomIn, Calendar } from "lucide-react";
 import { formatCurrency } from "@/lib/format";
+import { CustomSelect } from "@/components/ui/CustomSelect";
 
 /* ── Types ─────────────────────────────────────────────────────────── */
 
@@ -13,10 +14,11 @@ export interface OrderDataPoint {
   profit: number;
 }
 
-type ViewLevel = "year" | "month" | "week";
+type ViewLevel = "year" | "quarter" | "month" | "week";
 
 interface ChartItem {
   label: string;
+  subLabel?: string;
   commission: number;
   reward: number;
   profit: number;
@@ -41,19 +43,6 @@ function getMonday(d: Date): Date {
   const day = d.getDay();
   const diff = d.getDate() - day + (day === 0 ? -6 : 1);
   return new Date(d.getFullYear(), d.getMonth(), diff);
-}
-
-/** Xác định tuần thứ mấy trong tháng (1-indexed) */
-function weekOfMonth(d: Date): number {
-  const firstDay = new Date(d.getFullYear(), d.getMonth(), 1);
-  const firstMonday = getMonday(firstDay);
-  // Nếu firstMonday nằm ở tháng trước, cộng thêm 7 ngày
-  const adjustedFirst = firstMonday.getDate() > 7
-    ? new Date(firstMonday.getFullYear(), firstMonday.getMonth(), firstMonday.getDate() + 7)
-    : firstMonday;
-  const monday = getMonday(d);
-  const diff = Math.round((monday.getTime() - adjustedFirst.getTime()) / (7 * 86400000));
-  return Math.max(1, diff + 1);
 }
 
 const DAY_LABELS = ["CN", "T2", "T3", "T4", "T5", "T6", "T7"];
@@ -90,11 +79,12 @@ export function AdminRevenueChart({ orderData }: AdminRevenueChartProps) {
     return arr.length > 0 ? arr : [currentYear];
   }, [parsedOrders, currentYear]);
 
-  const [viewLevel, setViewLevel] = useState<ViewLevel>("year");
+  // MẶC ĐỊNH: Hiển thị tháng hiện tại (viewLevel = "month" để xem 4-5 tuần)
+  const [viewLevel, setViewLevel] = useState<ViewLevel>("month");
   const [selectedYear, setSelectedYear] = useState<number>(() => {
     if (orderData.length === 0) return currentYear;
     const years = Array.from(new Set(orderData.map((o) => new Date(o.date).getFullYear()))).sort((a, b) => b - a);
-    return years[0] || currentYear;
+    return years.includes(currentYear) ? currentYear : (years[0] || currentYear);
   });
 
   // Chỉ lấy những THÁNG có dữ liệu trong selectedYear
@@ -121,19 +111,20 @@ export function AdminRevenueChart({ orderData }: AdminRevenueChartProps) {
       .sort((a, b) => a.month - b.month);
   }, [parsedOrders, selectedYear]);
 
+  // MẶC ĐỊNH: Tháng hiện tại
   const [selectedMonth, setSelectedMonth] = useState<number>(() => {
     return currentMonth;
   });
 
-  // Tự động đồng bộ selectedMonth với tháng gần nhất có dữ liệu khi đổi năm
+  // Tự động đồng bộ selectedMonth với tháng gần nhất có dữ liệu khi đổi năm sang năm khác
   useEffect(() => {
-    if (availableMonthsInYear.length > 0) {
+    if (selectedYear !== currentYear && availableMonthsInYear.length > 0) {
       const exists = availableMonthsInYear.some((m) => m.month === selectedMonth);
       if (!exists) {
         setSelectedMonth(availableMonthsInYear[availableMonthsInYear.length - 1].month);
       }
     }
-  }, [selectedYear, availableMonthsInYear, selectedMonth]);
+  }, [selectedYear, availableMonthsInYear, selectedMonth, currentYear]);
 
   const [selectedWeekStart, setSelectedWeekStart] = useState<string | null>(null); // ISO date of Monday
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
@@ -174,10 +165,11 @@ export function AdminRevenueChart({ orderData }: AdminRevenueChartProps) {
 
   // ═══ Build chart items theo view level ═══
   const chartItems: ChartItem[] = useMemo(() => {
+    // 1. Chế độ xem cả năm (12 tháng)
     if (viewLevel === "year") {
-      // Nhóm theo 12 tháng của selectedYear
       const buckets: ChartItem[] = Array.from({ length: 12 }, (_, i) => ({
         label: MONTH_NAMES[i],
+        subLabel: `Tháng ${i + 1}`,
         commission: 0, reward: 0, profit: 0, count: 0,
       }));
       for (const o of parsedOrders) {
@@ -189,33 +181,65 @@ export function AdminRevenueChart({ orderData }: AdminRevenueChartProps) {
         buckets[m].count += 1;
       }
 
-      // Nếu là năm hiện tại, chỉ hiển thị đến tháng hiện tại
       if (selectedYear === currentYear) {
         return buckets.slice(0, currentMonth + 1);
       }
       return buckets;
     }
 
+    // 2. Chế độ xem theo 4 Quý (Q1 - Q4)
+    if (viewLevel === "quarter") {
+      const quarters: ChartItem[] = [
+        { label: "Quý 1", subLabel: "T1 – T3", commission: 0, reward: 0, profit: 0, count: 0 },
+        { label: "Quý 2", subLabel: "T4 – T6", commission: 0, reward: 0, profit: 0, count: 0 },
+        { label: "Quý 3", subLabel: "T7 – T9", commission: 0, reward: 0, profit: 0, count: 0 },
+        { label: "Quý 4", subLabel: "T10 – T12", commission: 0, reward: 0, profit: 0, count: 0 },
+      ];
+
+      for (const o of parsedOrders) {
+        if (o._date.getFullYear() !== selectedYear) continue;
+        const q = Math.floor(o._date.getMonth() / 3);
+        if (q >= 0 && q < 4) {
+          quarters[q].commission += o.commission;
+          quarters[q].reward += o.reward;
+          quarters[q].profit += o.profit;
+          quarters[q].count += 1;
+        }
+      }
+
+      if (selectedYear === currentYear) {
+        const curQ = Math.floor(currentMonth / 3);
+        return quarters.slice(0, curQ + 1);
+      }
+      return quarters;
+    }
+
+    // 3. Chế độ xem theo tuần của tháng (Mặc định: tháng hiện tại)
     if (viewLevel === "month") {
-      // Nhóm theo tuần trong tháng selectedMonth của selectedYear
-      // Tính các tuần (thứ Hai → Chủ nhật)
       const firstDay = new Date(selectedYear, selectedMonth, 1);
       const lastDay = new Date(selectedYear, selectedMonth + 1, 0);
       const weeksMap = new Map<string, ChartItem>();
 
+      let weekIdx = 1;
       for (let d = new Date(firstDay); d <= lastDay; d.setDate(d.getDate() + 1)) {
         const monday = getMonday(new Date(d));
         const key = monday.toISOString().slice(0, 10);
         if (!weeksMap.has(key)) {
-          const wom = weekOfMonth(new Date(d));
           const endOfWeek = new Date(monday);
           endOfWeek.setDate(endOfWeek.getDate() + 6);
-          const startLabel = `${monday.getDate()}/${monday.getMonth() + 1}`;
-          const endLabel = `${endOfWeek.getDate()}/${endOfWeek.getMonth() + 1}`;
+          const startD = monday < firstDay ? firstDay : monday;
+          const endD = endOfWeek > lastDay ? lastDay : endOfWeek;
+          const startLabel = `${startD.getDate()}/${startD.getMonth() + 1}`;
+          const endLabel = `${endD.getDate()}/${endD.getMonth() + 1}`;
           weeksMap.set(key, {
-            label: `Tuần ${wom}`,
-            commission: 0, reward: 0, profit: 0, count: 0,
+            label: `Tuần ${weekIdx}`,
+            subLabel: `${startLabel} – ${endLabel}`,
+            commission: 0,
+            reward: 0,
+            profit: 0,
+            count: 0,
           });
+          weekIdx++;
         }
       }
 
@@ -237,16 +261,17 @@ export function AdminRevenueChart({ orderData }: AdminRevenueChartProps) {
         .map(([, v]) => v);
     }
 
+    // 4. Chế độ xem theo ngày trong tuần (7 ngày)
     if (viewLevel === "week" && selectedWeekStart) {
-      // 7 ngày từ Monday
       const monday = new Date(selectedWeekStart);
       const buckets: ChartItem[] = [];
       for (let i = 0; i < 7; i++) {
         const day = new Date(monday);
         day.setDate(monday.getDate() + i);
-        const dayOfWeek = day.getDay(); // 0=CN, 1=T2...
+        const dayOfWeek = day.getDay();
         buckets.push({
           label: `${DAY_LABELS[dayOfWeek]} ${day.getDate()}/${day.getMonth() + 1}`,
+          subLabel: `${day.getDate()}/${day.getMonth() + 1}`,
           commission: 0, reward: 0, profit: 0, count: 0,
         });
       }
@@ -308,24 +333,75 @@ export function AdminRevenueChart({ orderData }: AdminRevenueChartProps) {
   const rewPoints = chartItems.map((m, i) => ({ x: getX(i), y: getY(m.reward), val: m.reward }));
   const profPoints = chartItems.map((m, i) => ({ x: getX(i), y: getY(m.profit), val: m.profit }));
 
-  const makePath = (pts: typeof commPoints) => pts.map((p, i) => `${i === 0 ? "M" : "L"} ${p.x} ${p.y}`).join(" ");
-  const makeArea = (pts: typeof commPoints) =>
-    pts.length > 0 ? `${makePath(pts)} L ${pts[pts.length - 1].x} ${PLOT.bottom} L ${pts[0].x} ${PLOT.bottom} Z` : "";
+  /**
+   * Tạo đường cong Bezier mềm mại (Smooth Spline) đi qua từng toạ độ điểm
+   * - Giữ phẳng tại đáy biểu đồ nếu giá trị = 0 (không bị võng dưới đáy)
+   * - Uốn lượn mượt mà tự nhiên, thanh thoát
+   */
+  const makeSmoothPath = (pts: typeof commPoints) => {
+    if (pts.length === 0) return "";
+    if (pts.length === 1) return `M ${pts[0].x.toFixed(1)} ${pts[0].y.toFixed(1)}`;
+    if (pts.length === 2) {
+      const dx = (pts[1].x - pts[0].x) * 0.45;
+      return `M ${pts[0].x.toFixed(1)} ${pts[0].y.toFixed(1)} C ${(pts[0].x + dx).toFixed(1)} ${pts[0].y.toFixed(1)}, ${(pts[1].x - dx).toFixed(1)} ${pts[1].y.toFixed(1)}, ${pts[1].x.toFixed(1)} ${pts[1].y.toFixed(1)}`;
+    }
+
+    let d = `M ${pts[0].x.toFixed(1)} ${pts[0].y.toFixed(1)}`;
+    const tension = 0.22;
+
+    for (let i = 0; i < pts.length - 1; i++) {
+      const p0 = pts[Math.max(0, i - 1)];
+      const p1 = pts[i];
+      const p2 = pts[i + 1];
+      const p3 = pts[Math.min(pts.length - 1, i + 2)];
+
+      let cp1x = p1.x + (p2.x - p0.x) * tension;
+      let cp1y = p1.y + (p2.y - p0.y) * tension;
+      let cp2x = p2.x - (p3.x - p1.x) * tension;
+      let cp2y = p2.y - (p3.y - p1.y) * tension;
+
+      // Khi cả 2 điểm đều ở mức 0 (đáy đồ thị), giữ phẳng tuyệt đối
+      if (p1.y >= PLOT.bottom - 0.5 && p2.y >= PLOT.bottom - 0.5) {
+        cp1y = PLOT.bottom;
+        cp2y = PLOT.bottom;
+      } else {
+        cp1y = Math.min(PLOT.bottom, Math.max(PLOT.top - 8, cp1y));
+        cp2y = Math.min(PLOT.bottom, Math.max(PLOT.top - 8, cp2y));
+      }
+
+      d += ` C ${cp1x.toFixed(1)} ${cp1y.toFixed(1)}, ${cp2x.toFixed(1)} ${cp2y.toFixed(1)}, ${p2.x.toFixed(1)} ${p2.y.toFixed(1)}`;
+    }
+
+    return d;
+  };
+
+  const makeSmoothArea = (pts: typeof commPoints) => {
+    if (pts.length === 0) return "";
+    const path = makeSmoothPath(pts);
+    const first = pts[0];
+    const last = pts[pts.length - 1];
+    return `${path} L ${last.x.toFixed(1)} ${PLOT.bottom} L ${first.x.toFixed(1)} ${PLOT.bottom} Z`;
+  };
 
   const midY = (PLOT.top + PLOT.bottom) / 2;
 
   // ═══ Drill-down handlers ═══
   const handleDrillDown = (idx: number) => {
     if (viewLevel === "year") {
-      // Chỉ drill nếu tháng có dữ liệu thực tế
       const targetItem = chartItems[idx];
       if (!targetItem || targetItem.count === 0) return;
       setSelectedMonth(idx);
       setViewLevel("month");
       setSelectedWeekStart(null);
       setHoveredIdx(null);
+    } else if (viewLevel === "quarter") {
+      const startMonth = idx * 3;
+      const mInQ = availableMonthsInYear.find((m) => m.month >= startMonth && m.month <= startMonth + 2);
+      setSelectedMonth(mInQ ? mInQ.month : startMonth);
+      setViewLevel("month");
+      setSelectedWeekStart(null);
+      setHoveredIdx(null);
     } else if (viewLevel === "month") {
-      // Tìm monday key tương ứng
       const firstDay = new Date(selectedYear, selectedMonth, 1);
       const lastDay = new Date(selectedYear, selectedMonth + 1, 0);
       const weeks: string[] = [];
@@ -345,7 +421,6 @@ export function AdminRevenueChart({ orderData }: AdminRevenueChartProps) {
         setHoveredIdx(null);
       }
     }
-    // week level → no drill
   };
 
   const handleGoBack = () => {
@@ -354,6 +429,9 @@ export function AdminRevenueChart({ orderData }: AdminRevenueChartProps) {
       setSelectedWeekStart(null);
       setHoveredIdx(null);
     } else if (viewLevel === "month") {
+      setViewLevel("quarter");
+      setHoveredIdx(null);
+    } else if (viewLevel === "quarter") {
       setViewLevel("year");
       setHoveredIdx(null);
     }
@@ -366,9 +444,14 @@ export function AdminRevenueChart({ orderData }: AdminRevenueChartProps) {
       label: `Năm ${selectedYear}`,
       onClick: viewLevel !== "year" ? () => { setViewLevel("year"); setHoveredIdx(null); } : undefined,
     });
+    if (viewLevel === "quarter") {
+      parts.push({
+        label: "Theo 4 Quý",
+      });
+    }
     if (viewLevel === "month" || viewLevel === "week") {
       parts.push({
-        label: MONTH_NAMES[selectedMonth],
+        label: `${MONTH_NAMES[selectedMonth]} (Theo tuần)`,
         onClick: viewLevel === "week" ? () => { setViewLevel("month"); setSelectedWeekStart(null); setHoveredIdx(null); } : undefined,
       });
     }
@@ -388,7 +471,7 @@ export function AdminRevenueChart({ orderData }: AdminRevenueChartProps) {
     if (hoveredIdx !== null && chartItems[hoveredIdx]) {
       const it = chartItems[hoveredIdx];
       return {
-        title: `${it.label} (${it.count} đơn) 🔍`,
+        title: `${it.label}${it.subLabel ? ` (${it.subLabel})` : ""} (${it.count} đơn) 🔍`,
         commission: it.commission,
         reward: it.reward,
         profit: it.profit,
@@ -398,6 +481,15 @@ export function AdminRevenueChart({ orderData }: AdminRevenueChartProps) {
     if (viewLevel === "year") {
       return {
         title: `Cả năm ${selectedYear} (${yearTotals.count} đơn)`,
+        commission: yearTotals.commission,
+        reward: yearTotals.reward,
+        profit: yearTotals.profit,
+      };
+    }
+
+    if (viewLevel === "quarter") {
+      return {
+        title: `4 Quý năm ${selectedYear} (${yearTotals.count} đơn)`,
         commission: yearTotals.commission,
         reward: yearTotals.reward,
         profit: yearTotals.profit,
@@ -427,10 +519,11 @@ export function AdminRevenueChart({ orderData }: AdminRevenueChartProps) {
 
   // ═══ Subtitle text ═══
   const subtitleText = useMemo(() => {
-    if (viewLevel === "year") return "Chọn tháng có dữ liệu trên biểu đồ hoặc menu để xem chi tiết theo tuần";
-    if (viewLevel === "month") return "Click vào tuần để xem chi tiết theo ngày";
+    if (viewLevel === "year") return "Hiển thị 12 tháng • Click vào tháng có dữ liệu để xem chi tiết theo tuần";
+    if (viewLevel === "quarter") return "Hiển thị 4 Quý • Click vào từng quý để xem chi tiết các tuần";
+    if (viewLevel === "month") return `Hiển thị 4 tuần của ${MONTH_NAMES[selectedMonth]}/${selectedYear} • Click vào tuần để xem theo ngày`;
     return "Hover vào từng ngày để xem chi tiết";
-  }, [viewLevel]);
+  }, [viewLevel, selectedMonth, selectedYear]);
 
   const canDrill = viewLevel !== "week";
 
@@ -479,11 +572,11 @@ export function AdminRevenueChart({ orderData }: AdminRevenueChartProps) {
         </div>
       </div>
 
-      {/* Navigation Bar + Filter Controls (Chỉ năm & tháng có dữ liệu) */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+      {/* Navigation Bar + Filter Controls */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3 mb-4">
         {/* Breadcrumb */}
         <div className="flex items-center gap-1.5 text-xs font-bold flex-wrap">
-          {viewLevel !== "year" && (
+          {viewLevel === "week" && (
             <button
               onClick={handleGoBack}
               className="flex items-center gap-1 text-rose-600 hover:text-rose-700 transition-colors mr-1 px-2.5 py-1.5 rounded-xl hover:bg-rose-50 border border-rose-200/70 shadow-2xs font-extrabold"
@@ -511,8 +604,58 @@ export function AdminRevenueChart({ orderData }: AdminRevenueChartProps) {
           ))}
         </div>
 
-        {/* Filter Controls: Chọn Năm & Chọn Tháng */}
-        <div className="flex items-center gap-2 self-start sm:self-auto flex-wrap">
+        {/* Filter Controls: Quick Segmented Switcher + Chọn Năm + Chọn Kỳ */}
+        <div className="flex items-center gap-2 self-start lg:self-auto flex-wrap">
+          {/* Quick Segmented View Mode Tabs */}
+          <div className="flex items-center rounded-xl bg-neutral-100/90 p-0.5 border border-neutral-200/80 shadow-2xs">
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedMonth(currentMonth);
+                setViewLevel("month");
+                setSelectedWeekStart(null);
+                setHoveredIdx(null);
+              }}
+              className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
+                viewLevel === "month" && selectedMonth === currentMonth
+                  ? "bg-white text-rose-600 shadow-xs font-black"
+                  : "text-neutral-600 hover:text-neutral-900"
+              }`}
+            >
+              📅 Tháng {currentMonth + 1}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setViewLevel("quarter");
+                setSelectedWeekStart(null);
+                setHoveredIdx(null);
+              }}
+              className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
+                viewLevel === "quarter"
+                  ? "bg-white text-rose-600 shadow-xs font-black"
+                  : "text-neutral-600 hover:text-neutral-900"
+              }`}
+            >
+              🏛️ Theo Quý
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setViewLevel("year");
+                setSelectedWeekStart(null);
+                setHoveredIdx(null);
+              }}
+              className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all ${
+                viewLevel === "year"
+                  ? "bg-white text-rose-600 shadow-xs font-black"
+                  : "text-neutral-600 hover:text-neutral-900"
+              }`}
+            >
+              📊 Cả năm
+            </button>
+          </div>
+
           {/* 1. BỘ CHỌN NĂM (Chỉ các năm có dữ liệu) */}
           <div className="flex items-center rounded-xl bg-neutral-100/90 p-0.5 border border-neutral-200/80 shadow-2xs">
             <button
@@ -521,33 +664,32 @@ export function AdminRevenueChart({ orderData }: AdminRevenueChartProps) {
                 if (curIdx < availableYears.length - 1) {
                   const newYear = availableYears[curIdx + 1];
                   setSelectedYear(newYear);
-                  setViewLevel("year");
+                  setViewLevel("month");
                   setHoveredIdx(null);
                 }
               }}
               disabled={availableYears.indexOf(selectedYear) >= availableYears.length - 1}
               className="p-1 rounded-lg hover:bg-white text-neutral-600 hover:text-neutral-900 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-              title="Năm trước (có dữ liệu)"
+              title="Năm trước"
             >
               <ChevronLeft size={15} strokeWidth={2.5} />
             </button>
 
-            <select
-              value={selectedYear}
-              onChange={(e) => {
-                const y = Number(e.target.value);
+            <CustomSelect
+              value={String(selectedYear)}
+              onChange={(val) => {
+                const y = Number(val);
                 setSelectedYear(y);
-                setViewLevel("year");
                 setHoveredIdx(null);
               }}
-              className="bg-transparent text-xs font-black text-neutral-900 px-1.5 py-1 cursor-pointer focus:outline-none"
-            >
-              {availableYears.map((y) => (
-                <option key={y} value={y}>
-                  Năm {y}
-                </option>
-              ))}
-            </select>
+              options={availableYears.map((y) => ({
+                value: String(y),
+                label: `Năm ${y}`,
+              }))}
+              className="w-[95px]"
+              buttonClassName="h-7 border-transparent hover:border-neutral-200 bg-transparent text-xs font-black text-neutral-900 px-2"
+              ariaLabel="Chọn năm"
+            />
 
             <button
               onClick={() => {
@@ -555,19 +697,19 @@ export function AdminRevenueChart({ orderData }: AdminRevenueChartProps) {
                 if (curIdx > 0) {
                   const newYear = availableYears[curIdx - 1];
                   setSelectedYear(newYear);
-                  setViewLevel("year");
+                  setViewLevel("month");
                   setHoveredIdx(null);
                 }
               }}
               disabled={availableYears.indexOf(selectedYear) <= 0}
               className="p-1 rounded-lg hover:bg-white text-neutral-600 hover:text-neutral-900 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-              title="Năm sau (có dữ liệu)"
+              title="Năm sau"
             >
               <ChevronRight size={15} strokeWidth={2.5} />
             </button>
           </div>
 
-          {/* 2. BỘ CHỌN THÁNG (Chỉ các tháng có dữ liệu trong năm đã chọn) */}
+          {/* 2. BỘ CHỌN KỲ CHI TIẾT (Tháng / Quý / Cả năm) */}
           <div className="flex items-center rounded-xl bg-rose-50/70 p-0.5 border border-rose-200/80 shadow-2xs">
             {viewLevel === "month" && (
               <button
@@ -580,37 +722,55 @@ export function AdminRevenueChart({ orderData }: AdminRevenueChartProps) {
                 }}
                 disabled={availableMonthsInYear.findIndex((m) => m.month === selectedMonth) <= 0}
                 className="p-1 rounded-lg hover:bg-white text-rose-700 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                title="Tháng trước (có dữ liệu)"
+                title="Tháng trước"
               >
                 <ChevronLeft size={15} strokeWidth={2.5} />
               </button>
             )}
 
-            <select
-              value={viewLevel === "year" ? "all" : selectedMonth}
-              onChange={(e) => {
-                const val = e.target.value;
-                if (val === "all") {
+            <CustomSelect
+              value={
+                viewLevel === "year"
+                  ? "year"
+                  : viewLevel === "quarter"
+                  ? "quarter"
+                  : `month_${selectedMonth}`
+              }
+              onChange={(val) => {
+                if (val === "year") {
                   setViewLevel("year");
                   setSelectedWeekStart(null);
                   setHoveredIdx(null);
-                } else {
-                  const mIdx = Number(val);
+                } else if (val === "quarter") {
+                  setViewLevel("quarter");
+                  setSelectedWeekStart(null);
+                  setHoveredIdx(null);
+                } else if (val.startsWith("month_")) {
+                  const mIdx = Number(val.replace("month_", ""));
                   setSelectedMonth(mIdx);
                   setViewLevel("month");
                   setSelectedWeekStart(null);
                   setHoveredIdx(null);
                 }
               }}
-              className="bg-transparent text-xs font-black text-rose-900 px-1.5 py-1 cursor-pointer focus:outline-none"
-            >
-              <option value="all">📊 Cả năm {selectedYear}</option>
-              {availableMonthsInYear.map((m) => (
-                <option key={m.month} value={m.month}>
-                  {m.fullName} ({m.count} đơn)
-                </option>
-              ))}
-            </select>
+              options={[
+                {
+                  value: `month_${currentMonth}`,
+                  label: `📅 ${MONTH_NAMES[currentMonth]}/${selectedYear} (Theo tuần) • Mặc định`,
+                },
+                { value: "quarter", label: `🏛️ Theo 4 Quý năm ${selectedYear}` },
+                { value: "year", label: `📊 Cả năm ${selectedYear} (12 tháng)` },
+                ...availableMonthsInYear
+                  .filter((m) => m.month !== currentMonth)
+                  .map((m) => ({
+                    value: `month_${m.month}`,
+                    label: `📅 ${m.fullName} (${m.count} đơn)`,
+                  })),
+              ]}
+              className="w-[185px]"
+              buttonClassName="h-7 border-transparent hover:border-rose-200 bg-transparent text-xs font-black text-rose-900 px-2"
+              ariaLabel="Chọn kỳ hiển thị"
+            />
 
             {viewLevel === "month" && (
               <button
@@ -626,7 +786,7 @@ export function AdminRevenueChart({ orderData }: AdminRevenueChartProps) {
                   availableMonthsInYear.length - 1
                 }
                 className="p-1 rounded-lg hover:bg-white text-rose-700 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                title="Tháng sau (có dữ liệu)"
+                title="Tháng sau"
               >
                 <ChevronRight size={15} strokeWidth={2.5} />
               </button>
@@ -663,7 +823,7 @@ export function AdminRevenueChart({ orderData }: AdminRevenueChartProps) {
         </div>
       </div>
 
-      {/* Interactive SVG 3-Line Graph */}
+      {/* Interactive SVG Smooth Spline 3-Line Graph */}
       <div className="relative w-full">
         <svg
           viewBox="0 0 600 215"
@@ -674,13 +834,23 @@ export function AdminRevenueChart({ orderData }: AdminRevenueChartProps) {
         >
           <defs>
             <linearGradient id="roseGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#F43F5E" stopOpacity="0.22" />
-              <stop offset="100%" stopColor="#F43F5E" stopOpacity="0" />
+              <stop offset="0%" stopColor="#F43F5E" stopOpacity="0.25" />
+              <stop offset="100%" stopColor="#F43F5E" stopOpacity="0.0" />
+            </linearGradient>
+            <linearGradient id="amberGradient" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor="#F59E0B" stopOpacity="0.12" />
+              <stop offset="100%" stopColor="#F59E0B" stopOpacity="0.0" />
             </linearGradient>
             <linearGradient id="emeraldGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#10B981" stopOpacity="0.14" />
-              <stop offset="100%" stopColor="#10B981" stopOpacity="0" />
+              <stop offset="0%" stopColor="#10B981" stopOpacity="0.16" />
+              <stop offset="100%" stopColor="#10B981" stopOpacity="0.0" />
             </linearGradient>
+            <filter id="glowRose" x="-10%" y="-20%" width="120%" height="140%">
+              <feDropShadow dx="0" dy="2" stdDeviation="2.5" floodColor="#F43F5E" floodOpacity="0.25" />
+            </filter>
+            <filter id="glowEmerald" x="-10%" y="-20%" width="120%" height="140%">
+              <feDropShadow dx="0" dy="2" stdDeviation="2" floodColor="#10B981" floodOpacity="0.2" />
+            </filter>
           </defs>
 
           {/* Grid lines */}
@@ -698,14 +868,44 @@ export function AdminRevenueChart({ orderData }: AdminRevenueChartProps) {
             0
           </text>
 
-          {/* Area Fills */}
-          {commPoints.length > 0 && <path d={makeArea(commPoints)} fill="url(#roseGradient)" />}
-          {profPoints.length > 0 && <path d={makeArea(profPoints)} fill="url(#emeraldGradient)" />}
+          {/* Area Fills với Smooth Curves */}
+          {commPoints.length > 0 && <path d={makeSmoothArea(commPoints)} fill="url(#roseGradient)" />}
+          {rewPoints.length > 0 && <path d={makeSmoothArea(rewPoints)} fill="url(#amberGradient)" />}
+          {profPoints.length > 0 && <path d={makeSmoothArea(profPoints)} fill="url(#emeraldGradient)" />}
 
-          {/* Lines */}
-          {commPoints.length > 1 && <path d={makePath(commPoints)} fill="none" stroke="#F43F5E" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />}
-          {rewPoints.length > 1 && <path d={makePath(rewPoints)} fill="none" stroke="#F59E0B" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />}
-          {profPoints.length > 1 && <path d={makePath(profPoints)} fill="none" stroke="#10B981" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />}
+          {/* Smooth Curved Spline Lines (Đường cong mềm mại mượt mà) */}
+          {commPoints.length > 1 && (
+            <path
+              d={makeSmoothPath(commPoints)}
+              fill="none"
+              stroke="#F43F5E"
+              strokeWidth="3.2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              filter="url(#glowRose)"
+            />
+          )}
+          {rewPoints.length > 1 && (
+            <path
+              d={makeSmoothPath(rewPoints)}
+              fill="none"
+              stroke="#F59E0B"
+              strokeWidth="2.6"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          )}
+          {profPoints.length > 1 && (
+            <path
+              d={makeSmoothPath(profPoints)}
+              fill="none"
+              stroke="#10B981"
+              strokeWidth="2.6"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              filter="url(#glowEmerald)"
+            />
+          )}
 
           {/* Hover Guideline */}
           {hoveredIdx !== null && (
@@ -726,7 +926,7 @@ export function AdminRevenueChart({ orderData }: AdminRevenueChartProps) {
               <circle
                 cx={p.x}
                 cy={p.y}
-                r={hoveredIdx === i ? 6 : 4.5}
+                r={hoveredIdx === i ? 6.5 : 4.5}
                 fill={hoveredIdx === i ? "#F43F5E" : "#FFFFFF"}
                 stroke="#F43F5E"
                 strokeWidth={hoveredIdx === i ? 3 : 2.5}
@@ -780,7 +980,7 @@ export function AdminRevenueChart({ orderData }: AdminRevenueChartProps) {
             const canDrillThisItem = canDrill && (viewLevel !== "year" || hasData);
 
             // Smart tooltip positioning
-            const tooltipBoxX = Math.max(10, Math.min(cx - 85, 420));
+            const tooltipBoxX = Math.max(10, Math.min(cx - 90, 410));
             const commY = commPoints[i]?.y ?? PLOT.bottom;
             const tooltipBoxY = commY < 100 ? commY + 14 : commY - 72;
 
@@ -845,8 +1045,8 @@ export function AdminRevenueChart({ orderData }: AdminRevenueChartProps) {
                         <rect
                           x={tooltipBoxX}
                           y={tooltipBoxY}
-                          width="170"
-                          height="65"
+                          width="180"
+                          height="66"
                           rx="12"
                           fill="#0F172A"
                           opacity="0.96"
@@ -858,7 +1058,7 @@ export function AdminRevenueChart({ orderData }: AdminRevenueChartProps) {
                           y={tooltipBoxY + 16}
                           className="text-[10px] font-extrabold fill-rose-300"
                         >
-                          {m.label.toUpperCase()} ({m.count} ĐƠN HÀNG)
+                          {m.label.toUpperCase()}{m.subLabel ? ` (${m.subLabel})` : ""} • {m.count} ĐƠN
                         </text>
                         <text
                           x={tooltipBoxX + 12}
@@ -887,7 +1087,7 @@ export function AdminRevenueChart({ orderData }: AdminRevenueChartProps) {
                         <rect
                           x={tooltipBoxX}
                           y={tooltipBoxY}
-                          width="170"
+                          width="180"
                           height="44"
                           rx="12"
                           fill="#0F172A"
@@ -900,7 +1100,7 @@ export function AdminRevenueChart({ orderData }: AdminRevenueChartProps) {
                           y={tooltipBoxY + 17}
                           className="text-[10px] font-extrabold fill-neutral-300"
                         >
-                          {m.label.toUpperCase()} (0 ĐƠN HÀNG)
+                          {m.label.toUpperCase()}{m.subLabel ? ` (${m.subLabel})` : ""} (0 ĐƠN)
                         </text>
                         <text
                           x={tooltipBoxX + 12}

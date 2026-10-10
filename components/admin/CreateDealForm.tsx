@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { TextInput } from "@/components/ui/TextInput";
+import { CustomSelect } from "@/components/ui/CustomSelect";
 import { DEAL_CATEGORIES } from "@/lib/dealCategories";
 import { DEAL_LINK_TYPES, type DealLinkType } from "@/lib/dealLinkTypes";
 import { dealExpiryEndOfDay } from "@/lib/dealExpiry";
@@ -446,16 +447,18 @@ export function CreateDealForm() {
                 <div className="grid grid-cols-2 gap-md">
                   <div className="flex flex-col gap-xs">
                     <label className="text-[12px] font-bold text-neutral-600 uppercase tracking-wide">Danh mục (tuỳ chọn)</label>
-                    <select
+                    <CustomSelect
                       value={category}
-                      onChange={(e) => setCategory(e.target.value)}
-                      className="h-11 w-full rounded-2xl bg-neutral-50 px-md text-[14px] font-medium text-neutral-900 border border-primary-100/80 focus:outline-none focus:border-primary-400 focus:ring-2 focus:ring-primary-200/50 transition-all"
-                    >
-                      <option value="">— Không chọn —</option>
-                      {DEAL_CATEGORIES.map((c) => (
-                        <option key={c} value={c}>{c}</option>
-                      ))}
-                    </select>
+                      onChange={setCategory}
+                      options={[
+                        { value: "", label: "— Không chọn —" },
+                        ...DEAL_CATEGORIES.map((c) => ({ value: c, label: c })),
+                      ]}
+                      placeholder="— Không chọn —"
+                      className="w-full"
+                      buttonClassName="h-11 bg-neutral-50 text-[13.5px] border-primary-100/80"
+                      ariaLabel="Danh mục"
+                    />
                   </div>
                   <div className="flex flex-col gap-xs">
                     <div className="flex items-center justify-between">

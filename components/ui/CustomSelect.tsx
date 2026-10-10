@@ -21,6 +21,7 @@ interface CustomSelectProps {
   menuClassName?: string;
   align?: "left" | "right";
   ariaLabel?: string;
+  wrapLabels?: boolean;
 }
 
 export function CustomSelect({
@@ -34,6 +35,7 @@ export function CustomSelect({
   menuClassName = "",
   align = "left",
   ariaLabel,
+  wrapLabels = false,
 }: CustomSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -118,47 +120,61 @@ export function CustomSelect({
           role="listbox"
           className={`absolute ${
             align === "right" ? "right-0" : "left-0"
-          } top-full mt-1.5 z-50 min-w-full max-h-64 overflow-y-auto rounded-2xl border border-primary-100/90 bg-white/98 p-1.5 shadow-xl shadow-primary-500/10 backdrop-blur-md animate-in fade-in zoom-in-95 duration-150 ${menuClassName}`}
-          style={{ minWidth: "max(100%, 160px)" }}
+          } top-full mt-1.5 z-50 w-full min-w-full max-w-full max-h-64 overflow-y-auto overflow-x-hidden rounded-2xl border border-primary-100/90 bg-white/98 p-1.5 shadow-xl shadow-primary-500/10 backdrop-blur-md animate-in fade-in zoom-in-95 duration-150 ${menuClassName}`}
         >
-          {options.map((opt) => {
-            const isSelected = opt.value === value;
-            return (
-              <button
-                key={opt.value}
-                type="button"
-                role="option"
-                aria-selected={isSelected}
-                onClick={() => handleSelect(opt.value)}
-                className={`flex w-full items-center justify-between gap-2.5 rounded-xl px-3 py-2 text-left text-[12.5px] sm:text-[13px] font-bold transition-all cursor-pointer ${
-                  isSelected
-                    ? "bg-primary-50 text-primary-600 font-extrabold shadow-2xs"
-                    : "text-neutral-700 hover:bg-neutral-50 hover:text-neutral-900"
-                }`}
-              >
-                <div className="flex items-center gap-2 min-w-0 flex-1">
-                  {opt.icon && <span className="shrink-0">{opt.icon}</span>}
-                  <span className="truncate">{opt.label}</span>
-                </div>
-                <div className="flex items-center gap-1.5 shrink-0">
-                  {opt.count !== undefined && (
+          {options.length === 0 ? (
+            <div className="py-3 px-3 text-center text-xs font-semibold text-neutral-400">
+              Không có lựa chọn nào
+            </div>
+          ) : (
+            options.map((opt) => {
+              const isSelected = opt.value === value;
+              return (
+                <button
+                  key={opt.value}
+                  type="button"
+                  role="option"
+                  aria-selected={isSelected}
+                  onClick={() => handleSelect(opt.value)}
+                  title={opt.label}
+                  className={`flex w-full items-center justify-between gap-2.5 rounded-xl px-3 py-2 text-left text-[12.5px] sm:text-[13px] font-bold transition-all cursor-pointer ${
+                    isSelected
+                      ? "bg-primary-50 text-primary-600 font-extrabold shadow-2xs"
+                      : "text-neutral-700 hover:bg-neutral-50 hover:text-neutral-900"
+                  }`}
+                >
+                  <div className="flex items-center gap-2 min-w-0 flex-1">
+                    {opt.icon && <span className="shrink-0">{opt.icon}</span>}
                     <span
-                      className={`rounded-full px-1.5 py-0.5 text-[10px] font-black ${
-                        isSelected
-                          ? "bg-primary-500 text-white"
-                          : "bg-neutral-100 text-neutral-600"
-                      }`}
+                      className={
+                        wrapLabels
+                          ? "whitespace-normal break-words line-clamp-2 leading-snug"
+                          : "truncate"
+                      }
                     >
-                      {opt.count}
+                      {opt.label}
                     </span>
-                  )}
-                  {isSelected && (
-                    <Check size={14} strokeWidth={2.5} className="text-primary-500" />
-                  )}
-                </div>
-              </button>
-            );
-          })}
+                  </div>
+                  <div className="flex items-center gap-1.5 shrink-0 ml-1">
+                    {opt.count !== undefined && (
+                      <span
+                        className={`rounded-full px-1.5 py-0.5 text-[10px] font-black ${
+                          isSelected
+                            ? "bg-primary-500 text-white"
+                            : "bg-neutral-100 text-neutral-600"
+                        }`}
+                      >
+                        {opt.count}
+                      </span>
+                    )}
+                    {isSelected && (
+                      <Check size={14} strokeWidth={2.5} className="text-primary-500" />
+                    )}
+                  </div>
+                </button>
+              );
+            })
+          )}
         </div>
       )}
     </div>

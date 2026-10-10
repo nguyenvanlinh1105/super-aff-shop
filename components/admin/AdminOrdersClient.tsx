@@ -5,6 +5,7 @@ import { formatCurrency } from "@/lib/format";
 import { OrderActions } from "@/components/admin/OrderActions";
 import { Pagination } from "@/components/ui/Pagination";
 import { ServerSearchInput } from "@/components/ui/ServerSearchInput";
+import { CustomSelect } from "@/components/ui/CustomSelect";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   LayoutGrid,
@@ -318,41 +319,45 @@ export function AdminOrdersClient({
 
           {/* CONTROLS BỔ SUNG CHO THEO THÁNG / THEO NĂM / KHOẢNG NGÀY */}
           {currentPeriod === "month" && (
-            <div className="flex items-center gap-1.5 shrink-0 bg-white px-2.5 py-1 rounded-xl border border-neutral-200 shadow-xs">
-              <select
-                value={currentMonth}
-                onChange={(e) => handlePeriodChange("month", { month: e.target.value, year: currentYear })}
-                className="text-xs font-black text-neutral-900 bg-transparent focus:outline-none cursor-pointer"
-              >
-                {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
-                  <option key={m} value={m}>Tháng {m}</option>
-                ))}
-              </select>
-              <span className="text-neutral-300 font-bold">/</span>
-              <select
-                value={currentYear}
-                onChange={(e) => handlePeriodChange("month", { month: currentMonth, year: e.target.value })}
-                className="text-xs font-black text-neutral-900 bg-transparent focus:outline-none cursor-pointer"
-              >
-                {[2024, 2025, 2026, 2027].map((y) => (
-                  <option key={y} value={y}>Năm {y}</option>
-                ))}
-              </select>
+            <div className="flex items-center gap-1.5 shrink-0">
+              <CustomSelect
+                value={String(currentMonth)}
+                onChange={(val) => handlePeriodChange("month", { month: val, year: currentYear })}
+                options={Array.from({ length: 12 }, (_, i) => ({
+                  value: String(i + 1),
+                  label: `Tháng ${i + 1}`,
+                }))}
+                className="w-[105px]"
+                buttonClassName="h-9 px-2.5 text-xs font-black text-neutral-900 border-neutral-200"
+                ariaLabel="Chọn tháng"
+              />
+              <CustomSelect
+                value={String(currentYear)}
+                onChange={(val) => handlePeriodChange("month", { month: currentMonth, year: val })}
+                options={[2024, 2025, 2026, 2027].map((y) => ({
+                  value: String(y),
+                  label: `Năm ${y}`,
+                }))}
+                className="w-[105px]"
+                buttonClassName="h-9 px-2.5 text-xs font-black text-neutral-900 border-neutral-200"
+                ariaLabel="Chọn năm"
+              />
             </div>
           )}
 
           {currentPeriod === "year" && (
-            <div className="flex items-center gap-1.5 shrink-0 bg-white px-3 py-1 rounded-xl border border-neutral-200 shadow-xs">
-              <span className="text-xs text-neutral-400 font-bold">Năm:</span>
-              <select
-                value={currentYear}
-                onChange={(e) => handlePeriodChange("year", { year: e.target.value })}
-                className="text-xs font-black text-neutral-900 bg-transparent focus:outline-none cursor-pointer"
-              >
-                {[2024, 2025, 2026, 2027].map((y) => (
-                  <option key={y} value={y}>{y}</option>
-                ))}
-              </select>
+            <div className="flex items-center gap-1.5 shrink-0">
+              <CustomSelect
+                value={String(currentYear)}
+                onChange={(val) => handlePeriodChange("year", { year: val })}
+                options={[2024, 2025, 2026, 2027].map((y) => ({
+                  value: String(y),
+                  label: `Năm ${y}`,
+                }))}
+                className="w-[110px]"
+                buttonClassName="h-9 px-2.5 text-xs font-black text-neutral-900 border-neutral-200"
+                ariaLabel="Chọn năm"
+              />
             </div>
           )}
 

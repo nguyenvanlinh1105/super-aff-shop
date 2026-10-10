@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { Search, X, Check, User } from "lucide-react";
+import { CustomSelect, type CustomSelectOption } from "@/components/ui/CustomSelect";
 
 export type ComboboxOption = {
   id: string;
@@ -114,7 +115,14 @@ export function SearchableSelect({
     );
   }
 
-  // Khi chưa chọn khách hàng: hiển thị Ô tìm kiếm (Tên/Mã/Email) + Selection dropdown (select)
+  const selectOptions = useMemo<CustomSelectOption[]>(() => {
+    return filtered.map((o) => ({
+      value: o.id,
+      label: `${o.label}${o.code ? ` [${o.code}]` : ""}${o.email ? ` • ${o.email}` : o.phone ? ` • ${o.phone}` : ""}`,
+    }));
+  }, [filtered]);
+
+  // Khi chưa chọn khách hàng: hiển thị Ô tìm kiếm (Tên/Mã/Email) + Selection dropdown (CustomSelect)
   return (
     <div className={`flex flex-col gap-1.5 ${className}`}>
       {/* 1. Ô tìm kiếm lọc theo Tên, Email, Mã KH */}
@@ -147,31 +155,27 @@ export function SearchableSelect({
         )}
       </div>
 
-      {/* 2. Selection dropdown (thẻ select chuẩn để Admin click chọn) */}
-      <div className="relative">
-        <select
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          className={`w-full rounded-xl border border-neutral-200 bg-white font-bold text-neutral-800 shadow-2xs focus:border-rose-400 focus:outline-none focus:ring-1 focus:ring-rose-200 hover:border-neutral-300 transition-colors cursor-pointer truncate ${
-            isSm
-              ? "h-10 px-3 text-xs"
-              : "h-11 px-3.5 text-sm"
-          }`}
-        >
-          <option value="" disabled={filtered.length > 0}>
-            {filtered.length === 0
-              ? `❌ ${emptyLabel}`
-              : query
-              ? `-- Chọn từ ${filtered.length} kết quả tìm kiếm --`
-              : `-- Chọn khách hàng (${options.length}) --`}
-          </option>
-          {filtered.map((o) => (
-            <option key={o.id} value={o.id}>
-              {o.label} {o.code ? `[${o.code}]` : ""} {o.email ? `• ${o.email}` : o.phone ? `• ${o.phone}` : ""}
-            </option>
-          ))}
-        </select>
-      </div>
+      {/* 2. Selection dropdown (CustomSelect thay thế select native, chuẩn thẩm mỹ, không tràn viền) */}
+      <CustomSelect
+        value={value}
+        onChange={(id) => {
+          if (id) onChange(id);
+        }}
+        options={selectOptions}
+        placeholder={
+          filtered.length === 0
+            ? `❌ ${emptyLabel}`
+            : query
+            ? `-- Chọn từ ${filtered.length} kết quả tìm kiếm --`
+            : `-- Chọn khách hàng (${options.length}) --`
+        }
+        className="w-full"
+        buttonClassName={`w-full rounded-xl border border-neutral-200 bg-white font-bold text-neutral-800 shadow-2xs hover:border-neutral-300 transition-colors ${
+          isSm ? "h-10 text-xs px-3" : "h-11 text-sm px-3.5"
+        }`}
+        wrapLabels={true}
+        ariaLabel="Chọn khách hàng"
+      />
 
       {/* Gợi ý khi tìm kiếm có kết quả */}
       {query && filtered.length > 0 && (

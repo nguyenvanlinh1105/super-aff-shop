@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Zap } from "lucide-react";
 import { useToast } from "@/components/ui/Toast";
+import { CustomSelect } from "@/components/ui/CustomSelect";
 
 type Option = { id: string; label: string };
 
@@ -61,17 +62,14 @@ export function QuickVoucherForm({ platforms }: { platforms: Option[] }) {
         </div>
       </div>
       <form onSubmit={handleSubmit} className="flex flex-col gap-sm sm:flex-row">
-        <select
+        <CustomSelect
           value={platformId}
-          onChange={(e) => setPlatformId(e.target.value)}
-          className="h-11 shrink-0 rounded-2xl border border-primary-100/80 bg-white px-md text-[14px] font-semibold text-neutral-800 sm:w-[160px] focus:border-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-200/50 transition-all"
-        >
-          {platforms.map((p) => (
-            <option key={p.id} value={p.id}>
-              {p.label}
-            </option>
-          ))}
-        </select>
+          onChange={setPlatformId}
+          options={platforms.map((p) => ({ value: p.id, label: p.label }))}
+          className="w-full sm:w-[170px] shrink-0"
+          buttonClassName="h-11 border-primary-100/80 bg-white text-[13.5px] font-extrabold text-neutral-800"
+          ariaLabel="Chọn sàn"
+        />
         <input
           type="text"
           placeholder="Dán link deal Shopee/TikTok vào đây..."

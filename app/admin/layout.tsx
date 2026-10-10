@@ -67,7 +67,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       <AdminSidebar adminName={session.fullName} sections={sections} />
 
       {/* ── Main content ── */}
-      <main className="relative flex-1 overflow-y-auto bg-transparent selection:bg-rose-500 selection:text-white px-3 sm:px-6 lg:px-8">
+      <main className="relative flex-1 overflow-y-auto overflow-x-hidden bg-transparent selection:bg-rose-500 selection:text-white px-3 sm:px-6 lg:px-8">
         <div className="min-h-full py-5 sm:py-6 lg:py-8 w-full max-w-[1560px] mx-auto">
           {children}
         </div>

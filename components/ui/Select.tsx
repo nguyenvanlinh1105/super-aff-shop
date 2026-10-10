@@ -4,10 +4,10 @@ import { ChevronDown } from "lucide-react";
 export const Select = forwardRef<HTMLSelectElement, SelectHTMLAttributes<HTMLSelectElement>>(
   ({ className = "", children, ...props }, ref) => {
     return (
-      <div className="relative">
+      <div className="relative w-full max-w-full overflow-hidden">
         <select
           ref={ref}
-          className={`w-full appearance-none rounded-xl border border-ink/10 bg-canvas px-md py-[10px] pr-[44px] text-[14px] font-medium text-ink transition-all duration-150 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary hover:border-ink/20 cursor-pointer ${className}`}
+          className={`w-full max-w-full appearance-none rounded-xl border border-ink/10 bg-canvas px-md py-[10px] pr-[44px] text-[14px] font-medium text-ink transition-all duration-150 focus:border-primary focus:outline-none focus:ring-1 focus:ring-primary hover:border-ink/20 cursor-pointer truncate ${className}`}
           {...props}
         >
           {children}

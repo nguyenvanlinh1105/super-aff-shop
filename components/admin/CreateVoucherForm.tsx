@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { TextInput } from "@/components/ui/TextInput";
-import { Select } from "@/components/ui/Select";
+import { CustomSelect } from "@/components/ui/CustomSelect";
 import { Card } from "@/components/ui/Card";
 
 type Option = { id: string; label: string };
@@ -58,13 +58,13 @@ export function CreateVoucherForm({ platforms }: { platforms: Option[] }) {
   return (
     <Card variant="default" className="border border-gray-100">
       <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-lg sm:grid-cols-2">
-        <Select value={platformId} onChange={(e) => setPlatformId(e.target.value)}>
-          {platforms.map((p) => (
-            <option key={p.id} value={p.id}>
-              {p.label}
-            </option>
-          ))}
-        </Select>
+        <CustomSelect
+          value={platformId}
+          onChange={setPlatformId}
+          options={platforms.map((p) => ({ value: p.id, label: p.label }))}
+          className="w-full"
+          ariaLabel="Chọn sàn"
+        />
         <TextInput placeholder="Tên chương trình" required value={title} onChange={(e) => setTitle(e.target.value)} />
         <TextInput placeholder="Mã voucher" value={voucherCode} onChange={(e) => setVoucherCode(e.target.value)} />
         <TextInput

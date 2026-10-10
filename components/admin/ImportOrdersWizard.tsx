@@ -6,7 +6,7 @@ import { Upload, FileCheck2, Gift } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { TextInput } from "@/components/ui/TextInput";
-import { Select } from "@/components/ui/Select";
+import { CustomSelect } from "@/components/ui/CustomSelect";
 import { Table, Thead, Tr, Th, Td } from "@/components/ui/Table";
 
 type Option = { id: string; label: string };
@@ -100,13 +100,13 @@ export function ImportOrdersWizard({ platforms }: { platforms: Option[] }) {
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <div>
               <label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 mb-1.5 block">Nền Tảng Affiliate</label>
-              <Select value={platformId} onChange={(e) => setPlatformId(e.target.value)} className="w-full">
-                {platforms.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.label}
-                  </option>
-                ))}
-              </Select>
+              <CustomSelect
+                value={platformId}
+                onChange={setPlatformId}
+                options={platforms.map((p) => ({ value: p.id, label: p.label }))}
+                className="w-full"
+                ariaLabel="Nền Tảng Affiliate"
+              />
             </div>
             <div>
               <label className="text-[10px] font-black uppercase tracking-widest text-neutral-400 mb-1.5 block">Nguồn File / Ghi Chú</label>
