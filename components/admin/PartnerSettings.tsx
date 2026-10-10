@@ -192,7 +192,7 @@ export function PartnerSettings({
   });
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-4 sm:gap-6 w-full max-w-full min-w-0 overflow-hidden">
       {/* Alert Messages */}
       {error && (
         <div className="rounded-2xl bg-rose-50 border border-rose-200 p-4 text-xs text-rose-700 font-extrabold flex items-center justify-between shadow-xs">
@@ -220,105 +220,127 @@ export function PartnerSettings({
 
       {/* Card 1: Toggle Chế độ Đối tác (Partner) */}
       <div
-        className={`rounded-3xl border p-5 sm:p-6 transition-all duration-300 ${
+        className={`rounded-3xl border p-4 sm:p-5.5 transition-all duration-300 ${
           isPartner
-            ? "bg-gradient-to-br from-emerald-50/70 via-white to-emerald-50/30 border-emerald-200/90 shadow-sm"
+            ? "bg-gradient-to-br from-emerald-50/80 via-white to-teal-50/40 border-emerald-300/80 shadow-xs"
             : "bg-white border-neutral-200/80 shadow-xs"
         }`}
       >
-        <div className="flex items-center justify-between gap-4 flex-wrap sm:flex-nowrap">
-          <div className="flex items-center gap-3.5">
+        {/* Hàng chính: Icon + Tiêu đề + Badge + Switch luôn nằm trên 1 hàng duy nhất */}
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 min-w-0">
+            {/* Icon */}
             <div
-              className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl font-black text-xl shadow-xs transition-colors ${
+              className={`flex h-11 w-11 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-2xl font-black shadow-xs transition-colors ${
                 isPartner
-                  ? "bg-emerald-500 text-white shadow-emerald-500/20"
-                  : "bg-neutral-100 text-neutral-500 border border-neutral-200/60"
+                  ? "bg-emerald-500 text-white shadow-emerald-500/25"
+                  : "bg-neutral-100 text-neutral-400 border border-neutral-200/80"
               }`}
             >
-              <Handshake size={22} strokeWidth={2.2} />
+              <Handshake size={20} strokeWidth={2.4} />
             </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h3 className="text-base font-extrabold text-neutral-900 tracking-tight">Quyền Đối Tác (Partner)</h3>
-                {isPartner && (
-                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-black uppercase tracking-wider">
-                    <Sparkles size={11} /> Đang Kích Hoạt
+
+            {/* Title & Badge */}
+            <div className="min-w-0">
+              <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+                <h3 className="text-sm sm:text-base font-black text-neutral-900 tracking-tight leading-snug">
+                  Quyền Đối Tác
+                </h3>
+                {isPartner ? (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-black uppercase tracking-wider shrink-0 whitespace-nowrap border border-emerald-200/80">
+                    <Sparkles size={10} className="text-emerald-600" />
+                    Đang Bật
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-neutral-100 text-neutral-500 text-[10px] font-bold uppercase tracking-wider shrink-0 whitespace-nowrap">
+                    Đang Tắt
                   </span>
                 )}
               </div>
-              <p className="mt-1 text-xs text-neutral-500 font-medium leading-relaxed max-w-2xl">
-                Khi kích hoạt, mọi khách hàng có <strong>&quot;Người giới thiệu&quot;</strong> trỏ về người này sẽ luôn được tính hoa hồng giới thiệu <strong>vĩnh viễn</strong> trên mọi đơn hàng — không bị giới hạn 5 đơn/người hay 6 tháng như người giới thiệu thông thường.
+              <p className="text-[11px] text-neutral-400 font-medium truncate sm:hidden">
+                {isPartner ? "Hoa hồng vĩnh viễn, không giới hạn" : "Bật để cấp quyền đối tác VIP"}
               </p>
             </div>
           </div>
 
+          {/* Toggle Switch: Cố định bên phải cùng hàng trên mobile & desktop */}
           <button
             type="button"
             role="switch"
             aria-checked={isPartner}
             onClick={() => patch({ isPartner: !isPartner })}
             disabled={loading}
-            className={`relative inline-flex h-8 w-14 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 ${
-              isPartner ? "bg-emerald-500" : "bg-neutral-200"
+            className={`relative inline-flex h-7 w-12 sm:h-8 sm:w-14 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 ${
+              isPartner ? "bg-emerald-500 shadow-sm shadow-emerald-500/30" : "bg-neutral-200"
             }`}
           >
             <span
-              className={`pointer-events-none inline-block h-7 w-7 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
-                isPartner ? "translate-x-6" : "translate-x-0"
+              className={`pointer-events-none inline-block h-6 w-6 sm:h-7 sm:w-7 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
+                isPartner ? "translate-x-5 sm:translate-x-6" : "translate-x-0"
               }`}
             />
           </button>
+        </div>
+
+        {/* Mô tả chi tiết: Trải đều full width bên dưới, thanh thoát và dễ đọc */}
+        <div className="mt-3 pt-2.5 border-t border-emerald-100/70 sm:border-neutral-100 flex items-start gap-2">
+          <Info size={13} className="text-emerald-600 shrink-0 mt-0.5" />
+          <p className="text-[11.5px] sm:text-xs text-neutral-600 font-medium leading-relaxed">
+            Khi bật, mọi khách hàng có <strong>&quot;Người giới thiệu&quot;</strong> trỏ về người này sẽ luôn được tính hoa hồng <strong>vĩnh viễn</strong> trên mọi đơn hàng — không bị giới hạn 5 đơn/người hay 6 tháng như người giới thiệu thông thường.
+          </p>
         </div>
       </div>
 
       {/* Card 2: CẤU HÌNH % HOA HỒNG THEO KHOẢNG THỜI GIAN (CHỈ HIỂN THỊ KHI LÀ ĐỐI TÁC) */}
       {isPartner && (
-        <div className="rounded-3xl bg-white border border-emerald-200/90 p-5 sm:p-7 shadow-sm flex flex-col gap-6">
+        <div className="rounded-3xl bg-white border border-emerald-200/90 p-4 sm:p-6 md:p-7 shadow-sm flex flex-col gap-5 sm:gap-6 w-full max-w-full min-w-0 overflow-hidden box-border">
           {/* Header */}
-          <div className="flex items-center justify-between border-b border-neutral-100 pb-4 flex-wrap gap-2">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center font-black shadow-sm shadow-emerald-500/20">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b border-neutral-100 pb-4 gap-3 w-full min-w-0">
+            <div className="flex items-center gap-3 min-w-0">
+              <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white flex items-center justify-center font-black shadow-sm shadow-emerald-500/20 shrink-0">
                 <Percent size={18} strokeWidth={2.5} />
               </div>
-              <div>
-                <h3 className="text-base font-extrabold text-neutral-900 tracking-tight">
-                  Cấu Hình Tỷ Lệ Hoa Hồng Theo Giai Đoạn (Point-in-Time)
+              <div className="min-w-0">
+                <h3 className="text-sm sm:text-base font-extrabold text-neutral-900 tracking-tight leading-snug">
+                  Cấu Hình Tỷ Lệ Hoa Hồng Theo Giai Đoạn
                 </h3>
-                <p className="text-xs text-neutral-500 font-medium">
-                  Thiết lập mức % đối tác nhận được (3%, 5%, 7%, 10%) kèm thời hạn bắt đầu &amp; kết thúc
+                <p className="text-[11px] sm:text-xs text-neutral-500 font-medium">
+                  Thiết lập % (3%, 5%, 7%, 10%) kèm thời hạn áp dụng
                 </p>
               </div>
             </div>
 
-            {currentActivePeriod ? (
-              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-black shadow-2xs">
-                <ShieldCheck size={14} className="text-emerald-600" />
-                <span>Hiệu lực hiện tại:</span>
-                <strong className="text-sm font-black text-emerald-600">
-                  {Math.round(currentActivePeriod.rate * 100)}%
-                </strong>
-              </span>
-            ) : (
-              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-neutral-100 text-neutral-600 border border-neutral-200 text-xs font-bold">
-                <Clock size={13} className="text-neutral-400" />
-                <span>Chưa có lịch riêng (Áp dụng mặc định hệ thống)</span>
-              </span>
-            )}
+            <div className="self-start sm:self-auto shrink-0 max-w-full">
+              {currentActivePeriod ? (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-black shadow-2xs max-w-full">
+                  <ShieldCheck size={14} className="text-emerald-600 shrink-0" />
+                  <span>Hiệu lực hiện tại:</span>
+                  <strong className="text-sm font-black text-emerald-600 shrink-0">
+                    {Math.round(currentActivePeriod.rate * 100)}%
+                  </strong>
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-neutral-100 text-neutral-600 border border-neutral-200 text-xs font-bold max-w-full">
+                  <Clock size={13} className="text-neutral-400 shrink-0" />
+                  <span>Mặc định hệ thống</span>
+                </span>
+              )}
+            </div>
           </div>
 
           {/* Form thêm giai đoạn áp dụng tỷ lệ */}
-          <form onSubmit={handleCreateRatePeriod} className="rounded-2xl bg-neutral-50/70 p-4 sm:p-5 border border-neutral-200/80 flex flex-col gap-4">
+          <form onSubmit={handleCreateRatePeriod} className="rounded-2xl bg-neutral-50/70 p-3.5 sm:p-5 border border-neutral-200/80 flex flex-col gap-4 w-full max-w-full min-w-0 overflow-hidden box-border">
             <div className="flex items-center gap-2 text-xs font-black text-neutral-900 uppercase tracking-wider">
-              <Plus size={14} className="text-emerald-600" />
+              <Plus size={14} className="text-emerald-600 shrink-0" />
               <span>Thiết Lập Mức % Cho Giai Đoạn Mới</span>
             </div>
 
             {/* Bước 1: Chọn % với Selection 3%, 5%, 7%, 10% */}
-            <div>
+            <div className="w-full min-w-0">
               <label className="block text-xs font-extrabold text-neutral-700 mb-2">
                 1. Chọn tỷ lệ hoa hồng đối tác nhận:
               </label>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-2.5 w-full min-w-0">
                 {PARTNER_RATE_PRESETS.map((p) => {
                   const active = selectedPercent === p.percent;
                   return (
@@ -326,14 +348,14 @@ export function PartnerSettings({
                       key={p.percent}
                       type="button"
                       onClick={() => setSelectedPercent(p.percent)}
-                      className={`flex flex-col items-center justify-center p-3 rounded-2xl border-2 transition-all cursor-pointer ${
+                      className={`flex flex-col items-center justify-center p-2.5 sm:p-3 rounded-2xl border-2 transition-all cursor-pointer min-w-0 w-full ${
                         active
                           ? "border-emerald-500 bg-emerald-50/90 text-emerald-950 font-black shadow-xs ring-2 ring-emerald-200"
                           : "border-neutral-200/90 bg-white text-neutral-700 font-extrabold hover:border-neutral-300 hover:bg-neutral-50"
                       }`}
                     >
-                      <span className="text-lg font-black leading-tight">{p.label}</span>
-                      <span className="text-[10px] text-neutral-400 font-bold mt-0.5">
+                      <span className="text-base sm:text-lg font-black leading-tight">{p.label}</span>
+                      <span className="text-[9.5px] sm:text-[10px] text-neutral-400 font-bold mt-0.5 truncate max-w-full">
                         {p.percent === 5 ? "Mặc định cũ" : p.percent === 7 ? "Ưu đãi vừa" : p.percent === 10 ? "VIP tối đa" : "Cơ bản"}
                       </span>
                     </button>
@@ -343,10 +365,10 @@ export function PartnerSettings({
             </div>
 
             {/* Bước 2: Chọn khoảng thời gian (startsAt -> endsAt) */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-1">
-              <div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-3.5 pt-1 w-full min-w-0">
+              <div className="w-full min-w-0">
                 <label className="block text-xs font-extrabold text-neutral-700 mb-1.5 flex items-center gap-1.5">
-                  <Calendar size={13} className="text-emerald-600" />
+                  <Calendar size={13} className="text-emerald-600 shrink-0" />
                   <span>Từ ngày (Bắt đầu áp dụng):</span>
                 </label>
                 <input
@@ -354,17 +376,17 @@ export function PartnerSettings({
                   required
                   value={startsAt}
                   onChange={(e) => setStartsAt(e.target.value)}
-                  className="w-full rounded-xl border border-neutral-200 bg-white px-3.5 py-2.5 text-xs font-bold text-neutral-900 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
+                  className="w-full max-w-full min-w-0 box-border rounded-xl border border-neutral-200 bg-white px-3 sm:px-3.5 py-2.5 text-xs font-bold text-neutral-900 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
                 />
               </div>
 
-              <div>
-                <div className="flex items-center justify-between mb-1.5">
-                  <label className="text-xs font-extrabold text-neutral-700 flex items-center gap-1.5">
-                    <Calendar size={13} className="text-emerald-600" />
+              <div className="w-full min-w-0">
+                <div className="flex items-center justify-between mb-1.5 flex-wrap gap-1">
+                  <label className="text-xs font-extrabold text-neutral-700 flex items-center gap-1.5 shrink-0">
+                    <Calendar size={13} className="text-emerald-600 shrink-0" />
                     <span>Đến ngày (Kết thúc):</span>
                   </label>
-                  <label className="inline-flex items-center gap-1.5 text-[11px] font-bold text-neutral-500 cursor-pointer">
+                  <label className="inline-flex items-center gap-1.5 text-[11px] font-bold text-neutral-500 cursor-pointer shrink-0">
                     <input
                       type="checkbox"
                       checked={isIndefinite}
@@ -384,28 +406,28 @@ export function PartnerSettings({
                   value={endsAt}
                   onChange={(e) => setEndsAt(e.target.value)}
                   placeholder="Chọn ngày kết thúc..."
-                  className="w-full rounded-xl border border-neutral-200 bg-white px-3.5 py-2.5 text-xs font-bold text-neutral-900 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 disabled:bg-neutral-100 disabled:text-neutral-400 disabled:cursor-not-allowed"
+                  className="w-full max-w-full min-w-0 box-border rounded-xl border border-neutral-200 bg-white px-3 sm:px-3.5 py-2.5 text-xs font-bold text-neutral-900 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 disabled:bg-neutral-100 disabled:text-neutral-400 disabled:cursor-not-allowed"
                 />
               </div>
             </div>
 
             {/* Bước 3: Ghi chú lý do / tên chiến dịch */}
-            <div>
+            <div className="w-full min-w-0">
               <label className="block text-xs font-extrabold text-neutral-700 mb-1.5">
                 Ghi chú nội bộ (Tùy chọn):
               </label>
-              <div className="flex flex-col sm:flex-row gap-2.5">
+              <div className="flex flex-col sm:flex-row gap-2.5 w-full min-w-0">
                 <input
                   type="text"
                   value={note}
                   onChange={(e) => setNote(e.target.value)}
-                  placeholder="Ví dụ: Chiến dịch tháng 10 ưu đãi 7%, Tháng 11 nâng lên 10%..."
-                  className="flex-1 rounded-xl border border-neutral-200 bg-white px-3.5 py-2.5 text-xs font-medium text-neutral-900 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
+                  placeholder="Ví dụ: Chiến dịch tháng 10 ưu đãi 7%..."
+                  className="w-full min-w-0 flex-1 box-border rounded-xl border border-neutral-200 bg-white px-3 sm:px-3.5 py-2.5 text-xs font-medium text-neutral-900 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20"
                 />
                 <button
                   type="submit"
                   disabled={submittingRate}
-                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 px-5 py-2.5 text-xs font-black text-white shadow-sm shadow-emerald-600/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all cursor-pointer shrink-0"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 px-5 py-2.5 text-xs font-black text-white shadow-sm shadow-emerald-600/20 disabled:opacity-50 disabled:cursor-not-allowed transition-all cursor-pointer shrink-0"
                 >
                   <Plus size={14} strokeWidth={2.5} />
                   <span>{submittingRate ? "Đang lưu..." : `Áp Dụng Mức ${selectedPercent}%`}</span>
@@ -415,31 +437,31 @@ export function PartnerSettings({
           </form>
 
           {/* Bảng Danh Sách Lịch Sử Hiệu Lực */}
-          <div>
+          <div className="w-full min-w-0 overflow-hidden">
             <div className="flex items-center justify-between mb-3">
               <h4 className="text-xs font-black text-neutral-900 uppercase tracking-wider flex items-center gap-1.5">
-                <Clock size={14} className="text-neutral-500" />
-                <span>Lịch Sử Áp Dụng Tỷ Lệ Theo Mốc Thời Gian ({partnerRatePeriods.length})</span>
+                <Clock size={14} className="text-neutral-500 shrink-0" />
+                <span>Lịch Sử Áp Dụng Tỷ Lệ ({partnerRatePeriods.length})</span>
               </h4>
               <span className="text-[11px] text-neutral-400 font-medium hidden sm:inline">
-                Đơn hàng phát sinh thời điểm nào sẽ tự động áp dụng đúng mức % thời điểm đó
+                Đơn phát sinh mốc nào sẽ áp dụng đúng tỷ lệ mốc đó
               </span>
             </div>
 
             {partnerRatePeriods.length === 0 ? (
-              <div className="rounded-2xl border border-dashed border-neutral-200 p-6 text-center text-xs text-neutral-400 font-medium">
+              <div className="rounded-2xl border border-dashed border-neutral-200 p-5 text-center text-xs text-neutral-400 font-medium">
                 Chưa có cấu hình mốc thời gian riêng nào cho đối tác này. Hệ thống sẽ áp dụng tỷ lệ mặc định theo cài đặt chung.
               </div>
             ) : (
-              <div className="overflow-x-auto rounded-2xl border border-neutral-200/80 shadow-xs">
-                <table className="w-full text-left border-collapse">
+              <div className="overflow-x-auto rounded-2xl border border-neutral-200/80 shadow-xs w-full bg-white">
+                <table className="w-full text-left border-collapse min-w-[620px]">
                   <thead>
                     <tr className="bg-neutral-50/80 border-b border-neutral-200 text-[11px] font-black uppercase tracking-wider text-neutral-500">
-                      <th className="py-3 px-4">Tỷ Lệ</th>
-                      <th className="py-3 px-4">Khoảng Thời Gian Hiệu Lực</th>
-                      <th className="py-3 px-4">Trạng Thái</th>
-                      <th className="py-3 px-4">Ghi Chú</th>
-                      <th className="py-3 px-4 text-right">Thao Tác</th>
+                      <th className="py-3.5 px-4 whitespace-nowrap">Tỷ Lệ</th>
+                      <th className="py-3.5 px-4 whitespace-nowrap">Khoảng Thời Gian Hiệu Lực</th>
+                      <th className="py-3.5 px-4 whitespace-nowrap">Trạng Thái</th>
+                      <th className="py-3.5 px-4 whitespace-nowrap">Ghi Chú</th>
+                      <th className="py-3.5 px-4 text-right whitespace-nowrap">Thao Tác</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-neutral-100 text-xs">
@@ -449,39 +471,32 @@ export function PartnerSettings({
                       const isDeleting = deletingId === p.id;
                       return (
                         <tr key={p.id} className="hover:bg-neutral-50/60 transition-colors">
-                          {/* Tỷ lệ */}
-                          <td className="py-3 px-4">
-                            <span className="inline-flex items-center px-2.5 py-1 rounded-xl bg-emerald-100 text-emerald-900 font-black text-sm">
+                          <td className="py-3.5 px-4 whitespace-nowrap">
+                            <span className="inline-flex items-center px-2.5 py-1 rounded-xl bg-emerald-100 text-emerald-900 font-black text-sm whitespace-nowrap">
                               {percentVal}%
                             </span>
                           </td>
-
-                          {/* Khoảng thời gian */}
-                          <td className="py-3 px-4 font-semibold text-neutral-800">
-                            <span>{formatDateVi(p.startsAt)}</span>
-                            <span className="text-neutral-400 mx-1.5">→</span>
-                            {p.endsAt ? (
-                              <span>{formatDateVi(p.endsAt)}</span>
-                            ) : (
-                              <span className="text-emerald-700 font-bold">Vô thời hạn</span>
-                            )}
+                          <td className="py-3.5 px-4 font-semibold text-neutral-800 whitespace-nowrap">
+                            <span className="inline-flex items-center gap-1.5 whitespace-nowrap">
+                              <span>{formatDateVi(p.startsAt)}</span>
+                              <span className="text-neutral-400">→</span>
+                              {p.endsAt ? (
+                                <span>{formatDateVi(p.endsAt)}</span>
+                              ) : (
+                                <span className="text-emerald-700 font-bold">Vô thời hạn</span>
+                              )}
+                            </span>
                           </td>
-
-                          {/* Trạng thái */}
-                          <td className="py-3 px-4">
-                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10.5px] border ${st.color}`}>
+                          <td className="py-3.5 px-4 whitespace-nowrap">
+                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold border whitespace-nowrap ${st.color}`}>
                               <span className={`w-1.5 h-1.5 rounded-full ${st.badge}`} />
                               <span>{st.label}</span>
                             </span>
                           </td>
-
-                          {/* Ghi chú */}
-                          <td className="py-3 px-4 text-neutral-500 max-w-[200px] truncate">
+                          <td className="py-3.5 px-4 text-neutral-500 max-w-[200px] truncate whitespace-nowrap">
                             {p.note || "—"}
                           </td>
-
-                          {/* Thao tác xoá */}
-                          <td className="py-3 px-4 text-right">
+                          <td className="py-3.5 px-4 text-right whitespace-nowrap">
                             <button
                               type="button"
                               disabled={isDeleting}
@@ -500,11 +515,11 @@ export function PartnerSettings({
               </div>
             )}
 
-            {/* Chú thích giải thích chuyên gia IT */}
-            <div className="mt-3.5 flex items-start gap-2 text-[11.5px] text-neutral-500 bg-emerald-50/50 p-3 rounded-xl border border-emerald-100">
+            {/* Chú thích giải thích */}
+            <div className="mt-3.5 flex items-start gap-2 text-[11px] sm:text-[11.5px] text-neutral-500 bg-emerald-50/50 p-3 rounded-xl border border-emerald-100">
               <Info size={15} className="text-emerald-600 shrink-0 mt-0.5" />
               <span>
-                <strong>Bảo toàn tính toán lịch sử:</strong> Khi sang tháng mới bạn đổi tỷ lệ (ví dụ tháng 10 là 7%, tháng 11 là 10%), hệ thống luôn căn cứ theo ngày đơn hàng phát sinh (Order Date) để tính đúng mức % của giai đoạn đó. Đơn hàng cũ của tháng trước hoàn toàn <strong>không bị ảnh hưởng</strong> hay bị tính lại theo tỷ lệ mới.
+                <strong>Bảo toàn tính toán lịch sử:</strong> Đơn hàng phát sinh lúc nào sẽ tính đúng mức % của giai đoạn đó. Đơn cũ <strong>không bị ảnh hưởng</strong> khi đổi tỷ lệ mới.
               </span>
             </div>
           </div>
@@ -512,23 +527,23 @@ export function PartnerSettings({
       )}
 
       {/* Card 3: Người giới thiệu của khách này */}
-      <div className="rounded-3xl bg-white border border-neutral-200/80 p-5 sm:p-6 shadow-xs flex flex-col gap-3">
-        <div className="flex items-center justify-between">
+      <div className="rounded-3xl bg-white border border-neutral-200/80 p-4 sm:p-6 shadow-xs flex flex-col gap-3 w-full max-w-full min-w-0 overflow-hidden box-border">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
           <div className="flex items-center gap-2 text-sm font-extrabold text-neutral-900">
-            <UserPlus size={16} className="text-rose-500" />
+            <UserPlus size={16} className="text-rose-500 shrink-0" />
             <span>Người Giới Thiệu Khách Này:</span>
           </div>
           {referredBy && (
-            <span className="text-xs text-neutral-500 font-medium">
+            <span className="text-xs text-neutral-500 font-medium truncate">
               Hiện tại: <strong className="text-rose-600 font-black">{referredBy.fullName}</strong> ({referredBy.customerCode})
             </span>
           )}
         </div>
 
-        <div className="flex items-center gap-3 flex-wrap sm:flex-nowrap">
-          <div className="relative flex-1 min-w-[220px]">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3 w-full min-w-0">
+          <div className="relative flex-1 min-w-0 w-full">
             <select
-              className="w-full rounded-2xl border border-neutral-200 bg-neutral-50/80 px-4 py-3 text-xs font-extrabold text-neutral-900 focus:border-rose-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-rose-500/20 transition-all cursor-pointer"
+              className="w-full max-w-full rounded-2xl border border-neutral-200 bg-neutral-50/80 px-3.5 sm:px-4 py-2.5 sm:py-3 text-xs font-extrabold text-neutral-900 focus:border-rose-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-rose-500/20 transition-all cursor-pointer box-border"
               value={referrerSelect}
               onChange={(e) => setReferrerSelect(e.target.value)}
             >
@@ -545,7 +560,7 @@ export function PartnerSettings({
             type="button"
             disabled={loading || referrerSelect === (referredBy?.id ?? "")}
             onClick={() => patch({ referredById: referrerSelect || null })}
-            className="inline-flex items-center justify-center gap-1.5 rounded-2xl bg-neutral-900 px-5 py-3 text-xs font-black text-white hover:bg-neutral-800 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-xs shrink-0 cursor-pointer"
+            className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 rounded-2xl bg-neutral-900 px-5 py-2.5 sm:py-3 text-xs font-black text-white hover:bg-neutral-800 disabled:opacity-40 disabled:cursor-not-allowed transition-all shadow-xs shrink-0 cursor-pointer"
           >
             <Check size={14} strokeWidth={2.5} />
             <span>{loading ? "Đang lưu..." : "Cập Nhật"}</span>
@@ -555,13 +570,13 @@ export function PartnerSettings({
 
       {/* Card 4: Danh sách khách đã được gán cho đối tác này (nếu là đối tác) */}
       {isPartner && (
-        <div className="rounded-3xl bg-white border border-emerald-200/80 p-5 sm:p-6 shadow-xs flex flex-col gap-3">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-sm font-extrabold text-neutral-900">
-              <Users size={16} className="text-emerald-600" />
-              <span>Khách Hàng Được Gán Cho Đối Tác Này</span>
+        <div className="rounded-3xl bg-white border border-emerald-200/80 p-4 sm:p-6 shadow-xs flex flex-col gap-3 w-full max-w-full min-w-0 overflow-hidden box-border">
+          <div className="flex items-center justify-between gap-3 border-b border-emerald-100/60 pb-3">
+            <div className="flex items-center gap-2 text-sm font-extrabold text-neutral-900 min-w-0">
+              <Users size={16} className="text-emerald-600 shrink-0" />
+              <span className="truncate sm:whitespace-normal">Khách Hàng Được Gán Cho Đối Tác Này</span>
             </div>
-            <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 text-xs font-black border border-emerald-200">
+            <span className="px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-black border border-emerald-200 whitespace-nowrap shrink-0">
               {referredUsers.length} khách hàng
             </span>
           </div>
@@ -569,12 +584,12 @@ export function PartnerSettings({
           {referredUsers.length === 0 ? (
             <p className="text-xs text-neutral-400 font-medium py-2 italic">Chưa có khách hàng nào được gán cho đối tác này.</p>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 pt-1">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 pt-1 w-full min-w-0">
               {referredUsers.map((u) => (
                 <Link
                   key={u.id}
                   href={`/admin/customers/${u.id}`}
-                  className="flex items-center justify-between p-3 rounded-2xl bg-neutral-50 hover:bg-emerald-50/70 border border-neutral-200/70 hover:border-emerald-200 transition-all duration-200 group"
+                  className="flex items-center justify-between p-3 rounded-2xl bg-neutral-50 hover:bg-emerald-50/70 border border-neutral-200/70 hover:border-emerald-200 transition-all duration-200 group min-w-0"
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
                     <div className="w-7 h-7 rounded-xl bg-white p-0.5 border border-emerald-200/80 flex items-center justify-center shrink-0 shadow-2xs overflow-hidden">

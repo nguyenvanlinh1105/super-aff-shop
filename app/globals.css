@@ -253,11 +253,19 @@
       max-width: 100%;
     }
     .responsive-table td:last-child { border-bottom: 0; }
-    .responsive-table td[data-label]::before {
+    .responsive-table td[data-label]:not([data-label=""])::before {
       content: attr(data-label);
       font-size: 10px; font-weight: 800;
       text-transform: uppercase; letter-spacing: 0.05em;
       color: #9CA3AF; text-align: left; flex-shrink: 0; margin-right: 0.5rem;
+    }
+    .responsive-table td[data-label=""]::before {
+      display: none !important;
+      content: none !important;
+    }
+    .responsive-table td[data-label=""] {
+      justify-content: flex-start !important;
+      text-align: left !important;
     }
     .responsive-table td[colspan] { display: block; text-align: center; }
   }

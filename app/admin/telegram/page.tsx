@@ -1,17 +1,29 @@
 import { Send } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { formatDate } from "@/lib/format";
-import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
-import { Table, Thead, Tr, Th, Td } from "@/components/ui/Table";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { PageHeader } from "@/components/ui/PageHeader";
 import { TelegramAccountForm } from "@/components/admin/TelegramAccountForm";
 import { TelegramWebhookStatus } from "@/components/admin/TelegramWebhookStatus";
 import { TelegramCommandManager } from "@/components/admin/TelegramCommandManager";
 
 import { TelegramIcon } from "@/components/icons/PlatformIcons";
 import { Pagination } from "@/components/ui/Pagination";
+
+function stripTelegramHtml(text: string | null | undefined): string {
+  if (!text) return "—";
+  return text
+    .replace(/<br\s*\/?>/gi, " ")
+    .replace(/<\/p>/gi, " ")
+    .replace(/<[^>]+>/g, "")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/\s+/g, " ")
+    .trim();
+}
 
 export default async function AdminTelegramPage({
   searchParams,
@@ -101,32 +113,84 @@ export default async function AdminTelegramPage({
             description="Log sẽ xuất hiện tự động khi có tương tác thực tế từ người dùng với Telegram Bot."
           />
         ) : (
-          <Table>
-            <Thead>
-              <Tr>
-                <Th>Thời Gian</Th>
-                <Th>Chiều Tin Nhắn</Th>
-                <Th>Phân Loại</Th>
-                <Th>Nội Dung Message</Th>
-                <Th>Trạng Thái Xử Lý</Th>
-              </Tr>
-            </Thead>
-            <tbody>
+          <div className="flex flex-col gap-4">
+            {/* Mobile Card View */}
+            <div className="flex flex-col gap-3 sm:hidden">
               {logs.map((l) => (
-                <Tr key={l.id}>
-                  <Td className="font-mono text-xs text-neutral-500">{formatDate(l.createdAt)}</Td>
-                  <Td>
-                    <Badge tone={l.direction === "in" ? "neutral" : "positive"} dot>
-                      {l.direction === "in" ? "Tin đến 📥" : "Gửi đi 📤"}
-                    </Badge>
-                  </Td>
-                  <Td className="font-bold text-xs">{l.messageType || "—"}</Td>
-                  <Td className="max-w-[320px] truncate font-medium text-neutral-800 text-xs">{l.messageText || "—"}</Td>
-                  <Td className="font-mono text-xs font-extrabold text-emerald-700">{l.processingStatus}</Td>
-                </Tr>
+                <div
+                  key={l.id}
+                  className="p-4 rounded-2xl bg-neutral-50/70 border border-neutral-200/80 flex flex-col gap-2.5 shadow-2xs text-left"
+                >
+                  <div className="flex items-center justify-between gap-2 flex-wrap">
+                    <div className="flex items-center gap-2">
+                      <Badge tone={l.direction === "in" ? "neutral" : "positive"} dot>
+                        {l.direction === "in" ? "Tin đến 📥" : "Gửi đi 📤"}
+                      </Badge>
+                      {l.messageType && (
+                        <span className="font-mono text-[11px] font-bold text-neutral-600 bg-white px-2 py-0.5 rounded-lg border border-neutral-200/70">
+                          {l.messageType}
+                        </span>
+                      )}
+                    </div>
+                    <span className="text-[11px] font-semibold text-neutral-400 font-mono">
+                      {formatDate(l.createdAt)}
+                    </span>
+                  </div>
+
+                  <div className="text-xs text-neutral-800 leading-relaxed bg-white p-3 rounded-xl border border-neutral-200/60 break-words text-left">
+                    <strong className="text-neutral-900 font-extrabold">Nội dung: </strong>
+                    <span>{stripTelegramHtml(l.messageText)}</span>
+                  </div>
+
+                  <div className="flex items-center justify-between text-[11px] pt-1 border-t border-neutral-200/60">
+                    <span className="text-neutral-400 font-medium">Trạng thái xử lý:</span>
+                    <span className="font-mono font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-100">
+                      {l.processingStatus || "sent"}
+                    </span>
+                  </div>
+                </div>
               ))}
-            </tbody>
-          </Table>
+            </div>
+
+            {/* Desktop Table View */}
+            <div className="hidden sm:block overflow-x-auto rounded-2xl border border-neutral-200/80 shadow-xs">
+              <table className="w-full text-left border-collapse text-xs">
+                <thead>
+                  <tr className="bg-neutral-50/80 border-b border-neutral-200 text-[11px] font-black uppercase tracking-wider text-neutral-500">
+                    <th className="py-3.5 px-4 whitespace-nowrap">Thời Gian</th>
+                    <th className="py-3.5 px-4 whitespace-nowrap">Chiều Tin Nhắn</th>
+                    <th className="py-3.5 px-4 whitespace-nowrap">Phân Loại</th>
+                    <th className="py-3.5 px-4">Nội Dung</th>
+                    <th className="py-3.5 px-4 whitespace-nowrap text-right">Trạng Thái Xử Lý</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-neutral-100">
+                  {logs.map((l) => (
+                    <tr key={l.id} className="hover:bg-neutral-50/60 transition-colors">
+                      <td className="py-3.5 px-4 font-mono text-neutral-500 whitespace-nowrap">
+                        {formatDate(l.createdAt)}
+                      </td>
+                      <td className="py-3.5 px-4 whitespace-nowrap">
+                        <Badge tone={l.direction === "in" ? "neutral" : "positive"} dot>
+                          {l.direction === "in" ? "Tin đến 📥" : "Gửi đi 📤"}
+                        </Badge>
+                      </td>
+                      <td className="py-3.5 px-4 font-bold whitespace-nowrap">
+                        {l.messageType || "—"}
+                      </td>
+                      <td className="py-3.5 px-4 max-w-[420px] font-medium text-neutral-800 break-words leading-relaxed">
+                        <strong className="text-neutral-900 font-extrabold">Nội dung: </strong>
+                        <span>{stripTelegramHtml(l.messageText)}</span>
+                      </td>
+                      <td className="py-3.5 px-4 text-right font-mono font-bold text-emerald-700 whitespace-nowrap">
+                        {l.processingStatus || "sent"}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
         )}
         <Pagination totalPages={totalPages} currentPage={page} />
       </div>

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Megaphone, Send, Sparkles, Smartphone, Bell, CheckCircle2 } from "lucide-react";
 import { useModal } from "@/components/ui/ModalProvider";
 import { useToast } from "@/components/ui/Toast";
+import { CustomSelect } from "@/components/ui/CustomSelect";
 
 const PRESET_TEMPLATES = [
   {
@@ -59,12 +60,16 @@ export function BroadcastForm() {
   const [title, setTitle] = useState("");
   const [message, setMessage] = useState("");
   const [link, setLink] = useState("/app/deals");
+  const [selectedPresetIndex, setSelectedPresetIndex] = useState("");
   const [loading, setLoading] = useState(false);
 
-  function applyPreset(preset: typeof PRESET_TEMPLATES[0]) {
+  function applyPreset(preset: typeof PRESET_TEMPLATES[0], index?: number) {
     setTitle(preset.title);
     setMessage(preset.message);
     setLink(preset.link);
+    if (index !== undefined) {
+      setSelectedPresetIndex(String(index));
+    }
   }
 
   async function send() {
@@ -119,6 +124,7 @@ export function BroadcastForm() {
       const data = await res.json();
       setTitle("");
       setMessage("");
+      setSelectedPresetIndex("");
       toast.success(`Đã phát thông báo thành công tới ${data.sentCount} khách hàng! 📢`, "Thành công");
     } else {
       const data = await res.json().catch(() => ({}));
@@ -145,17 +151,40 @@ export function BroadcastForm() {
       </div>
 
       {/* Preset Quick Selectors */}
-      <div className="flex flex-col gap-2 p-3.5 rounded-2xl bg-rose-50/50 border border-rose-100/80">
+      <div className="flex flex-col gap-2.5 p-3.5 rounded-2xl bg-rose-50/50 border border-rose-100/80">
         <div className="text-xs font-extrabold text-rose-900 flex items-center gap-1.5">
-          <Sparkles size={14} className="text-rose-500" />
+          <Sparkles size={14} className="text-rose-500 shrink-0" />
           <span>Mẫu thông báo sẵn có (Click để điền nhanh):</span>
         </div>
-        <div className="flex flex-wrap gap-2">
-          {PRESET_TEMPLATES.map((p) => (
+
+        {/* Mobile View: Dùng CustomSelect tinh tế, không chiếm nhiều diện tích màn hình */}
+        <div className="block sm:hidden w-full">
+          <CustomSelect
+            options={PRESET_TEMPLATES.map((p, idx) => ({
+              value: String(idx),
+              label: p.title,
+            }))}
+            value={selectedPresetIndex}
+            onChange={(val) => {
+              setSelectedPresetIndex(val);
+              const p = PRESET_TEMPLATES[Number(val)];
+              if (p) applyPreset(p, Number(val));
+            }}
+            placeholder="— Chọn mẫu thông báo sẵn có —"
+            icon={<Sparkles size={15} className="text-rose-500" />}
+            className="w-full"
+            ariaLabel="Mẫu thông báo sẵn có"
+          />
+        </div>
+
+        {/* Desktop View: Giữ nguyên các nút pill bấm nhanh */}
+        <div className="hidden sm:flex flex-wrap gap-2">
+          {PRESET_TEMPLATES.map((p, idx) => (
             <button
+              type="button"
               key={p.title}
-              onClick={() => applyPreset(p)}
-              className="text-xs font-extrabold bg-white hover:bg-rose-50 text-neutral-800 px-3 py-1.5 rounded-xl border border-rose-200 shadow-2xs transition-colors"
+              onClick={() => applyPreset(p, idx)}
+              className="text-xs font-extrabold bg-white hover:bg-rose-50 text-neutral-800 px-3 py-1.5 rounded-xl border border-rose-200 shadow-2xs transition-colors cursor-pointer"
             >
               {p.title}
             </button>

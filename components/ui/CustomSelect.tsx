@@ -83,15 +83,16 @@ export function CustomSelect({
         onClick={() => setIsOpen(!isOpen)}
         aria-expanded={isOpen}
         aria-label={ariaLabel || selectedOption?.label || placeholder}
-        className={`group flex h-10 sm:h-11 w-full items-center justify-between gap-2 rounded-2xl border bg-white px-3 sm:px-3.5 text-left text-[12.5px] sm:text-[13px] font-bold transition-all cursor-pointer shadow-2xs active:scale-[0.98] ${
+        className={`group flex h-11 w-full items-center justify-between gap-2 rounded-2xl border bg-white px-3.5 text-left text-[13px] font-bold transition-all cursor-pointer shadow-2xs focus:outline-none active:scale-[0.98] ${
           isOpen
             ? "border-primary-400 ring-2 ring-primary-100 shadow-cute"
             : "border-neutral-200/90 hover:border-primary-300 hover:shadow-sm"
         } ${buttonClassName}`}
       >
         <div className="flex items-center gap-2 min-w-0 flex-1">
-          {icon && <span className="shrink-0 text-primary-500">{icon}</span>}
-          {selectedOption?.icon && <span className="shrink-0">{selectedOption.icon}</span>}
+          {(selectedOption?.icon ?? icon) && (
+            <span className="shrink-0">{selectedOption?.icon ?? icon}</span>
+          )}
           <span className="truncate text-neutral-800 font-bold">
             {selectedOption ? selectedOption.label : placeholder}
           </span>

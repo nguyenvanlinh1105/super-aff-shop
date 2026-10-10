@@ -71,7 +71,6 @@ export function AdminListClient({
 
   const [admins, setAdmins] = useState<AdminUser[]>(initialAdmins);
   const [search, setSearch] = useState("");
-  const [filterNotify, setFilterNotify] = useState("all");
 
   const [isCreateOpen, setIsCreateOpen] = useState(false);
   const [editingAdmin, setEditingAdmin] = useState<AdminUser | null>(null);
@@ -311,20 +310,13 @@ export function AdminListClient({
   // Lọc dữ liệu
   const filteredAdmins = admins.filter((a) => {
     const q = search.toLowerCase().trim();
-    const matchSearch =
-      !q ||
+    if (!q) return true;
+    return (
       a.fullName.toLowerCase().includes(q) ||
       a.email.toLowerCase().includes(q) ||
       (a.phone && a.phone.includes(q)) ||
-      (a.telegramChatId && a.telegramChatId.includes(q));
-
-    const hasAnyNotify = (a.notifyOnNewCustomer || a.notifyOnImport) && Boolean(a.telegramChatId);
-    const matchNotify =
-      filterNotify === "all" ||
-      (filterNotify === "enabled" && hasAnyNotify) ||
-      (filterNotify === "disabled" && !hasAnyNotify);
-
-    return matchSearch && matchNotify;
+      (a.telegramChatId && a.telegramChatId.includes(q))
+    );
   });
 
   return (
@@ -383,7 +375,7 @@ export function AdminListClient({
                         onChange={(e) => setCreateName(e.target.value)}
                         placeholder="Ví dụ: Nguyễn Văn Quản Trị"
                         required
-                        className="w-full h-10 pl-9.5 pr-3.5 rounded-xl border border-neutral-200 bg-white text-xs sm:text-sm font-semibold text-neutral-900 placeholder:text-neutral-400 shadow-2xs transition-all focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/15 hover:border-neutral-300"
+                        className="w-full h-10 pl-10 pr-3.5 rounded-xl border border-neutral-200 bg-white text-xs sm:text-sm font-semibold text-neutral-900 placeholder:text-neutral-400 shadow-2xs transition-all focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/15 hover:border-neutral-300"
                       />
                     </div>
                   </div>
@@ -401,7 +393,7 @@ export function AdminListClient({
                         onChange={(e) => setCreateEmail(e.target.value)}
                         placeholder="admin.moi@meowback.shop"
                         required
-                        className="w-full h-10 pl-9.5 pr-3.5 rounded-xl border border-neutral-200 bg-white text-xs sm:text-sm font-semibold text-neutral-900 placeholder:text-neutral-400 shadow-2xs transition-all focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/15 hover:border-neutral-300"
+                        className="w-full h-10 pl-10 pr-3.5 rounded-xl border border-neutral-200 bg-white text-xs sm:text-sm font-semibold text-neutral-900 placeholder:text-neutral-400 shadow-2xs transition-all focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/15 hover:border-neutral-300"
                       />
                     </div>
                   </div>
@@ -452,7 +444,7 @@ export function AdminListClient({
                         value={createPhone}
                         onChange={(e) => setCreatePhone(e.target.value)}
                         placeholder="Ví dụ: 0987654321"
-                        className="w-full h-10 pl-9.5 pr-3.5 rounded-xl border border-neutral-200 bg-white text-xs sm:text-sm font-semibold text-neutral-900 placeholder:text-neutral-400 shadow-2xs transition-all focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/15 hover:border-neutral-300"
+                        className="w-full h-10 pl-10 pr-3.5 rounded-xl border border-neutral-200 bg-white text-xs sm:text-sm font-semibold text-neutral-900 placeholder:text-neutral-400 shadow-2xs transition-all focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/15 hover:border-neutral-300"
                       />
                     </div>
                   </div>
@@ -657,7 +649,7 @@ export function AdminListClient({
                           onChange={(e) => setEditName(e.target.value)}
                           required
                           placeholder="Ví dụ: Trần Nam"
-                          className="w-full h-10 pl-9.5 pr-3.5 rounded-xl border border-neutral-200 bg-white text-xs sm:text-sm font-semibold text-neutral-900 placeholder:text-neutral-400 shadow-2xs transition-all focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/15 hover:border-neutral-300"
+                          className="w-full h-10 pl-10 pr-3.5 rounded-xl border border-neutral-200 bg-white text-xs sm:text-sm font-semibold text-neutral-900 placeholder:text-neutral-400 shadow-2xs transition-all focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/15 hover:border-neutral-300"
                         />
                       </div>
                     </div>
@@ -678,7 +670,7 @@ export function AdminListClient({
                           type="email"
                           value={editingAdmin.email}
                           disabled
-                          className="w-full h-10 pl-9.5 pr-3.5 rounded-xl border border-neutral-200 bg-neutral-100/70 text-xs sm:text-sm font-medium text-neutral-500 cursor-not-allowed shadow-2xs select-all"
+                          className="w-full h-10 pl-10 pr-3.5 rounded-xl border border-neutral-200 bg-neutral-100/70 text-xs sm:text-sm font-medium text-neutral-500 cursor-not-allowed shadow-2xs select-all"
                         />
                       </div>
                     </div>
@@ -695,7 +687,7 @@ export function AdminListClient({
                           value={editPhone}
                           onChange={(e) => setEditPhone(e.target.value)}
                           placeholder="Ví dụ: 0987654321"
-                          className="w-full h-10 pl-9.5 pr-3.5 rounded-xl border border-neutral-200 bg-white text-xs sm:text-sm font-semibold text-neutral-900 placeholder:text-neutral-400 shadow-2xs transition-all focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/15 hover:border-neutral-300"
+                          className="w-full h-10 pl-10 pr-3.5 rounded-xl border border-neutral-200 bg-white text-xs sm:text-sm font-semibold text-neutral-900 placeholder:text-neutral-400 shadow-2xs transition-all focus:border-rose-500 focus:outline-none focus:ring-2 focus:ring-rose-500/15 hover:border-neutral-300"
                         />
                       </div>
                     </div>
@@ -1039,37 +1031,24 @@ export function AdminListClient({
       <div className="rounded-3xl bg-white shadow-sm border border-neutral-200/70 overflow-hidden">
         {/* Header Toolbar */}
         <div className="p-5 sm:p-6 border-b border-neutral-200/70 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4 bg-gradient-to-r from-rose-50/40 via-white to-rose-50/20">
-          <div className="flex items-center gap-3">
-            <div className="relative flex-1 min-w-[240px] sm:min-w-[300px]">
-              <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400" />
-              <input
-                type="text"
-                placeholder="Tìm kiếm theo tên, email, SĐT, Chat ID..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="w-full h-10 pl-9 pr-8 text-xs font-medium bg-white rounded-xl border border-neutral-200/80 focus:outline-none focus:border-rose-400 focus:ring-2 focus:ring-rose-200/40 transition-all shadow-xs"
-              />
-              {search && (
-                <button
-                  type="button"
-                  onClick={() => setSearch("")}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 p-0.5"
-                >
-                  <X size={14} />
-                </button>
-              )}
-            </div>
-
-            {/* Filter Telegram Notify */}
-            <select
-              value={filterNotify}
-              onChange={(e) => setFilterNotify(e.target.value)}
-              className="h-10 px-3 rounded-xl bg-white border border-neutral-200/80 text-xs font-bold text-neutral-800 focus:outline-none shadow-xs cursor-pointer"
-            >
-              <option value="all">Thông báo Telegram: Tất cả</option>
-              <option value="enabled">🔔 Đang bật báo bot</option>
-              <option value="disabled">🔕 Chưa bật / Chưa nối</option>
-            </select>
+          <div className="relative flex-1 max-w-md">
+            <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400 pointer-events-none" />
+            <input
+              type="text"
+              placeholder="Tìm kiếm theo tên, email, SĐT, Chat ID..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full h-10 pl-10 pr-8 text-xs font-medium bg-white rounded-xl border border-neutral-200/80 focus:outline-none focus:border-rose-400 focus:ring-2 focus:ring-rose-200/40 transition-all shadow-xs"
+            />
+            {search && (
+              <button
+                type="button"
+                onClick={() => setSearch("")}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 p-0.5 cursor-pointer"
+              >
+                <X size={14} />
+              </button>
+            )}
           </div>
 
           <Button

@@ -68,7 +68,7 @@ export default async function CustomerDetailPage({ params }: { params: { id: str
   const email = customer.user?.email;
 
   return (
-    <div className="flex flex-col gap-6 fade-in pb-12">
+    <div className="flex flex-col gap-6 fade-in pb-12 w-full max-w-full min-w-0 overflow-x-hidden">
       {/* ── TOP BREADCRUMB ── */}
       <div>
         <Link
@@ -81,124 +81,146 @@ export default async function CustomerDetailPage({ params }: { params: { id: str
       </div>
 
       {/* ── LUXURY PROFILE HEADER CARD ── */}
-      <div className="relative overflow-hidden rounded-3xl p-6 sm:p-8 border border-rose-200/60 shadow-lg shadow-rose-500/5 bg-gradient-to-br from-white via-[#FFF5F8] to-[#FFE8F0]">
+      <div className="relative overflow-hidden rounded-3xl p-5 sm:p-8 border border-rose-200/70 shadow-lg shadow-rose-500/5 bg-gradient-to-br from-white via-[#FFF5F8] to-[#FFE8F0]">
         <div className="pointer-events-none absolute -right-10 -top-10 h-56 w-56 rounded-full bg-gradient-to-br from-rose-200/40 to-pink-300/20 blur-2xl" />
 
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="flex items-start sm:items-center gap-5">
-            {/* Avatar */}
-            <div className="relative">
-              <div className="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-white p-1.5 shadow-md shadow-rose-500/10 border border-rose-200/80 shrink-0 overflow-hidden flex items-center justify-center">
-                <img src="/logo-200.png" alt="MeowBack" className="w-full h-full object-contain rounded-xl" />
-              </div>
-              <div
-                className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-white shadow-xs ${
-                  customer.status === "active" ? "bg-emerald-500" : "bg-neutral-400"
-                }`}
-                title={customer.status === "active" ? "Đang hoạt động" : "Bị tạm khoá"}
-              />
-            </div>
-
-            {/* Info details */}
-            <div className="flex flex-col gap-1.5 min-w-0">
-              <div className="flex items-center gap-2 flex-wrap">
-                <h1 className="text-2xl sm:text-3xl font-black text-neutral-900 tracking-tight">
-                  {customer.fullName}
-                </h1>
-                {customer.isPartner && (
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100/90 text-emerald-800 text-[11px] font-black uppercase tracking-wider border border-emerald-300/80 shadow-2xs">
-                    <Handshake size={13} strokeWidth={2.5} />
-                    Đối tác
-                  </span>
-                )}
-                <span
-                  className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10.5px] font-black uppercase tracking-wider border ${
-                    customer.status === "active"
-                      ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                      : "bg-rose-50 text-rose-700 border-rose-200"
+        <div className="relative z-10 flex flex-col gap-4 sm:gap-5">
+          {/* 1. Header Row: Avatar + Tên & Trạng thái chính */}
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex items-center gap-3.5 sm:gap-5">
+              {/* Avatar */}
+              <div className="relative shrink-0">
+                <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-white p-1.5 shadow-md shadow-rose-500/10 border-2 border-rose-200/80 overflow-hidden flex items-center justify-center">
+                  <img src="/logo-200.png" alt="MeowBack" className="w-full h-full object-contain rounded-xl" />
+                </div>
+                <div
+                  className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full border-2 border-white shadow-xs ${
+                    customer.status === "active" ? "bg-emerald-500" : "bg-neutral-400"
                   }`}
-                >
-                  <UserCheck size={11} strokeWidth={2.5} />
-                  {customer.status === "active" ? "Hoạt Động" : "Bị Khoá"}
-                </span>
+                  title={customer.status === "active" ? "Đang hoạt động" : "Bị tạm khoá"}
+                />
               </div>
 
-              {/* Chips row */}
-              <div className="flex items-center gap-2 flex-wrap text-xs text-neutral-600 font-semibold pt-1">
-                {/* Customer Code */}
-                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-white/90 border border-neutral-200/90 font-mono font-bold text-neutral-800 shadow-2xs">
-                  Mã: <strong className="text-rose-600">{customer.customerCode}</strong>
-                </span>
-
-                {/* Email */}
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-white/90 border border-neutral-200/90 text-neutral-700 shadow-2xs">
-                  <Mail size={13} className="text-rose-500" />
-                  <span>{email || "Chưa có email"}</span>
-                </span>
-
-                {/* Phone */}
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-white/90 border border-neutral-200/90 text-neutral-700 shadow-2xs">
-                  <Phone size={13} className="text-emerald-600" />
-                  <span>{customer.phone || "Chưa cập nhật SĐT"}</span>
-                </span>
-
-                {/* Registered Date */}
-                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-white/90 border border-neutral-200/90 text-neutral-700 shadow-2xs">
-                  <Calendar size={13} className="text-purple-500" />
-                  <span>Đăng ký: {formatDate(registeredDate)}</span>
-                </span>
-
-                {/* Referrer Source */}
-                {customer.referredBy ? (
-                  <Link
-                    href={`/admin/customers/${customer.referredBy.id}`}
-                    className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 text-xs font-black shadow-2xs transition-colors"
-                  >
-                    <Users size={13} className="text-purple-500" />
-                    <span>Mời bởi: {customer.referredBy.fullName}</span>
-                  </Link>
-                ) : (
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-neutral-100/90 text-neutral-600 border border-neutral-200/80 shadow-2xs">
-                    <Globe size={13} className="text-neutral-400" />
-                    <span>Nguồn: Trực tiếp</span>
-                  </span>
-                )}
-              </div>
-
-              {/* Social Channels (Zalo / Telegram) */}
-              {(customer.zaloUserId || customer.telegramUsername) && (
-                <div className="flex items-center gap-2 flex-wrap pt-1">
-                  {customer.zaloUserId && (
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-blue-50 text-blue-700 border border-blue-200/70 text-[11px] font-bold">
-                      <MessageCircle size={12} className="text-blue-500" />
-                      <span>Zalo ID: {customer.zaloUserId}</span>
-                    </span>
-                  )}
-                  {customer.telegramUsername && (
-                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-sky-50 text-sky-700 border border-sky-200/70 text-[11px] font-bold">
-                      <Send size={12} className="text-sky-500" />
-                      <span>Telegram: @{customer.telegramUsername}</span>
+              {/* Tên & Badges */}
+              <div className="flex flex-col gap-1 min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <h1 className="text-xl sm:text-3xl font-black text-neutral-900 tracking-tight leading-tight">
+                    {customer.fullName}
+                  </h1>
+                  {customer.isPartner && (
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full bg-emerald-100/90 text-emerald-800 text-[10.5px] sm:text-[11px] font-black uppercase tracking-wider border border-emerald-300/80 shadow-2xs shrink-0">
+                      <Handshake size={12} strokeWidth={2.5} />
+                      Đối tác
                     </span>
                   )}
                 </div>
-              )}
+
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span
+                    className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10.5px] font-black uppercase tracking-wider border ${
+                      customer.status === "active"
+                        ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                        : "bg-rose-50 text-rose-700 border-rose-200"
+                    }`}
+                  >
+                    <UserCheck size={11} strokeWidth={2.5} />
+                    {customer.status === "active" ? "Hoạt Động" : "Bị Khoá"}
+                  </span>
+
+                  <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-white/95 border border-neutral-200/90 font-mono font-bold text-neutral-800 text-[11px] shadow-2xs">
+                    Mã: <strong className="text-rose-600 font-extrabold">{customer.customerCode}</strong>
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Quick Actions (Desktop: nằm bên phải trên cùng) */}
+            <div className="hidden sm:flex items-center gap-2.5 shrink-0">
+              <Link
+                href={`/admin/links?q=${customer.customerCode}`}
+                className="inline-flex items-center gap-2 rounded-2xl bg-white px-4 py-2.5 text-xs font-extrabold text-neutral-800 border border-neutral-200/80 shadow-xs hover:bg-rose-50 hover:text-rose-600 transition-colors"
+              >
+                <Link2 size={15} />
+                <span>Xem Link Khách Này</span>
+              </Link>
+              <Link
+                href={`/admin/orders?q=${customer.customerCode}`}
+                className="inline-flex items-center gap-2 rounded-2xl bg-rose-600 px-4 py-2.5 text-xs font-extrabold text-white shadow-md shadow-rose-600/20 hover:bg-rose-700 transition-colors"
+              >
+                <Package size={15} />
+                <span>Xem Đơn Hàng</span>
+              </Link>
             </div>
           </div>
 
-          {/* Quick Actions / Link to Portal */}
-          <div className="flex items-center gap-3 shrink-0">
+          {/* Dải phân cách nhẹ nhàng */}
+          <div className="h-px bg-rose-200/50 w-full" />
+
+          {/* 2. Detail Info Chips (Trải đều full width, không ép lệch cột) */}
+          <div className="flex items-center gap-2 flex-wrap text-xs text-neutral-600 font-semibold">
+            {/* Email */}
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/90 border border-neutral-200/90 text-neutral-700 shadow-2xs max-w-full">
+              <Mail size={13} className="text-rose-500 shrink-0" />
+              <span className="truncate">{email || "Chưa có email"}</span>
+            </span>
+
+            {/* Phone */}
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/90 border border-neutral-200/90 text-neutral-700 shadow-2xs">
+              <Phone size={13} className="text-emerald-600 shrink-0" />
+              <span>{customer.phone || "Chưa cập nhật SĐT"}</span>
+            </span>
+
+            {/* Registered Date */}
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/90 border border-neutral-200/90 text-neutral-700 shadow-2xs">
+              <Calendar size={13} className="text-purple-500 shrink-0" />
+              <span>Đăng ký: {formatDate(registeredDate)}</span>
+            </span>
+
+            {/* Referrer Source */}
+            {customer.referredBy ? (
+              <Link
+                href={`/admin/customers/${customer.referredBy.id}`}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 text-xs font-black shadow-2xs transition-colors"
+              >
+                <Users size={13} className="text-purple-500 shrink-0" />
+                <span>Mời bởi: {customer.referredBy.fullName}</span>
+              </Link>
+            ) : (
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-neutral-100/90 text-neutral-600 border border-neutral-200/80 shadow-2xs">
+                <Globe size={13} className="text-neutral-400 shrink-0" />
+                <span>Nguồn: Trực tiếp</span>
+              </span>
+            )}
+
+            {/* Social Channels (Zalo / Telegram) */}
+            {customer.zaloUserId && (
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-50 text-blue-700 border border-blue-200/70 text-xs font-bold shadow-2xs">
+                <MessageCircle size={13} className="text-blue-500 shrink-0" />
+                <span>Zalo ID: {customer.zaloUserId}</span>
+              </span>
+            )}
+            {customer.telegramUsername && (
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-sky-50 text-sky-700 border border-sky-200/70 text-xs font-bold shadow-2xs">
+                <Send size={13} className="text-sky-500 shrink-0" />
+                <span>Telegram: @{customer.telegramUsername}</span>
+              </span>
+            )}
+          </div>
+
+          {/* 3. Quick Actions (Mobile: 2 nút đều nhau 50-50 ở cuối card) */}
+          <div className="grid grid-cols-2 gap-2.5 sm:hidden pt-1">
             <Link
               href={`/admin/links?q=${customer.customerCode}`}
-              className="inline-flex items-center gap-2 rounded-2xl bg-white px-4 py-2.5 text-xs font-extrabold text-neutral-800 border border-neutral-200/80 shadow-xs hover:bg-rose-50 hover:text-rose-600 transition-colors"
+              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-3 py-2.5 text-xs font-extrabold text-neutral-800 border border-neutral-200/90 shadow-2xs hover:bg-rose-50 hover:text-rose-600 transition-colors text-center"
             >
-              <Link2 size={15} />
-              <span>Xem Link Khách Này</span>
+              <Link2 size={14} className="shrink-0" />
+              <span>Xem Link</span>
             </Link>
             <Link
               href={`/admin/orders?q=${customer.customerCode}`}
-              className="inline-flex items-center gap-2 rounded-2xl bg-rose-600 px-4 py-2.5 text-xs font-extrabold text-white shadow-md shadow-rose-600/20 hover:bg-rose-700 transition-colors"
+              className="inline-flex items-center justify-center gap-2 rounded-2xl bg-rose-600 px-3 py-2.5 text-xs font-extrabold text-white shadow-md shadow-rose-600/20 hover:bg-rose-700 transition-colors text-center"
             >
-              <Package size={15} />
+              <Package size={14} className="shrink-0" />
               <span>Xem Đơn Hàng</span>
             </Link>
           </div>
@@ -360,18 +382,18 @@ export default async function CustomerDetailPage({ params }: { params: { id: str
       })()}
 
       {/* ── CẤU HÌNH ĐỐI TÁC & GIỚI THIỆU ── */}
-      <div className="rounded-3xl bg-white p-6 sm:p-7 shadow-sm border border-neutral-200/80 flex flex-col gap-5">
-        <div className="flex items-center justify-between border-b border-neutral-100 pb-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-600 border border-emerald-100 shadow-2xs">
+      <div className="rounded-3xl bg-white p-4 sm:p-7 shadow-sm border border-neutral-200/80 flex flex-col gap-5">
+        <div className="flex items-center justify-between gap-3 border-b border-neutral-100 pb-4">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-10 h-10 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-600 border border-emerald-100 shadow-2xs shrink-0">
               <Handshake size={20} />
             </div>
-            <div>
-              <h2 className="text-base font-extrabold text-neutral-900 tracking-tight">Đối Tác &amp; Giới Thiệu (Affiliate Partner)</h2>
-              <p className="text-xs text-neutral-500 font-medium">Thiết lập quan hệ giới thiệu và hoa hồng trọn đời</p>
+            <div className="min-w-0">
+              <h2 className="text-sm sm:text-base font-extrabold text-neutral-900 tracking-tight truncate sm:whitespace-normal">Đối Tác &amp; Giới Thiệu (Affiliate Partner)</h2>
+              <p className="text-xs text-neutral-500 font-medium truncate sm:whitespace-normal">Thiết lập quan hệ giới thiệu và hoa hồng trọn đời</p>
             </div>
           </div>
-          <span className="text-[10px] font-black uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-xl border border-emerald-200">
+          <span className="text-[10px] font-black uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-xl border border-emerald-200 whitespace-nowrap shrink-0">
             Referral Policy
           </span>
         </div>
@@ -396,18 +418,18 @@ export default async function CustomerDetailPage({ params }: { params: { id: str
       </div>
 
       {/* ── HOẠT ĐỘNG: LINK AFFILIATE GẦN ĐÂY ── */}
-      <div className="rounded-3xl bg-white p-6 sm:p-7 shadow-sm border border-neutral-200/80 flex flex-col gap-4">
-        <div className="flex items-center justify-between border-b border-neutral-100 pb-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-purple-50 flex items-center justify-center text-purple-600 border border-purple-100 shadow-2xs">
+      <div className="rounded-3xl bg-white p-4 sm:p-7 shadow-sm border border-neutral-200/80 flex flex-col gap-4">
+        <div className="flex items-center justify-between gap-3 border-b border-neutral-100 pb-4">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-10 h-10 rounded-2xl bg-purple-50 flex items-center justify-center text-purple-600 border border-purple-100 shadow-2xs shrink-0">
               <Link2 size={20} />
             </div>
-            <div>
-              <h2 className="text-base font-extrabold text-neutral-900 tracking-tight">Link Affiliate Gần Đây</h2>
-              <p className="text-xs text-neutral-500 font-medium">Danh sách các liên kết sản phẩm khách đã tạo để mua sắm</p>
+            <div className="min-w-0">
+              <h2 className="text-sm sm:text-base font-extrabold text-neutral-900 tracking-tight truncate sm:whitespace-normal">Link Affiliate Gần Đây</h2>
+              <p className="text-xs text-neutral-500 font-medium truncate sm:whitespace-normal">Danh sách các liên kết sản phẩm khách đã tạo để mua sắm</p>
             </div>
           </div>
-          <span className="text-xs font-bold text-neutral-500 bg-neutral-100 px-3 py-1 rounded-xl">
+          <span className="text-xs font-bold text-neutral-600 bg-neutral-100 px-3 py-1.5 rounded-xl whitespace-nowrap shrink-0">
             {customer.trackingLinks.length} link gần nhất
           </span>
         </div>
@@ -462,18 +484,18 @@ export default async function CustomerDetailPage({ params }: { params: { id: str
       </div>
 
       {/* ── HOẠT ĐỘNG: ĐƠN HÀNG GẦN ĐÂY ── */}
-      <div className="rounded-3xl bg-white p-6 sm:p-7 shadow-sm border border-neutral-200/80 flex flex-col gap-4">
-        <div className="flex items-center justify-between border-b border-neutral-100 pb-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600 border border-blue-100 shadow-2xs">
+      <div className="rounded-3xl bg-white p-4 sm:p-7 shadow-sm border border-neutral-200/80 flex flex-col gap-4">
+        <div className="flex items-center justify-between gap-3 border-b border-neutral-100 pb-4">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-10 h-10 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600 border border-blue-100 shadow-2xs shrink-0">
               <ShoppingBag size={20} />
             </div>
-            <div>
-              <h2 className="text-base font-extrabold text-neutral-900 tracking-tight">Lịch Sử Đơn Hàng Hoàn Tiền</h2>
-              <p className="text-xs text-neutral-500 font-medium">Các đơn hàng phát sinh hoa hồng được đối soát từ sàn</p>
+            <div className="min-w-0">
+              <h2 className="text-sm sm:text-base font-extrabold text-neutral-900 tracking-tight truncate sm:whitespace-normal">Lịch Sử Đơn Hàng Hoàn Tiền</h2>
+              <p className="text-xs text-neutral-500 font-medium truncate sm:whitespace-normal">Các đơn hàng phát sinh hoa hồng được đối soát từ sàn</p>
             </div>
           </div>
-          <span className="text-xs font-bold text-neutral-500 bg-neutral-100 px-3 py-1 rounded-xl">
+          <span className="text-xs font-bold text-neutral-600 bg-neutral-100 px-3 py-1.5 rounded-xl whitespace-nowrap shrink-0">
             {customer.orders.length} đơn hàng gần nhất
           </span>
         </div>
@@ -539,18 +561,18 @@ export default async function CustomerDetailPage({ params }: { params: { id: str
       </div>
 
       {/* ── LỊCH SỬ PHIẾU CHI / RÚT TIỀN ── */}
-      <div className="rounded-3xl bg-white p-6 sm:p-7 shadow-sm border border-neutral-200/80 flex flex-col gap-4">
-        <div className="flex items-center justify-between border-b border-neutral-100 pb-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-600 border border-emerald-100 shadow-2xs">
+      <div className="rounded-3xl bg-white p-4 sm:p-7 shadow-sm border border-neutral-200/80 flex flex-col gap-4">
+        <div className="flex items-center justify-between gap-3 border-b border-neutral-100 pb-4">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-10 h-10 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-600 border border-emerald-100 shadow-2xs shrink-0">
               <CreditCard size={20} />
             </div>
-            <div>
-              <h2 className="text-base font-extrabold text-neutral-900 tracking-tight">Lịch Sử Phiếu Chi / Rút Tiền</h2>
-              <p className="text-xs text-neutral-500 font-medium">Các đợt chuyển khoản hoàn tiền đã quyết toán cho khách</p>
+            <div className="min-w-0">
+              <h2 className="text-sm sm:text-base font-extrabold text-neutral-900 tracking-tight truncate sm:whitespace-normal">Lịch Sử Phiếu Chi / Rút Tiền</h2>
+              <p className="text-xs text-neutral-500 font-medium truncate sm:whitespace-normal">Các đợt chuyển khoản hoàn tiền đã quyết toán cho khách</p>
             </div>
           </div>
-          <span className="text-xs font-bold text-neutral-500 bg-neutral-100 px-3 py-1 rounded-xl">
+          <span className="text-xs font-bold text-neutral-600 bg-neutral-100 px-3 py-1.5 rounded-xl whitespace-nowrap shrink-0">
             {customer.paymentBatches.length} phiếu chi
           </span>
         </div>

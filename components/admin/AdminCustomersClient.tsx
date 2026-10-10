@@ -275,7 +275,7 @@ export function AdminCustomersClient({
                       }`}
                       title="Click để đổi chiều sắp xếp theo tên"
                     >
-                      <span>Khách hàng &amp; Email</span>
+                      <span>Khách hàng</span>
                       {currentSort === "fullName" ? (
                         currentOrder === "asc" ? (
                           <ArrowUp size={13} className="text-rose-600 shrink-0" />
@@ -358,7 +358,7 @@ export function AdminCustomersClient({
               <tbody>
                 {customers.map((c) => (
                   <Tr key={c.id}>
-                    <Td>
+                    <Td data-label="">
                       <div className="flex items-start gap-2.5">
                         <div className="w-8 h-8 rounded-xl bg-white p-0.5 border border-rose-200/80 flex items-center justify-center shrink-0 shadow-2xs mt-0.5 overflow-hidden">
                           <img src="/icon-512.png" alt="MeowBack" className="w-full h-full object-contain rounded-lg" />
@@ -382,7 +382,7 @@ export function AdminCustomersClient({
                             )}
                           </div>
                           {c.email ? (
-                            <span className="flex items-center gap-1 text-[11px] text-neutral-500 font-medium truncate max-w-[200px]" title={c.email}>
+                            <span className="flex items-center gap-1 text-[11px] text-neutral-500 font-medium truncate max-w-[280px] sm:max-w-[320px]" title={c.email}>
                               <Mail size={11} className="text-neutral-400 shrink-0" />
                               <span className="truncate">{c.email}</span>
                             </span>

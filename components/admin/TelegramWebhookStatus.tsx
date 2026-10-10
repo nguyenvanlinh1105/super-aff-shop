@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { RefreshCw, CheckCircle2, XCircle, Loader2 } from "lucide-react";
+import { CheckCircle2, XCircle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
@@ -65,11 +65,15 @@ export function TelegramWebhookStatus() {
 
   return (
     <Card variant="soft">
-      <div className="mb-lg flex items-center justify-between">
+      <div className="mb-lg flex items-center justify-between gap-3">
         <h2 className="display-xs">Trạng thái kết nối bot</h2>
-        <Button variant="tertiary" onClick={loadInfo} disabled={loading} className="gap-sm px-md py-xs text-[13px]">
-          <RefreshCw size={14} strokeWidth={1.75} className={loading ? "animate-spin" : ""} />
-          Làm mới
+        <Button
+          variant="tertiary"
+          onClick={loadInfo}
+          disabled={loading}
+          className="px-md py-xs text-[13px] whitespace-nowrap shrink-0"
+        >
+          {loading ? "Đang tải..." : "Làm mới"}
         </Button>
       </div>
 
