@@ -24,7 +24,7 @@ export default async function AdminCommunityPage() {
       where: { createdAt: { gte: startOfDay } },
     }),
     prisma.notification.count(),
-    prisma.customer.count(),
+    prisma.customer.count({ where: { customerCode: { not: "SYSTEM" } } }),
   ]);
 
   const activeTodayCount = activeTodayUsers.length;

@@ -30,6 +30,20 @@ export default async function AdminDashboardPage() {
   const startOfMonth = new Date(currentYear, now.getMonth(), 1);
   const endOfMonth = new Date(currentYear, now.getMonth() + 1, 0, 23, 59, 59, 999);
 
+  // Dọn dẹp tài khoản SYSTEM (Link chia sẻ công khai) nếu còn sót trên database production
+  try {
+    const sysCust = await prisma.customer.findUnique({
+      where: { customerCode: "SYSTEM" },
+      select: { id: true },
+    });
+    if (sysCust) {
+      await prisma.trackingLink.deleteMany({ where: { customerId: sysCust.id } });
+      await prisma.customer.delete({ where: { id: sysCust.id } });
+    }
+  } catch {
+    // ignore
+  }
+
   const [
     totalCustomers,
     totalLinks,
@@ -46,7 +60,7 @@ export default async function AdminDashboardPage() {
     topReferrersAllTimeRaw,
     totalReferralsThisMonth,
   ] = await Promise.all([
-    prisma.customer.count(),
+    prisma.customer.count({ where: { customerCode: { not: "SYSTEM" } } }),
     prisma.trackingLink.count(),
     prisma.order.count(),
     prisma.order.aggregate({ _sum: { commissionAmount: true } }),
@@ -95,6 +109,7 @@ export default async function AdminDashboardPage() {
     }),
     prisma.customer.count({
       where: {
+        customerCode: { not: "SYSTEM" },
         referredById: { not: null },
         createdAt: { gte: startOfMonth, lte: endOfMonth },
       },
