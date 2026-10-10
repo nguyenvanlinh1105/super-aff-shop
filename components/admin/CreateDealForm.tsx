@@ -4,14 +4,17 @@ import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import {
   Search, Upload, X, CheckCircle2, AlertCircle, Loader2,
-  Tag, DollarSign, ImageIcon, ExternalLink, Flame, Plus
+  Tag, DollarSign, ImageIcon, ExternalLink, Flame, Plus, Copy
 } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/Button";
 import { TextInput } from "@/components/ui/TextInput";
 import { CustomSelect } from "@/components/ui/CustomSelect";
 import { DEAL_CATEGORIES } from "@/lib/dealCategories";
 import { DEAL_LINK_TYPES, type DealLinkType } from "@/lib/dealLinkTypes";
 import { dealExpiryEndOfDay } from "@/lib/dealExpiry";
+import { formatVND, formatNumberInput, parseNumberInput } from "@/lib/format";
+import { useToast } from "@/components/ui/Toast";
 
 type ResolveResult = {
   rawInputLink: string;
@@ -25,9 +28,13 @@ type ResolveResult = {
 
 export function CreateDealForm() {
   const router = useRouter();
+  const { toast } = useToast();
   const [open, setOpen] = useState(false);
-  const [step, setStep] = useState<1 | 2 | 3>(1); // 3 = success
-  const [createdShortUrl, setCreatedShortUrl] = useState<string | null>(null);
+  const [step, setStep] = useState<1 | 2>(1);
+  const [successModal, setSuccessModal] = useState<{
+    title: string;
+    shortUrl: string;
+  } | null>(null);
   const [copied, setCopied] = useState(false);
 
   // Step 1
@@ -52,6 +59,55 @@ export function CreateDealForm() {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
+  function calculateDiscount(origVal: string, saleVal: string): string {
+    const orig = parseFloat(origVal);
+    const sale = parseFloat(saleVal);
+    if (!isNaN(orig) && orig > 0 && !isNaN(sale) && sale > 0) {
+      if (orig > sale) {
+        const pct = Math.round(((orig - sale) / orig) * 100);
+        return Math.min(100, Math.max(0, pct)).toString();
+      }
+      return "0";
+    }
+    return "";
+  }
+
+  function handleOriginalPriceChange(val: string) {
+    setOriginalPrice(val);
+    if (!val.trim()) {
+      setDiscountPercent("");
+      return;
+    }
+    if (salePrice.trim()) {
+      const pct = calculateDiscount(val, salePrice);
+      if (pct !== "") setDiscountPercent(pct);
+    }
+  }
+
+  function handleSalePriceChange(val: string) {
+    setSalePrice(val);
+    if (!val.trim()) {
+      setDiscountPercent("");
+      return;
+    }
+    if (originalPrice.trim()) {
+      const pct = calculateDiscount(originalPrice, val);
+      if (pct !== "") setDiscountPercent(pct);
+    }
+  }
+
+  function handleDiscountPercentChange(val: string) {
+    setDiscountPercent(val);
+    const pct = parseFloat(val);
+    const orig = parseFloat(originalPrice);
+    if (!isNaN(orig) && orig > 0 && !isNaN(pct) && pct >= 0 && pct <= 100) {
+      if (!salePrice.trim()) {
+        const calcSale = Math.round(orig * (1 - pct / 100));
+        setSalePrice(calcSale.toString());
+      }
+    }
+  }
+
   async function handleResolve() {
     if (!inputUrl.trim()) return;
     setResolving(true);
@@ -66,6 +122,9 @@ export function CreateDealForm() {
       const data = await res.json();
       setResolved(data);
       setTitle(data.productTitle || "");
+      if (data.price) {
+        setSalePrice(String(data.price));
+      }
       setStep(2);
     } catch (e: any) {
       setResolveError(e.message || "Lỗi phân tích link");
@@ -111,12 +170,41 @@ export function CreateDealForm() {
     setSubmitting(false);
     if (!res.ok) {
       const d = await res.json().catch(() => ({}));
-      setSubmitError(d.error || "Có lỗi xảy ra");
+      const errMsg = d.error || "Có lỗi xảy ra khi tạo deal";
+      setSubmitError(errMsg);
+      toast.error(errMsg, "Lỗi đăng deal");
       return;
     }
     const data = await res.json();
-    setCreatedShortUrl(data.deal?.shortUrl || null);
-    setStep(3);
+    const shortUrl = data.deal?.shortUrl || resolved.shortUrl;
+    const dealTitle = data.deal?.title || title;
+
+    // Giữ form mở nhưng reset toàn bộ về ô nhập ban đầu (Bước 1)
+    setOpen(true);
+    setStep(1);
+    setInputUrl("");
+    setResolved(null);
+    setTitle("");
+    setDescription("");
+    setOriginalPrice("");
+    setSalePrice("");
+    setDiscountPercent("");
+    setCategory("");
+    setLinkType("product");
+    setExpiresAt("");
+    setImageFile(null);
+    setImagePreview(null);
+    setCopied(false);
+    setShortUrlCopied(false);
+    setResolveError(null);
+    setSubmitError(null);
+
+    // Mở popup thông báo thành công
+    setSuccessModal({
+      title: dealTitle,
+      shortUrl: shortUrl || "",
+    });
+    toast.success("Deal đã được đăng thành công! 🐾", "Đăng deal thành công");
     router.refresh();
   }
 
@@ -135,7 +223,6 @@ export function CreateDealForm() {
     setExpiresAt("");
     setImageFile(null);
     setImagePreview(null);
-    setCreatedShortUrl(null);
     setCopied(false);
     setShortUrlCopied(false);
     setResolveError(null);
@@ -144,87 +231,44 @@ export function CreateDealForm() {
 
   const displayImage = imagePreview || resolved?.shopeeImageUrl;
 
-  if (!open) {
-    return (
-      <Button variant="primary" onClick={() => setOpen(true)} className="shadow-cute">
-        <Plus size={18} strokeWidth={2} className="mr-1" />
-        Thêm Deal Mới
-      </Button>
-    );
-  }
-
   return (
-    <div className="rounded-3xl bg-white shadow-cute border border-primary-100/80 overflow-hidden mb-lg">
-      {/* Header */}
-      <div className="flex items-center justify-between px-xl py-lg border-b border-primary-100/80 bg-gradient-to-r from-primary-50/80 via-primary-50 to-pink-50">
-        <div className="flex items-center gap-sm">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary-100 text-primary-600">
-            <Flame size={18} strokeWidth={2} />
-          </div>
-          <div>
-            <h3 className="text-[15px] font-bold text-neutral-900">Thêm Deal Mới</h3>
-            <p className="text-[12px] text-neutral-500">
-              {step === 1 ? "Bước 1: Dán link deal vào đây" : step === 2 ? "Bước 2: Điền thông tin và đăng" : "✅ Đăng deal thành công!"}
-            </p>
-          </div>
-        </div>
-        <div className="flex items-center gap-sm">
-          {/* Step indicator */}
-          <div className="flex items-center gap-1 mr-md">
-            {step < 3 && [1, 2].map((s) => (
-              <div key={s} className={`h-2 w-8 rounded-full transition-colors ${step >= s ? "bg-primary-500" : "bg-neutral-200"}`} />
-            ))}
-            {step === 3 && <div className="h-2 w-16 rounded-full bg-emerald-500" />}
-          </div>
-          <button onClick={resetForm} className="h-8 w-8 flex items-center justify-center rounded-xl text-neutral-400 hover:bg-neutral-100 hover:text-neutral-900 transition-colors">
-            <X size={18} />
-          </button>
-        </div>
-      </div>
-
-      <div className="p-xl">
-        {/* ═══ STEP 3: SUCCESS ═══ */}
-        {step === 3 && (
-          <div className="flex flex-col items-center gap-lg py-lg text-center">
-            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-emerald-50 border border-emerald-100">
-              <CheckCircle2 size={40} className="text-emerald-500" strokeWidth={1.75} />
-            </div>
-            <div>
-              <h3 className="text-[18px] font-black text-neutral-900">Deal đã được đăng!</h3>
-              <p className="text-[13px] text-neutral-500 mt-xs">Link dưới đây dùng tên miền của bạn, đích đến vẫn là Shopee.</p>
-            </div>
-
-            {createdShortUrl && (
-              <div className="w-full rounded-2xl bg-neutral-50 border border-primary-100/80 p-lg flex flex-col sm:flex-row items-center gap-sm">
-                <div className="flex-1 min-w-0">
-                  <div className="text-[11px] font-bold uppercase tracking-wider text-neutral-400 mb-1">Link deal (tên miền của bạn)</div>
-                  <div className="text-[14px] font-bold text-neutral-900 break-all">{createdShortUrl}</div>
-                </div>
-                <button
-                  onClick={() => {
-                    navigator.clipboard.writeText(createdShortUrl);
-                    setCopied(true);
-                    setTimeout(() => setCopied(false), 2000);
-                  }}
-                  className={`shrink-0 flex items-center gap-xs rounded-xl px-md py-sm text-[13px] font-bold transition-all ${
-                    copied ? "bg-emerald-500 text-white" : "bg-primary-500 text-white hover:bg-primary-600"
-                  }`}
-                >
-                  {copied ? "✓ Đã copy!" : "Copy link"}
-                </button>
-              </div>
-            )}
-
+    <>
+      {!open ? (
+        <Button variant="primary" onClick={() => setOpen(true)} className="shadow-cute">
+          <Plus size={18} strokeWidth={2} className="mr-1" />
+          Thêm Deal Mới
+        </Button>
+      ) : (
+        <div className="rounded-3xl bg-white shadow-cute border border-primary-100/80 overflow-hidden mb-lg">
+          {/* Header */}
+          <div className="flex items-center justify-between px-xl py-lg border-b border-primary-100/80 bg-gradient-to-r from-primary-50/80 via-primary-50 to-pink-50">
             <div className="flex items-center gap-sm">
-              <Button variant="tertiary" onClick={resetForm}>Đóng</Button>
-              <Button onClick={() => { setStep(1); setResolved(null); setInputUrl(""); setTitle(""); setOriginalPrice(""); setSalePrice(""); setDiscountPercent(""); setImageFile(null); setImagePreview(null); setCreatedShortUrl(null); setCopied(false); }}>
-                + Thêm deal khác
-              </Button>
+              <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary-100 text-primary-600">
+                <Flame size={18} strokeWidth={2} />
+              </div>
+              <div>
+                <h3 className="text-[15px] font-bold text-neutral-900">Thêm Deal Mới</h3>
+                <p className="text-[12px] text-neutral-500">
+                  {step === 1 ? "Bước 1: Dán link deal vào đây" : "Bước 2: Điền thông tin và đăng"}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-sm">
+              {/* Step indicator */}
+              <div className="flex items-center gap-1 mr-md">
+                {[1, 2].map((s) => (
+                  <div key={s} className={`h-2 w-8 rounded-full transition-colors ${step >= s ? "bg-primary-500" : "bg-neutral-200"}`} />
+                ))}
+              </div>
+              <button onClick={resetForm} className="h-8 w-8 flex items-center justify-center rounded-xl text-neutral-400 hover:bg-neutral-100 hover:text-neutral-900 transition-colors">
+                <X size={18} />
+              </button>
             </div>
           </div>
-        )}
-        {/* ═══ STEP 1: Dán link ═══ */}
-        {step === 1 && (
+
+          <div className="p-xl">
+            {/* ═══ STEP 1: Dán link ═══ */}
+            {step === 1 && (
           <div className="flex flex-col gap-lg">
             <div className="rounded-2xl bg-amber-50 border border-amber-100 p-md flex gap-sm">
               <AlertCircle size={16} className="text-amber-500 shrink-0 mt-0.5" />
@@ -382,39 +426,56 @@ export function CreateDealForm() {
                 {/* Pricing */}
                 <div className="grid grid-cols-3 gap-md">
                   <div className="flex flex-col gap-xs">
-                    <label className="text-[12px] font-bold text-neutral-600 uppercase tracking-wide flex items-center gap-1">
-                      <DollarSign size={11} /> Giá gốc
+                    <label className="text-[12px] font-bold text-neutral-600 uppercase tracking-wide flex items-center justify-between">
+                      <span className="flex items-center gap-1"><DollarSign size={11} /> Giá gốc</span>
+                      {originalPrice && (
+                        <span className="text-[11px] font-black text-neutral-500 lowercase">
+                          {formatVND(originalPrice)}
+                        </span>
+                      )}
                     </label>
                     <TextInput
-                      type="number"
-                      placeholder="500000"
-                      value={originalPrice}
-                      onChange={(e) => setOriginalPrice(e.target.value)}
-                      className="bg-neutral-50"
+                      type="text"
+                      inputMode="numeric"
+                      placeholder="500.000"
+                      value={formatNumberInput(originalPrice)}
+                      onChange={(e) => handleOriginalPriceChange(parseNumberInput(e.target.value))}
+                      className="bg-neutral-50 font-semibold"
                     />
                   </div>
                   <div className="flex flex-col gap-xs">
-                    <label className="text-[12px] font-bold text-primary-600 uppercase tracking-wide flex items-center gap-1">
-                      <DollarSign size={11} /> Giá sale
+                    <label className="text-[12px] font-bold text-primary-600 uppercase tracking-wide flex items-center justify-between">
+                      <span className="flex items-center gap-1"><DollarSign size={11} /> Giá sale</span>
+                      {salePrice && (
+                        <span className="text-[11px] font-black text-primary-600 lowercase">
+                          {formatVND(salePrice)}
+                        </span>
+                      )}
                     </label>
                     <TextInput
-                      type="number"
-                      placeholder="250000"
-                      value={salePrice}
-                      onChange={(e) => setSalePrice(e.target.value)}
-                      className="bg-primary-50/50 border-primary-200"
+                      type="text"
+                      inputMode="numeric"
+                      placeholder="250.000"
+                      value={formatNumberInput(salePrice)}
+                      onChange={(e) => handleSalePriceChange(parseNumberInput(e.target.value))}
+                      className="bg-primary-50/50 border-primary-200 font-semibold text-primary-700"
                     />
                   </div>
                   <div className="flex flex-col gap-xs">
-                    <label className="text-[12px] font-bold text-neutral-600 uppercase tracking-wide flex items-center gap-1">
-                      <Tag size={11} /> % Giảm
-                    </label>
+                    <div className="flex items-center justify-between">
+                      <label className="text-[12px] font-bold text-neutral-600 uppercase tracking-wide flex items-center gap-1">
+                        <Tag size={11} /> % Giảm
+                      </label>
+                      <span className="text-[10px] text-primary-600 font-bold bg-primary-50 px-1.5 py-0.5 rounded-full border border-primary-100">
+                        Tự tính
+                      </span>
+                    </div>
                     <TextInput
                       type="number"
-                      placeholder="50"
+                      placeholder="VD: 50"
                       value={discountPercent}
-                      onChange={(e) => setDiscountPercent(e.target.value)}
-                      className="bg-neutral-50"
+                      onChange={(e) => handleDiscountPercentChange(e.target.value)}
+                      className="bg-neutral-50 font-bold text-primary-600"
                     />
                   </div>
                 </div>
@@ -521,5 +582,123 @@ export function CreateDealForm() {
         )}
       </div>
     </div>
+  )}
+
+      {/* ═══ POPUP MODAL THÀNH CÔNG ═══ */}
+      <AnimatePresence>
+        {successModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 12 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 12 }}
+              transition={{ duration: 0.2, ease: "easeOut" }}
+              className="relative w-full max-w-lg rounded-3xl bg-white shadow-2xl border border-primary-100/80 overflow-hidden flex flex-col"
+            >
+              {/* Modal Header */}
+              <div className="relative px-6 pt-6 pb-4 bg-gradient-to-br from-emerald-50 via-teal-50/40 to-primary-50/30 border-b border-emerald-100/60 flex flex-col items-center text-center">
+                <button
+                  type="button"
+                  onClick={() => setSuccessModal(null)}
+                  className="absolute right-4 top-4 h-8 w-8 flex items-center justify-center rounded-full text-neutral-400 hover:bg-white/80 hover:text-neutral-700 transition-colors"
+                >
+                  <X size={18} />
+                </button>
+
+                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-400 to-teal-500 text-white shadow-lg shadow-emerald-500/25 mb-3">
+                  <CheckCircle2 size={34} strokeWidth={2.5} />
+                </div>
+                <h3 className="text-xl font-black text-neutral-900">
+                  Đăng Deal Thành Công! 🎉
+                </h3>
+                <p className="text-[13px] text-neutral-500 mt-1 max-w-sm">
+                  Deal đã được lưu và hệ thống đã làm mới ô nhập để bạn tiếp tục đăng deal tiếp theo!
+                </p>
+              </div>
+
+              {/* Modal Body */}
+              <div className="p-6 flex flex-col gap-4">
+                {/* Tiêu đề deal */}
+                <div className="rounded-2xl bg-neutral-50 p-3.5 border border-neutral-100">
+                  <div className="text-[11px] font-bold text-neutral-400 uppercase tracking-wider mb-1 flex items-center gap-1">
+                    <Flame size={12} className="text-amber-500" /> Tiêu đề deal vừa đăng
+                  </div>
+                  <div className="text-[13px] font-bold text-neutral-800 line-clamp-2">
+                    {successModal.title}
+                  </div>
+                </div>
+
+                {/* Short link affiliate */}
+                {successModal.shortUrl && (
+                  <div className="rounded-2xl bg-gradient-to-br from-primary-50/70 to-pink-50/40 p-4 border border-primary-100 flex flex-col gap-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] font-bold uppercase tracking-wider text-primary-600">
+                        Link deal (Tên miền của bạn)
+                      </span>
+                      <span className="text-[10px] font-semibold text-neutral-400">
+                        Shopee Affiliate
+                      </span>
+                    </div>
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                      <input
+                        type="text"
+                        readOnly
+                        value={successModal.shortUrl}
+                        className="flex-1 bg-white border border-primary-200/80 rounded-xl px-3 py-2 text-[13px] font-bold text-neutral-900 select-all focus:outline-none min-w-0"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          navigator.clipboard.writeText(successModal.shortUrl);
+                          setCopied(true);
+                          toast.success("Đã copy link rút gọn vào clipboard! 📋");
+                          setTimeout(() => setCopied(false), 2000);
+                        }}
+                        className={`flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl text-[13px] font-bold transition-all shadow-xs shrink-0 ${
+                          copied
+                            ? "bg-emerald-500 text-white"
+                            : "bg-primary-500 hover:bg-primary-600 text-white active:scale-95"
+                        }`}
+                      >
+                        {copied ? (
+                          <>
+                            <CheckCircle2 size={15} /> Đã copy!
+                          </>
+                        ) : (
+                          <>
+                            <Copy size={15} /> Copy link
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Footer Buttons */}
+                <div className="flex items-center justify-end gap-2 pt-2 border-t border-neutral-100">
+                  {successModal.shortUrl && (
+                    <a
+                      href={successModal.shortUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-neutral-200 text-neutral-700 hover:bg-neutral-50 text-[13px] font-bold transition-colors"
+                    >
+                      <ExternalLink size={14} /> Mở xem thử
+                    </a>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => setSuccessModal(null)}
+                    className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary-500 to-pink-500 hover:from-primary-600 hover:to-pink-600 text-white font-bold text-[13px] shadow-sm hover:shadow transition-all active:scale-95"
+                  >
+                    + Tiếp tục đăng deal khác 🐾
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+    </>
   );
 }

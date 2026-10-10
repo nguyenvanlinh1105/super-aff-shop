@@ -39,7 +39,8 @@ function extractJsonLdPrice(html: string): number | null {
               for (const offer of offerList) {
                 const price = offer.price ?? offer.lowPrice ?? offer.highPrice;
                 if (price != null) {
-                  const parsed = parseFloat(String(price).replace(/[^0-9.]/g, ""));
+                  const clean = String(price).replace(/[^0-9]/g, "");
+                  const parsed = parseInt(clean, 10);
                   if (!isNaN(parsed) && parsed > 0) return parsed;
                 }
               }
@@ -117,7 +118,8 @@ function extractImageSrcByClass(html: string, classNames: string[]): string | nu
 function extractPriceByClass(html: string, classNames: string[]): number | null {
   const text = extractTextByClass(html, classNames);
   if (!text) return null;
-  const parsed = parseFloat(text.replace(/[^0-9.]/g, ""));
+  const clean = text.replace(/[^0-9]/g, "");
+  const parsed = parseInt(clean, 10);
   return !isNaN(parsed) && parsed > 0 ? parsed : null;
 }
 

@@ -63,7 +63,16 @@ export async function fetchShopeeProductDetail(url: string): Promise<ShopeeProdu
     if (!item) return null;
 
     const rawPrice = typeof item.price_min === "number" ? item.price_min : item.price;
-    const price = typeof rawPrice === "number" ? Math.round(rawPrice / 100000) : null;
+    let price: number | null = null;
+    if (typeof rawPrice === "number" && rawPrice > 0) {
+      if (rawPrice >= 1000000000) {
+        price = Math.round(rawPrice / 100000);
+      } else if (rawPrice >= 10000000 && rawPrice % 100000 === 0) {
+        price = Math.round(rawPrice / 100000);
+      } else {
+        price = Math.round(rawPrice);
+      }
+    }
     const sold =
       typeof item.historical_sold === "number"
         ? item.historical_sold

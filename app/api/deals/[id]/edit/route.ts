@@ -26,14 +26,21 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     uploadedImageUrl = await saveOptimizedImage(imageFile, "deals");
   }
 
+  const numOrig = originalPrice ? parseFloat(originalPrice) : null;
+  const numSale = salePrice ? parseFloat(salePrice) : null;
+  let finalDiscount = discountPercent ? parseInt(discountPercent) : null;
+  if (finalDiscount === null && numOrig && numSale && numOrig > numSale) {
+    finalDiscount = Math.round(((numOrig - numSale) / numOrig) * 100);
+  }
+
   const deal = await prisma.dealPost.update({
     where: { id: params.id },
     data: {
       title,
       description: description || null,
-      originalPrice: originalPrice ? parseFloat(originalPrice) : null,
-      salePrice: salePrice ? parseFloat(salePrice) : null,
-      discountPercent: discountPercent ? parseInt(discountPercent) : null,
+      originalPrice: numOrig,
+      salePrice: numSale,
+      discountPercent: finalDiscount,
       category: category || null,
       ...(linkType ? { linkType } : {}),
       expiresAt: expiresAt ? new Date(expiresAt) : null,

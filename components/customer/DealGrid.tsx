@@ -35,8 +35,10 @@ export type Deal = {
   createdAt: string;
 };
 
-function formatPrice(n: number) {
-  return new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(n);
+import { formatVND } from "@/lib/format";
+
+function formatPrice(n: number | null | undefined) {
+  return formatVND(n);
 }
 
 function calculateEstimatedCashback(salePrice: number | null, discountPercent: number | null): number {

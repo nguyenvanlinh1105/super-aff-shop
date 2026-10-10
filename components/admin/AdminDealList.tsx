@@ -22,7 +22,7 @@ import {
   Layers,
   Search,
 } from "lucide-react";
-import { formatCurrency } from "@/lib/format";
+import { formatCurrency, formatVND, formatNumberInput, parseNumberInput } from "@/lib/format";
 import { TextInput } from "@/components/ui/TextInput";
 import { Button } from "@/components/ui/Button";
 import { useModal } from "@/components/ui/ModalProvider";
@@ -138,6 +138,55 @@ function EditDealModal({
   const fileRef = useRef<HTMLInputElement>(null);
 
   const displayImage = imagePreview || deal.uploadedImageUrl || deal.shopeeImageUrl;
+
+  function calculateDiscount(origVal: string, saleVal: string): string {
+    const orig = parseFloat(origVal);
+    const sale = parseFloat(saleVal);
+    if (!isNaN(orig) && orig > 0 && !isNaN(sale) && sale > 0) {
+      if (orig > sale) {
+        const pct = Math.round(((orig - sale) / orig) * 100);
+        return Math.min(100, Math.max(0, pct)).toString();
+      }
+      return "0";
+    }
+    return "";
+  }
+
+  function handleOriginalPriceChange(val: string) {
+    setOriginalPrice(val);
+    if (!val.trim()) {
+      setDiscountPercent("");
+      return;
+    }
+    if (salePrice.trim()) {
+      const pct = calculateDiscount(val, salePrice);
+      if (pct !== "") setDiscountPercent(pct);
+    }
+  }
+
+  function handleSalePriceChange(val: string) {
+    setSalePrice(val);
+    if (!val.trim()) {
+      setDiscountPercent("");
+      return;
+    }
+    if (originalPrice.trim()) {
+      const pct = calculateDiscount(originalPrice, val);
+      if (pct !== "") setDiscountPercent(pct);
+    }
+  }
+
+  function handleDiscountPercentChange(val: string) {
+    setDiscountPercent(val);
+    const pct = parseFloat(val);
+    const orig = parseFloat(originalPrice);
+    if (!isNaN(orig) && orig > 0 && !isNaN(pct) && pct >= 0 && pct <= 100) {
+      if (!salePrice.trim()) {
+        const calcSale = Math.round(orig * (1 - pct / 100));
+        setSalePrice(calcSale.toString());
+      }
+    }
+  }
 
   function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -304,33 +353,54 @@ function EditDealModal({
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-md">
             <div className="flex flex-col gap-xs">
-              <label className="text-[12px] font-bold text-neutral-600 uppercase tracking-wide">Giá gốc</label>
+              <label className="text-[12px] font-bold text-neutral-600 uppercase tracking-wide flex items-center justify-between">
+                <span>Giá gốc</span>
+                {originalPrice && (
+                  <span className="text-[11px] font-black text-neutral-500 lowercase">
+                    {formatVND(originalPrice)}
+                  </span>
+                )}
+              </label>
               <TextInput
-                type="number"
-                value={originalPrice}
-                onChange={(e) => setOriginalPrice(e.target.value)}
-                className="bg-neutral-50"
-                placeholder="500000"
+                type="text"
+                inputMode="numeric"
+                value={formatNumberInput(originalPrice)}
+                onChange={(e) => handleOriginalPriceChange(parseNumberInput(e.target.value))}
+                className="bg-neutral-50 font-semibold"
+                placeholder="500.000"
               />
             </div>
             <div className="flex flex-col gap-xs">
-              <label className="text-[12px] font-bold text-amber-700 uppercase tracking-wide">Giá sale</label>
+              <label className="text-[12px] font-bold text-amber-700 uppercase tracking-wide flex items-center justify-between">
+                <span>Giá sale</span>
+                {salePrice && (
+                  <span className="text-[11px] font-black text-amber-700 lowercase">
+                    {formatVND(salePrice)}
+                  </span>
+                )}
+              </label>
               <TextInput
-                type="number"
-                value={salePrice}
-                onChange={(e) => setSalePrice(e.target.value)}
-                className="bg-amber-50/50 border-amber-200"
-                placeholder="250000"
+                type="text"
+                inputMode="numeric"
+                value={formatNumberInput(salePrice)}
+                onChange={(e) => handleSalePriceChange(parseNumberInput(e.target.value))}
+                className="bg-amber-50/50 border-amber-200 font-semibold text-amber-800"
+                placeholder="250.000"
               />
             </div>
             <div className="flex flex-col gap-xs">
-              <label className="text-[12px] font-bold text-neutral-600 uppercase tracking-wide">% Giảm</label>
+              <div className="flex items-center justify-between">
+                <label className="text-[12px] font-bold text-neutral-600 uppercase tracking-wide">% Giảm</label>
+                <span className="text-[10px] text-amber-700 font-bold bg-amber-50 px-1.5 py-0.5 rounded-full border border-amber-200">
+                  Tự tính
+                </span>
+              </div>
               <TextInput
                 type="number"
                 value={discountPercent}
-                onChange={(e) => setDiscountPercent(e.target.value)}
-                className="bg-neutral-50"
-                placeholder="50"
+                onChange={(e) => handleDiscountPercentChange(e.target.value)}
+                className="bg-neutral-50 font-bold text-amber-700"
+                placeholder="VD: 50"
               />
             </div>
           </div>
@@ -1030,11 +1100,11 @@ export function AdminDealList({
                       {deal.salePrice ? (
                         <div>
                           <div className="font-black text-amber-700 text-[14px] tabular-nums">
-                            {formatCurrency(deal.salePrice)}
+                            {formatVND(deal.salePrice)}
                           </div>
                           {deal.originalPrice && (
                             <div className="text-[10px] text-neutral-400 line-through tabular-nums">
-                              {formatCurrency(deal.originalPrice)}
+                              {formatVND(deal.originalPrice)}
                             </div>
                           )}
                         </div>

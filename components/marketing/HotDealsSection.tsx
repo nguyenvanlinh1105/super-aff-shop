@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Flame, ArrowUpRight, Sparkles, ShoppingBag, Zap } from "lucide-react";
 import { ShopeeIcon } from "@/components/icons/PlatformIcons";
+import { formatVND } from "@/lib/format";
 
 export type DealItem = {
   id: string;
@@ -112,12 +113,11 @@ export function HotDealsSection({ deals }: { deals?: DealItem[] }) {
                 <div className="space-y-3">
                   <div className="flex items-end gap-2">
                     <span className="text-lg font-black text-neutral-950">
-                      {deal.salePrice.toLocaleString("vi-VN")}
-                      <span className="text-sm font-bold align-top">đ</span>
+                      {formatVND(deal.salePrice)}
                     </span>
                     {deal.originalPrice > deal.salePrice && (
                       <span className="text-xs font-bold text-neutral-400 line-through mb-1">
-                        {deal.originalPrice.toLocaleString("vi-VN")}đ
+                        {formatVND(deal.originalPrice)}
                       </span>
                     )}
                   </div>

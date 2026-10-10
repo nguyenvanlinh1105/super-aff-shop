@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
-import { createTrackingLink } from "@/lib/trackingLinkService";
-import { getSystemCustomer } from "@/lib/systemCustomer";
+import { resolveShortLink, normalizeUrl } from "@/lib/linkConversion";
+import { fetchProductInfo } from "@/lib/productInfo";
 
 export async function GET() {
   const vouchers = await prisma.voucher.findMany({
@@ -50,26 +50,14 @@ export async function POST(req: NextRequest) {
 
   if (voucherUrl) {
     try {
-      // Dan link nhanh: chi/sep chi dan link deal, he thong tu doi ngay
-      // thanh link theo domain cua minh (giong flow tao link hoan tien
-      // hien co) de khach bam link cua minh, khong phai link Shopee goc —
-      // kip luc truoc khi deal so luong gioi han het.
-      const systemCustomer = await getSystemCustomer();
-      const result = await createTrackingLink({
-        originalUrl: voucherUrl,
-        platformId,
-        customerId: systemCustomer.id,
-        channelSource: "web",
-        createdByUserId: session.userId,
-      });
-
-      trackingLinkId = result.link.id;
-      voucherUrlToStore = result.link.normalizedUrl ?? voucherUrl;
-      resolvedTitle = resolvedTitle ?? result.link.productTitle ?? undefined;
-      productImage = result.link.productImage ?? null;
+      const resolved = await resolveShortLink(voucherUrl);
+      const normalized = normalizeUrl(resolved);
+      voucherUrlToStore = normalized;
+      const info = await fetchProductInfo(normalized);
+      if (info?.title && !resolvedTitle) resolvedTitle = info.title;
+      if (info?.image && !productImage) productImage = info.image;
     } catch {
-      // Neu build link that bai (vd thieu SHOPEE_AFFILIATE_ID), van cho
-      // dang voucher voi link goc, khong chan luong dang tin cua admin.
+      // Neu lay thong tin that bai van cho dang voucher voi link goc
     }
   }
 

@@ -12,7 +12,9 @@ export default async function AdminCustomersPage({ searchParams }: { searchParam
   const sortBy = searchParams.sort || "createdAt";
   const sortOrder = searchParams.order === "asc" ? "asc" : "desc";
 
-  const where: any = {};
+  const where: any = {
+    customerCode: { not: "SYSTEM" },
+  };
   if (q) {
     where.OR = [
       { fullName: { contains: q, mode: "insensitive" } },
@@ -35,12 +37,13 @@ export default async function AdminCustomersPage({ searchParams }: { searchParam
   }
 
   const [totalCount, activeCount, lockedCount, partnerCount, debtCount] = await Promise.all([
-    prisma.customer.count(),
-    prisma.customer.count({ where: { status: "active" } }),
-    prisma.customer.count({ where: { status: { not: "active" } } }),
-    prisma.customer.count({ where: { isPartner: true } }),
+    prisma.customer.count({ where: { customerCode: { not: "SYSTEM" } } }),
+    prisma.customer.count({ where: { status: "active", customerCode: { not: "SYSTEM" } } }),
+    prisma.customer.count({ where: { status: { not: "active" }, customerCode: { not: "SYSTEM" } } }),
+    prisma.customer.count({ where: { isPartner: true, customerCode: { not: "SYSTEM" } } }),
     prisma.customer.count({
       where: {
+        customerCode: { not: "SYSTEM" },
         orders: {
           some: {
             payoutStatus: { not: "paid" },
