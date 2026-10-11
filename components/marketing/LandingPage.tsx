@@ -163,7 +163,7 @@ export function LandingPage({
 
               {/* The Core Hero Feature: Demo Link Converter Box */}
               <div className="pt-1 sm:pt-2">
-                <DemoConvertLink />
+                <DemoConvertLink customerRate={customerRate} />
               </div>
             </div>
           </div>

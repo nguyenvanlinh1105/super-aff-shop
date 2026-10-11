@@ -86,7 +86,7 @@ function triggerSuccessConfetti() {
   } catch {}
 }
 
-export function DemoConvertLink() {
+export function DemoConvertLink({ customerRate = 80 }: { customerRate?: number }) {
   const router = useRouter();
   const [url, setUrl] = useState("");
   const [loading, setLoading] = useState(false);
@@ -174,7 +174,7 @@ export function DemoConvertLink() {
           </div>
           <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             <span className="text-[10px] sm:text-[11.5px] font-black text-primary-700 bg-primary-50 px-2 sm:px-2.5 py-0.5 rounded-full border border-primary-200/80 shrink-0 whitespace-nowrap shadow-2xs">
-              Hoàn tới 80%
+              Hoàn tới {customerRate}%
             </span>
           </div>
         </div>
@@ -288,7 +288,7 @@ export function DemoConvertLink() {
                       {preview.platformCode || "ĐA SÀN"}
                     </span>
                     <span className="text-[11px] font-bold text-neutral-500">
-                      Tự động hoàn 80% hoa hồng
+                      Tự động hoàn {customerRate}% hoa hồng
                     </span>
                   </div>
                   {preview.productTitle && (

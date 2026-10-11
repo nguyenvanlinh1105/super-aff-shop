@@ -344,7 +344,7 @@ export function LiveCashbackCalculator({
 
               <div className="border-t border-white/20 pt-2 flex items-center justify-between text-white">
                 <span className="flex items-center gap-1.5 font-black text-white">
-                  <span>💖</span> Bạn thực nhận (80%):
+                  <span>💖</span> Bạn thực nhận ({customerRate}%):
                 </span>
                 <span className="text-sm sm:text-base font-black text-amber-300 tabular-nums drop-shadow-xs">
                   {formatCurrency(monthlyCashback)}

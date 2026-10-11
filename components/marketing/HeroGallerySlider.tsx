@@ -3,31 +3,31 @@
 import { Sparkles, CheckCircle2, Copy, ShoppingBag, Wallet, ArrowRight } from "lucide-react";
 import { ShopeeIcon, LazadaIcon, TiktokIcon } from "@/components/icons/PlatformIcons";
 
-const STEPS = [
-  {
-    num: "1",
-    title: "Copy link sản phẩm",
-    desc: "Lấy link bất kỳ từ Shopee, Lazada hoặc TikTok Shop bạn muốn mua.",
-    icon: Copy,
-    color: "bg-amber-100 text-amber-700",
-  },
-  {
-    num: "2",
-    title: "Dán vào MeowBack",
-    desc: "Nhận link mua hàng hoàn tiền tự động trong 1 giây.",
-    icon: ShoppingBag,
-    color: "bg-pink-100 text-pink-700",
-  },
-  {
-    num: "3",
-    title: "Nhận 80% hoàn tiền về ví",
-    desc: "Tiền hoàn tích lũy tự động, rút thẳng ngân hàng chỉ từ 10.000đ.",
-    icon: Wallet,
-    color: "bg-emerald-100 text-emerald-700",
-  },
-];
-
 export function HeroGallerySlider({ customerRate = 80 }: { customerRate?: number }) {
+  const steps = [
+    {
+      num: "1",
+      title: "Copy link sản phẩm",
+      desc: "Lấy link bất kỳ từ Shopee, Lazada hoặc TikTok Shop bạn muốn mua.",
+      icon: Copy,
+      color: "bg-amber-100 text-amber-700",
+    },
+    {
+      num: "2",
+      title: "Dán vào MeowBack",
+      desc: "Nhận link mua hàng hoàn tiền tự động trong 1 giây.",
+      icon: ShoppingBag,
+      color: "bg-pink-100 text-pink-700",
+    },
+    {
+      num: "3",
+      title: `Nhận ${customerRate}% hoàn tiền về ví`,
+      desc: "Tiền hoàn tích lũy tự động, rút thẳng ngân hàng chỉ từ 10.000đ.",
+      icon: Wallet,
+      color: "bg-emerald-100 text-emerald-700",
+    },
+  ];
+
   return (
     <div className="relative w-full max-w-[360px] sm:max-w-[440px] md:max-w-[480px] lg:max-w-[500px] mx-auto select-none">
       {/* Background Soft Glow */}
@@ -42,7 +42,7 @@ export function HeroGallerySlider({ customerRate = 80 }: { customerRate?: number
             <source media="(max-width: 639px)" srcSet="/meowback_clean_mobile.jpg" />
             <img
               src="/meowback_clean_desktop.jpg"
-              alt="MeowBack Mèo Thần Tài Hoàn Tiền 80%"
+              alt={`MeowBack Mèo Thần Tài Hoàn Tiền ${customerRate}%`}
               className="w-full h-full object-cover object-center transform hover:scale-105 transition-transform duration-700"
               loading="eager"
             />
@@ -91,7 +91,7 @@ export function HeroGallerySlider({ customerRate = 80 }: { customerRate?: number
 
           {/* 3 Simple Steps */}
           <div className="space-y-2.5">
-            {STEPS.map((s) => {
+            {steps.map((s) => {
               const Icon = s.icon;
               return (
                 <div
