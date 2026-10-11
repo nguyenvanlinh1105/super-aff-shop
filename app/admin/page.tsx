@@ -17,7 +17,7 @@ import {
   Wallet,
 } from "lucide-react";
 import { prisma } from "@/lib/prisma";
-import { formatCurrency } from "@/lib/format";
+import { formatCurrency, getVietnamHour } from "@/lib/format";
 import { AdminRevenueChart } from "@/components/admin/AdminRevenueChart";
 import { TopReferrersWidget } from "@/components/admin/TopReferrersWidget";
 import { IconBow } from "@/components/icons/CatRibbonIcons";
@@ -379,7 +379,7 @@ export default async function AdminDashboardPage() {
   const hourBuckets = { night: 0, morning: 0, afternoon: 0, evening: 0 };
   for (const o of orders) {
     const d = new Date(o.orderedAt ?? o.createdAt);
-    const hour = d.getHours();
+    const hour = getVietnamHour(d);
     if (hour >= 0 && hour < 6) hourBuckets.night += 1;
     else if (hour >= 6 && hour < 12) hourBuckets.morning += 1;
     else if (hour >= 12 && hour < 18) hourBuckets.afternoon += 1;

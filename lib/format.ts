@@ -33,7 +33,25 @@ export function parseNumberInput(value: string): string {
   return value.replace(/\D/g, "");
 }
 
+/**
+ * Lấy giờ trong ngày (0..23) theo chuẩn múi giờ Việt Nam (Asia/Ho_Chi_Minh - GMT+7).
+ * Giải quyết triệt để lỗi chênh lệch múi giờ khi server chạy trên môi trường UTC (Linux / Docker).
+ */
+export function getVietnamHour(value: Date | string): number {
+  const date = typeof value === "string" ? new Date(value) : value;
+  const hourStr = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Asia/Ho_Chi_Minh",
+    hour: "numeric",
+    hour12: false,
+  }).format(date);
+  return parseInt(hourStr, 10) % 24;
+}
+
 export function formatDate(value: Date | string): string {
   const date = typeof value === "string" ? new Date(value) : value;
-  return new Intl.DateTimeFormat("vi-VN", { dateStyle: "short", timeStyle: "short" }).format(date);
+  return new Intl.DateTimeFormat("vi-VN", {
+    timeZone: "Asia/Ho_Chi_Minh",
+    dateStyle: "short",
+    timeStyle: "short",
+  }).format(date);
 }

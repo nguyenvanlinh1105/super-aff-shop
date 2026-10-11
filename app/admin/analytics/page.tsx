@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { AdminAnalyticsClient } from "@/components/admin/AdminAnalyticsClient";
+import { getVietnamHour } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
 
@@ -121,13 +122,15 @@ export default async function AdminAnalyticsPage() {
   const browserMap = new Map<string, number>();
 
   for (const log of logsForStats) {
-    // 24 Giờ
-    const hour = new Date(log.createdAt).getHours();
-    hourlyDistribution[hour].total += 1;
-    if (log.userRole === "guest") {
-      hourlyDistribution[hour].guests += 1;
-    } else {
-      hourlyDistribution[hour].members += 1;
+    // 24 Giờ theo chuẩn múi giờ Việt Nam (Asia/Ho_Chi_Minh - GMT+7)
+    const hour = getVietnamHour(log.createdAt);
+    if (hourlyDistribution[hour]) {
+      hourlyDistribution[hour].total += 1;
+      if (log.userRole === "guest") {
+        hourlyDistribution[hour].guests += 1;
+      } else {
+        hourlyDistribution[hour].members += 1;
+      }
     }
 
     // Thiết bị
