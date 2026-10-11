@@ -24,7 +24,6 @@ import { useToast } from "@/components/ui/Toast";
 import { IconBow } from "@/components/icons/CatRibbonIcons";
 import { IconPaidSuccessBadge } from "@/components/icons/FinanceBadgeIcons";
 import { FloatingElement } from "@/components/ui/FloatingElement";
-import { FadeUp } from "@/components/ui/FadeUp";
 import { HoverCard } from "@/components/ui/HoverCard";
 import { LiquidButton } from "@/components/ui/LiquidButton";
 import { ShineEffect } from "@/components/ui/ShineEffect";
@@ -146,435 +145,455 @@ export function ReferralClient({
   };
 
   return (
-    <div className="flex w-full flex-col gap-8 sm:gap-10 fade-in pb-20 sm:pb-14">
+    <div className="flex w-full flex-col gap-8 sm:gap-10 fade-in pb-36 sm:pb-20">
       {/* ═══ 1. BANNER CHÀO MỪNG (ĐỒNG BỘ 100% VỚI /APP) ═══ */}
-      <FadeUp delay={0.05}>
-        <div className="relative overflow-hidden rounded-3xl p-5 sm:p-7 lg:p-8 border border-primary-200/60 shadow-xl shadow-primary-500/5 bg-white">
-          <img
-            src="/welcome-bg.png"
-            alt=""
-            className="absolute inset-0 w-full h-full object-cover opacity-80"
-          />
-          <div className="absolute inset-0 bg-white/40 backdrop-blur-[2px]" />
+      <div className="relative overflow-hidden rounded-3xl p-5 sm:p-7 lg:p-8 border border-primary-200/60 shadow-xl shadow-primary-500/5 bg-white">
+        <img
+          src="/welcome-bg.png"
+          alt=""
+          className="absolute inset-0 w-full h-full object-cover opacity-80"
+        />
+        <div className="absolute inset-0 bg-white/40 backdrop-blur-[2px]" />
 
-          <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-5 sm:gap-6">
-            <div className="flex items-center gap-4 sm:gap-5 min-w-0">
-              <FloatingElement duration={4}>
-                <div className="w-14 h-14 sm:w-18 sm:h-18 lg:w-20 lg:h-20 rounded-3xl bg-gradient-to-br from-primary-400 via-primary-500 to-pink-600 text-white flex items-center justify-center shadow-lg shadow-primary-500/25 shrink-0 border border-white/50 overflow-hidden p-1">
-                  <img
-                    src="/meow-back-mascot.png"
-                    alt="MeowBack Mascot"
-                    className="w-full h-full object-contain rounded-2xl"
-                  />
-                </div>
-              </FloatingElement>
-              <div className="min-w-0 flex-1">
-                <div className="inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1 rounded-full bg-white/85 border border-primary-200/80 text-[10.5px] sm:text-[11px] font-black uppercase tracking-widest text-primary-600 shadow-xs mb-1.5 sm:mb-2 backdrop-blur-md">
-                  <IconBow className="w-3.5 h-3.5 text-accent-bow" />
-                  <span>Chương Trình Giới Thiệu 🎀</span>
-                </div>
-                <h1 className="text-xl sm:text-2xl lg:text-3xl font-extrabold leading-tight text-neutral-900 tracking-tight">
-                  Mời Bạn Bè — <span className="text-primary-600 drop-shadow-sm">Nhận Hoa Hồng</span>
-                </h1>
-                <p className="mt-1 text-xs sm:text-sm text-neutral-800 font-semibold leading-relaxed max-w-xl drop-shadow-sm">
-                  Nhận thêm <strong className="text-primary-600 font-extrabold">{referralPercent}% hoa hồng</strong> thưởng trên mỗi đơn hàng bạn bè mua sắm thành công. Bạn bè vẫn giữ trọn 100% tiền hoàn!
-                </p>
+        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-5 sm:gap-6">
+          <div className="flex items-center gap-4 sm:gap-5 min-w-0">
+            <FloatingElement duration={4}>
+              <div className="w-14 h-14 sm:w-18 sm:h-18 lg:w-20 lg:h-20 rounded-3xl bg-gradient-to-br from-primary-400 via-primary-500 to-pink-600 text-white flex items-center justify-center shadow-lg shadow-primary-500/25 shrink-0 border border-white/50 overflow-hidden p-1">
+                <img
+                  src="/meow-back-mascot.png"
+                  alt="MeowBack Mascot"
+                  className="w-full h-full object-contain rounded-2xl"
+                />
               </div>
-            </div>
-
-            <div className="shrink-0 flex items-center pt-1 md:pt-0 relative overflow-hidden group rounded-[2rem] self-start md:self-center">
-              <ShineEffect />
-              <LiquidButton
-                onClick={handleCopyLink}
-                icon={copiedLink ? <Check size={18} strokeWidth={2.5} className="text-white" /> : <Copy size={18} strokeWidth={2.5} className="text-white" />}
-              >
-                {copiedLink ? "Đã copy link 🎀" : "Sao chép link mời 🎀"}
-              </LiquidButton>
+            </FloatingElement>
+            <div className="min-w-0 flex-1">
+              <div className="inline-flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1 rounded-full bg-white/85 border border-primary-200/80 text-[10.5px] sm:text-[11px] font-black uppercase tracking-widest text-primary-600 shadow-xs mb-1.5 sm:mb-2 backdrop-blur-md">
+                <IconBow className="w-3.5 h-3.5 text-accent-bow" />
+                <span>Chương Trình Giới Thiệu 🎀</span>
+              </div>
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-extrabold leading-tight text-neutral-900 tracking-tight">
+                Mời Bạn Bè — <span className="text-primary-600 drop-shadow-sm">Nhận Hoa Hồng</span>
+              </h1>
+              <p className="mt-1 text-xs sm:text-sm text-neutral-800 font-semibold leading-relaxed max-w-xl drop-shadow-sm">
+                Nhận thêm <strong className="text-primary-600 font-extrabold">{referralPercent}% hoa hồng</strong> thưởng trên mỗi đơn hàng bạn bè mua sắm thành công. Bạn bè vẫn giữ trọn 100% tiền hoàn!
+              </p>
             </div>
           </div>
+
+          <div className="shrink-0 flex items-center pt-1 md:pt-0 relative overflow-hidden group rounded-[2rem] self-start md:self-center">
+            <ShineEffect />
+            <LiquidButton
+              onClick={handleCopyLink}
+              icon={copiedLink ? <Check size={18} strokeWidth={2.5} className="text-white" /> : <Copy size={18} strokeWidth={2.5} className="text-white" />}
+            >
+              {copiedLink ? "Đã copy link 🎀" : "Sao chép link mời 🎀"}
+            </LiquidButton>
+          </div>
         </div>
-      </FadeUp>
+      </div>
 
       {/* ═══ 2. TOP 3 STAT CARDS (ĐỒNG BỘ 100% VỚI STAT CARDS TRANG CHỦ) ═══ */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 sm:gap-4.5">
         {/* CARD 1: BẠN BÈ ĐÃ MỜI */}
-        <FadeUp delay={0.1}>
-          <HoverCard>
-            <div className="group h-full relative overflow-hidden rounded-3xl bg-white p-5 sm:p-5.5 shadow-sm border border-neutral-200/80 hover:border-primary-300 hover:shadow-md transition-all duration-300 flex flex-col justify-between gap-3.5">
-              {/* Watermark góc mờ nghệ thuật */}
-              <div className="absolute -right-3 -bottom-3 opacity-[0.07] pointer-events-none transition-transform duration-500 group-hover:scale-110 group-hover:rotate-6 text-primary-600">
-                <Users size={90} />
-              </div>
+        <HoverCard>
+          <div className="group h-full relative overflow-hidden rounded-3xl bg-white p-5 sm:p-5.5 shadow-sm border border-neutral-200/80 hover:border-primary-300 hover:shadow-md transition-all duration-300 flex flex-col justify-between gap-3.5">
+            {/* Watermark góc mờ nghệ thuật */}
+            <div className="absolute -right-3 -bottom-3 opacity-[0.07] pointer-events-none transition-transform duration-500 group-hover:scale-110 group-hover:rotate-6 text-primary-600">
+              <Users size={90} />
+            </div>
 
-              {/* Tầng 1: Icon + Phân loại + Badge trạng thái */}
-              <div className="relative z-10 flex items-center justify-between gap-2">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-11 w-11 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-2xl bg-primary-50/80 border border-primary-100/90 text-primary-600 shadow-2xs group-hover:scale-105 transition-transform p-1">
-                    <Users size={22} strokeWidth={2.4} />
-                  </div>
-                  <div>
-                    <div className="text-[11px] sm:text-[11.5px] font-bold uppercase tracking-wider text-neutral-400">Mạng lưới</div>
-                    <div className="text-[12px] font-semibold text-neutral-700">Bạn bè đã mời</div>
-                  </div>
+            {/* Tầng 1: Icon + Phân loại + Badge trạng thái */}
+            <div className="relative z-10 flex items-center justify-between gap-2">
+              <div className="flex items-center gap-3">
+                <div className="flex h-11 w-11 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-2xl bg-primary-50/80 border border-primary-100/90 text-primary-600 shadow-2xs group-hover:scale-105 transition-transform p-1">
+                  <Users size={22} strokeWidth={2.4} />
                 </div>
-                <span className="shrink-0 rounded-full bg-primary-50 border border-primary-200/80 px-2.5 py-0.5 text-[10px] sm:text-[10.5px] font-black uppercase text-primary-700 tracking-wider">
-                  {totalFriends > 0 ? "Đang tăng" : "Bắt đầu"}
-                </span>
-              </div>
-
-              {/* Tầng 2: Số thành viên lớn */}
-              <div className="relative z-10 pt-2.5 border-t border-neutral-100 flex items-end justify-between gap-2">
                 <div>
-                  <div className="text-[10.5px] font-semibold text-neutral-400 uppercase tracking-wider">Tổng số thành viên</div>
-                  <div className="text-2xl sm:text-3xl font-black text-primary-600 tabular-nums leading-tight mt-0.5">
-                    {totalFriends} <span className="text-[14px] font-bold text-neutral-500">người</span>
-                  </div>
+                  <div className="text-[11px] sm:text-[11.5px] font-bold uppercase tracking-wider text-neutral-400">Mạng lưới</div>
+                  <div className="text-[12px] font-semibold text-neutral-700">Bạn bè đã mời</div>
                 </div>
               </div>
+              <span className="shrink-0 rounded-full bg-primary-50 border border-primary-200/80 px-2.5 py-0.5 text-[10px] sm:text-[10.5px] font-black uppercase text-primary-700 tracking-wider">
+                {totalFriends > 0 ? "Đang tăng" : "Bắt đầu"}
+              </span>
+            </div>
 
-              {/* Tầng 3: Dòng trạng thái ngữ cảnh */}
-              <div className="relative z-10 flex items-center gap-2 text-[11px] text-neutral-500 font-medium">
-                <span className="w-1.5 h-1.5 rounded-full bg-primary-500 animate-pulse shrink-0" />
-                <span className="leading-snug truncate">Đã đăng ký qua mã của bạn</span>
+            {/* Tầng 2: Số thành viên lớn */}
+            <div className="relative z-10 pt-2.5 border-t border-neutral-100 flex items-end justify-between gap-2">
+              <div>
+                <div className="text-[10.5px] font-semibold text-neutral-400 uppercase tracking-wider">Tổng số thành viên</div>
+                <div className="text-2xl sm:text-3xl font-black text-primary-600 tabular-nums leading-tight mt-0.5">
+                  {totalFriends} <span className="text-[14px] font-bold text-neutral-500">người</span>
+                </div>
               </div>
             </div>
-          </HoverCard>
-        </FadeUp>
+
+            {/* Tầng 3: Dòng trạng thái ngữ cảnh */}
+            <div className="relative z-10 flex items-center gap-2 text-[11px] text-neutral-500 font-medium">
+              <span className="w-1.5 h-1.5 rounded-full bg-primary-500 animate-pulse shrink-0" />
+              <span className="leading-snug truncate">Đã đăng ký qua mã của bạn</span>
+            </div>
+          </div>
+        </HoverCard>
 
         {/* CARD 2: HOA HỒNG NHẬN ĐƯỢC */}
-        <FadeUp delay={0.15}>
-          <HoverCard>
-            <div className="group h-full relative overflow-hidden rounded-3xl bg-white p-5 sm:p-5.5 shadow-sm border border-neutral-200/80 hover:border-emerald-300 hover:shadow-md transition-all duration-300 flex flex-col justify-between gap-3.5">
-              {/* Watermark góc mờ nghệ thuật */}
-              <div className="absolute -right-3 -bottom-3 opacity-[0.08] pointer-events-none transition-transform duration-500 group-hover:scale-110 group-hover:rotate-6 text-emerald-600">
-                <IconPaidSuccessBadge size={92} />
-              </div>
+        <HoverCard>
+          <div className="group h-full relative overflow-hidden rounded-3xl bg-white p-5 sm:p-5.5 shadow-sm border border-neutral-200/80 hover:border-emerald-300 hover:shadow-md transition-all duration-300 flex flex-col justify-between gap-3.5">
+            {/* Watermark góc mờ nghệ thuật */}
+            <div className="absolute -right-3 -bottom-3 opacity-[0.08] pointer-events-none transition-transform duration-500 group-hover:scale-110 group-hover:rotate-6 text-emerald-600">
+              <IconPaidSuccessBadge size={92} />
+            </div>
 
-              {/* Tầng 1: Icon + Phân loại + Badge trạng thái */}
-              <div className="relative z-10 flex items-center justify-between gap-2">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-11 w-11 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-50/80 border border-emerald-100/90 shadow-2xs group-hover:scale-105 transition-transform p-1">
-                    <IconPaidSuccessBadge size={38} />
-                  </div>
-                  <div>
-                    <div className="text-[11px] sm:text-[11.5px] font-bold uppercase tracking-wider text-neutral-400">Thu nhập</div>
-                    <div className="text-[12px] font-semibold text-neutral-700">Hoa hồng nhận được</div>
-                  </div>
+            {/* Tầng 1: Icon + Phân loại + Badge trạng thái */}
+            <div className="relative z-10 flex items-center justify-between gap-2">
+              <div className="flex items-center gap-3">
+                <div className="flex h-11 w-11 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-50/80 border border-emerald-100/90 shadow-2xs group-hover:scale-105 transition-transform p-1">
+                  <IconPaidSuccessBadge size={38} />
                 </div>
-                <span className="shrink-0 rounded-full bg-emerald-50 border border-emerald-200/80 px-2.5 py-0.5 text-[10px] sm:text-[10.5px] font-black uppercase text-emerald-700 tracking-wider">
-                  Vào ví
-                </span>
-              </div>
-
-              {/* Tầng 2: Số tiền lớn */}
-              <div className="relative z-10 pt-2.5 border-t border-neutral-100 flex items-end justify-between gap-2">
                 <div>
-                  <div className="text-[10.5px] font-semibold text-neutral-400 uppercase tracking-wider">Đã thanh toán</div>
-                  <div className="text-2xl sm:text-3xl font-black text-emerald-600 tabular-nums leading-tight mt-0.5">
-                    {formatCurrency(totalCommission)}
-                  </div>
+                  <div className="text-[11px] sm:text-[11.5px] font-bold uppercase tracking-wider text-neutral-400">Thu nhập</div>
+                  <div className="text-[12px] font-semibold text-neutral-700">Hoa hồng nhận được</div>
                 </div>
               </div>
+              <span className="shrink-0 rounded-full bg-emerald-50 border border-emerald-200/80 px-2.5 py-0.5 text-[10px] sm:text-[10.5px] font-black uppercase text-emerald-700 tracking-wider">
+                Vào ví
+              </span>
+            </div>
 
-              {/* Tầng 3: Dòng trạng thái ngữ cảnh */}
-              <div className="relative z-10 flex items-center gap-2 text-[11px] text-neutral-500 font-medium">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
-                <span className="leading-snug truncate">Tự động cộng trực tiếp vào ví MeowBack</span>
+            {/* Tầng 2: Số tiền lớn */}
+            <div className="relative z-10 pt-2.5 border-t border-neutral-100 flex items-end justify-between gap-2">
+              <div>
+                <div className="text-[10.5px] font-semibold text-neutral-400 uppercase tracking-wider">Đã thanh toán</div>
+                <div className="text-2xl sm:text-3xl font-black text-emerald-600 tabular-nums leading-tight mt-0.5">
+                  {formatCurrency(totalCommission)}
+                </div>
               </div>
             </div>
-          </HoverCard>
-        </FadeUp>
+
+            {/* Tầng 3: Dòng trạng thái ngữ cảnh */}
+            <div className="relative z-10 flex items-center gap-2 text-[11px] text-neutral-500 font-medium">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
+              <span className="leading-snug truncate">Tự động cộng trực tiếp vào ví MeowBack</span>
+            </div>
+          </div>
+        </HoverCard>
 
         {/* CARD 3: CHÍNH SÁCH TỶ LỆ THƯỞNG */}
-        <FadeUp delay={0.2}>
-          <HoverCard>
-            <div className="group h-full relative overflow-hidden rounded-3xl bg-white p-5 sm:p-5.5 shadow-sm border border-neutral-200/80 hover:border-amber-300 hover:shadow-md transition-all duration-300 flex flex-col justify-between gap-3.5">
-              {/* Watermark góc mờ nghệ thuật */}
-              <div className="absolute -right-3 -bottom-3 opacity-[0.07] pointer-events-none transition-transform duration-500 group-hover:scale-110 group-hover:rotate-6 text-amber-500">
-                <Gift size={90} />
-              </div>
+        <HoverCard>
+          <div className="group h-full relative overflow-hidden rounded-3xl bg-white p-5 sm:p-5.5 shadow-sm border border-neutral-200/80 hover:border-amber-300 hover:shadow-md transition-all duration-300 flex flex-col justify-between gap-3.5">
+            {/* Watermark góc mờ nghệ thuật */}
+            <div className="absolute -right-3 -bottom-3 opacity-[0.07] pointer-events-none transition-transform duration-500 group-hover:scale-110 group-hover:rotate-6 text-amber-500">
+              <Gift size={90} />
+            </div>
 
-              {/* Tầng 1: Icon + Phân loại + Badge trạng thái */}
-              <div className="relative z-10 flex items-center justify-between gap-2">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-11 w-11 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-2xl bg-amber-50/80 border border-amber-100/90 text-amber-600 shadow-2xs group-hover:scale-105 transition-transform p-1">
-                    <Gift size={22} strokeWidth={2.4} />
-                  </div>
-                  <div>
-                    <div className="text-[11px] sm:text-[11.5px] font-bold uppercase tracking-wider text-neutral-400">Chính sách</div>
-                    <div className="text-[12px] font-semibold text-neutral-700">Tỷ lệ thưởng</div>
-                  </div>
+            {/* Tầng 1: Icon + Phân loại + Badge trạng thái */}
+            <div className="relative z-10 flex items-center justify-between gap-2">
+              <div className="flex items-center gap-3">
+                <div className="flex h-11 w-11 sm:h-12 sm:w-12 shrink-0 items-center justify-center rounded-2xl bg-amber-50/80 border border-amber-100/90 text-amber-600 shadow-2xs group-hover:scale-105 transition-transform p-1">
+                  <Gift size={22} strokeWidth={2.4} />
                 </div>
-                <span className="shrink-0 rounded-full bg-amber-50 border border-amber-200/80 px-2.5 py-0.5 text-[10px] sm:text-[10.5px] font-black uppercase text-amber-700 tracking-wider">
-                  {isPartner ? "Đối tác" : "Chuẩn"}
-                </span>
-              </div>
-
-              {/* Tầng 2: Tỷ lệ thưởng lớn */}
-              <div className="relative z-10 pt-2.5 border-t border-neutral-100 flex items-end justify-between gap-2">
                 <div>
-                  <div className="text-[10.5px] font-semibold text-neutral-400 uppercase tracking-wider">Thưởng trên tiền hoàn</div>
-                  <div className="text-2xl sm:text-3xl font-black text-neutral-900 tabular-nums leading-tight mt-0.5">
-                    +{referralPercent}% <span className="text-[14px] font-bold text-neutral-500">/ mỗi đơn</span>
-                  </div>
+                  <div className="text-[11px] sm:text-[11.5px] font-bold uppercase tracking-wider text-neutral-400">Chính sách</div>
+                  <div className="text-[12px] font-semibold text-neutral-700">Tỷ lệ thưởng</div>
                 </div>
               </div>
+              <span className="shrink-0 rounded-full bg-amber-50 border border-amber-200/80 px-2.5 py-0.5 text-[10px] sm:text-[10.5px] font-black uppercase text-amber-700 tracking-wider">
+                {isPartner ? "Đối tác" : "Chuẩn"}
+              </span>
+            </div>
 
-              {/* Tầng 3: Dòng trạng thái ngữ cảnh */}
-              <div className="relative z-10 flex items-center gap-2 text-[11px] text-neutral-500 font-medium">
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse shrink-0" />
-                <span className="leading-snug truncate">
-                  {isPartner ? "Không giới hạn số đơn" : `Áp dụng ${maxReferralOrders} đơn đầu tiên / bạn`}
-                </span>
+            {/* Tầng 2: Tỷ lệ thưởng lớn */}
+            <div className="relative z-10 pt-2.5 border-t border-neutral-100 flex items-end justify-between gap-2">
+              <div>
+                <div className="text-[10.5px] font-semibold text-neutral-400 uppercase tracking-wider">Thưởng trên tiền hoàn</div>
+                <div className="text-2xl sm:text-3xl font-black text-neutral-900 tabular-nums leading-tight mt-0.5">
+                  +{referralPercent}% <span className="text-[14px] font-bold text-neutral-500">/ mỗi đơn</span>
+                </div>
               </div>
             </div>
-          </HoverCard>
-        </FadeUp>
+
+            {/* Tầng 3: Dòng trạng thái ngữ cảnh */}
+            <div className="relative z-10 flex items-center gap-2 text-[11px] text-neutral-500 font-medium">
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse shrink-0" />
+              <span className="leading-snug truncate">
+                {isPartner ? "Không giới hạn số đơn" : `Áp dụng ${maxReferralOrders} đơn đầu tiên / bạn`}
+              </span>
+            </div>
+          </div>
+        </HoverCard>
       </div>
 
       {/* ═══ 3. MAIN SECTION: CÔNG CỤ MỜI BẠN BÈ & QUYỀN LỢI ═══ */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
-        {/* CỘT TRÁI: CÔNG CỤ CHIA SẺ VÀ MÃ MỜI */}
-        <FadeUp delay={0.25} className="h-full">
-          <div className="h-full rounded-3xl bg-gradient-to-b from-white via-primary-50/15 to-white p-4.5 sm:p-6 shadow-cute border border-primary-200/80 flex flex-col justify-between gap-5 overflow-hidden">
-            <div>
-              {/* Header Box */}
-              <div className="flex items-center justify-between border-b border-primary-100/70 pb-3.5 mb-5">
-                <div className="flex items-center gap-2.5">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-gradient-to-br from-primary-400 to-pink-500 text-white shadow-sm shrink-0">
-                    <Share2 size={18} strokeWidth={2.4} />
-                  </div>
-                  <div>
-                    <h2 className="text-[15px] sm:text-[16px] font-extrabold text-neutral-900 leading-tight">
-                      Công cụ mời bạn bè
-                    </h2>
-                    <p className="text-[11px] text-neutral-500 font-medium">Chia sẻ mã hoặc link để nhận hoa hồng</p>
-                  </div>
+        {/* CỘT TRÁI: THẺ GIỚI THIỆU & CÔNG CỤ CHIA SẺ */}
+        <div className="h-full rounded-3xl bg-white p-4.5 sm:p-6 shadow-cute border border-primary-200/80 flex flex-col justify-between gap-4 overflow-hidden">
+          <div className="flex flex-col gap-3.5">
+            {/* Header Box */}
+            <div className="flex items-center justify-between border-b border-primary-100/70 pb-3">
+              <div className="flex items-center gap-2.5">
+                <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-gradient-to-br from-primary-400 to-pink-500 text-white shadow-2xs shrink-0">
+                  <Gift size={18} strokeWidth={2.4} />
                 </div>
-                <span className="text-[11px] font-extrabold px-2.5 py-1 rounded-full bg-primary-50 text-primary-600 border border-primary-200/70 shadow-2xs shrink-0">
-                  1 chạm chia sẻ 🎀
-                </span>
-              </div>
-
-              {/* Danh sách công cụ */}
-              <div className="flex flex-col gap-4">
-                {/* 1. Mã giới thiệu độc quyền */}
-                <div className="rounded-2xl bg-gradient-to-r from-primary-50 via-pink-50/60 to-primary-50 p-3.5 sm:p-4 border border-primary-200/80 flex items-center justify-between gap-3 shadow-2xs">
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-1.5 text-[10.5px] font-extrabold uppercase tracking-wider text-neutral-500">
-                      <Sparkles size={12} className="text-primary-500" />
-                      <span>Mã giới thiệu của bạn</span>
-                    </div>
-                    <div className="font-mono text-xl sm:text-2xl font-black text-primary-600 tracking-wider truncate mt-0.5">
-                      {customerCode || "---"}
-                    </div>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={handleCopyCode}
-                    className={`flex items-center gap-1.5 rounded-xl px-3.5 sm:px-4 py-2 text-xs font-extrabold transition-all shadow-2xs shrink-0 cursor-pointer ${
-                      copiedCode
-                        ? "bg-emerald-500 text-white"
-                        : "bg-white text-primary-600 border border-primary-200/80 hover:bg-primary-50 active:scale-95"
-                    }`}
-                  >
-                    {copiedCode ? <Check size={14} strokeWidth={2.5} /> : <Copy size={14} strokeWidth={2} />}
-                    <span>{copiedCode ? "Đã chép" : "Chép mã"}</span>
-                  </button>
-                </div>
-
-                {/* 2. Link đăng ký giới thiệu */}
                 <div>
-                  <label className="text-[12px] font-extrabold text-neutral-700 mb-1.5 block">
-                    Link đăng ký giới thiệu
-                  </label>
-                  <div className="flex items-center gap-2 rounded-2xl bg-neutral-50 border border-neutral-200/80 p-1.5 pl-3.5 shadow-2xs">
-                    <span className="flex-1 truncate text-xs sm:text-[13px] font-bold text-neutral-700 select-all min-w-0">
-                      {referralLink || "Đang tạo link..."}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={handleCopyLink}
-                      className={`flex items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-extrabold text-white transition-all shrink-0 shadow-2xs cursor-pointer active:scale-95 ${
-                        copiedLink
-                          ? "bg-emerald-500"
-                          : "bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700"
-                      }`}
-                    >
-                      {copiedLink ? <Check size={13} strokeWidth={2.5} /> : <Copy size={13} strokeWidth={2} />}
-                      <span>{copiedLink ? "Đã copy" : "Copy link 🎀"}</span>
-                    </button>
-                  </div>
-                </div>
-
-                {/* 3. Nút hành động nhanh: Xem QR & Tin nhắn mời mẫu */}
-                <div className="grid grid-cols-2 gap-2.5 pt-1">
-                  <button
-                    type="button"
-                    onClick={() => setShowQR(true)}
-                    className="flex items-center justify-center gap-1.5 rounded-2xl bg-white hover:bg-primary-50/70 border border-primary-200/80 py-2.5 px-3 text-xs font-extrabold text-neutral-700 hover:text-primary-600 transition-all shadow-2xs cursor-pointer active:scale-95"
-                  >
-                    <QrCode size={15} strokeWidth={2.2} className="text-primary-500" />
-                    <span>Xem mã QR</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={handleCopyInviteMessage}
-                    className={`flex items-center justify-center gap-1.5 rounded-2xl py-2.5 px-3 text-xs font-extrabold transition-all shadow-2xs border cursor-pointer active:scale-95 ${
-                      copiedMsg
-                        ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                        : "bg-white hover:bg-primary-50/70 text-neutral-700 hover:text-primary-600 border-primary-200/80"
-                    }`}
-                  >
-                    {copiedMsg ? (
-                      <>
-                        <Check size={14} strokeWidth={2.5} className="text-emerald-600" />
-                        <span>Đã sao chép</span>
-                      </>
-                    ) : (
-                      <>
-                        <MessageSquare size={14} strokeWidth={2.2} className="text-primary-500" />
-                        <span>Lời mời mẫu</span>
-                      </>
-                    )}
-                  </button>
+                  <h2 className="text-[15px] sm:text-[16px] font-black text-neutral-900 leading-tight">
+                    Mời Bạn Bè Nhận Thưởng
+                  </h2>
+                  <p className="text-[11px] text-neutral-500 font-medium">Nhận +{referralPercent}% hoa hồng trên mỗi đơn</p>
                 </div>
               </div>
+              <span className="text-[10.5px] font-black px-2.5 py-1 rounded-full bg-primary-50 text-primary-600 border border-primary-200/70 shadow-2xs shrink-0">
+                1 chạm chia sẻ 🎀
+              </span>
             </div>
 
-            {/* 3 Mini Highlight Bullets dưới cùng */}
-            <div className="pt-3 border-t border-primary-100/70 grid grid-cols-3 gap-1 sm:gap-2 text-[10px] sm:text-[11.5px] font-bold text-neutral-500 text-center select-none">
-              <div className="flex items-center justify-center gap-1 min-w-0">
-                <Sparkles size={11} className="text-primary-500 shrink-0" />
-                <span className="truncate">Thưởng {referralPercent}%/đơn</span>
-              </div>
-              <div className="flex items-center justify-center gap-1 min-w-0 border-x border-primary-100/80 px-0.5">
-                <ShieldCheck size={11} className="text-emerald-500 shrink-0" />
-                <span className="truncate">Bạn bè giữ 100%</span>
-              </div>
-              <div className="flex items-center justify-center gap-1 min-w-0">
-                <IconBow className="w-3 h-3 text-accent-bow shrink-0" />
-                <span className="truncate">Cộng ví tự động</span>
-              </div>
-            </div>
-          </div>
-        </FadeUp>
-
-        {/* CỘT PHẢI: QUYỀN LỢI & CÁCH HOẠT ĐỘNG */}
-        <FadeUp delay={0.3} className="h-full">
-          <div className="h-full rounded-3xl bg-white p-4.5 sm:p-6 shadow-cute border border-primary-200/80 flex flex-col justify-between gap-5 overflow-hidden">
-            <div>
-              {/* Header Box */}
-              <div className="flex items-center justify-between border-b border-primary-100/70 pb-3.5 mb-5">
-                <div className="flex items-center gap-2.5">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-primary-100 text-primary-600 shadow-sm shrink-0">
-                    <IconBow className="w-4 h-4 text-accent-bow" />
-                  </div>
-                  <div>
-                    <h2 className="text-[15px] sm:text-[16px] font-extrabold text-neutral-900 leading-tight">
-                      Quyền lợi khi giới thiệu
-                    </h2>
-                    <p className="text-[11px] text-neutral-500 font-medium">Chính sách thưởng minh bạch, rõ ràng</p>
-                  </div>
-                </div>
-                <span className="text-[11px] font-extrabold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/70 shadow-2xs shrink-0">
-                  100% minh bạch 🎀
+            {/* VIP REFERRAL TICKET (Thẻ Giới Thiệu Phong Cách Coupon May Mắn) */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary-50/90 via-pink-50/50 to-primary-50/80 border-2 border-dashed border-primary-200 p-3.5 sm:p-4 shadow-2xs flex flex-col gap-2.5">
+              {/* Dòng 1: Tiêu đề vé & Mã to rõ */}
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-[10.5px] font-extrabold uppercase tracking-wider text-neutral-500 flex items-center gap-1">
+                  <Sparkles size={11} className="text-primary-500" />
+                  <span>Mã giới thiệu của bạn</span>
+                </span>
+                <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-white text-primary-600 border border-primary-200/80 shadow-2xs">
+                  Thưởng {referralPercent}% trọn đời
                 </span>
               </div>
 
-              {/* Checklist 4 quyền lợi */}
-              <div className="flex flex-col gap-3">
-                <div className="flex items-start gap-3 p-3 rounded-2xl bg-neutral-50/80 border border-neutral-200/60 hover:border-primary-200 transition-colors">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-primary-100 text-primary-600 shadow-2xs">
-                    <Gift size={16} strokeWidth={2.3} />
-                  </div>
-                  <div className="min-w-0">
-                    <h3 className="text-[13px] font-extrabold text-neutral-900">
-                      Nhận thêm {referralPercent}% hoa hồng từ MeowBack
-                    </h3>
-                    <p className="text-[11.5px] text-neutral-600 font-medium mt-0.5 leading-relaxed">
-                      Bạn được tặng thêm {referralPercent}% trên số tiền hoàn mà bạn bè nhận được ở mỗi đơn hàng thành công.
-                    </p>
-                  </div>
-                </div>
+              {/* Hộp mã to đẹp + nút chép */}
+              <div className="flex items-center justify-between gap-2 bg-white rounded-xl p-2 pl-3 sm:pl-3.5 border border-primary-100 shadow-2xs">
+                <span className="font-mono text-2xl sm:text-3xl font-black text-primary-600 tracking-wider truncate select-all">
+                  {customerCode || "---"}
+                </span>
+                <button
+                  type="button"
+                  onClick={handleCopyCode}
+                  className={`flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 sm:py-2 text-xs font-black transition-all shadow-2xs shrink-0 cursor-pointer ${
+                    copiedCode
+                      ? "bg-emerald-500 text-white"
+                      : "bg-primary-500 hover:bg-primary-600 text-white shadow-cute active:scale-95"
+                  }`}
+                >
+                  {copiedCode ? <Check size={13} strokeWidth={2.5} /> : <Copy size={13} strokeWidth={2} />}
+                  <span>{copiedCode ? "Đã chép" : "Chép mã"}</span>
+                </button>
+              </div>
 
-                <div className="flex items-start gap-3 p-3 rounded-2xl bg-neutral-50/80 border border-neutral-200/60 hover:border-emerald-200 transition-colors">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600 shadow-2xs">
-                    <ShieldCheck size={16} strokeWidth={2.3} />
-                  </div>
-                  <div className="min-w-0">
-                    <h3 className="text-[13px] font-extrabold text-neutral-900">
-                      Bạn bè giữ nguyên 100% tiền hoàn
-                    </h3>
-                    <p className="text-[11.5px] text-neutral-600 font-medium mt-0.5 leading-relaxed">
-                      Người được mời vẫn nhận trọn vẹn số tiền hoàn của họ. Tiền thưởng {referralPercent}% là MeowBack trích ngân sách tặng riêng cho bạn.
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3 p-3 rounded-2xl bg-neutral-50/80 border border-neutral-200/60 hover:border-amber-200 transition-colors">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-600 shadow-2xs">
-                    <ShoppingBag size={16} strokeWidth={2.3} />
-                  </div>
-                  <div className="min-w-0">
-                    <h3 className="text-[13px] font-extrabold text-neutral-900">
-                      {isPartner ? "Đối tác — không giới hạn đơn hàng" : `Áp dụng ${maxReferralOrders} đơn hàng đầu tiên / bạn`}
-                    </h3>
-                    <p className="text-[11.5px] text-neutral-600 font-medium mt-0.5 leading-relaxed">
-                      {isPartner
-                        ? "Nhận hoa hồng không giới hạn trên toàn bộ đơn mua sắm của bạn bè."
-                        : `${maxReferralOrders} đơn hàng đầu tiên tính độc lập cho từng người bạn được mời.`}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex items-start gap-3 p-3 rounded-2xl bg-neutral-50/80 border border-neutral-200/60 hover:border-blue-200 transition-colors">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-blue-100 text-blue-600 shadow-2xs">
-                    <Clock size={16} strokeWidth={2.3} />
-                  </div>
-                  <div className="min-w-0">
-                    <h3 className="text-[13px] font-extrabold text-neutral-900">
-                      Hiệu lực trong {referralValidityMonths} tháng
-                    </h3>
-                    <p className="text-[11.5px] text-neutral-600 font-medium mt-0.5 leading-relaxed">
-                      Mọi đơn phát sinh trong {referralValidityMonths} tháng kể từ lúc bạn bè đăng ký tài khoản đều được ghi nhận hoa hồng.
-                    </p>
-                  </div>
-                </div>
+              {/* Hộp link đăng ký */}
+              <div className="flex items-center gap-1.5 bg-neutral-100/90 rounded-xl p-1 pl-2.5 border border-neutral-200/70">
+                <span className="flex-1 truncate text-[11.5px] font-bold text-neutral-600 select-all min-w-0">
+                  {referralLink || "Đang tạo link..."}
+                </span>
+                <button
+                  type="button"
+                  onClick={handleCopyLink}
+                  className={`flex items-center gap-1 rounded-lg px-3 py-1.5 text-[11px] font-black transition-all shrink-0 cursor-pointer ${
+                    copiedLink
+                      ? "bg-emerald-500 text-white"
+                      : "bg-white hover:bg-neutral-50 text-neutral-800 border border-neutral-200 shadow-2xs active:scale-95"
+                  }`}
+                >
+                  {copiedLink ? <Check size={12} strokeWidth={2.5} /> : <Copy size={12} strokeWidth={2} />}
+                  <span>{copiedLink ? "Đã copy" : "Copy link"}</span>
+                </button>
               </div>
             </div>
 
-            {/* 3 Bước đơn giản */}
-            <div className="rounded-2xl bg-gradient-to-r from-primary-50/80 via-pink-50/40 to-primary-50/80 p-3 sm:p-3.5 border border-primary-200/80 shadow-2xs">
-              <div className="grid grid-cols-3 gap-1.5 sm:gap-2 text-center items-center">
-                <div className="flex flex-col items-center">
-                  <span className="flex h-5 w-5 sm:h-6 sm:w-6 items-center justify-center rounded-full bg-primary-500 text-white text-[10px] sm:text-[11px] font-black shadow-2xs mb-1">
-                    1
-                  </span>
-                  <span className="text-[11px] sm:text-[12px] font-extrabold text-neutral-900 leading-tight">Gửi link mời</span>
+            {/* BỘ 2 NÚT HÀNH ĐỘNG NHANH */}
+            <div className="grid grid-cols-2 gap-2 sm:gap-2.5 pt-0.5">
+              <button
+                type="button"
+                onClick={handleCopyInviteMessage}
+                className={`flex items-center justify-center gap-1.5 rounded-xl py-2.5 px-2 text-xs font-black transition-all shadow-2xs border cursor-pointer active:scale-95 ${
+                  copiedMsg
+                    ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                    : "bg-white hover:bg-primary-50/70 text-neutral-800 hover:text-primary-600 border-primary-200/90"
+                }`}
+              >
+                {copiedMsg ? (
+                  <>
+                    <Check size={14} strokeWidth={2.5} className="text-emerald-600" />
+                    <span>Đã chép tin nhắn</span>
+                  </>
+                ) : (
+                  <>
+                    <MessageSquare size={14} strokeWidth={2.2} className="text-primary-500" />
+                    <span>Lời mời Zalo 💬</span>
+                  </>
+                )}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setShowQR(true)}
+                className="flex items-center justify-center gap-1.5 rounded-xl bg-white hover:bg-primary-50/70 border border-primary-200/90 py-2.5 px-2 text-xs font-black text-neutral-800 hover:text-primary-600 transition-all shadow-2xs cursor-pointer active:scale-95"
+              >
+                <QrCode size={14} strokeWidth={2.2} className="text-primary-500" />
+                <span>Mã QR quét 📲</span>
+              </button>
+            </div>
+          </div>
+
+          {/* 3 Mini Highlight Bullets dạng banner màu mềm */}
+          <div className="mt-1 rounded-xl bg-primary-50/80 p-2 sm:p-2.5 border border-primary-100/80 grid grid-cols-3 gap-1 text-[10px] sm:text-[11px] font-black text-neutral-600 text-center select-none">
+            <div className="flex items-center justify-center gap-1 min-w-0">
+              <Sparkles size={11} className="text-primary-500 shrink-0" />
+              <span className="truncate">Thưởng {referralPercent}%/đơn</span>
+            </div>
+            <div className="flex items-center justify-center gap-1 min-w-0 border-x border-primary-200/80 px-0.5">
+              <ShieldCheck size={11} className="text-emerald-600 shrink-0" />
+              <span className="truncate">Bạn bè giữ 100%</span>
+            </div>
+            <div className="flex items-center justify-center gap-1 min-w-0">
+              <IconBow className="w-3.5 h-3.5 text-accent-bow shrink-0" />
+              <span className="truncate">Cộng ví tự động</span>
+            </div>
+          </div>
+        </div>
+
+        {/* CỘT PHẢI: QUYỀN LỢI & CÁCH HOẠT ĐỘNG (THIẾT KẾ GRID 2x2 HIỆN ĐẠI, GỌN GÀNG, SANG TRỌNG) */}
+        <div className="h-full rounded-3xl bg-white p-4.5 sm:p-6 shadow-cute border border-primary-200/80 flex flex-col justify-between gap-4 overflow-hidden">
+          <div className="flex flex-col gap-3.5">
+            {/* Header Box */}
+            <div className="flex items-center justify-between border-b border-primary-100/70 pb-3 gap-2">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-gradient-to-br from-primary-400 to-pink-500 text-white shadow-2xs shrink-0">
+                  <IconBow className="w-4.5 h-4.5 text-white" />
                 </div>
-                <div className="flex flex-col items-center">
-                  <span className="flex h-5 w-5 sm:h-6 sm:w-6 items-center justify-center rounded-full bg-primary-500 text-white text-[10px] sm:text-[11px] font-black shadow-2xs mb-1">
-                    2
-                  </span>
-                  <span className="text-[11px] sm:text-[12px] font-extrabold text-neutral-900 leading-tight">Bạn mua sắm</span>
+                <div className="min-w-0">
+                  <h2 className="text-[14px] sm:text-[15.5px] font-black text-neutral-900 tracking-tight truncate">
+                    Quyền Lợi Giới Thiệu
+                  </h2>
+                  <p className="text-[11px] text-neutral-500 font-medium truncate">Chính sách minh bạch & tự động</p>
                 </div>
-                <div className="flex flex-col items-center">
-                  <span className="flex h-5 w-5 sm:h-6 sm:w-6 items-center justify-center rounded-full bg-emerald-500 text-white text-[10px] sm:text-[11px] font-black shadow-2xs mb-1">
-                    3
+              </div>
+              <span className="text-[10.5px] sm:text-[11px] font-black px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/80 shadow-2xs shrink-0 whitespace-nowrap">
+                100% minh bạch 🎀
+              </span>
+            </div>
+
+            {/* Grid 2x2: 4 Quyền Lợi Nổi Bật Siêu Đẹp & Gọn Gàng */}
+            <div className="grid grid-cols-2 gap-2.5 sm:gap-3">
+              {/* Box 1: Thưởng hoa hồng */}
+              <div className="group rounded-2xl p-3 sm:p-3.5 bg-gradient-to-b from-primary-50/70 via-pink-50/30 to-white border border-primary-200/80 hover:border-primary-300 transition-all shadow-2xs flex flex-col justify-between gap-2">
+                <div className="flex items-center justify-between gap-1">
+                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-primary-100 text-primary-600 flex items-center justify-center shrink-0 shadow-2xs">
+                    <Gift size={16} strokeWidth={2.4} />
+                  </div>
+                  <span className="text-[9.5px] sm:text-[10px] font-black px-1.5 py-0.5 rounded-md bg-primary-100/90 text-primary-700 uppercase tracking-wider">
+                    Thưởng thêm
                   </span>
-                  <span className="text-[11px] sm:text-[12px] font-extrabold text-neutral-900 leading-tight">Nhận hoa hồng</span>
+                </div>
+                <div>
+                  <div className="text-[12.5px] sm:text-[13px] font-black text-neutral-900 leading-snug">
+                    +{referralPercent}% Hoa hồng
+                  </div>
+                  <p className="text-[10px] sm:text-[11px] text-neutral-500 font-medium leading-relaxed mt-0.5 line-clamp-2">
+                    Tặng trên số tiền hoàn bạn bè nhận được ở mỗi đơn
+                  </p>
+                </div>
+              </div>
+
+              {/* Box 2: Bạn bè giữ 100% */}
+              <div className="group rounded-2xl p-3 sm:p-3.5 bg-gradient-to-b from-emerald-50/60 via-teal-50/30 to-white border border-emerald-200/80 hover:border-emerald-300 transition-all shadow-2xs flex flex-col justify-between gap-2">
+                <div className="flex items-center justify-between gap-1">
+                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0 shadow-2xs">
+                    <ShieldCheck size={16} strokeWidth={2.4} />
+                  </div>
+                  <span className="text-[9.5px] sm:text-[10px] font-black px-1.5 py-0.5 rounded-md bg-emerald-100/90 text-emerald-700 uppercase tracking-wider">
+                    Giữ trọn 100%
+                  </span>
+                </div>
+                <div>
+                  <div className="text-[12.5px] sm:text-[13px] font-black text-neutral-900 leading-snug">
+                    Bạn bè giữ trọn vẹn
+                  </div>
+                  <p className="text-[10px] sm:text-[11px] text-neutral-500 font-medium leading-relaxed mt-0.5 line-clamp-2">
+                    Người được mời không bị trừ bất kỳ chiết khấu nào
+                  </p>
+                </div>
+              </div>
+
+              {/* Box 3: Số đơn áp dụng */}
+              <div className="group rounded-2xl p-3 sm:p-3.5 bg-gradient-to-b from-amber-50/60 via-yellow-50/30 to-white border border-amber-200/80 hover:border-amber-300 transition-all shadow-2xs flex flex-col justify-between gap-2">
+                <div className="flex items-center justify-between gap-1">
+                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center shrink-0 shadow-2xs">
+                    <ShoppingBag size={16} strokeWidth={2.4} />
+                  </div>
+                  <span className="text-[9.5px] sm:text-[10px] font-black px-1.5 py-0.5 rounded-md bg-amber-100/90 text-amber-700 uppercase tracking-wider">
+                    {isPartner ? "Đối tác" : "Số lượng đơn"}
+                  </span>
+                </div>
+                <div>
+                  <div className="text-[12.5px] sm:text-[13px] font-black text-neutral-900 leading-snug">
+                    {isPartner ? "Vô hạn đơn hàng" : `${maxReferralOrders} đơn đầu / bạn`}
+                  </div>
+                  <p className="text-[10px] sm:text-[11px] text-neutral-500 font-medium leading-relaxed mt-0.5 line-clamp-2">
+                    {isPartner ? "Thưởng hoa hồng không giới hạn mọi đơn trọn đời" : `Tính độc lập cho ${maxReferralOrders} đơn của từng người bạn`}
+                  </p>
+                </div>
+              </div>
+
+              {/* Box 4: Thời hạn hiệu lực */}
+              <div className="group rounded-2xl p-3 sm:p-3.5 bg-gradient-to-b from-blue-50/60 via-indigo-50/30 to-white border border-blue-200/80 hover:border-blue-300 transition-all shadow-2xs flex flex-col justify-between gap-2">
+                <div className="flex items-center justify-between gap-1">
+                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center shrink-0 shadow-2xs">
+                    <Clock size={16} strokeWidth={2.4} />
+                  </div>
+                  <span className="text-[9.5px] sm:text-[10px] font-black px-1.5 py-0.5 rounded-md bg-blue-100/90 text-blue-700 uppercase tracking-wider">
+                    Thời hạn
+                  </span>
+                </div>
+                <div>
+                  <div className="text-[12.5px] sm:text-[13px] font-black text-neutral-900 leading-snug">
+                    Hạn {referralValidityMonths} tháng
+                  </div>
+                  <p className="text-[10px] sm:text-[11px] text-neutral-500 font-medium leading-relaxed mt-0.5 line-clamp-2">
+                    Ghi nhận toàn bộ đơn phát sinh từ lúc bạn bè tạo tài khoản
+                  </p>
                 </div>
               </div>
             </div>
           </div>
-        </FadeUp>
+
+          {/* 3 Bước nhận hoa hồng tự động */}
+          <div className="rounded-2xl bg-neutral-50/90 p-3 sm:p-3.5 border border-neutral-200/70 shadow-2xs">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-[10px] sm:text-[10.5px] font-black uppercase tracking-wider text-neutral-400">
+                Quy trình 3 bước
+              </span>
+              <span className="text-[10.5px] sm:text-[11px] font-bold text-primary-600 flex items-center gap-1">
+                Tự động cộng ví 🐾
+              </span>
+            </div>
+            <div className="grid grid-cols-3 gap-1.5 sm:gap-2 text-center items-center">
+              <div className="flex flex-col items-center p-2 rounded-xl bg-white border border-neutral-100 shadow-2xs">
+                <span className="flex h-5 w-5 sm:h-6 sm:w-6 items-center justify-center rounded-full bg-primary-500 text-white text-[10px] sm:text-[11px] font-black shadow-2xs mb-1">
+                  1
+                </span>
+                <span className="text-[11px] sm:text-[12px] font-extrabold text-neutral-900 leading-tight">Gửi link mời</span>
+                <span className="text-[9.5px] text-neutral-400 mt-0.5">Zalo / QR / Mã</span>
+              </div>
+              <div className="flex flex-col items-center p-2 rounded-xl bg-white border border-neutral-100 shadow-2xs">
+                <span className="flex h-5 w-5 sm:h-6 sm:w-6 items-center justify-center rounded-full bg-primary-500 text-white text-[10px] sm:text-[11px] font-black shadow-2xs mb-1">
+                  2
+                </span>
+                <span className="text-[11px] sm:text-[12px] font-extrabold text-neutral-900 leading-tight">Bạn mua sắm</span>
+                <span className="text-[9.5px] text-neutral-400 mt-0.5">Shopee & TikTok</span>
+              </div>
+              <div className="flex flex-col items-center p-2 rounded-xl bg-white border border-emerald-100/90 bg-emerald-50/40 shadow-2xs">
+                <span className="flex h-5 w-5 sm:h-6 sm:w-6 items-center justify-center rounded-full bg-emerald-500 text-white text-[10px] sm:text-[11px] font-black shadow-2xs mb-1">
+                  3
+                </span>
+                <span className="text-[11px] sm:text-[12px] font-extrabold text-emerald-800 leading-tight">Nhận hoa hồng</span>
+                <span className="text-[9.5px] text-emerald-600 font-semibold mt-0.5">Vào ví tức thì</span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* ═══ 4. TIẾN TRÌNH ĐƠN HÀNG & DANH SÁCH BẠN BÈ ═══ */}
-      <FadeUp delay={0.35}>
-        <div className="rounded-3xl bg-white p-5 sm:p-6 shadow-cute border border-primary-200/80 flex flex-col gap-4 overflow-hidden">
+      <div className="rounded-3xl bg-white p-5 sm:p-6 shadow-cute border border-primary-200/80 flex flex-col gap-4 overflow-hidden">
           {/* Navigation Tabs */}
           <div className="flex flex-col gap-2.5 pb-2 border-b border-primary-100/60">
             <div className="grid grid-cols-2 p-1 rounded-2xl bg-neutral-100/90 border border-neutral-200/60">
@@ -896,7 +915,6 @@ export function ReferralClient({
             </>
           )}
         </div>
-      </FadeUp>
 
       {/* ═══ QR CODE MODAL POPUP (ĐỒNG BỘ POPUP CỦA MEOWBACK) ═══ */}
       {showQR && mounted && createPortal(
