@@ -375,7 +375,7 @@ export async function POST(req: NextRequest) {
       .filter((o) => o.orderStatus === "approved" && o.payoutStatus === "unpaid")
       .reduce((s, o) => s + Number(o.customerRewardAmount), 0);
     const processing = orders
-      .filter((o) => o.payoutStatus === "processing")
+      .filter((o) => o.orderStatus === "pending" || o.orderStatus === "processing")
       .reduce((s, o) => s + Number(o.customerRewardAmount), 0);
     const paid = orders
       .filter((o) => o.payoutStatus === "paid")
