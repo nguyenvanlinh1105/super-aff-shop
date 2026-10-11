@@ -2,10 +2,24 @@ import { prisma } from "@/lib/prisma";
 import { AdminLinksClient } from "@/components/admin/AdminLinksClient";
 import { Link2, CheckCircle, MousePointerClick } from "lucide-react";
 import { resolveDisplayProductName, resolveDisplayProductImage } from "@/lib/productInfo";
+import { buildShortUrl } from "@/lib/shortLink";
+import Link from "next/link";
 
-export default async function AdminLinksPage({ searchParams }: { searchParams: { q?: string; page?: string; sort?: string; order?: string; tab?: string } }) {
+export default async function AdminLinksPage({
+  searchParams,
+}: {
+  searchParams: {
+    q?: string;
+    page?: string;
+    sort?: string;
+    order?: string;
+    tab?: string;
+    platform?: string;
+    limit?: string;
+  };
+}) {
   const page = Number(searchParams.page) || 1;
-  const limit = 10;
+  const limit = Number(searchParams.limit) || 10;
   const skip = (page - 1) * limit;
   const q = searchParams.q?.trim() || "";
 
@@ -23,26 +37,39 @@ export default async function AdminLinksPage({ searchParams }: { searchParams: {
 
   const where: any = { ...baseWhere };
 
-  const orderByField = searchParams.sort || "createdAt";
-  const orderByDir = searchParams.order || "desc";
-  const orderBy = { [orderByField]: orderByDir };
+  // Lọc theo sàn
+  const platform = (searchParams.platform || "ALL").toUpperCase();
+  if (platform !== "ALL") {
+    where.platform = { code: { equals: platform, mode: "insensitive" } };
+  }
 
+  // Lọc theo trạng thái
   const tab = searchParams.tab || "all";
   if (tab === "active") where.status = "active";
   if (tab === "stopped") where.status = "stopped";
 
+  // Sắp xếp
+  const sortBy = searchParams.sort || "newest";
+  let orderBy: any = { createdAt: "desc" };
+  if (sortBy === "oldest") orderBy = { createdAt: "asc" };
+  else if (sortBy === "clicks") orderBy = { clicks: "desc" };
+  else if (sortBy === "name_asc") orderBy = { customer: { fullName: "asc" } };
+  else if (sortBy === "product_asc") orderBy = { productTitle: "asc" };
+  else if (searchParams.sort && searchParams.order) {
+    orderBy = { [searchParams.sort]: searchParams.order };
+  }
+
   const [
-    customers,
-    platforms,
     links,
     filteredCount,
     totalCount,
     activeCount,
     stoppedCount,
     clicksAgg,
+    shopeeCount,
+    tiktokCount,
+    lazadaCount,
   ] = await Promise.all([
-    prisma.customer.findMany({ where: { status: "active" }, orderBy: { fullName: "asc" } }),
-    prisma.platform.findMany({ where: { status: "active" }, orderBy: { name: "asc" } }),
     prisma.trackingLink.findMany({
       where,
       orderBy,
@@ -55,15 +82,29 @@ export default async function AdminLinksPage({ searchParams }: { searchParams: {
     prisma.trackingLink.count({ where: { ...baseWhere, status: "active" } }),
     prisma.trackingLink.count({ where: { ...baseWhere, status: "stopped" } }),
     prisma.trackingLink.aggregate({ where, _sum: { clicks: true } }),
+    prisma.trackingLink.count({
+      where: { ...baseWhere, platform: { code: { equals: "SHOPEE", mode: "insensitive" } } },
+    }),
+    prisma.trackingLink.count({
+      where: { ...baseWhere, platform: { code: { equals: "TIKTOK", mode: "insensitive" } } },
+    }),
+    prisma.trackingLink.count({
+      where: { ...baseWhere, platform: { code: { equals: "LAZADA", mode: "insensitive" } } },
+    }),
   ]);
 
   const rows = links.map((l) => ({
     id: l.id,
-    createdAt: l.createdAt,
+    createdAt: l.createdAt.toISOString(),
     customerName: l.customer.fullName,
+    customerCode: l.customer.customerCode,
+    customerId: l.customer.id,
     platformName: l.platform.name,
+    platformCode: l.platform.code,
     trackingCode: l.trackingCode,
     shortCode: l.shortCode,
+    shortUrl: l.shortUrl || (l.shortCode ? buildShortUrl(l.shortCode) : null),
+    affiliateUrl: l.affiliateUrl,
     channelSource: l.channelSource,
     clicks: l.clicks,
     status: l.status,
@@ -71,13 +112,12 @@ export default async function AdminLinksPage({ searchParams }: { searchParams: {
     productImage: resolveDisplayProductImage(l.productImage),
   }));
 
-  const totalPages = Math.ceil(filteredCount / limit);
+  const totalPages = Math.ceil(filteredCount / limit) || 1;
   const counts = { all: totalCount, active: activeCount, stopped: stoppedCount };
   const totalClicks = clicksAgg._sum.clicks ?? 0;
 
   return (
     <div className="flex flex-col gap-6 fade-in pb-8">
-
       {/* ── LUXURY HERO BANNER ── */}
       <div className="relative overflow-hidden rounded-3xl p-6 sm:p-8 border border-sky-200/60 shadow-lg shadow-sky-500/5 bg-gradient-to-br from-white via-[#F0F4FF] to-[#E8EEFF]">
         <div className="pointer-events-none absolute -right-10 -top-10 h-48 w-48 rounded-full bg-gradient-to-br from-sky-200/30 to-indigo-300/20 blur-xl" />
@@ -109,12 +149,12 @@ export default async function AdminLinksPage({ searchParams }: { searchParams: {
             </div>
           </div>
 
-          <a href="/admin/quick-link">
-            <button className="flex items-center gap-2 rounded-2xl bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 px-5 py-3 text-xs font-black text-white shadow-md shadow-rose-500/20 hover:shadow-lg transition-all active:scale-[0.98]">
+          <Link href="/admin/quick-link">
+            <button className="flex items-center gap-2 rounded-2xl bg-gradient-to-r from-rose-500 via-pink-500 to-rose-600 px-5 py-3 text-xs font-black text-white shadow-md shadow-rose-500/20 hover:shadow-lg transition-all active:scale-[0.98] cursor-pointer">
               <span>+ Tạo Link Aff Nhanh</span>
               <span className="text-base leading-none">⚡</span>
             </button>
-          </a>
+          </Link>
         </div>
       </div>
 
@@ -159,27 +199,23 @@ export default async function AdminLinksPage({ searchParams }: { searchParams: {
         </div>
       </div>
 
-      {/* ── LINK LIST ── */}
-      <div className="rounded-3xl bg-white shadow-sm border border-neutral-200/70 overflow-hidden">
-        <div className="flex items-center justify-between px-6 pt-6 pb-4 border-b border-neutral-200/70 bg-neutral-50/50">
-          <div className="flex items-center gap-2.5">
-            <img src="/meow-back-voucher.png" alt="" className="h-7 w-7 object-contain rounded-lg" />
-            <h2 className="text-sm font-extrabold text-neutral-900 tracking-tight">Lịch Sử Link Đã Khởi Tạo</h2>
-          </div>
-          <span className="text-xs font-extrabold text-neutral-500 bg-neutral-100 px-3 py-1 rounded-full">{filteredCount} link</span>
-        </div>
-        <div className="p-6">
-          <AdminLinksClient
-            links={rows}
-            totalPages={totalPages}
-            currentPage={page}
-            totalItems={filteredCount}
-            pageSize={limit}
-            counts={counts}
-            totalClicks={totalClicks}
-          />
-        </div>
-      </div>
+      {/* ── DANH SÁCH LINK AFFILIATE (HIỂN THỊ ĐẸP & THÂN THIỆN NHƯ TRANG TẠO LINK AFF NHANH) ── */}
+      <AdminLinksClient
+        links={rows}
+        totalPages={totalPages}
+        currentPage={page}
+        totalItems={filteredCount}
+        pageSize={limit}
+        counts={counts}
+        totalClicks={totalClicks}
+        platformCounts={{
+          all: totalCount,
+          shopee: shopeeCount,
+          tiktok: tiktokCount,
+          lazada: lazadaCount,
+        }}
+      />
     </div>
   );
 }
+
