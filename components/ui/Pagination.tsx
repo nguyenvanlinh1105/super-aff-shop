@@ -23,37 +23,32 @@ type PageItem =
   | { type: "dots-right"; jumpTo: number };
 
 function getPaginationItems(totalPages: number, currentPage: number): PageItem[] {
-  // Nếu tổng số trang nhỏ hơn hoặc bằng 7, hiển thị đầy đủ (không cần rút gọn vì 7 nút hoàn toàn vừa vặn)
-  if (totalPages <= 7) {
+  // Nếu tổng số trang nhỏ hơn hoặc bằng 5, hiển thị đầy đủ (1, 2, 3, 4, 5)
+  if (totalPages <= 5) {
     return Array.from({ length: totalPages }, (_, i) => ({
       type: "page",
       value: i + 1,
     }));
   }
 
-  // Khi tổng số trang > 7, luôn giữ đúng 7 phần tử (bao gồm số và dấu ...)
-  // để chiều rộng phân trang luôn cố định, không giật lag khi chuyển trang:
+  // Khi tổng số trang >= 6, giới hạn hiển thị gọn gàng bằng dấu "…" thay vì hiện tràn lan tất cả các trang:
 
-  // Trường hợp 1: Ở cụm đầu (trang 1, 2, 3, 4) -> 1 2 3 4 5 ... N
-  if (currentPage <= 4) {
+  // Trường hợp 1: Ở cụm đầu (trang 1, 2, 3) -> 1 2 3 ... N
+  if (currentPage <= 3) {
     return [
       { type: "page", value: 1 },
       { type: "page", value: 2 },
       { type: "page", value: 3 },
-      { type: "page", value: 4 },
-      { type: "page", value: 5 },
       { type: "dots-right", jumpTo: Math.min(totalPages, currentPage + 5) },
       { type: "page", value: totalPages },
     ];
   }
 
-  // Trường hợp 2: Ở cụm cuối (trang N-3, N-2, N-1, N) -> 1 ... N-4 N-3 N-2 N-1 N
-  if (currentPage >= totalPages - 3) {
+  // Trường hợp 2: Ở cụm cuối (trang N-2, N-1, N) -> 1 ... N-2 N-1 N
+  if (currentPage >= totalPages - 2) {
     return [
       { type: "page", value: 1 },
       { type: "dots-left", jumpTo: Math.max(1, currentPage - 5) },
-      { type: "page", value: totalPages - 4 },
-      { type: "page", value: totalPages - 3 },
       { type: "page", value: totalPages - 2 },
       { type: "page", value: totalPages - 1 },
       { type: "page", value: totalPages },
@@ -61,7 +56,7 @@ function getPaginationItems(totalPages: number, currentPage: number): PageItem[]
   }
 
   // Trường hợp 3: Ở giữa -> 1 ... (curr-1) (curr) (curr+1) ... N
-  // Tâm điểm là trang hiện tại cùng 2 trang kề bên
+  // Hiển thị trang 1, dấu …, trang kề trước, trang hiện tại, trang kề sau, dấu …, trang cuối
   return [
     { type: "page", value: 1 },
     { type: "dots-left", jumpTo: Math.max(1, currentPage - 5) },
