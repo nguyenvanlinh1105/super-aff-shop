@@ -1,8 +1,8 @@
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { AdminAnalyticsClient } from "@/components/admin/AdminAnalyticsClient";
-import { getVietnamHour } from "@/lib/format";
+import { AdminAnalyticsClient, ActivityLogStatItem } from "@/components/admin/AdminAnalyticsClient";
+import { getVietnamHour, getVietnamDateParts } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
 
@@ -11,10 +11,6 @@ export default async function AdminAnalyticsPage() {
   if (!session || session.role !== "admin") {
     redirect("/admin");
   }
-
-  // Lấy dữ liệu 7 ngày gần nhất để tính mật độ và khung giờ
-  const sevenDaysAgo = new Date();
-  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
   // ── CHỈ LẤY DỮ LIỆU CỦA USER THỰC TẾ (CUSTOMER & GUEST), LOẠI BỎ HOÀN TOÀN ADMIN & TRANG /ADMIN ──
   const userOnlyFilter = {
@@ -69,12 +65,9 @@ export default async function AdminAnalyticsPage() {
       orderBy: { createdAt: "desc" },
     }),
 
-    // 6. Dữ liệu 7 ngày gần nhất (tối đa 5000 records) để tính giờ cao điểm và thiết bị
+    // 6. Dữ liệu hoạt động người dùng (lấy tối đa 10,000 records mới nhất) để vẽ biểu đồ và phân tích
     prisma.userActivityLog.findMany({
-      where: {
-        ...userOnlyFilter,
-        createdAt: { gte: sevenDaysAgo },
-      },
+      where: userOnlyFilter,
       select: {
         path: true,
         userRole: true,
@@ -83,7 +76,8 @@ export default async function AdminAnalyticsPage() {
         browser: true,
         createdAt: true,
       },
-      take: 5000,
+      orderBy: { createdAt: "desc" },
+      take: 10000,
     }),
   ]);
 
@@ -110,7 +104,21 @@ export default async function AdminAnalyticsPage() {
     };
   });
 
-  // Phân bổ 24 giờ trong ngày (0h -> 23h)
+  // Xác định ngày mới nhất theo giờ Việt Nam (GMT+7)
+  const todayParts = getVietnamDateParts(new Date());
+  let latestDateKey = todayParts.dateKey;
+
+  if (logsForStats.length > 0) {
+    const hasLogToday = logsForStats.some(
+      (l) => getVietnamDateParts(l.createdAt).dateKey === todayParts.dateKey
+    );
+    if (!hasLogToday) {
+      // Nếu hôm nay chưa có lượt truy cập, mặc định lấy ngày gần nhất có dữ liệu
+      latestDateKey = getVietnamDateParts(logsForStats[0].createdAt).dateKey;
+    }
+  }
+
+  // Phân bổ 24 giờ trong ngày (0h -> 23h) cho ngày mới nhất được chọn
   const hourlyDistribution = Array.from({ length: 24 }, (_, hour) => ({
     hour,
     total: 0,
@@ -122,14 +130,18 @@ export default async function AdminAnalyticsPage() {
   const browserMap = new Map<string, number>();
 
   for (const log of logsForStats) {
-    // 24 Giờ theo chuẩn múi giờ Việt Nam (Asia/Ho_Chi_Minh - GMT+7)
-    const hour = getVietnamHour(log.createdAt);
-    if (hourlyDistribution[hour]) {
-      hourlyDistribution[hour].total += 1;
-      if (log.userRole === "guest") {
-        hourlyDistribution[hour].guests += 1;
-      } else {
-        hourlyDistribution[hour].members += 1;
+    const parts = getVietnamDateParts(log.createdAt);
+
+    // Tính phân bổ 24h cho ngày mới nhất theo giờ Việt Nam
+    if (parts.dateKey === latestDateKey) {
+      const hour = parts.hour;
+      if (hourlyDistribution[hour]) {
+        hourlyDistribution[hour].total += 1;
+        if (log.userRole === "guest") {
+          hourlyDistribution[hour].guests += 1;
+        } else {
+          hourlyDistribution[hour].members += 1;
+        }
       }
     }
 
@@ -143,7 +155,7 @@ export default async function AdminAnalyticsPage() {
     browserMap.set(b, (browserMap.get(b) || 0) + 1);
   }
 
-  // Tìm khung giờ cao điểm nhất
+  // Tìm khung giờ cao điểm nhất của ngày
   let peakHour = 12;
   let maxCount = -1;
   for (const h of hourlyDistribution) {
@@ -174,6 +186,16 @@ export default async function AdminAnalyticsPage() {
     createdAt: l.createdAt.toISOString(),
   }));
 
+  // Toàn bộ dữ liệu log đã serialize để client lọc động theo Ngày, Tuần, Tháng, Quý, Năm
+  const activityLogs: ActivityLogStatItem[] = logsForStats.map((l) => ({
+    path: l.path,
+    userRole: l.userRole,
+    visitorId: l.visitorId,
+    deviceType: l.deviceType,
+    browser: l.browser,
+    createdAt: l.createdAt.toISOString(),
+  }));
+
   return (
     <AdminAnalyticsClient
       totalViews={totalViews}
@@ -186,6 +208,8 @@ export default async function AdminAnalyticsPage() {
       browserBreakdown={browserBreakdown}
       recentLogs={formattedRecentLogs}
       peakHour={peakHour}
+      activityLogs={activityLogs}
+      initialDateKey={latestDateKey}
     />
   );
 }

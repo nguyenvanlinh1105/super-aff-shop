@@ -25,6 +25,9 @@ import { formatDate } from "@/lib/format";
 import { Pagination } from "@/components/ui/Pagination";
 import { CustomSelect, type CustomSelectOption } from "@/components/ui/CustomSelect";
 
+import { TrafficTrendChart, type ActivityLogStatItem } from "./TrafficTrendChart";
+export type { ActivityLogStatItem };
+
 type RouteGroup = {
   path: string;
   totalViews: number;
@@ -68,294 +71,8 @@ interface Props {
   browserBreakdown: { name: string; count: number }[];
   recentLogs: LogEntry[];
   peakHour: number;
-}
-
-// ── BIỂU ĐỒ ĐƯỜNG CONG SVG HIỆN ĐẠI CHO 24 KHUNG GIỜ (LINE CHART) ──
-function LineChart24h({
-  data,
-  peakHour,
-}: {
-  data: HourlyStat[];
-  peakHour: number;
-}) {
-  const [hoveredHour, setHoveredHour] = useState<number | null>(peakHour);
-
-  const maxTotal = useMemo(() => {
-    return Math.max(...data.map((d) => d.total), 4);
-  }, [data]);
-
-  const svgWidth = 600;
-  const svgHeight = 200;
-  const paddingX = 25;
-  const paddingTop = 25;
-  const paddingBottom = 35;
-  const chartW = svgWidth - paddingX * 2;
-  const chartH = svgHeight - paddingTop - paddingBottom;
-
-  // Tọa độ các điểm (24 giờ)
-  const points = useMemo(() => {
-    return data.map((d, i) => {
-      const x = paddingX + (i / 23) * chartW;
-      const y = paddingTop + chartH - (d.total / maxTotal) * chartH;
-      return { x, y, ...d };
-    });
-  }, [data, maxTotal, chartW, chartH, paddingX, paddingTop]);
-
-  // Tạo đường cong Bézier mượt mà (Smooth Spline)
-  const { linePath, areaPath } = useMemo(() => {
-    if (points.length === 0) return { linePath: "", areaPath: "" };
-
-    let line = `M ${points[0].x} ${points[0].y}`;
-    for (let i = 0; i < points.length - 1; i++) {
-      const p0 = points[i];
-      const p1 = points[i + 1];
-      const cx1 = p0.x + (p1.x - p0.x) / 2;
-      const cy1 = p0.y;
-      const cx2 = p0.x + (p1.x - p0.x) / 2;
-      const cy2 = p1.y;
-      line += ` C ${cx1} ${cy1}, ${cx2} ${cy2}, ${p1.x} ${p1.y}`;
-    }
-
-    const baselineY = paddingTop + chartH;
-    const area = `${line} L ${points[points.length - 1].x} ${baselineY} L ${points[0].x} ${baselineY} Z`;
-
-    return { linePath: line, areaPath: area };
-  }, [points, paddingTop, chartH]);
-
-  const activePoint = points.find((p) => p.hour === hoveredHour) || points[peakHour] || points[0];
-
-  return (
-    <div className="flex flex-col gap-3">
-      {/* Thẻ hiển thị chi tiết điểm đang xem (Interactive Inspection Card) */}
-      <div className="bg-gradient-to-br from-rose-50/70 via-white to-pink-50/50 p-3 sm:p-3.5 rounded-2xl border border-rose-200/70 shadow-2xs">
-        {/* Header khung giờ & trạng thái */}
-        <div className="flex items-center justify-between gap-2 mb-2 pb-2 border-b border-rose-100/70">
-          <div className="flex items-center gap-2 min-w-0">
-            <span className="relative flex h-2.5 w-2.5 shrink-0">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-rose-400 opacity-75" />
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-rose-500" />
-            </span>
-            <span className="text-xs sm:text-[13px] font-black text-neutral-900 tracking-tight">
-              Khung giờ {activePoint.hour}:00 – {activePoint.hour + 1}:00
-            </span>
-          </div>
-
-          {activePoint.hour === peakHour ? (
-            <span className="inline-flex items-center gap-1 text-[10px] sm:text-[10.5px] font-black text-rose-600 bg-rose-100/90 px-2 py-0.5 rounded-full border border-rose-200 shrink-0">
-              <Flame size={11} className="text-rose-500 shrink-0" />
-              <span>Giờ vàng cao điểm</span>
-            </span>
-          ) : (
-            <span className="text-[10px] sm:text-[10.5px] font-bold text-neutral-400 shrink-0">
-              Chi tiết thời gian thực
-            </span>
-          )}
-        </div>
-
-        {/* 3 Thẻ số liệu chi tiết (Grid 3 Cột cân đối, không bao giờ bị vỡ dòng) */}
-        <div className="grid grid-cols-3 gap-2">
-          {/* Cột 1: Tổng lượt xem */}
-          <div className="bg-white rounded-xl p-2 sm:p-2.5 border border-rose-100/90 shadow-2xs flex flex-col items-center justify-center text-center">
-            <span className="text-[9.5px] sm:text-[10px] font-bold text-neutral-400 uppercase tracking-wider truncate">
-              Tổng lượt xem
-            </span>
-            <span className="text-base sm:text-lg font-black text-rose-600 tabular-nums leading-tight mt-0.5">
-              {activePoint.total.toLocaleString("vi-VN")}
-            </span>
-          </div>
-
-          {/* Cột 2: Thành viên */}
-          <div className="bg-white rounded-xl p-2 sm:p-2.5 border border-emerald-100/90 shadow-2xs flex flex-col items-center justify-center text-center">
-            <span className="text-[9.5px] sm:text-[10px] font-bold text-neutral-400 uppercase tracking-wider flex items-center justify-center gap-1 truncate">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />
-              <span>Thành viên</span>
-            </span>
-            <span className="text-base sm:text-lg font-black text-emerald-600 tabular-nums leading-tight mt-0.5">
-              {activePoint.members.toLocaleString("vi-VN")}
-            </span>
-          </div>
-
-          {/* Cột 3: Khách vãng lai */}
-          <div className="bg-white rounded-xl p-2 sm:p-2.5 border border-amber-100/90 shadow-2xs flex flex-col items-center justify-center text-center">
-            <span className="text-[9.5px] sm:text-[10px] font-bold text-neutral-400 uppercase tracking-wider flex items-center justify-center gap-1 truncate">
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shrink-0" />
-              <span>Khách</span>
-            </span>
-            <span className="text-base sm:text-lg font-black text-amber-600 tabular-nums leading-tight mt-0.5">
-              {activePoint.guests.toLocaleString("vi-VN")}
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* SVG Canvas Biểu Đồ Đường Responsive */}
-      <div className="relative w-full overflow-hidden rounded-2xl bg-white border border-neutral-100 p-1 sm:p-2 shadow-2xs">
-        <svg
-          viewBox={`0 0 ${svgWidth} ${svgHeight}`}
-          className="w-full h-auto select-none overflow-visible"
-        >
-          <defs>
-            {/* Gradient màu hồng MeowBack lấp lánh dưới đường cong */}
-            <linearGradient id="lineAreaGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#f43f5e" stopOpacity="0.28" />
-              <stop offset="60%" stopColor="#fb7185" stopOpacity="0.08" />
-              <stop offset="100%" stopColor="#ffffff" stopOpacity="0.00" />
-            </linearGradient>
-
-            {/* Gradient cho đường stroke chính */}
-            <linearGradient id="strokeGradient" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stopColor="#fb7185" />
-              <stop offset="50%" stopColor="#f43f5e" />
-              <stop offset="100%" stopColor="#e11d48" />
-            </linearGradient>
-          </defs>
-
-          {/* Đường lưới ngang (Grid lines) */}
-          {[0, 0.25, 0.5, 0.75, 1].map((ratio, idx) => {
-            const y = paddingTop + chartH - ratio * chartH;
-            const val = Math.round(ratio * maxTotal);
-            return (
-              <g key={idx}>
-                <line
-                  x1={paddingX}
-                  y1={y}
-                  x2={svgWidth - paddingX}
-                  y2={y}
-                  stroke="#f1f5f9"
-                  strokeWidth="1"
-                  strokeDasharray={ratio === 0 ? "none" : "3,3"}
-                />
-                <text
-                  x={paddingX - 4}
-                  y={y + 3}
-                  textAnchor="end"
-                  fill="#94a3b8"
-                  fontSize="9"
-                  fontWeight="bold"
-                >
-                  {val}
-                </text>
-              </g>
-            );
-          })}
-
-          {/* Vùng đổ màu phía dưới đường cong */}
-          <path d={areaPath} fill="url(#lineAreaGradient)" />
-
-          {/* Đường cong chính (Spline Line) */}
-          <path
-            d={linePath}
-            fill="none"
-            stroke="url(#strokeGradient)"
-            strokeWidth="3.2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-
-          {/* Đường chỉ dẫn trục dọc khi chọn/hover */}
-          {activePoint && (
-            <line
-              x1={activePoint.x}
-              y1={paddingTop}
-              x2={activePoint.x}
-              y2={paddingTop + chartH}
-              stroke="#f43f5e"
-              strokeWidth="1.5"
-              strokeDasharray="2,2"
-            />
-          )}
-
-          {/* Các điểm nút trên đường (Points) */}
-          {points.map((p) => {
-            const isPeak = p.hour === peakHour;
-            const isSelected = p.hour === hoveredHour;
-
-            return (
-              <g
-                key={p.hour}
-                className="cursor-pointer transition-transform"
-                onClick={() => setHoveredHour(p.hour)}
-                onMouseEnter={() => setHoveredHour(p.hour)}
-              >
-                {/* Dải chạm dọc toàn chiều cao (Vertical Hit Strip) - Giúp chạm trên mobile cực nhạy */}
-                <rect
-                  x={p.x - chartW / 46}
-                  y={paddingTop}
-                  width={chartW / 23}
-                  height={chartH}
-                  fill="transparent"
-                />
-
-                {/* Vòng sáng ngoài khi là Giờ Vàng */}
-                {isPeak && (
-                  <circle
-                    cx={p.x}
-                    cy={p.y}
-                    r={isSelected ? "9" : "7"}
-                    fill="#ffe4e6"
-                    stroke="#f43f5e"
-                    strokeWidth="1.5"
-                    className="animate-ping origin-center pointer-events-none"
-                    style={{ animationDuration: "2.5s" }}
-                  />
-                )}
-
-                {/* Chấm tròn chính */}
-                <circle
-                  cx={p.x}
-                  cy={p.y}
-                  r={isSelected ? "5.5" : isPeak ? "4.5" : p.total > 0 ? "3" : "2"}
-                  fill={isSelected ? "#e11d48" : isPeak ? "#f43f5e" : p.total > 0 ? "#fb7185" : "#cbd5e1"}
-                  stroke="#ffffff"
-                  strokeWidth="1.5"
-                  className="pointer-events-none"
-                />
-              </g>
-            );
-          })}
-
-          {/* Nhãn trục hoành (Giờ: 0h, 3h, 6h, 9h, 12h, 15h, 18h, 21h, 23h) */}
-          {[0, 3, 6, 9, 12, 15, 18, 21, 23].map((h) => {
-            const pt = points[h];
-            if (!pt) return null;
-            const isPeak = h === peakHour;
-            const isSelected = h === hoveredHour;
-
-            return (
-              <text
-                key={h}
-                x={pt.x}
-                y={svgHeight - 12}
-                textAnchor="middle"
-                fill={isSelected ? "#e11d48" : isPeak ? "#f43f5e" : "#64748b"}
-                fontSize={isSelected || isPeak ? "10.5" : "9.5"}
-                fontWeight={isSelected || isPeak ? "900" : "700"}
-              >
-                {h}h
-              </text>
-            );
-          })}
-        </svg>
-      </div>
-
-      {/* Chú thích & Tóm tắt dưới biểu đồ */}
-      <div className="flex items-center justify-between flex-wrap gap-2 text-[11px] font-bold text-neutral-500 pt-1">
-        <div className="flex items-center gap-3">
-          <span className="flex items-center gap-1.5">
-            <span className="w-3 h-1 rounded-full bg-rose-500" />
-            <span>Lưu lượng người dùng</span>
-          </span>
-          <span className="flex items-center gap-1.5 text-rose-600">
-            <span className="w-2 h-2 rounded-full bg-rose-500" />
-            <span>Khung giờ vàng ({peakHour}h)</span>
-          </span>
-        </div>
-        <span className="text-[10.5px] text-neutral-400">
-          Chạm vào từng điểm trên đường để xem chi tiết
-        </span>
-      </div>
-    </div>
-  );
+  activityLogs?: ActivityLogStatItem[];
+  initialDateKey?: string;
 }
 
 const ROLE_FILTER_OPTIONS: CustomSelectOption[] = [
@@ -381,11 +98,49 @@ export function AdminAnalyticsClient({
   browserBreakdown,
   recentLogs,
   peakHour,
+  activityLogs = [],
+  initialDateKey,
 }: Props) {
   const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState<"all" | "member" | "guest">("all");
   const [deviceFilter, setDeviceFilter] = useState<"all" | "mobile" | "desktop">("all");
   const [activeTab, setActiveTab] = useState<"overview" | "routes" | "logs">("overview");
+
+  // State nhận danh sách logs của kỳ lọc đang xem từ TrafficTrendChart
+  const [periodFilteredLogs, setPeriodFilteredLogs] = useState<ActivityLogStatItem[] | null>(null);
+
+  // Thống kê thiết bị & trình duyệt động theo kỳ lọc (hoặc fallback về tổng quan)
+  const { currentDeviceBreakdown, currentBrowserBreakdown, currentPeriodViews } = useMemo(() => {
+    if (periodFilteredLogs && periodFilteredLogs.length > 0) {
+      const dev = { mobile: 0, desktop: 0, tablet: 0 };
+      const browserMap = new Map<string, number>();
+
+      for (const log of periodFilteredLogs) {
+        if (log.deviceType === "mobile") dev.mobile += 1;
+        else if (log.deviceType === "tablet") dev.tablet += 1;
+        else dev.desktop += 1;
+
+        const b = log.browser || "Khác";
+        browserMap.set(b, (browserMap.get(b) || 0) + 1);
+      }
+
+      const browsers = Array.from(browserMap.entries())
+        .map(([name, count]) => ({ name, count }))
+        .sort((a, b) => b.count - a.count);
+
+      return {
+        currentDeviceBreakdown: dev,
+        currentBrowserBreakdown: browsers,
+        currentPeriodViews: periodFilteredLogs.length,
+      };
+    }
+
+    return {
+      currentDeviceBreakdown: deviceBreakdown,
+      currentBrowserBreakdown: browserBreakdown,
+      currentPeriodViews: totalViews,
+    };
+  }, [periodFilteredLogs, deviceBreakdown, browserBreakdown, totalViews]);
 
   // Lọc nhật ký trực tiếp
   const filteredLogs = useMemo(() => {
@@ -599,8 +354,8 @@ export function AdminAnalyticsClient({
               : "text-neutral-500 hover:text-neutral-900"
           }`}
         >
-          <span className="hidden sm:inline">📈 Biểu Đồ 24H</span>
-          <span className="sm:hidden">Biểu Đồ 24H</span>
+          <span className="hidden sm:inline">📈 Biểu Đồ Xu Hướng</span>
+          <span className="sm:hidden">Biểu Đồ</span>
         </button>
         <button
           type="button"
@@ -626,36 +381,19 @@ export function AdminAnalyticsClient({
         </button>
       </div>
 
-      {/* ═══ NỘI DUNG TAB 1: OVERVIEW (BIỂU ĐỒ ĐƯỜNG 24H & THIẾT BỊ) ═══ */}
+      {/* ═══ NỘI DUNG TAB 1: OVERVIEW (BIỂU ĐỒ ĐƯỜNG ĐA KỲ & THIẾT BỊ) ═══ */}
       {activeTab === "overview" && (
         <div className="flex flex-col gap-5">
-          {/* 1. BIỂU ĐỒ ĐƯỜNG MẬT ĐỘ TRUY CẬP 24H */}
-          <div className="bg-white p-4 sm:p-5 rounded-3xl border border-neutral-200/80 shadow-xs flex flex-col gap-3.5">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-neutral-100 pb-3">
-              <div>
-                <div className="flex items-center gap-2">
-                  <TrendingUp size={18} className="text-rose-500" />
-                  <h2 className="text-sm sm:text-base font-extrabold text-neutral-900">
-                    Biểu Đồ Xu Hướng Truy Cập 24 Giờ
-                  </h2>
-                </div>
-                <p className="text-[11px] sm:text-xs text-neutral-500 mt-0.5">
-                  Đường lưu lượng theo thời gian thực để tối ưu khung giờ push deal & thông báo.
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-rose-50 text-rose-700 text-[11px] font-extrabold border border-rose-200">
-                  <Flame size={12} className="text-rose-500" />
-                  <span>Khung giờ vàng: {peakHour}:00 - {peakHour + 1}:00</span>
-                </span>
-              </div>
-            </div>
+          {/* Component Biểu Đồ Xu Hướng Lọc Theo Ngày / Tuần / Tháng / Quý / Năm */}
+          <TrafficTrendChart
+            activityLogs={activityLogs}
+            fallbackHourlyDistribution={hourlyDistribution}
+            initialPeakHour={peakHour}
+            initialDateKey={initialDateKey}
+            onFilteredLogsChange={setPeriodFilteredLogs}
+          />
 
-            {/* Component Biểu Đồ Đường */}
-            <LineChart24h data={hourlyDistribution} peakHour={peakHour} />
-          </div>
-
-          {/* 2. THIẾT BỊ & TRÌNH DUYỆT TRUY CẬP */}
+          {/* 2. THIẾT BỊ & TRÌNH DUYỆT TRUY CẬP (ĐỒNG BỘ THEO KỲ ĐANG LỌC) */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Cột thiết bị */}
             <div className="bg-white p-4 sm:p-5 rounded-3xl border border-neutral-200/80 shadow-xs flex flex-col justify-between gap-3.5">
@@ -664,7 +402,9 @@ export function AdminAnalyticsClient({
                   <Smartphone size={15} className="text-rose-500" />
                   <span>Thiết Bị Người Dùng</span>
                 </h3>
-                <span className="text-[11px] text-neutral-400 font-bold">Tỷ lệ %</span>
+                <span className="text-[11px] text-neutral-400 font-bold">
+                  {currentPeriodViews > 0 ? `${currentPeriodViews} lượt` : "Tỷ lệ %"}
+                </span>
               </div>
 
               <div className="space-y-2.5">
@@ -674,13 +414,13 @@ export function AdminAnalyticsClient({
                     <span className="flex items-center gap-1.5">
                       <Smartphone size={13} className="text-rose-500" /> Điện thoại (Mobile)
                     </span>
-                    <span className="tabular-nums font-black">{deviceBreakdown.mobile} lượt</span>
+                    <span className="tabular-nums font-black">{currentDeviceBreakdown.mobile} lượt</span>
                   </div>
                   <div className="w-full bg-neutral-100 rounded-full h-1.5 overflow-hidden">
                     <div
                       className="bg-rose-500 h-full rounded-full"
                       style={{
-                        width: `${totalViews > 0 ? (deviceBreakdown.mobile / totalViews) * 100 : 0}%`,
+                        width: `${currentPeriodViews > 0 ? (currentDeviceBreakdown.mobile / currentPeriodViews) * 100 : 0}%`,
                       }}
                     />
                   </div>
@@ -692,13 +432,13 @@ export function AdminAnalyticsClient({
                     <span className="flex items-center gap-1.5">
                       <Monitor size={13} className="text-indigo-500" /> Máy tính (Desktop)
                     </span>
-                    <span className="tabular-nums font-black">{deviceBreakdown.desktop} lượt</span>
+                    <span className="tabular-nums font-black">{currentDeviceBreakdown.desktop} lượt</span>
                   </div>
                   <div className="w-full bg-neutral-100 rounded-full h-1.5 overflow-hidden">
                     <div
                       className="bg-indigo-500 h-full rounded-full"
                       style={{
-                        width: `${totalViews > 0 ? (deviceBreakdown.desktop / totalViews) * 100 : 0}%`,
+                        width: `${currentPeriodViews > 0 ? (currentDeviceBreakdown.desktop / currentPeriodViews) * 100 : 0}%`,
                       }}
                     />
                   </div>
@@ -710,13 +450,13 @@ export function AdminAnalyticsClient({
                     <span className="flex items-center gap-1.5">
                       <Tablet size={13} className="text-amber-500" /> Máy tính bảng (Tablet)
                     </span>
-                    <span className="tabular-nums font-black">{deviceBreakdown.tablet} lượt</span>
+                    <span className="tabular-nums font-black">{currentDeviceBreakdown.tablet} lượt</span>
                   </div>
                   <div className="w-full bg-neutral-100 rounded-full h-1.5 overflow-hidden">
                     <div
                       className="bg-amber-500 h-full rounded-full"
                       style={{
-                        width: `${totalViews > 0 ? (deviceBreakdown.tablet / totalViews) * 100 : 0}%`,
+                        width: `${currentPeriodViews > 0 ? (currentDeviceBreakdown.tablet / currentPeriodViews) * 100 : 0}%`,
                       }}
                     />
                   </div>
@@ -735,18 +475,18 @@ export function AdminAnalyticsClient({
               </div>
 
               <div className="space-y-2">
-                {browserBreakdown.slice(0, 5).map((b) => (
+                {currentBrowserBreakdown.slice(0, 5).map((b) => (
                   <div key={b.name} className="flex items-center justify-between text-xs">
                     <span className="font-bold text-neutral-700">{b.name}</span>
                     <div className="flex items-center gap-1.5">
                       <span className="tabular-nums font-black text-neutral-900">{b.count} lượt</span>
                       <span className="text-[10px] text-neutral-400 font-bold">
-                        ({totalViews > 0 ? Math.round((b.count / totalViews) * 100) : 0}%)
+                        ({currentPeriodViews > 0 ? Math.round((b.count / currentPeriodViews) * 100) : 0}%)
                       </span>
                     </div>
                   </div>
                 ))}
-                {browserBreakdown.length === 0 && (
+                {currentBrowserBreakdown.length === 0 && (
                   <p className="text-xs text-neutral-400 py-2 text-center">Chưa có dữ liệu trình duyệt</p>
                 )}
               </div>
