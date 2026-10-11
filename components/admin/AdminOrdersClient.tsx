@@ -499,8 +499,8 @@ export function AdminOrdersClient({
             </span>
           </div>
           <div className="flex flex-col min-w-0">
-            <span className="text-[10px] font-extrabold text-neutral-400 uppercase tracking-wider mb-1 whitespace-nowrap">Admin Lợi Nhuận</span>
-            <span className="text-base font-black text-neutral-700 leading-none tabular-nums whitespace-nowrap">
+            <span className="text-[10px] font-extrabold text-emerald-600 uppercase tracking-wider mb-1 whitespace-nowrap">Admin Lợi Nhuận</span>
+            <span className="text-base font-black text-emerald-600 leading-none tabular-nums whitespace-nowrap">
               {formatCurrency(sums.systemProfitAmount)}
             </span>
           </div>
@@ -657,7 +657,7 @@ export function AdminOrdersClient({
                       <div className={`font-black text-xs tabular-nums ${o.customerRewardAmount < 0 ? "text-rose-600" : "text-rose-600"}`}>
                         {formatCurrency(o.customerRewardAmount || 0)}
                       </div>
-                      <div className="text-[10px] font-medium text-neutral-400 mt-0.5 tabular-nums">
+                      <div className="text-[10.5px] font-bold text-emerald-600 mt-0.5 tabular-nums">
                         Giữ: {formatCurrency(o.systemProfitAmount || 0)}
                       </div>
                       {o.referralBonusDeducted > 0 && (

@@ -36,10 +36,7 @@ services:
       # Lắng nghe tại localhost VPS cổng 3000, Nginx làm reverse proxy đón domain meowback.shop
       - "127.0.0.1:3000:3000"
     env_file:
-      - path: .env
-        required: false
-      - path: .env.production
-        required: false
+      - .env
     environment:
       # Ghi đè kết nối DB để trỏ vào container postgres nội bộ
       DATABASE_URL: "postgresql://${POSTGRES_USER:-meowuser}:${POSTGRES_PASSWORD:-meowpassword_secret}@postgres:5432/${POSTGRES_DB:-meowback_shop}?schema=public"

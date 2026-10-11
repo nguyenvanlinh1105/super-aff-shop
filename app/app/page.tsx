@@ -91,16 +91,25 @@ export default async function CustomerHomePage() {
   ]);
 
   const recentOrders = customer?.orders ?? [];
-  const totalIncome = allOrders.reduce((s, o) => s + Number(o.customerRewardAmount), 0);
-  const pendingIncome = allOrders
-    .filter((o) => o.orderStatus === "pending")
-    .reduce((s, o) => s + Number(o.customerRewardAmount), 0);
-  const availableBalance = allOrders
-    .filter((o) => o.orderStatus === "approved" && o.payoutStatus === "unpaid")
-    .reduce((s, o) => s + Number(o.customerRewardAmount), 0);
-  const paidTotal = allOrders
-    .filter((o) => o.payoutStatus === "paid")
-    .reduce((s, o) => s + Number(o.customerRewardAmount), 0);
+  
+  // 1. Đơn đang chờ đối soát từ sàn (pending: mới ghi nhận, processing: sàn báo hoàn thành trong 15 ngày đối soát)
+  const pendingOrders = allOrders.filter(
+    (o) => o.orderStatus === "pending" || o.orderStatus === "processing"
+  );
+  const pendingIncome = pendingOrders.reduce((s, o) => s + Number(o.customerRewardAmount), 0);
+
+  // 2. Đơn đã duyệt đối soát xong, tiền đã về ví sẵn sàng rút
+  const availableOrders = allOrders.filter(
+    (o) => o.orderStatus === "approved" && o.payoutStatus !== "paid"
+  );
+  const availableBalance = availableOrders.reduce((s, o) => s + Number(o.customerRewardAmount), 0);
+
+  // 3. Đơn đã giải ngân thành công về ngân hàng
+  const paidOrders = allOrders.filter((o) => o.payoutStatus === "paid");
+  const paidTotal = paidOrders.reduce((s, o) => s + Number(o.customerRewardAmount), 0);
+
+  // 4. Tổng tích lũy thực nhận (chỉ tính tiền ĐÃ VỀ VÍ hoặc ĐÃ RÚT THÀNH CÔNG, không cộng tiền đang chờ đối soát)
+  const totalIncome = availableBalance + paidTotal;
 
   const rawName = (customer?.fullName || session?.fullName || "").trim();
   const firstName = rawName.split(/\s+/).filter(Boolean).at(-1) || rawName || "bạn";
@@ -194,7 +203,7 @@ export default async function CustomerHomePage() {
                   <div>
                     <div className="text-[11.5px] font-bold uppercase tracking-wider text-neutral-400">Chờ duyệt</div>
                     <div className="text-[12px] font-semibold text-neutral-600">
-                      {allOrders.filter((o) => o.orderStatus === "pending").length} đơn hàng đang xử lý
+                      {pendingOrders.length} đơn hàng đang xử lý
                     </div>
                   </div>
                 </div>
@@ -247,7 +256,7 @@ export default async function CustomerHomePage() {
                   <div>
                     <div className="text-[11.5px] font-bold uppercase tracking-wider text-neutral-400">Sẵn sàng rút</div>
                     <div className="text-[12px] font-semibold text-neutral-600">
-                      {allOrders.filter((o) => o.orderStatus === "approved" && o.payoutStatus === "unpaid").length} đơn hàng khả dụng
+                      {availableOrders.length} đơn hàng khả dụng
                     </div>
                   </div>
                 </div>
@@ -300,7 +309,7 @@ export default async function CustomerHomePage() {
                   <div>
                     <div className="text-[11.5px] font-bold uppercase tracking-wider text-neutral-400">Đã rút về ví</div>
                     <div className="text-[12px] font-semibold text-neutral-600">
-                      {allOrders.filter((o) => o.payoutStatus === "paid").length} đơn đã giải ngân
+                      {paidOrders.length} đơn đã giải ngân
                     </div>
                   </div>
                 </div>
@@ -382,7 +391,7 @@ export default async function CustomerHomePage() {
               {/* Tầng 3: Dòng trạng thái ngữ cảnh */}
               <div className="relative z-10 flex items-center gap-2 text-[11px] text-primary-700/85 font-medium">
                 <span className="w-1.5 h-1.5 rounded-full bg-rose-500 shrink-0" />
-                <span className="leading-snug">Tích luỹ trọn đời từ mọi đơn mua</span>
+                <span className="leading-snug">Đã tích luỹ thành công về ví</span>
               </div>
             </div>
           </HoverCard>
