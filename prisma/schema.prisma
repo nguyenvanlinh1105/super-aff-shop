@@ -49,6 +49,7 @@ model User {
   chatMessages     ChatMessage[]
   pushSubscriptions PushSubscription[]
   adminTelegramLinkCodes AdminTelegramLinkCode[]
+  activityLogs     UserActivityLog[]
 
   @@map("users")
 }
@@ -103,6 +104,7 @@ model Customer {
   telegramLinkCodes   TelegramLinkCode[]
   withdrawRequests    WithdrawRequest[]
   partnerRatePeriods  PartnerRatePeriod[]
+  activityLogs        UserActivityLog[]
 
   @@index([phone])
   @@index([zaloUserId])
@@ -657,4 +659,32 @@ model SystemSetting {
   updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
 
   @@map("system_settings")
+}
+
+model UserActivityLog {
+  id              String    @id @default(uuid())
+  path            String
+  title           String?
+  userId          String?   @map("user_id")
+  customerId      String?   @map("customer_id")
+  userRole        String    @default("guest") @map("user_role") // 'admin' | 'customer' | 'guest'
+  userDisplayName String?   @map("user_display_name")
+  visitorId       String    @map("visitor_id")
+  deviceType      String?   @map("device_type") // 'mobile' | 'tablet' | 'desktop'
+  browser         String?
+  os              String?
+  ipAddress       String?   @map("ip_address")
+  referer         String?
+  createdAt       DateTime  @default(now()) @map("created_at")
+
+  user            User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
+  customer        Customer? @relation(fields: [customerId], references: [id], onDelete: SetNull)
+
+  @@index([path])
+  @@index([createdAt])
+  @@index([visitorId])
+  @@index([userId])
+  @@index([customerId])
+  @@index([userRole])
+  @@map("user_activity_logs")
 }

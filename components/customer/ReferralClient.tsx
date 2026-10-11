@@ -336,7 +336,7 @@ export function ReferralClient({
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
         {/* CỘT TRÁI: CÔNG CỤ CHIA SẺ VÀ MÃ MỜI */}
         <FadeUp delay={0.25} className="h-full">
-          <div className="h-full rounded-3xl bg-gradient-to-b from-white via-primary-50/15 to-white p-5 sm:p-6 shadow-cute border border-primary-200/80 flex flex-col justify-between gap-5">
+          <div className="h-full rounded-3xl bg-gradient-to-b from-white via-primary-50/15 to-white p-4.5 sm:p-6 shadow-cute border border-primary-200/80 flex flex-col justify-between gap-5 overflow-hidden">
             <div>
               {/* Header Box */}
               <div className="flex items-center justify-between border-b border-primary-100/70 pb-3.5 mb-5">
@@ -444,17 +444,17 @@ export function ReferralClient({
             </div>
 
             {/* 3 Mini Highlight Bullets dưới cùng */}
-            <div className="pt-3 border-t border-primary-100/70 flex items-center justify-between text-[11px] font-semibold text-neutral-500">
-              <div className="flex items-center gap-1">
-                <Sparkles size={12} className="text-primary-500 shrink-0" />
-                <span className="truncate">Thưởng {referralPercent}% mỗi đơn</span>
+            <div className="pt-3 border-t border-primary-100/70 grid grid-cols-3 gap-1 sm:gap-2 text-[10px] sm:text-[11.5px] font-bold text-neutral-500 text-center select-none">
+              <div className="flex items-center justify-center gap-1 min-w-0">
+                <Sparkles size={11} className="text-primary-500 shrink-0" />
+                <span className="truncate">Thưởng {referralPercent}%/đơn</span>
               </div>
-              <div className="flex items-center gap-1">
-                <ShieldCheck size={12} className="text-emerald-500 shrink-0" />
+              <div className="flex items-center justify-center gap-1 min-w-0 border-x border-primary-100/80 px-0.5">
+                <ShieldCheck size={11} className="text-emerald-500 shrink-0" />
                 <span className="truncate">Bạn bè giữ 100%</span>
               </div>
-              <div className="flex items-center gap-1">
-                <IconBow className="w-3.5 h-3.5 text-accent-bow shrink-0" />
+              <div className="flex items-center justify-center gap-1 min-w-0">
+                <IconBow className="w-3 h-3 text-accent-bow shrink-0" />
                 <span className="truncate">Cộng ví tự động</span>
               </div>
             </div>
@@ -463,7 +463,7 @@ export function ReferralClient({
 
         {/* CỘT PHẢI: QUYỀN LỢI & CÁCH HOẠT ĐỘNG */}
         <FadeUp delay={0.3} className="h-full">
-          <div className="h-full rounded-3xl bg-white p-5 sm:p-6 shadow-cute border border-primary-200/80 flex flex-col justify-between gap-5">
+          <div className="h-full rounded-3xl bg-white p-4.5 sm:p-6 shadow-cute border border-primary-200/80 flex flex-col justify-between gap-5 overflow-hidden">
             <div>
               {/* Header Box */}
               <div className="flex items-center justify-between border-b border-primary-100/70 pb-3.5 mb-5">

@@ -93,6 +93,9 @@ export const viewport: Viewport = {
   maximumScale: 1,
 };
 
+import { Suspense } from "react";
+import { UserActivityTracker } from "@/components/analytics/UserActivityTracker";
+
 export default function RootLayout({
   children,
 }: {
@@ -101,6 +104,9 @@ export default function RootLayout({
   return (
     <html lang="vi" className={`${beVietnamPro.variable} ${fontQuicksand.variable}`} suppressHydrationWarning>
       <body className={`${beVietnamPro.className} selection:bg-primary-200 selection:text-primary-600`} suppressHydrationWarning>
+        <Suspense fallback={null}>
+          <UserActivityTracker />
+        </Suspense>
         <ServiceWorkerRegister />
         <GlobalDragScroll />
         <ToastProvider>

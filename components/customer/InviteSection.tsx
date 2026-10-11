@@ -191,18 +191,18 @@ export function InviteSection({
       </div>
 
       {/* ═══ 5. MINI HIGHLIGHT BULLETS ═══ */}
-      <div className="pt-2 border-t border-primary-100/60 flex items-center justify-between text-[11px] font-semibold text-neutral-500">
-        <div className="flex items-center gap-1">
-          <Sparkles size={11} className="text-primary-500" />
-          <span>Thưởng 5% mỗi đơn</span>
+      <div className="pt-2 border-t border-primary-100/60 grid grid-cols-3 gap-1 sm:gap-2 text-[10px] sm:text-[11px] font-semibold text-neutral-500 text-center select-none">
+        <div className="flex items-center justify-center gap-1 min-w-0">
+          <Sparkles size={11} className="text-primary-500 shrink-0" />
+          <span className="truncate">Thưởng {referralPercent}%/đơn</span>
         </div>
-        <div className="flex items-center gap-1">
-          <ShieldCheck size={11} className="text-emerald-500" />
-          <span>Bạn bè giữ 100%</span>
+        <div className="flex items-center justify-center gap-1 min-w-0 border-x border-primary-100/70 px-0.5">
+          <ShieldCheck size={11} className="text-emerald-500 shrink-0" />
+          <span className="truncate">Bạn bè giữ 100%</span>
         </div>
-        <div className="flex items-center gap-1">
-          <IconBow className="w-3 h-3 text-accent-bow" />
-          <span>Cộng ví tự động</span>
+        <div className="flex items-center justify-center gap-1 min-w-0">
+          <IconBow className="w-3 h-3 text-accent-bow shrink-0" />
+          <span className="truncate">Cộng ví tự động</span>
         </div>
       </div>
 

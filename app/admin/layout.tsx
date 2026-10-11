@@ -12,6 +12,7 @@ import {
   MessagesSquare,
   Zap,
   ShieldCheck,
+  Activity,
 } from "lucide-react";
 import { getSession } from "@/lib/auth";
 import { AdminSidebar } from "@/components/layout/AdminSidebar";
@@ -36,6 +37,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       title: "Vận hành",
       items: [
         { href: "/admin",            label: "Tổng quan",           emoji: "🏠", icon: <LayoutDashboard size={16} strokeWidth={1.75} /> },
+        { href: "/admin/analytics",  label: "Lưu lượng & User Action", emoji: "📈", icon: <Activity        size={16} strokeWidth={1.75} /> },
         { href: "/admin/quick-link", label: "Tạo Link Aff Nhanh",  emoji: "⚡", icon: <Zap             size={16} strokeWidth={1.75} /> },
         { href: "/admin/customers",  label: "Khách hàng",          emoji: "👥", icon: <Users           size={16} strokeWidth={1.75} /> },
         { href: "/admin/links",      label: "Link Affiliate",       emoji: "🔗", icon: <Link2           size={16} strokeWidth={1.75} /> },
