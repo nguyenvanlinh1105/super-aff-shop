@@ -113,7 +113,7 @@ export function ReferralClient({
   }, [customerCode, referralLink]);
 
   const handleCopyLink = () => {
-    if (!referralLink) return;
+    if (!referralLink || copiedLink) return;
     navigator.clipboard.writeText(referralLink);
     setCopiedLink(true);
     toast.success("Đã copy link giới thiệu! Gửi ngay cho bạn bè nhé 🎀", "Đã sao chép");
@@ -121,6 +121,7 @@ export function ReferralClient({
   };
 
   const handleCopyCode = () => {
+    if (copiedCode) return;
     navigator.clipboard.writeText(customerCode);
     setCopiedCode(true);
     toast.success(`Đã copy mã giới thiệu "${customerCode}"! 🎀`, "Đã sao chép mã");
@@ -128,6 +129,7 @@ export function ReferralClient({
   };
 
   const handleCopyInviteMessage = () => {
+    if (copiedMsg) return;
     const message = `Săn sale Shopee, TikTok Shop & Lazada nhận thêm tiền hoàn cực hời cùng MeowBack! Đăng ký qua link của mình để được hoàn tiền tự động nhé:\n${referralLink}\n(Mã giới thiệu: ${customerCode})`;
     navigator.clipboard.writeText(message);
     setCopiedMsg(true);
@@ -343,9 +345,6 @@ export function ReferralClient({
                   </p>
                 </div>
               </div>
-              <span className="text-[10.5px] sm:text-[11px] font-black px-2.5 py-1 rounded-full bg-primary-50 text-primary-600 border border-primary-200/70 shadow-2xs shrink-0 whitespace-nowrap">
-                1 chạm chia sẻ 🎀
-              </span>
             </div>
 
             {/* VIP REFERRAL TICKET (Thẻ Giới Thiệu Tinh Tế, Gọn Gàng, Thoáng Đãng) */}
@@ -470,9 +469,6 @@ export function ReferralClient({
                   </p>
                 </div>
               </div>
-              <span className="text-[10.5px] sm:text-[11px] font-black px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/80 shadow-2xs shrink-0 whitespace-nowrap">
-                100% minh bạch 🎀
-              </span>
             </div>
 
             {/* Grid 2x2: 4 Quyền Lợi Nổi Bật Siêu Đẹp & Gọn Gàng */}

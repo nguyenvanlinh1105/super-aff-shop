@@ -182,6 +182,12 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     };
 
     setToasts((prev) => {
+      // Deduplicate: avoid duplicate toast with identical message & title
+      const isDuplicate = prev.some(
+        (t) => t.message === newToast.message && (t.title ?? "") === (newToast.title ?? "")
+      );
+      if (isDuplicate) return prev;
+
       // Limit to max 4 toasts at a time
       const next = [newToast, ...prev];
       return next.slice(0, 4);
