@@ -15,8 +15,14 @@ export async function generateTrackingCode(params: {
 
   const prefix = `${params.platformCode}_${params.customerCode}_${params.channelSource.toUpperCase()}_${datePart}_`;
 
+  // Đếm toàn bộ link của khách hàng đã tạo trong ngày hôm nay (trên tất cả các sàn)
+  // để số thứ tự _0001, _0002 tăng dần liên tục, không bị lặp lại _0001 khi đổi sàn
   const countToday = await prisma.trackingLink.count({
-    where: { trackingCode: { startsWith: prefix } },
+    where: {
+      trackingCode: {
+        contains: `_${params.customerCode}_${params.channelSource.toUpperCase()}_${datePart}_`,
+      },
+    },
   });
 
   const sequence = String(countToday + 1).padStart(4, "0");

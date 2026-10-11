@@ -6,7 +6,10 @@ import {
   saveReconciliationReminderConfig,
   getAdminLinhTarget,
 } from "@/lib/reconciliationReminder";
-import { initReconciliationReminderScheduler } from "@/lib/reconciliationReminderScheduler";
+import {
+  initReconciliationReminderScheduler,
+  checkAndTriggerReconciliationReminder,
+} from "@/lib/reconciliationReminderScheduler";
 
 // GET /api/admin/reconciliation-reminder — Lấy cấu hình nhắc nhở đối soát hàng ngày
 export async function GET(req: NextRequest) {
