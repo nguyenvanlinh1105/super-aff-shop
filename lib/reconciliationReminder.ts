@@ -11,6 +11,7 @@ export interface ReconciliationReminderConfig {
   lastSentAt?: string | null;
   lastSentStatus?: "success" | "error" | null;
   lastSentDetail?: string | null;
+  lastSentScheduleSlot?: string | null; // Slot dạng "YYYY-MM-DD_HH:mm" để hỗ trợ đổi giờ linh hoạt
 }
 
 export const SETTING_KEY_RECONCILIATION_REMINDER = "RECONCILIATION_REMINDER_CONFIG";
@@ -24,6 +25,7 @@ export const DEFAULT_RECONCILIATION_CONFIG: ReconciliationReminderConfig = {
   lastSentAt: null,
   lastSentStatus: null,
   lastSentDetail: null,
+  lastSentScheduleSlot: null,
 };
 
 function escapeHtml(val: string): string {
@@ -361,11 +363,20 @@ export async function sendReconciliationReminder(isTest: boolean = false): Promi
     .map((s) => `${s.adminName}: ${s.ok ? "✅" : "❌ " + (s.error || "")}`)
     .join(", ")})`;
 
+  const dateStr = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Ho_Chi_Minh",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(now);
+
   // Cập nhật trạng thái lần gửi vào CSDL
   await saveReconciliationReminderConfig({
     lastSentAt: now.toISOString(),
     lastSentStatus: allSuccess ? "success" : "error",
     lastSentDetail: summaryDetail,
+    // Nếu là gửi tự động theo giờ hẹn thì lưu slot date_time, nếu là test thì giữ nguyên slot cũ
+    lastSentScheduleSlot: isTest ? config.lastSentScheduleSlot : `${dateStr}_${config.scheduledTime}`,
   });
 
   return {

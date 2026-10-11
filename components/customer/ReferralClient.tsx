@@ -323,45 +323,47 @@ export function ReferralClient({
         </HoverCard>
       </div>
 
-      {/* ═══ 3. MAIN SECTION: CÔNG CỤ MỜI BẠN BÈ & QUYỀN LỢI ═══ */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
+      {/* ═══ 3. MAIN SECTION: CÔNG CỤ MỜI BẠN BÈ & QUYỀN LỢI (THIẾT KẾ CÂN ĐỐI, ĐẸP MẮT TRÊN MOBILE & DESKTOP) ═══ */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6 items-stretch">
         {/* CỘT TRÁI: THẺ GIỚI THIỆU & CÔNG CỤ CHIA SẺ */}
-        <div className="h-full rounded-3xl bg-white p-4.5 sm:p-6 shadow-cute border border-primary-200/80 flex flex-col justify-between gap-4 overflow-hidden">
+        <div className="h-full rounded-3xl bg-white p-4 sm:p-6 shadow-sm border border-neutral-200/80 hover:border-primary-200 transition-all duration-300 flex flex-col justify-between gap-4 overflow-hidden">
           <div className="flex flex-col gap-3.5">
             {/* Header Box */}
-            <div className="flex items-center justify-between border-b border-primary-100/70 pb-3">
-              <div className="flex items-center gap-2.5">
-                <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-gradient-to-br from-primary-400 to-pink-500 text-white shadow-2xs shrink-0">
-                  <Gift size={18} strokeWidth={2.4} />
+            <div className="flex items-center justify-between border-b border-neutral-100 pb-3 gap-2">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-2xl bg-primary-50 text-primary-600 border border-primary-100/90 shadow-2xs shrink-0">
+                  <Gift size={20} strokeWidth={2.4} />
                 </div>
-                <div>
-                  <h2 className="text-[15px] sm:text-[16px] font-black text-neutral-900 leading-tight">
+                <div className="min-w-0">
+                  <h2 className="text-[14.5px] sm:text-[16px] font-black text-neutral-900 leading-snug truncate">
                     Mời Bạn Bè Nhận Thưởng
                   </h2>
-                  <p className="text-[11px] text-neutral-500 font-medium">Nhận +{referralPercent}% hoa hồng trên mỗi đơn</p>
+                  <p className="text-[11px] sm:text-[11.5px] text-neutral-500 font-medium truncate">
+                    Nhận thêm +{referralPercent}% hoa hồng trên mỗi đơn hàng
+                  </p>
                 </div>
               </div>
-              <span className="text-[10.5px] font-black px-2.5 py-1 rounded-full bg-primary-50 text-primary-600 border border-primary-200/70 shadow-2xs shrink-0">
+              <span className="text-[10.5px] sm:text-[11px] font-black px-2.5 py-1 rounded-full bg-primary-50 text-primary-600 border border-primary-200/70 shadow-2xs shrink-0 whitespace-nowrap">
                 1 chạm chia sẻ 🎀
               </span>
             </div>
 
-            {/* VIP REFERRAL TICKET (Thẻ Giới Thiệu Phong Cách Coupon May Mắn) */}
-            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary-50/90 via-pink-50/50 to-primary-50/80 border-2 border-dashed border-primary-200 p-3.5 sm:p-4 shadow-2xs flex flex-col gap-2.5">
-              {/* Dòng 1: Tiêu đề vé & Mã to rõ */}
+            {/* VIP REFERRAL TICKET (Thẻ Giới Thiệu Tinh Tế, Gọn Gàng, Thoáng Đãng) */}
+            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary-50/70 via-pink-50/30 to-white border border-primary-200/80 p-3.5 sm:p-4 shadow-2xs flex flex-col gap-2.5">
+              {/* Dòng 1: Tiêu đề vé & Badge thưởng */}
               <div className="flex items-center justify-between gap-2">
-                <span className="text-[10.5px] font-extrabold uppercase tracking-wider text-neutral-500 flex items-center gap-1">
-                  <Sparkles size={11} className="text-primary-500" />
+                <span className="text-[10.5px] font-extrabold uppercase tracking-wider text-neutral-500 flex items-center gap-1.5">
+                  <Sparkles size={12} className="text-primary-500" />
                   <span>Mã giới thiệu của bạn</span>
                 </span>
-                <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-white text-primary-600 border border-primary-200/80 shadow-2xs">
+                <span className="text-[10px] sm:text-[10.5px] font-extrabold px-2.5 py-0.5 rounded-full bg-white text-primary-600 border border-primary-200/80 shadow-2xs">
                   Thưởng {referralPercent}% trọn đời
                 </span>
               </div>
 
               {/* Hộp mã to đẹp + nút chép */}
-              <div className="flex items-center justify-between gap-2 bg-white rounded-xl p-2 pl-3 sm:pl-3.5 border border-primary-100 shadow-2xs">
-                <span className="font-mono text-2xl sm:text-3xl font-black text-primary-600 tracking-wider truncate select-all">
+              <div className="flex items-center justify-between gap-2 bg-white rounded-xl p-2.5 sm:p-3 border border-primary-100 shadow-2xs">
+                <span className="font-mono text-xl sm:text-2xl font-black text-primary-600 tracking-wider truncate select-all pl-1">
                   {customerCode || "---"}
                 </span>
                 <button
@@ -379,8 +381,8 @@ export function ReferralClient({
               </div>
 
               {/* Hộp link đăng ký */}
-              <div className="flex items-center gap-1.5 bg-neutral-100/90 rounded-xl p-1 pl-2.5 border border-neutral-200/70">
-                <span className="flex-1 truncate text-[11.5px] font-bold text-neutral-600 select-all min-w-0">
+              <div className="flex items-center gap-1.5 bg-white rounded-xl p-1.5 pl-3 border border-primary-100 shadow-2xs">
+                <span className="flex-1 truncate text-[11px] sm:text-[11.5px] font-bold text-neutral-600 select-all min-w-0">
                   {referralLink || "Đang tạo link..."}
                 </span>
                 <button
@@ -389,7 +391,7 @@ export function ReferralClient({
                   className={`flex items-center gap-1 rounded-lg px-3 py-1.5 text-[11px] font-black transition-all shrink-0 cursor-pointer ${
                     copiedLink
                       ? "bg-emerald-500 text-white"
-                      : "bg-white hover:bg-neutral-50 text-neutral-800 border border-neutral-200 shadow-2xs active:scale-95"
+                      : "bg-neutral-50 hover:bg-neutral-100 text-neutral-800 border border-neutral-200 shadow-2xs active:scale-95"
                   }`}
                 >
                   {copiedLink ? <Check size={12} strokeWidth={2.5} /> : <Copy size={12} strokeWidth={2} />}
@@ -403,10 +405,10 @@ export function ReferralClient({
               <button
                 type="button"
                 onClick={handleCopyInviteMessage}
-                className={`flex items-center justify-center gap-1.5 rounded-xl py-2.5 px-2 text-xs font-black transition-all shadow-2xs border cursor-pointer active:scale-95 ${
+                className={`flex items-center justify-center gap-1.5 rounded-xl py-2.5 px-2 text-xs font-bold transition-all shadow-2xs border cursor-pointer active:scale-95 ${
                   copiedMsg
                     ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                    : "bg-white hover:bg-primary-50/70 text-neutral-800 hover:text-primary-600 border-primary-200/90"
+                    : "bg-white hover:bg-primary-50/70 text-neutral-800 hover:text-primary-600 border-neutral-200 hover:border-primary-200"
                 }`}
               >
                 {copiedMsg ? (
@@ -425,7 +427,7 @@ export function ReferralClient({
               <button
                 type="button"
                 onClick={() => setShowQR(true)}
-                className="flex items-center justify-center gap-1.5 rounded-xl bg-white hover:bg-primary-50/70 border border-primary-200/90 py-2.5 px-2 text-xs font-black text-neutral-800 hover:text-primary-600 transition-all shadow-2xs cursor-pointer active:scale-95"
+                className="flex items-center justify-center gap-1.5 rounded-xl bg-white hover:bg-primary-50/70 border border-neutral-200 hover:border-primary-200 py-2.5 px-2 text-xs font-bold text-neutral-800 hover:text-primary-600 transition-all shadow-2xs cursor-pointer active:scale-95"
               >
                 <QrCode size={14} strokeWidth={2.2} className="text-primary-500" />
                 <span>Mã QR quét 📲</span>
@@ -434,7 +436,7 @@ export function ReferralClient({
           </div>
 
           {/* 3 Mini Highlight Bullets dạng banner màu mềm */}
-          <div className="mt-1 rounded-xl bg-primary-50/80 p-2 sm:p-2.5 border border-primary-100/80 grid grid-cols-3 gap-1 text-[10px] sm:text-[11px] font-black text-neutral-600 text-center select-none">
+          <div className="mt-1 rounded-xl bg-primary-50/70 p-2 sm:p-2.5 border border-primary-100/80 grid grid-cols-3 gap-1 text-[10.5px] sm:text-[11px] font-black text-neutral-600 text-center select-none">
             <div className="flex items-center justify-center gap-1 min-w-0">
               <Sparkles size={11} className="text-primary-500 shrink-0" />
               <span className="truncate">Thưởng {referralPercent}%/đơn</span>
@@ -450,20 +452,22 @@ export function ReferralClient({
           </div>
         </div>
 
-        {/* CỘT PHẢI: QUYỀN LỢI & CÁCH HOẠT ĐỘNG (THIẾT KẾ GRID 2x2 HIỆN ĐẠI, GỌN GÀNG, SANG TRỌNG) */}
-        <div className="h-full rounded-3xl bg-white p-4.5 sm:p-6 shadow-cute border border-primary-200/80 flex flex-col justify-between gap-4 overflow-hidden">
+        {/* CỘT PHẢI: QUYỀN LỢI & CÁCH HOẠT ĐỘNG (THIẾT KẾ GRID 2x2 CÂN ĐỐI, KHÔNG TRÀN CHỮ, ĐẸP NHƯ CÁC CARD KHÁC) */}
+        <div className="h-full rounded-3xl bg-white p-4 sm:p-6 shadow-sm border border-neutral-200/80 hover:border-primary-200 transition-all duration-300 flex flex-col justify-between gap-4 overflow-hidden">
           <div className="flex flex-col gap-3.5">
             {/* Header Box */}
-            <div className="flex items-center justify-between border-b border-primary-100/70 pb-3 gap-2">
+            <div className="flex items-center justify-between border-b border-neutral-100 pb-3 gap-2">
               <div className="flex items-center gap-2.5 min-w-0">
-                <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-gradient-to-br from-primary-400 to-pink-500 text-white shadow-2xs shrink-0">
-                  <IconBow className="w-4.5 h-4.5 text-white" />
+                <div className="flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-2xl bg-primary-50 text-primary-600 border border-primary-100/90 shadow-2xs shrink-0">
+                  <IconBow className="w-5 h-5 text-accent-bow" />
                 </div>
                 <div className="min-w-0">
-                  <h2 className="text-[14px] sm:text-[15.5px] font-black text-neutral-900 tracking-tight truncate">
+                  <h2 className="text-[14.5px] sm:text-[16px] font-black text-neutral-900 leading-snug truncate">
                     Quyền Lợi Giới Thiệu
                   </h2>
-                  <p className="text-[11px] text-neutral-500 font-medium truncate">Chính sách minh bạch & tự động</p>
+                  <p className="text-[11px] sm:text-[11.5px] text-neutral-500 font-medium truncate">
+                    Chính sách minh bạch & tự động cộng ví
+                  </p>
                 </div>
               </div>
               <span className="text-[10.5px] sm:text-[11px] font-black px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200/80 shadow-2xs shrink-0 whitespace-nowrap">
@@ -474,10 +478,10 @@ export function ReferralClient({
             {/* Grid 2x2: 4 Quyền Lợi Nổi Bật Siêu Đẹp & Gọn Gàng */}
             <div className="grid grid-cols-2 gap-2.5 sm:gap-3">
               {/* Box 1: Thưởng hoa hồng */}
-              <div className="group rounded-2xl p-3 sm:p-3.5 bg-gradient-to-b from-primary-50/70 via-pink-50/30 to-white border border-primary-200/80 hover:border-primary-300 transition-all shadow-2xs flex flex-col justify-between gap-2">
+              <div className="group rounded-2xl p-3 sm:p-3.5 bg-gradient-to-b from-primary-50/70 via-pink-50/30 to-white border border-primary-200/70 hover:border-primary-300 transition-all shadow-2xs flex flex-col justify-between gap-2">
                 <div className="flex items-center justify-between gap-1">
-                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-primary-100 text-primary-600 flex items-center justify-center shrink-0 shadow-2xs">
-                    <Gift size={16} strokeWidth={2.4} />
+                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-primary-100/80 text-primary-600 flex items-center justify-center shrink-0 shadow-2xs">
+                    <Gift size={15} strokeWidth={2.4} />
                   </div>
                   <span className="text-[9.5px] sm:text-[10px] font-black px-1.5 py-0.5 rounded-md bg-primary-100/90 text-primary-700 uppercase tracking-wider">
                     Thưởng thêm
@@ -487,17 +491,17 @@ export function ReferralClient({
                   <div className="text-[12.5px] sm:text-[13px] font-black text-neutral-900 leading-snug">
                     +{referralPercent}% Hoa hồng
                   </div>
-                  <p className="text-[10px] sm:text-[11px] text-neutral-500 font-medium leading-relaxed mt-0.5 line-clamp-2">
-                    Tặng trên số tiền hoàn bạn bè nhận được ở mỗi đơn
+                  <p className="text-[10px] sm:text-[11px] text-neutral-500 font-medium leading-relaxed mt-0.5">
+                    Thưởng trên tiền hoàn ở mỗi đơn hàng
                   </p>
                 </div>
               </div>
 
               {/* Box 2: Bạn bè giữ 100% */}
-              <div className="group rounded-2xl p-3 sm:p-3.5 bg-gradient-to-b from-emerald-50/60 via-teal-50/30 to-white border border-emerald-200/80 hover:border-emerald-300 transition-all shadow-2xs flex flex-col justify-between gap-2">
+              <div className="group rounded-2xl p-3 sm:p-3.5 bg-gradient-to-b from-emerald-50/60 via-teal-50/30 to-white border border-emerald-200/70 hover:border-emerald-300 transition-all shadow-2xs flex flex-col justify-between gap-2">
                 <div className="flex items-center justify-between gap-1">
-                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0 shadow-2xs">
-                    <ShieldCheck size={16} strokeWidth={2.4} />
+                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-emerald-100/80 text-emerald-600 flex items-center justify-center shrink-0 shadow-2xs">
+                    <ShieldCheck size={15} strokeWidth={2.4} />
                   </div>
                   <span className="text-[9.5px] sm:text-[10px] font-black px-1.5 py-0.5 rounded-md bg-emerald-100/90 text-emerald-700 uppercase tracking-wider">
                     Giữ trọn 100%
@@ -507,17 +511,17 @@ export function ReferralClient({
                   <div className="text-[12.5px] sm:text-[13px] font-black text-neutral-900 leading-snug">
                     Bạn bè giữ trọn vẹn
                   </div>
-                  <p className="text-[10px] sm:text-[11px] text-neutral-500 font-medium leading-relaxed mt-0.5 line-clamp-2">
-                    Người được mời không bị trừ bất kỳ chiết khấu nào
+                  <p className="text-[10px] sm:text-[11px] text-neutral-500 font-medium leading-relaxed mt-0.5">
+                    Người được mời nhận đủ 100% tiền hoàn
                   </p>
                 </div>
               </div>
 
               {/* Box 3: Số đơn áp dụng */}
-              <div className="group rounded-2xl p-3 sm:p-3.5 bg-gradient-to-b from-amber-50/60 via-yellow-50/30 to-white border border-amber-200/80 hover:border-amber-300 transition-all shadow-2xs flex flex-col justify-between gap-2">
+              <div className="group rounded-2xl p-3 sm:p-3.5 bg-gradient-to-b from-amber-50/60 via-yellow-50/30 to-white border border-amber-200/70 hover:border-amber-300 transition-all shadow-2xs flex flex-col justify-between gap-2">
                 <div className="flex items-center justify-between gap-1">
-                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center shrink-0 shadow-2xs">
-                    <ShoppingBag size={16} strokeWidth={2.4} />
+                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-amber-100/80 text-amber-600 flex items-center justify-center shrink-0 shadow-2xs">
+                    <ShoppingBag size={15} strokeWidth={2.4} />
                   </div>
                   <span className="text-[9.5px] sm:text-[10px] font-black px-1.5 py-0.5 rounded-md bg-amber-100/90 text-amber-700 uppercase tracking-wider">
                     {isPartner ? "Đối tác" : "Số lượng đơn"}
@@ -527,17 +531,17 @@ export function ReferralClient({
                   <div className="text-[12.5px] sm:text-[13px] font-black text-neutral-900 leading-snug">
                     {isPartner ? "Vô hạn đơn hàng" : `${maxReferralOrders} đơn đầu / bạn`}
                   </div>
-                  <p className="text-[10px] sm:text-[11px] text-neutral-500 font-medium leading-relaxed mt-0.5 line-clamp-2">
-                    {isPartner ? "Thưởng hoa hồng không giới hạn mọi đơn trọn đời" : `Tính độc lập cho ${maxReferralOrders} đơn của từng người bạn`}
+                  <p className="text-[10px] sm:text-[11px] text-neutral-500 font-medium leading-relaxed mt-0.5">
+                    {isPartner ? "Thưởng hoa hồng không giới hạn mọi đơn" : `Áp dụng riêng cho ${maxReferralOrders} đơn của mỗi bạn`}
                   </p>
                 </div>
               </div>
 
               {/* Box 4: Thời hạn hiệu lực */}
-              <div className="group rounded-2xl p-3 sm:p-3.5 bg-gradient-to-b from-blue-50/60 via-indigo-50/30 to-white border border-blue-200/80 hover:border-blue-300 transition-all shadow-2xs flex flex-col justify-between gap-2">
+              <div className="group rounded-2xl p-3 sm:p-3.5 bg-gradient-to-b from-blue-50/60 via-indigo-50/30 to-white border border-blue-200/70 hover:border-blue-300 transition-all shadow-2xs flex flex-col justify-between gap-2">
                 <div className="flex items-center justify-between gap-1">
-                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center shrink-0 shadow-2xs">
-                    <Clock size={16} strokeWidth={2.4} />
+                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-blue-100/80 text-blue-600 flex items-center justify-center shrink-0 shadow-2xs">
+                    <Clock size={15} strokeWidth={2.4} />
                   </div>
                   <span className="text-[9.5px] sm:text-[10px] font-black px-1.5 py-0.5 rounded-md bg-blue-100/90 text-blue-700 uppercase tracking-wider">
                     Thời hạn
@@ -547,8 +551,8 @@ export function ReferralClient({
                   <div className="text-[12.5px] sm:text-[13px] font-black text-neutral-900 leading-snug">
                     Hạn {referralValidityMonths} tháng
                   </div>
-                  <p className="text-[10px] sm:text-[11px] text-neutral-500 font-medium leading-relaxed mt-0.5 line-clamp-2">
-                    Ghi nhận toàn bộ đơn phát sinh từ lúc bạn bè tạo tài khoản
+                  <p className="text-[10px] sm:text-[11px] text-neutral-500 font-medium leading-relaxed mt-0.5">
+                    Ghi nhận toàn bộ đơn trong {referralValidityMonths} tháng
                   </p>
                 </div>
               </div>
@@ -593,7 +597,7 @@ export function ReferralClient({
       </div>
 
       {/* ═══ 4. TIẾN TRÌNH ĐƠN HÀNG & DANH SÁCH BẠN BÈ ═══ */}
-      <div className="rounded-3xl bg-white p-5 sm:p-6 shadow-cute border border-primary-200/80 flex flex-col gap-4 overflow-hidden">
+      <div className="rounded-3xl bg-white p-4 sm:p-6 shadow-sm border border-neutral-200/80 hover:border-primary-200 transition-all duration-300 flex flex-col gap-4 overflow-hidden">
           {/* Navigation Tabs */}
           <div className="flex flex-col gap-2.5 pb-2 border-b border-primary-100/60">
             <div className="grid grid-cols-2 p-1 rounded-2xl bg-neutral-100/90 border border-neutral-200/60">

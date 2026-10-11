@@ -1,28 +1,29 @@
 import {
   getReconciliationReminderConfig,
   sendReconciliationReminder,
+  ReconciliationReminderConfig,
 } from "./reconciliationReminder";
 
 declare global {
   // eslint-disable-next-line no-var
   var __reconciliationReminderSchedulerStarted: boolean | undefined;
   // eslint-disable-next-line no-var
-  var __reconciliationReminderLastRunDate: string | undefined;
+  var __reconciliationReminderLastRunSlot: string | undefined;
 }
 
 /**
  * Lấy ngày và giờ hiện tại theo múi giờ Việt Nam (Asia/Ho_Chi_Minh - GMT+7)
  */
-function getVietnamDateTime(): { dateStr: string; timeStr: string } {
+export function getVietnamDateTime(): { dateStr: string; timeStr: string } {
   const now = new Date();
-  
+
   // Format theo YYYY-MM-DD
   const dateParts = new Intl.DateTimeFormat("en-CA", {
     timeZone: "Asia/Ho_Chi_Minh",
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
-  }).format(now); // Output dạng "2026-10-07"
+  }).format(now); // Output dạng "2026-10-11"
 
   // Format theo HH:mm (24h)
   const timeParts = new Intl.DateTimeFormat("en-GB", {
@@ -30,7 +31,7 @@ function getVietnamDateTime(): { dateStr: string; timeStr: string } {
     hour: "2-digit",
     minute: "2-digit",
     hour12: false,
-  }).format(now); // Output dạng "07:00"
+  }).format(now); // Output dạng "21:10"
 
   return {
     dateStr: dateParts,
@@ -39,23 +40,51 @@ function getVietnamDateTime(): { dateStr: string; timeStr: string } {
 }
 
 /**
- * Kiểm tra xem ngày hôm nay đã gửi nhắc nhở chưa
+ * Kiểm tra xem khung giờ hẹn này (ví dụ: 2026-10-11_21:10) đã gửi nhắc nhở chưa.
+ * - Tránh gửi lặp lại nhiều lần trong cùng 1 phút.
+ * - Cho phép gửi ngay khi admin đổi sang giờ hẹn mới trong ngày (ví dụ 9h đã gửi, set lại 9h10 thì 9h10 vẫn gửi bình thường).
  */
-function hasAlreadySentToday(lastSentAtIso?: string | null, todayDateStr?: string): boolean {
-  if (!lastSentAtIso || !todayDateStr) return false;
-  try {
-    const lastDate = new Date(lastSentAtIso);
-    const lastDateStr = new Intl.DateTimeFormat("en-CA", {
-      timeZone: "Asia/Ho_Chi_Minh",
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-    }).format(lastDate);
+function hasAlreadySentForSlot(
+  config: ReconciliationReminderConfig,
+  todayDateStr: string,
+  scheduledTime: string
+): boolean {
+  const currentSlot = `${todayDateStr}_${scheduledTime}`;
 
-    return lastDateStr === todayDateStr;
-  } catch {
-    return false;
+  // 1. Kiểm tra slot đã lưu rõ ràng trong config CSDL
+  if (config.lastSentScheduleSlot) {
+    return config.lastSentScheduleSlot === currentSlot;
   }
+
+  // 2. Dự phòng (backward compatibility): Nếu chưa có field lastSentScheduleSlot,
+  // chỉ coi là đã gửi nếu lần gửi trước rơi đúng vào ngày VÀ đúng vào giờ hẹn này.
+  if (config.lastSentAt) {
+    try {
+      const lastDate = new Date(config.lastSentAt);
+      const lastDateStr = new Intl.DateTimeFormat("en-CA", {
+        timeZone: "Asia/Ho_Chi_Minh",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      }).format(lastDate);
+
+      if (lastDateStr !== todayDateStr) return false;
+
+      const lastTimeStr = new Intl.DateTimeFormat("en-GB", {
+        timeZone: "Asia/Ho_Chi_Minh",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      }).format(lastDate);
+
+      // Chỉ trùng nếu giờ của lần gửi trước đúng bằng giờ hẹn hiện tại
+      return lastTimeStr === scheduledTime;
+    } catch {
+      return false;
+    }
+  }
+
+  return false;
 }
 
 /**
@@ -74,8 +103,9 @@ export async function checkAndTriggerReconciliationReminder(): Promise<{
 
     const { dateStr, timeStr } = getVietnamDateTime();
     const scheduledTime = config.scheduledTime || "07:00";
+    const slotKey = `${dateStr}_${scheduledTime}`;
 
-    // 1. Kiểm tra giờ hiện tại có khớp với giờ được hẹn không (VD: 07:00)
+    // 1. Kiểm tra giờ hiện tại có khớp với giờ được hẹn không (VD: 21:10)
     if (timeStr !== scheduledTime) {
       return {
         triggered: false,
@@ -83,28 +113,28 @@ export async function checkAndTriggerReconciliationReminder(): Promise<{
       };
     }
 
-    // 2. Kiểm tra bộ nhớ trong tiến trình (In-memory flag)
-    if (globalThis.__reconciliationReminderLastRunDate === dateStr) {
+    // 2. Kiểm tra bộ nhớ trong tiến trình (In-memory slot flag)
+    if (globalThis.__reconciliationReminderLastRunSlot === slotKey) {
       return {
         triggered: false,
-        reason: `Đã gửi nhắc nhở trong ngày hôm nay (${dateStr}).`,
+        reason: `Đã gửi nhắc nhở cho khung giờ ${scheduledTime} ngày ${dateStr}.`,
       };
     }
 
-    // 3. Kiểm tra bản ghi trong CSDL
-    if (hasAlreadySentToday(config.lastSentAt, dateStr)) {
-      globalThis.__reconciliationReminderLastRunDate = dateStr;
+    // 3. Kiểm tra bản ghi trong CSDL cho khung giờ này
+    if (hasAlreadySentForSlot(config, dateStr, scheduledTime)) {
+      globalThis.__reconciliationReminderLastRunSlot = slotKey;
       return {
         triggered: false,
-        reason: `Đã có bản ghi gửi nhắc nhở trong ngày hôm nay (${dateStr}) trong CSDL.`,
+        reason: `Đã có bản ghi gửi nhắc nhở cho khung giờ ${scheduledTime} ngày ${dateStr} trong CSDL.`,
       };
     }
 
-    // Đánh dấu đã chạy để không bị gửi lặp lại trong cùng 1 phút
-    globalThis.__reconciliationReminderLastRunDate = dateStr;
+    // Đánh dấu đã chạy slot này để không gửi lặp lại trong các chu kỳ lặp kế tiếp của cùng 1 phút
+    globalThis.__reconciliationReminderLastRunSlot = slotKey;
 
     console.log(
-      `[ReconciliationReminder] ⏰ Đến giờ ${scheduledTime} sáng (GMT+7) ngày ${dateStr}. Đang gửi thông báo nhắc nhở import file đối soát tới Admin...`
+      `[ReconciliationReminder] ⏰ Đến giờ hẹn ${scheduledTime} (GMT+7) ngày ${dateStr}. Đang gửi thông báo nhắc nhở import file đối soát tới Admin...`
     );
 
     const result = await sendReconciliationReminder(false);
@@ -124,7 +154,7 @@ export async function checkAndTriggerReconciliationReminder(): Promise<{
 }
 
 /**
- * Khởi động scheduler chạy ngầm kiểm tra mỗi 30 giây một lần.
+ * Khởi động scheduler chạy ngầm kiểm tra mỗi 15 giây một lần.
  * Dùng cờ toàn cục singleton để chỉ chạy duy nhất 1 bộ hẹn giờ trên tiến trình Node.js.
  */
 export function initReconciliationReminderScheduler() {
@@ -133,12 +163,12 @@ export function initReconciliationReminderScheduler() {
   }
 
   globalThis.__reconciliationReminderSchedulerStarted = true;
-  console.log("🕒 [ReconciliationReminder] Đã kích hoạt bộ lập lịch nhắc nhở import file đối soát hàng ngày (mặc định 07:00 sáng).");
+  console.log("🕒 [ReconciliationReminder] Đã kích hoạt bộ lập lịch nhắc nhở import file đối soát hàng ngày.");
 
-  // Chạy kiểm tra mỗi 30 giây
+  // Chạy kiểm tra mỗi 15 giây để bắt kịp khung giờ hẹn chính xác
   setInterval(() => {
     checkAndTriggerReconciliationReminder().catch((err) => {
       console.error("[ReconciliationReminderScheduler] Lỗi vòng lặp kiểm tra:", err);
     });
-  }, 30_000);
+  }, 15_000);
 }

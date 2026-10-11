@@ -23,40 +23,48 @@ type PageItem =
   | { type: "dots-right"; jumpTo: number };
 
 function getPaginationItems(totalPages: number, currentPage: number): PageItem[] {
-  // Nếu tổng số trang nhỏ hơn hoặc bằng 5, hiển thị đầy đủ (1, 2, 3, 4, 5)
-  if (totalPages <= 5) {
+  // 1. Nếu tổng số trang nhỏ hơn hoặc bằng 7: Hiển thị đầy đủ tất cả các trang [1, 2, 3, 4, 5, 6, 7]
+  // Tuyệt đối không dùng dấu "…" khi danh sách chỉ có 6 hoặc 7 trang
+  if (totalPages <= 7) {
     return Array.from({ length: totalPages }, (_, i) => ({
       type: "page",
       value: i + 1,
     }));
   }
 
-  // Khi tổng số trang >= 6, giới hạn hiển thị gọn gàng bằng dấu "…" thay vì hiện tràn lan tất cả các trang:
+  // 2. Khi tổng số trang > 7:
+  // Cần xác định xem có cần dấu "…" ở bên trái và bên phải không
+  const showLeftDots = currentPage > 4;
+  const showRightDots = currentPage < totalPages - 3;
 
-  // Trường hợp 1: Ở cụm đầu (trang 1, 2, 3) -> 1 2 3 ... N
-  if (currentPage <= 3) {
+  // Trường hợp 2.1: Ở cụm đầu (currentPage <= 4) -> [1, 2, 3, 4, 5, …, totalPages]
+  // Đảm bảo khi đang ở trang 1, 2, 3 thì trang 4 và 5 luôn hiện rõ và bấm được trực tiếp
+  if (!showLeftDots && showRightDots) {
     return [
       { type: "page", value: 1 },
       { type: "page", value: 2 },
       { type: "page", value: 3 },
+      { type: "page", value: 4 },
+      { type: "page", value: 5 },
       { type: "dots-right", jumpTo: Math.min(totalPages, currentPage + 5) },
       { type: "page", value: totalPages },
     ];
   }
 
-  // Trường hợp 2: Ở cụm cuối (trang N-2, N-1, N) -> 1 ... N-2 N-1 N
-  if (currentPage >= totalPages - 2) {
+  // Trường hợp 2.2: Ở cụm cuối (currentPage >= totalPages - 3) -> [1, …, totalPages-4, totalPages-3, totalPages-2, totalPages-1, totalPages]
+  if (showLeftDots && !showRightDots) {
     return [
       { type: "page", value: 1 },
       { type: "dots-left", jumpTo: Math.max(1, currentPage - 5) },
+      { type: "page", value: totalPages - 4 },
+      { type: "page", value: totalPages - 3 },
       { type: "page", value: totalPages - 2 },
       { type: "page", value: totalPages - 1 },
       { type: "page", value: totalPages },
     ];
   }
 
-  // Trường hợp 3: Ở giữa -> 1 ... (curr-1) (curr) (curr+1) ... N
-  // Hiển thị trang 1, dấu …, trang kề trước, trang hiện tại, trang kề sau, dấu …, trang cuối
+  // Trường hợp 2.3: Ở giữa (currentPage từ 5 đến totalPages - 4) -> [1, …, curr-1, curr, curr+1, …, totalPages]
   return [
     { type: "page", value: 1 },
     { type: "dots-left", jumpTo: Math.max(1, currentPage - 5) },
@@ -174,7 +182,7 @@ export function Pagination({
                 type="button"
                 onClick={() => handleNavigate(item.jumpTo)}
                 title={`Nhảy ${isLeft ? "lùi" : "tiếp"} 5 trang (đến trang ${item.jumpTo})`}
-                className="group flex h-8 w-7 sm:w-8 items-center justify-center rounded-full text-neutral-400 hover:text-primary-600 hover:bg-primary-50 transition-all cursor-pointer select-none"
+                className="group flex h-8 w-7 sm:w-8 items-center justify-center rounded-full text-neutral-400 hover:text-rose-600 hover:bg-rose-50 transition-all cursor-pointer select-none"
               >
                 <span className="group-hover:hidden font-black text-xs tracking-widest leading-none">
                   …

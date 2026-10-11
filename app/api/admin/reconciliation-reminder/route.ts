@@ -68,10 +68,18 @@ export async function PUT(req: NextRequest) {
       updateData.customMessage = customMessage ? customMessage.trim() : null;
     }
 
+    // Khi admin chủ động lưu cấu hình (đổi giờ hoặc lưu lại):
+    // Xóa slot đã gửi trước đó để không bị chặn gửi trong ngày hôm nay
+    globalThis.__reconciliationReminderLastRunSlot = undefined;
+    updateData.lastSentScheduleSlot = null;
+
     const updatedConfig = await saveReconciliationReminderConfig(updateData);
 
-    // Kích hoạt scheduler
+    // Kích hoạt scheduler & kiểm tra ngay lập tức nếu giờ vừa set trùng với giờ hiện tại
     initReconciliationReminderScheduler();
+    checkAndTriggerReconciliationReminder().catch((err) => {
+      console.error("[PUT reconciliation-reminder] Lỗi trigger tức thì:", err);
+    });
 
     return NextResponse.json({
       success: true,

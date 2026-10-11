@@ -49,14 +49,15 @@ export async function POST(req: NextRequest) {
     const rawPath = typeof body.path === "string" ? body.path.trim() : "/";
     const path = rawPath.startsWith("/") ? rawPath : `/${rawPath}`;
 
-    // Bỏ qua các API route, socket, asset tĩnh
+    // Bỏ qua các API route, socket, asset tĩnh, và toàn bộ trang quản trị /admin
     if (
       path.startsWith("/api") ||
       path.startsWith("/_next") ||
       path.startsWith("/favicon") ||
+      path.startsWith("/admin") ||
       path.includes(".")
     ) {
-      return NextResponse.json({ ok: true, skipped: true });
+      return NextResponse.json({ ok: true, skipped: true, reason: "excluded_path" });
     }
 
     const title = typeof body.title === "string" ? body.title.slice(0, 255) : null;
@@ -79,6 +80,12 @@ export async function POST(req: NextRequest) {
 
     // Xác thực người dùng
     const session = await getSession();
+
+    // ── QUY TẮC: KHÔNG THU THẬP DỮ LIỆU CỦA ADMIN, CHỈ THU THẬP USER THỰC TẾ ──
+    if (session?.role === "admin") {
+      return NextResponse.json({ ok: true, skipped: true, reason: "admin_excluded" });
+    }
+
     let userRole = "guest";
     let userId: string | null = null;
     let customerId: string | null = null;

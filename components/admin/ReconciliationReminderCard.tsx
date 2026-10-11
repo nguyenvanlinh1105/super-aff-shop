@@ -78,6 +78,14 @@ export function ReconciliationReminderCard({
         throw new Error(data.error || "Không thể lưu cấu hình");
       }
 
+      if (data.config) {
+        setLastSent({
+          at: data.config.lastSentAt || null,
+          status: data.config.lastSentStatus || null,
+          detail: data.config.lastSentDetail || null,
+        });
+      }
+
       toast.success(
         enabled
           ? `Đã lưu nhắc nhở đối soát lúc ${scheduledTime} hàng ngày!`

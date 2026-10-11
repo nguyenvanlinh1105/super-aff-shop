@@ -15,6 +15,14 @@ export default async function AdminAnalyticsPage() {
   const sevenDaysAgo = new Date();
   sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
+  // ── CHỈ LẤY DỮ LIỆU CỦA USER THỰC TẾ (CUSTOMER & GUEST), LOẠI BỎ HOÀN TOÀN ADMIN & TRANG /ADMIN ──
+  const userOnlyFilter = {
+    userRole: { in: ["customer", "guest"] },
+    NOT: {
+      path: { startsWith: "/admin" },
+    },
+  };
+
   const [
     totalViews,
     memberViews,
@@ -23,36 +31,49 @@ export default async function AdminAnalyticsPage() {
     recentRawLogs,
     logsForStats,
   ] = await Promise.all([
-    // 1. Tổng lượt xem
-    prisma.userActivityLog.count(),
-
-    // 2. Lượt xem của thành viên
+    // 1. Tổng lượt xem của người dùng thực tế
     prisma.userActivityLog.count({
-      where: { userRole: { in: ["customer", "admin"] } },
+      where: userOnlyFilter,
     }),
 
-    // 3. Lượt xem của khách
+    // 2. Lượt xem của thành viên (chỉ customer)
     prisma.userActivityLog.count({
-      where: { userRole: "guest" },
+      where: {
+        ...userOnlyFilter,
+        userRole: "customer",
+      },
     }),
 
-    // 4. Top 15 Router được truy cập nhiều nhất
+    // 3. Lượt xem của khách vãng lai (guest)
+    prisma.userActivityLog.count({
+      where: {
+        ...userOnlyFilter,
+        userRole: "guest",
+      },
+    }),
+
+    // 4. Top Router được truy cập nhiều nhất bởi người dùng (lên đến 50 routes)
     prisma.userActivityLog.groupBy({
+      where: userOnlyFilter,
       by: ["path"],
       _count: { id: true },
       orderBy: { _count: { id: "desc" } },
-      take: 15,
+      take: 50,
     }),
 
-    // 5. 100 Nhật ký mới nhất
+    // 5. 200 Nhật ký mới nhất của người dùng
     prisma.userActivityLog.findMany({
-      take: 100,
+      where: userOnlyFilter,
+      take: 200,
       orderBy: { createdAt: "desc" },
     }),
 
     // 6. Dữ liệu 7 ngày gần nhất (tối đa 5000 records) để tính giờ cao điểm và thiết bị
     prisma.userActivityLog.findMany({
-      where: { createdAt: { gte: sevenDaysAgo } },
+      where: {
+        ...userOnlyFilter,
+        createdAt: { gte: sevenDaysAgo },
+      },
       select: {
         path: true,
         userRole: true,
