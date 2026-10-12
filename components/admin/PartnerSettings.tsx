@@ -68,15 +68,53 @@ export function PartnerSettings({
     setReferrerSelect(referredBy?.id ?? "");
   }, [referredBy?.id]);
 
+  // Tìm tỷ lệ đang có hiệu lực hiện tại (nếu có)
+  const currentActivePeriod = useMemo(() => {
+    const now = new Date();
+    return partnerRatePeriods.find((p) => {
+      const start = new Date(p.startsAt);
+      const end = p.endsAt ? new Date(p.endsAt) : null;
+      return now >= start && (!end || now <= end);
+    });
+  }, [partnerRatePeriods]);
+
+  // % hoa hồng đối tác đang được hưởng hiện tại (mặc định 5% nếu chưa cấu hình mốc riêng)
+  const currentRatePercent = useMemo(() => {
+    if (currentActivePeriod) {
+      return Math.round(currentActivePeriod.rate * 100);
+    }
+    return 5;
+  }, [currentActivePeriod]);
+
   // Form State cho việc thêm khoảng thời gian áp dụng tỷ lệ mới
   const todayStr = new Date().toISOString().split("T")[0];
-  const [selectedPercent, setSelectedPercent] = useState<number>(7); // Default 7% như ví dụ của user
+  // Tự động focus/chọn mức % hoa hồng mà đối tác đang được hưởng hiện tại (thay vì cố định 7%)
+  const [selectedPercent, setSelectedPercent] = useState<number>(currentRatePercent);
   const [startsAt, setStartsAt] = useState<string>(todayStr);
   const [endsAt, setEndsAt] = useState<string>("");
   const [isIndefinite, setIsIndefinite] = useState<boolean>(false);
   const [note, setNote] = useState<string>("");
   const [submittingRate, setSubmittingRate] = useState<boolean>(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  // Tự động đồng bộ focus vào mức % đang hưởng khi danh sách giai đoạn thay đổi hoặc tải lại trang
+  useEffect(() => {
+    setSelectedPercent(currentRatePercent);
+  }, [currentRatePercent]);
+
+  // Danh sách các mốc tỷ lệ: luôn đảm bảo có mốc đang hưởng (kể cả khi là mốc tuỳ chỉnh)
+  const ratePresets = useMemo(() => {
+    const list: Array<{ value: number; percent: number; label: string }> = [...PARTNER_RATE_PRESETS];
+    if (!list.some((p) => p.percent === currentRatePercent)) {
+      list.push({
+        value: currentRatePercent / 100,
+        percent: currentRatePercent,
+        label: `${currentRatePercent}%`,
+      });
+      list.sort((a, b) => a.percent - b.percent);
+    }
+    return list;
+  }, [currentRatePercent]);
 
   async function patch(body: Record<string, unknown>) {
     setLoading(true);
@@ -202,16 +240,8 @@ export function PartnerSettings({
     });
   }
 
-  // Tìm tỷ lệ đang có hiệu lực hiện tại (nếu có)
-  const currentActivePeriod = partnerRatePeriods.find((p) => {
-    const now = new Date();
-    const start = new Date(p.startsAt);
-    const end = p.endsAt ? new Date(p.endsAt) : null;
-    return now >= start && (!end || now <= end);
-  });
-
   return (
-    <div className="flex flex-col gap-4 sm:gap-6 w-full max-w-full min-w-0 overflow-hidden">
+    <div className="flex flex-col gap-4 sm:gap-6 w-full max-w-full min-w-0">
       {/* Alert Messages */}
       {error && (
         <div className="rounded-2xl bg-rose-50 border border-rose-200 p-4 text-xs text-rose-700 font-extrabold flex items-center justify-between shadow-xs">
@@ -335,13 +365,13 @@ export function PartnerSettings({
                   <ShieldCheck size={14} className="text-emerald-600 shrink-0" />
                   <span>Hiệu lực hiện tại:</span>
                   <strong className="text-sm font-black text-emerald-600 shrink-0">
-                    {Math.round(currentActivePeriod.rate * 100)}%
+                    {currentRatePercent}%
                   </strong>
                 </span>
               ) : (
                 <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-neutral-100 text-neutral-600 border border-neutral-200 text-xs font-bold max-w-full">
                   <Clock size={13} className="text-neutral-400 shrink-0" />
-                  <span>Mặc định hệ thống</span>
+                  <span>Mặc định hệ thống ({currentRatePercent}%)</span>
                 </span>
               )}
             </div>
@@ -356,26 +386,46 @@ export function PartnerSettings({
 
             {/* Bước 1: Chọn % với Selection 3%, 5%, 7%, 10% */}
             <div className="w-full min-w-0">
-              <label className="block text-xs font-extrabold text-neutral-700 mb-2">
-                1. Chọn tỷ lệ hoa hồng đối tác nhận:
-              </label>
+              <div className="flex items-center justify-between mb-2">
+                <label className="block text-xs font-extrabold text-neutral-700">
+                  1. Chọn tỷ lệ hoa hồng đối tác nhận:
+                </label>
+                <span className="text-[11px] font-bold text-neutral-500">
+                  Đang hưởng: <strong className="text-emerald-700 font-black">{currentRatePercent}%</strong>
+                </span>
+              </div>
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-2.5 w-full min-w-0">
-                {PARTNER_RATE_PRESETS.map((p) => {
-                  const active = selectedPercent === p.percent;
+                {ratePresets.map((p) => {
+                  const isSelected = selectedPercent === p.percent;
+                  const isCurrentActive = currentRatePercent === p.percent;
                   return (
                     <button
                       key={p.percent}
                       type="button"
                       onClick={() => setSelectedPercent(p.percent)}
-                      className={`flex flex-col items-center justify-center p-2.5 sm:p-3 rounded-2xl border-2 transition-all cursor-pointer min-w-0 w-full ${
-                        active
+                      className={`relative flex flex-col items-center justify-center p-2.5 sm:p-3 rounded-2xl border-2 transition-all cursor-pointer min-w-0 w-full ${
+                        isSelected
                           ? "border-emerald-500 bg-emerald-50/90 text-emerald-950 font-black shadow-xs ring-2 ring-emerald-200"
                           : "border-neutral-200/90 bg-white text-neutral-700 font-extrabold hover:border-neutral-300 hover:bg-neutral-50"
                       }`}
                     >
+                      {isCurrentActive && (
+                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-emerald-600 text-white text-[9px] font-black uppercase tracking-wider mb-1 shadow-2xs">
+                          <Check size={9} strokeWidth={3} />
+                          Đang Hưởng
+                        </span>
+                      )}
                       <span className="text-base sm:text-lg font-black leading-tight">{p.label}</span>
                       <span className="text-[9.5px] sm:text-[10px] text-neutral-400 font-bold mt-0.5 truncate max-w-full">
-                        {p.percent === 5 ? "Mặc định cũ" : p.percent === 7 ? "Ưu đãi vừa" : p.percent === 10 ? "VIP tối đa" : "Cơ bản"}
+                        {p.percent === 5
+                          ? "Mặc định cũ"
+                          : p.percent === 7
+                          ? "Ưu đãi vừa"
+                          : p.percent === 10
+                          ? "VIP tối đa"
+                          : p.percent === 3
+                          ? "Cơ bản"
+                          : "Mức riêng"}
                       </span>
                     </button>
                   );
