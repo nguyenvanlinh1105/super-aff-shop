@@ -39,7 +39,16 @@ export default async function CustomerDetailPage({ params }: { params: { id: str
         orders: { orderBy: { createdAt: "desc" }, take: 20, include: { platform: true } },
         paymentBatches: { orderBy: { createdAt: "desc" }, take: 20 },
         referredBy: { select: { id: true, fullName: true, customerCode: true, phone: true } },
-        referredUsers: { select: { id: true, fullName: true, customerCode: true }, orderBy: { fullName: "asc" } },
+        referredUsers: {
+          select: {
+            id: true,
+            fullName: true,
+            customerCode: true,
+            phone: true,
+            user: { select: { email: true } },
+          },
+          orderBy: { fullName: "asc" },
+        },
         partnerRatePeriods: { orderBy: { startsAt: "desc" } },
       },
     }),
@@ -402,7 +411,13 @@ export default async function CustomerDetailPage({ params }: { params: { id: str
           customerId={customer.id}
           isPartner={customer.isPartner}
           referredBy={customer.referredBy}
-          referredUsers={customer.referredUsers}
+          referredUsers={customer.referredUsers.map((u) => ({
+            id: u.id,
+            fullName: u.fullName,
+            customerCode: u.customerCode,
+            phone: u.phone,
+            email: u.user?.email ?? null,
+          }))}
           partnerRatePeriods={customer.partnerRatePeriods.map((p) => ({
             id: p.id,
             rate: Number(p.rate),

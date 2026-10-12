@@ -17,12 +17,21 @@ import {
   Clock,
   ShieldCheck,
   Info,
+  Mail,
+  Phone,
+  ExternalLink,
 } from "lucide-react";
 import { PARTNER_RATE_PRESETS } from "@/lib/commission";
 import { CustomSelect, type CustomSelectOption } from "@/components/ui/CustomSelect";
 
 type Option = { id: string; label: string };
-type LinkedCustomer = { id: string; fullName: string; customerCode: string };
+type LinkedCustomer = {
+  id: string;
+  fullName: string;
+  customerCode: string;
+  email?: string | null;
+  phone?: string | null;
+};
 
 export type PartnerRatePeriodDto = {
   id: string;
@@ -586,7 +595,7 @@ export function PartnerSettings({
 
       {/* Card 4: Danh sách khách đã được gán cho đối tác này (nếu là đối tác) */}
       {isPartner && (
-        <div className="rounded-3xl bg-white border border-emerald-200/80 p-4 sm:p-6 shadow-xs flex flex-col gap-3 w-full max-w-full min-w-0 overflow-hidden box-border">
+        <div className="rounded-3xl bg-white border border-emerald-200/80 p-4 sm:p-6 shadow-xs flex flex-col gap-4 w-full max-w-full min-w-0 box-border">
           <div className="flex items-center justify-between gap-3 border-b border-emerald-100/60 pb-3">
             <div className="flex items-center gap-2 text-sm font-extrabold text-neutral-900 min-w-0">
               <Users size={16} className="text-emerald-600 shrink-0" />
@@ -598,28 +607,74 @@ export function PartnerSettings({
           </div>
 
           {referredUsers.length === 0 ? (
-            <p className="text-xs text-neutral-400 font-medium py-2 italic">Chưa có khách hàng nào được gán cho đối tác này.</p>
+            <p className="text-xs text-neutral-400 font-medium py-3 italic text-center">
+              Chưa có khách hàng nào được gán cho đối tác này.
+            </p>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 pt-1 w-full min-w-0">
-              {referredUsers.map((u) => (
-                <Link
-                  key={u.id}
-                  href={`/admin/customers/${u.id}`}
-                  className="flex items-center justify-between p-3 rounded-2xl bg-neutral-50 hover:bg-emerald-50/70 border border-neutral-200/70 hover:border-emerald-200 transition-all duration-200 group min-w-0"
-                >
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <div className="w-7 h-7 rounded-xl bg-white p-0.5 border border-emerald-200/80 flex items-center justify-center shrink-0 shadow-2xs overflow-hidden">
-                      <img src="/icon-512.png" alt="MeowBack" className="w-full h-full object-contain rounded-lg" />
-                    </div>
-                    <span className="font-extrabold text-xs text-neutral-800 group-hover:text-emerald-700 transition-colors truncate">
-                      {u.fullName}
-                    </span>
-                  </div>
-                  <span className="font-mono text-[11px] font-bold text-neutral-400 group-hover:text-neutral-600 shrink-0 ml-2">
-                    {u.customerCode}
-                  </span>
-                </Link>
-              ))}
+            <div className="overflow-x-auto rounded-2xl border border-neutral-200/80 shadow-2xs w-full bg-white">
+              <table className="w-full text-left border-collapse min-w-[560px]">
+                <thead>
+                  <tr className="bg-neutral-50/80 border-b border-neutral-200 text-[11px] font-black uppercase tracking-wider text-neutral-500">
+                    <th className="py-3 px-4 whitespace-nowrap">Khách Hàng</th>
+                    <th className="py-3 px-4 whitespace-nowrap">Email</th>
+                    <th className="py-3 px-4 whitespace-nowrap">Số Điện Thoại</th>
+                    <th className="py-3 px-4 text-right whitespace-nowrap">Thao Tác</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-neutral-100 text-xs">
+                  {referredUsers.map((u) => (
+                    <tr key={u.id} className="hover:bg-emerald-50/40 transition-colors group">
+                      <td className="py-3 px-4 whitespace-nowrap">
+                        <Link
+                          href={`/admin/customers/${u.id}`}
+                          className="flex items-center gap-2.5 group-hover:text-emerald-700 transition-colors"
+                        >
+                          <div className="w-8 h-8 rounded-xl bg-white p-0.5 border border-emerald-200/80 flex items-center justify-center shrink-0 shadow-2xs overflow-hidden">
+                            <img src="/logo-200.png" alt="Avatar" className="w-full h-full object-contain rounded-lg" />
+                          </div>
+                          <div className="flex flex-col min-w-0">
+                            <span className="font-extrabold text-xs text-neutral-900 group-hover:text-emerald-700 transition-colors">
+                              {u.fullName}
+                            </span>
+                            <span className="font-mono text-[10.5px] font-bold text-neutral-400">
+                              {u.customerCode}
+                            </span>
+                          </div>
+                        </Link>
+                      </td>
+                      <td className="py-3 px-4 whitespace-nowrap font-medium text-neutral-600">
+                        {u.email ? (
+                          <div className="flex items-center gap-1.5 text-neutral-700">
+                            <Mail size={13} className="text-neutral-400 shrink-0" />
+                            <span className="font-semibold text-xs">{u.email}</span>
+                          </div>
+                        ) : (
+                          <span className="text-neutral-400 italic text-[11px]">Chưa liên kết</span>
+                        )}
+                      </td>
+                      <td className="py-3 px-4 whitespace-nowrap font-medium text-neutral-600">
+                        {u.phone ? (
+                          <div className="flex items-center gap-1.5 text-neutral-700">
+                            <Phone size={13} className="text-neutral-400 shrink-0" />
+                            <span className="font-semibold font-mono text-[11.5px]">{u.phone}</span>
+                          </div>
+                        ) : (
+                          <span className="text-neutral-400 italic text-[11px]">—</span>
+                        )}
+                      </td>
+                      <td className="py-3 px-4 text-right whitespace-nowrap">
+                        <Link
+                          href={`/admin/customers/${u.id}`}
+                          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-neutral-100 hover:bg-emerald-100 text-neutral-700 hover:text-emerald-900 text-[11.5px] font-bold transition-all shadow-2xs"
+                        >
+                          <span>Hồ sơ</span>
+                          <ExternalLink size={12} />
+                        </Link>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           )}
         </div>
