@@ -382,7 +382,7 @@ export default async function CustomerDetailPage({ params }: { params: { id: str
       })()}
 
       {/* ── CẤU HÌNH ĐỐI TÁC & GIỚI THIỆU ── */}
-      <div className="rounded-3xl bg-white p-4 sm:p-7 shadow-sm border border-neutral-200/80 flex flex-col gap-5">
+      <div className="rounded-3xl bg-white p-4 sm:p-7 shadow-sm border border-neutral-200/80 flex flex-col gap-5 relative z-20">
         <div className="flex items-center justify-between gap-3 border-b border-neutral-100 pb-4">
           <div className="flex items-center gap-3 min-w-0">
             <div className="w-10 h-10 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-600 border border-emerald-100 shadow-2xs shrink-0">

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -54,6 +54,11 @@ export function PartnerSettings({
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
+  // Sync state when referredBy changes after router.refresh()
+  useEffect(() => {
+    setReferrerSelect(referredBy?.id ?? "");
+  }, [referredBy?.id]);
+
   // Form State cho việc thêm khoảng thời gian áp dụng tỷ lệ mới
   const todayStr = new Date().toISOString().split("T")[0];
   const [selectedPercent, setSelectedPercent] = useState<number>(7); // Default 7% như ví dụ của user
@@ -76,7 +81,11 @@ export function PartnerSettings({
     setLoading(false);
     if (res.ok) {
       router.refresh();
-      setSuccessMsg("Đã cập nhật trạng thái đối tác thành công!");
+      if ("referredById" in body) {
+        setSuccessMsg(body.referredById ? "Đã gán người giới thiệu thành công!" : "Đã chuyển về đăng ký trực tiếp thành công!");
+      } else {
+        setSuccessMsg("Đã cập nhật trạng thái đối tác thành công!");
+      }
       setTimeout(() => setSuccessMsg(null), 3500);
     } else {
       const data = await res.json().catch(() => ({}));
@@ -528,7 +537,7 @@ export function PartnerSettings({
       )}
 
       {/* Card 3: Người giới thiệu của khách này */}
-      <div className="rounded-3xl bg-white border border-neutral-200/80 p-4 sm:p-6 shadow-xs flex flex-col gap-3 w-full max-w-full min-w-0 overflow-hidden box-border">
+      <div className="rounded-3xl bg-white border border-neutral-200/80 p-4 sm:p-6 shadow-xs flex flex-col gap-3 w-full max-w-full min-w-0 relative z-30">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
           <div className="flex items-center gap-2 text-sm font-extrabold text-neutral-900">
             <UserPlus size={16} className="text-rose-500 shrink-0" />
@@ -557,6 +566,8 @@ export function PartnerSettings({
               className="w-full"
               buttonClassName="bg-neutral-50/80 hover:bg-white text-xs font-extrabold text-neutral-900 border-neutral-200"
               wrapLabels={true}
+              searchable={true}
+              searchPlaceholder="Tìm theo tên hoặc mã khách hàng..."
               ariaLabel="Người Giới Thiệu Khách Này"
             />
           </div>
