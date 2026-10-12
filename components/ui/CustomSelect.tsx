@@ -199,7 +199,7 @@ export function CustomSelect({
         <div
           role="listbox"
           className={cn(
-            "absolute z-50 rounded-2xl border border-primary-100/90 bg-white p-1.5 shadow-xl shadow-primary-500/10 backdrop-blur-md animate-in fade-in zoom-in-95 duration-150 max-h-72 flex flex-col",
+            "absolute z-50 rounded-2xl border border-primary-100/90 bg-white p-1.5 shadow-xl shadow-primary-500/10 backdrop-blur-md animate-in fade-in zoom-in-95 duration-150 max-h-72 overflow-y-auto overflow-x-hidden scrollbar-none scrollbar-hide [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
             effectiveDirection === "up" ? "bottom-full mb-1.5" : "top-full mt-1.5",
             isFullWidth
               ? "left-0 right-0 w-full min-w-0 max-w-full"
@@ -211,7 +211,7 @@ export function CustomSelect({
           )}
         >
           {searchable && (
-            <div className="p-1 pb-1.5 shrink-0 border-b border-neutral-100 mb-1">
+            <div className="sticky top-0 z-10 bg-white/95 backdrop-blur-sm p-1 pb-1.5 border-b border-neutral-100 mb-1 -mt-0.5">
               <div className="relative flex items-center">
                 <Search size={13} className="pointer-events-none absolute left-2.5 text-neutral-400" />
                 <input
@@ -244,7 +244,7 @@ export function CustomSelect({
             </div>
           )}
 
-          <div className="overflow-y-auto overflow-x-hidden scrollbar-none scrollbar-hide [scrollbar-width:none] [&::-webkit-scrollbar]:hidden flex-1 flex flex-col gap-0.5">
+          <div className="flex flex-col gap-0.5">
             {filteredOptions.length === 0 ? (
               <div className="py-3 px-3 text-center text-xs font-semibold text-neutral-400">
                 {searchable && searchQuery ? "Không tìm thấy kết quả" : "Không có lựa chọn nào"}

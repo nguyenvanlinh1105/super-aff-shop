@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo, useEffect, useRef } from "react";
 import {
   Clock,
   CalendarRange,
@@ -577,14 +577,16 @@ export function TrafficTrendChart({
     return Math.max(...chartItems.map((d) => d.total), 4);
   }, [chartItems]);
 
-  // SVG Geometry
-  const svgWidth = 600;
-  const svgHeight = 200;
-  const paddingX = 25;
-  const paddingTop = 25;
-  const paddingBottom = 35;
+  // SVG Geometry (Rộng & cao vượt trội, tạo độ dốc trực quan đẹp mắt)
+  const svgWidth = 720;
+  const svgHeight = 280;
+  const paddingX = 28;
+  const paddingTop = 30;
+  const paddingBottom = 42;
   const chartW = svgWidth - paddingX * 2;
   const chartH = svgHeight - paddingTop - paddingBottom;
+
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // Điểm tọa độ
   const points = useMemo(() => {
@@ -630,6 +632,25 @@ export function TrafficTrendChart({
     hoveredIdx !== null && points[hoveredIdx]
       ? points[hoveredIdx]
       : points[peakItemIdx] || points[0];
+
+  // Tự động cuộn đến điểm cao điểm hoặc điểm đang chọn trên màn hình mobile khi đổi mốc
+  useEffect(() => {
+    if (scrollContainerRef.current && points.length > 0) {
+      const isMobileScreen = typeof window !== "undefined" && window.innerWidth < 640;
+      if (!isMobileScreen) return;
+
+      const target = activePoint || points[peakItemIdx];
+      if (target) {
+        const container = scrollContainerRef.current;
+        const targetRatio = target.x / svgWidth;
+        const scrollTarget = targetRatio * container.scrollWidth - container.clientWidth / 2;
+        container.scrollTo({
+          left: Math.max(0, scrollTarget),
+          behavior: "smooth",
+        });
+      }
+    }
+  }, [selectedDateKey, viewLevel, peakItemIdx]);
 
   // ── CÁC HÀM ĐIỀU HƯỚNG THỜI GIAN ──
   const handlePrev = () => {
@@ -1111,164 +1132,206 @@ export function TrafficTrendChart({
           </div>
         )}
 
-        {/* SVG Canvas Biểu Đồ Đường Responsive */}
-        <div className="relative w-full overflow-hidden rounded-2xl bg-white border border-neutral-100 p-1 sm:p-2 shadow-2xs">
-          <svg
-            viewBox={`0 0 ${svgWidth} ${svgHeight}`}
-            className="w-full h-auto select-none overflow-visible"
-          >
-            <defs>
-              <linearGradient id="lineAreaGradient" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#f43f5e" stopOpacity="0.28" />
-                <stop offset="60%" stopColor="#fb7185" stopOpacity="0.08" />
-                <stop offset="100%" stopColor="#ffffff" stopOpacity="0.00" />
-              </linearGradient>
+        {/* Gợi ý vuốt ngang trên mobile */}
+        <div className="flex sm:hidden items-center justify-between text-[11px] font-bold text-neutral-400 px-1 -mb-1">
+          <span className="inline-flex items-center gap-1.5 text-rose-600 bg-rose-50/90 px-2.5 py-1 rounded-xl border border-rose-200/80 shadow-2xs">
+            <span>↔</span>
+            <span>Vuốt ngang để xem 24 giờ</span>
+          </span>
+          {activePoint && (
+            <span className="text-neutral-500 font-extrabold text-[11px]">
+              Đang xem: <strong className="text-rose-600 font-black">{activePoint.label}</strong>
+            </span>
+          )}
+        </div>
 
-              <linearGradient id="strokeGradient" x1="0" y1="0" x2="1" y2="0">
-                <stop offset="0%" stopColor="#fb7185" />
-                <stop offset="50%" stopColor="#f43f5e" />
-                <stop offset="100%" stopColor="#e11d48" />
-              </linearGradient>
-            </defs>
+        {/* SVG Canvas Biểu Đồ Đường Responsive (Cuộn ngang mượt mà & Chiều cao vượt trội trên Mobile) */}
+        <div
+          ref={scrollContainerRef}
+          className="relative w-full overflow-x-auto rounded-2xl bg-white border border-neutral-100 p-1 sm:p-2 shadow-2xs custom-scrollbar touch-pan-x"
+        >
+          <div className="min-w-[680px] sm:min-w-0 w-full">
+            <svg
+              viewBox={`0 0 ${svgWidth} ${svgHeight}`}
+              className="w-full h-[255px] sm:h-auto select-none overflow-visible"
+            >
+              <defs>
+                <linearGradient id="lineAreaGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#f43f5e" stopOpacity="0.28" />
+                  <stop offset="60%" stopColor="#fb7185" stopOpacity="0.08" />
+                  <stop offset="100%" stopColor="#ffffff" stopOpacity="0.00" />
+                </linearGradient>
 
-            {/* Đường lưới ngang (Grid lines) */}
-            {[0, 0.25, 0.5, 0.75, 1].map((ratio, idx) => {
-              const y = paddingTop + chartH - ratio * chartH;
-              const val = Math.round(ratio * maxTotal);
-              return (
-                <g key={idx}>
-                  <line
-                    x1={paddingX}
-                    y1={y}
-                    x2={svgWidth - paddingX}
-                    y2={y}
-                    stroke="#f1f5f9"
-                    strokeWidth="1"
-                    strokeDasharray={ratio === 0 ? "none" : "3,3"}
+                <linearGradient id="strokeGradient" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="0%" stopColor="#fb7185" />
+                  <stop offset="50%" stopColor="#f43f5e" />
+                  <stop offset="100%" stopColor="#e11d48" />
+                </linearGradient>
+              </defs>
+
+              {/* Đường lưới ngang (Grid lines) */}
+              {[0, 0.25, 0.5, 0.75, 1].map((ratio, idx) => {
+                const y = paddingTop + chartH - ratio * chartH;
+                const val = Math.round(ratio * maxTotal);
+                return (
+                  <g key={idx}>
+                    <line
+                      x1={paddingX}
+                      y1={y}
+                      x2={svgWidth - paddingX}
+                      y2={y}
+                      stroke="#f1f5f9"
+                      strokeWidth="1"
+                      strokeDasharray={ratio === 0 ? "none" : "3,3"}
+                    />
+                    <text
+                      x={paddingX - 4}
+                      y={y + 3.5}
+                      textAnchor="end"
+                      fill="#94a3b8"
+                      fontSize="9.5"
+                      fontWeight="bold"
+                    >
+                      {val}
+                    </text>
+                  </g>
+                );
+              })}
+
+              {/* Vùng đổ màu phía dưới đường cong */}
+              <path d={areaPath} fill="url(#lineAreaGradient)" />
+
+              {/* Đường cong chính (Spline Line) */}
+              <path
+                d={linePath}
+                fill="none"
+                stroke="url(#strokeGradient)"
+                strokeWidth="3.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+
+              {/* Đường chỉ dẫn trục dọc khi chọn/hover */}
+              {activePoint && (
+                <line
+                  x1={activePoint.x}
+                  y1={paddingTop}
+                  x2={activePoint.x}
+                  y2={paddingTop + chartH}
+                  stroke="#f43f5e"
+                  strokeWidth="1.5"
+                  strokeDasharray="2,2"
+                />
+              )}
+
+              {/* Huy hiệu số lượng nổi trực tiếp trên điểm đang chọn */}
+              {activePoint && (
+                <g className="pointer-events-none animate-in fade-in zoom-in-95 duration-150">
+                  <rect
+                    x={activePoint.x - 17}
+                    y={Math.max(6, activePoint.y - 25)}
+                    width={34}
+                    height={18}
+                    rx={6}
+                    fill="#e11d48"
                   />
                   <text
-                    x={paddingX - 4}
-                    y={y + 3}
-                    textAnchor="end"
-                    fill="#94a3b8"
-                    fontSize="9"
-                    fontWeight="bold"
+                    x={activePoint.x}
+                    y={Math.max(6, activePoint.y - 25) + 12.5}
+                    textAnchor="middle"
+                    fill="#ffffff"
+                    fontSize="10"
+                    fontWeight="900"
                   >
-                    {val}
+                    {activePoint.total}
                   </text>
                 </g>
-              );
-            })}
+              )}
 
-            {/* Vùng đổ màu phía dưới đường cong */}
-            <path d={areaPath} fill="url(#lineAreaGradient)" />
+              {/* Các điểm nút trên đường (Points) */}
+              {points.map((p) => {
+                const isPeak = p.index === peakItemIdx;
+                const isSelected = activePoint && p.id === activePoint.id;
+                const stripWidth = points.length > 1 ? chartW / (points.length - 1) : chartW;
 
-            {/* Đường cong chính (Spline Line) */}
-            <path
-              d={linePath}
-              fill="none"
-              stroke="url(#strokeGradient)"
-              strokeWidth="3.2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
+                return (
+                  <g
+                    key={p.id}
+                    className="cursor-pointer transition-transform"
+                    onClick={() => {
+                      setHoveredIdx(p.index);
+                      if (p.canDrill && isSelected && p.onDrill) {
+                        p.onDrill();
+                      }
+                    }}
+                    onMouseEnter={() => setHoveredIdx(p.index)}
+                  >
+                    {/* Dải chạm dọc toàn chiều cao (Vertical Hit Strip) */}
+                    <rect
+                      x={p.x - stripWidth / 2}
+                      y={paddingTop}
+                      width={stripWidth}
+                      height={chartH}
+                      fill="transparent"
+                    />
 
-            {/* Đường chỉ dẫn trục dọc khi chọn/hover */}
-            {activePoint && (
-              <line
-                x1={activePoint.x}
-                y1={paddingTop}
-                x2={activePoint.x}
-                y2={paddingTop + chartH}
-                stroke="#f43f5e"
-                strokeWidth="1.5"
-                strokeDasharray="2,2"
-              />
-            )}
+                    {/* Vòng sáng ngoài khi là Điểm Cao Điểm */}
+                    {isPeak && (
+                      <circle
+                        cx={p.x}
+                        cy={p.y}
+                        r={isSelected ? "9.5" : "7.5"}
+                        fill="#ffe4e6"
+                        stroke="#f43f5e"
+                        strokeWidth="1.5"
+                        className="animate-ping origin-center pointer-events-none"
+                        style={{ animationDuration: "2.5s" }}
+                      />
+                    )}
 
-            {/* Các điểm nút trên đường (Points) */}
-            {points.map((p) => {
-              const isPeak = p.index === peakItemIdx;
-              const isSelected = activePoint && p.id === activePoint.id;
-              const stripWidth = points.length > 1 ? chartW / (points.length - 1) : chartW;
-
-              return (
-                <g
-                  key={p.id}
-                  className="cursor-pointer transition-transform"
-                  onClick={() => {
-                    setHoveredIdx(p.index);
-                    if (p.canDrill && isSelected && p.onDrill) {
-                      p.onDrill();
-                    }
-                  }}
-                  onMouseEnter={() => setHoveredIdx(p.index)}
-                >
-                  {/* Dải chạm dọc toàn chiều cao (Vertical Hit Strip) */}
-                  <rect
-                    x={p.x - stripWidth / 2}
-                    y={paddingTop}
-                    width={stripWidth}
-                    height={chartH}
-                    fill="transparent"
-                  />
-
-                  {/* Vòng sáng ngoài khi là Điểm Cao Điểm */}
-                  {isPeak && (
+                    {/* Chấm tròn chính */}
                     <circle
                       cx={p.x}
                       cy={p.y}
-                      r={isSelected ? "9" : "7"}
-                      fill="#ffe4e6"
-                      stroke="#f43f5e"
-                      strokeWidth="1.5"
-                      className="animate-ping origin-center pointer-events-none"
-                      style={{ animationDuration: "2.5s" }}
+                      r={isSelected ? "6" : isPeak ? "5" : p.total > 0 ? "3.5" : "2.5"}
+                      fill={
+                        isSelected
+                          ? "#e11d48"
+                          : isPeak
+                          ? "#f43f5e"
+                          : p.total > 0
+                          ? "#fb7185"
+                          : "#cbd5e1"
+                      }
+                      stroke="#ffffff"
+                      strokeWidth="1.8"
+                      className="pointer-events-none"
                     />
-                  )}
+                  </g>
+                );
+              })}
 
-                  {/* Chấm tròn chính */}
-                  <circle
-                    cx={p.x}
-                    cy={p.y}
-                    r={isSelected ? "5.5" : isPeak ? "4.5" : p.total > 0 ? "3" : "2"}
-                    fill={
-                      isSelected
-                        ? "#e11d48"
-                        : isPeak
-                        ? "#f43f5e"
-                        : p.total > 0
-                        ? "#fb7185"
-                        : "#cbd5e1"
-                    }
-                    stroke="#ffffff"
-                    strokeWidth="1.5"
+              {/* Nhãn trục hoành (X-Axis Labels) */}
+              {points.map((p) => {
+                if (!p.tickLabel) return null;
+                const isSelected = activePoint && p.id === activePoint.id;
+                return (
+                  <text
+                    key={`lbl-${p.id}`}
+                    x={p.x}
+                    y={paddingTop + chartH + 18}
+                    textAnchor="middle"
+                    fill={isSelected ? "#e11d48" : "#64748b"}
+                    fontSize={viewLevel === "month" ? "9" : "10"}
+                    fontWeight={isSelected ? "900" : "700"}
                     className="pointer-events-none"
-                  />
-                </g>
-              );
-            })}
-
-            {/* Nhãn trục hoành (X-Axis Labels) */}
-            {points.map((p) => {
-              if (!p.tickLabel) return null;
-              const isSelected = activePoint && p.id === activePoint.id;
-              return (
-                <text
-                  key={`lbl-${p.id}`}
-                  x={p.x}
-                  y={paddingTop + chartH + 16}
-                  textAnchor="middle"
-                  fill={isSelected ? "#e11d48" : "#64748b"}
-                  fontSize={viewLevel === "month" ? "8.5" : "9.5"}
-                  fontWeight={isSelected ? "900" : "700"}
-                  className="pointer-events-none"
-                >
-                  {p.tickLabel}
-                </text>
-              );
-            })}
-          </svg>
+                  >
+                    {p.tickLabel}
+                  </text>
+                );
+              })}
+            </svg>
+          </div>
         </div>
       </div>
     </div>
