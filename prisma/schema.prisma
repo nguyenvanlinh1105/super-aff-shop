@@ -367,6 +367,7 @@ model Order {
   referralBonusDeducted  Decimal  @default(0) @map("referral_bonus_deducted")
   rawData                String?    @map("raw_data")
   approvedAt              DateTime? @map("approved_at")
+  earlyApprovalReason     String?   @map("early_approval_reason")
   createdAt               DateTime  @default(now()) @map("created_at")
   updatedAt               DateTime  @default(now()) @updatedAt @map("updated_at")
 

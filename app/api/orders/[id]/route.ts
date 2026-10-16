@@ -13,19 +13,22 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
     return NextResponse.json({ error: "Không có quyền" }, { status: 403 });
   }
 
-  const { customerId, orderStatus } = await req.json();
+  const { customerId, orderStatus, earlyApprovalReason } = await req.json();
   const order = await prisma.order.findUnique({ where: { id: params.id } });
   if (!order) return NextResponse.json({ error: "Không tìm thấy đơn" }, { status: 404 });
 
   // Kiểm tra chuyển trạng thái hợp lệ
   const VALID_TRANSITIONS: Record<string, string[]> = {
     pending:    ["completed", "cancelled", "approved", "processing"],
-    processing: ["approved", "cancelled"],  // Đang đối soát — tự chuyển approved khi đủ SETTLEMENT_DAYS qua re-import CSV
+    processing: ["approved", "cancelled"],  // Đang đối soát
     completed:  ["approved", "cancelled"],   // Shopee đã trả → approved; hoặc phát hiện lỗi → cancelled
     approved:   ["clawback"],                // Shopee đòi lại
     cancelled:  ["pending"],                 // Khôi phục nếu nhầm
     clawback:   [],                          // Trạng thái cuối, không thay đổi
   };
+
+  const MAX_EARLY_SETTLEMENT_REWARD = 5000;
+  let isEarlyApproval = false;
 
   if (orderStatus && order.orderStatus !== orderStatus) {
     const allowed = VALID_TRANSITIONS[order.orderStatus] ?? [];
@@ -36,17 +39,35 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
       );
     }
 
-    // Chặn cứng ở tầng API — không cho phép duyệt tay bỏ qua luật đối soát
-    // SETTLEMENT_DAYS ngày, dù nút bấm trên giao diện có ẩn hay không.
-    if (orderStatus === "approved" && !isSettlementReady(order.completedAt)) {
-      return NextResponse.json(
-        {
-          error: order.completedAt
-            ? `Đơn chưa đủ ${SETTLEMENT_DAYS} ngày kể từ ngày hoàn thành, chưa thể duyệt "Tiền đã về"`
-            : `Đơn chưa có ngày hoàn thành, chưa thể duyệt "Tiền đã về"`,
-        },
-        { status: 400 }
-      );
+    // Kiểm tra quy định đối soát:
+    // Nếu chưa đủ SETTLEMENT_DAYS (15 ngày):
+    // Chỉ cho phép duyệt sớm với đơn có tiền hoàn (customerRewardAmount) <= 5.000đ
+    // VÀ phải cung cấp lý do hoàn thành đối soát sớm.
+    if (orderStatus === "approved") {
+      const settlementReady = isSettlementReady(order.completedAt);
+      if (!settlementReady) {
+        const rewardAmount = Number(order.customerRewardAmount || 0);
+        if (rewardAmount > MAX_EARLY_SETTLEMENT_REWARD) {
+          return NextResponse.json(
+            {
+              error: `Đơn chưa đủ ${SETTLEMENT_DAYS} ngày đối soát và có tiền hoàn ${rewardAmount.toLocaleString("vi-VN")}đ (vượt mức tối đa ${MAX_EARLY_SETTLEMENT_REWARD.toLocaleString("vi-VN")}đ cho phép duyệt trước hạn). Vui lòng chờ đủ thời gian đối soát.`,
+            },
+            { status: 400 }
+          );
+        }
+
+        const reasonStr = typeof earlyApprovalReason === "string" ? earlyApprovalReason.trim() : "";
+        if (!reasonStr) {
+          return NextResponse.json(
+            {
+              error: `Đơn chưa đủ ${SETTLEMENT_DAYS} ngày đối soát. Vui lòng nhập lý do hoàn thành đối soát sớm để chuyển tiền vào ví khách.`,
+            },
+            { status: 400 }
+          );
+        }
+
+        isEarlyApproval = true;
+      }
     }
   }
 
@@ -72,7 +93,12 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   if (customerId !== undefined) data.customerId = customerId;
   if (orderStatus) {
     data.orderStatus = orderStatus;
-    if (orderStatus === "approved") data.approvedAt = new Date();
+    if (orderStatus === "approved") {
+      data.approvedAt = new Date();
+      if (isEarlyApproval && earlyApprovalReason) {
+        data.earlyApprovalReason = String(earlyApprovalReason).trim();
+      }
+    }
   }
 
   if (Object.keys(data).length === 0) {
@@ -80,6 +106,24 @@ export async function PATCH(req: NextRequest, { params }: { params: { id: string
   }
 
   const updated = await prisma.order.update({ where: { id: params.id }, data });
+
+  if (isEarlyApproval && session?.userId) {
+    await prisma.auditLog.create({
+      data: {
+        actorUserId: session.userId,
+        entityType: "Order",
+        entityId: params.id,
+        action: "early_approval",
+        beforeData: JSON.stringify({ orderStatus: order.orderStatus }),
+        afterData: JSON.stringify({
+          orderStatus: "approved",
+          reason: earlyApprovalReason,
+          customerRewardAmount: Number(order.customerRewardAmount),
+          completedAt: order.completedAt,
+        }),
+      },
+    }).catch((err) => console.error("Lỗi ghi audit log:", err));
+  }
 
   const targetCustomerId = updated.customerId;
 

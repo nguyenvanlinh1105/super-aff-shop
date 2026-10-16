@@ -293,6 +293,7 @@ export default async function AdminOrdersPage({
       payoutStatus: o.payoutStatus,
       orderedAt: o.orderedAt?.toISOString() ?? null,
       completedAt: o.completedAt?.toISOString() ?? null,
+      earlyApprovalReason: o.earlyApprovalReason ?? null,
       clawbackWarning: o.orderStatus === "completed" && o.completedAt
         ? (new Date().getTime() - new Date(o.completedAt).getTime()) > 15 * 24 * 60 * 60 * 1000
         : false,

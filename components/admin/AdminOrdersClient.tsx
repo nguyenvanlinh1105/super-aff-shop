@@ -54,6 +54,7 @@ type Order = {
   payoutStatus: string;
   orderedAt: string | null;
   completedAt: string | null;
+  earlyApprovalReason?: string | null;
   clawbackWarning: boolean;
 };
 
@@ -733,6 +734,15 @@ export function AdminOrdersClient({
                             Chưa gán khách
                           </Badge>
                         )}
+                        {o.earlyApprovalReason && (
+                          <span
+                            className="inline-flex items-center gap-1 text-[10px] font-semibold text-amber-700 bg-amber-50 border border-amber-200/80 rounded-md px-1.5 py-0.5 mt-0.5"
+                            title={`Lý do duyệt đối soát sớm: ${o.earlyApprovalReason}`}
+                          >
+                            <Clock3 size={10} className="text-amber-600 shrink-0" />
+                            <span className="truncate max-w-[140px]">Duyệt sớm: {o.earlyApprovalReason}</span>
+                          </span>
+                        )}
                       </div>
                     </td>
 
@@ -740,10 +750,16 @@ export function AdminOrdersClient({
                     <td className="px-4 py-3 min-w-[320px]" data-label="Thao tác">
                       <OrderActions
                         orderId={o.id}
+                        orderExternalId={o.orderExternalId}
                         orderStatus={o.orderStatus}
                         payoutStatus={o.payoutStatus}
                         hasCustomer={Boolean(o.customerId)}
                         customers={customers}
+                        customerName={o.customerName}
+                        customerRewardAmount={o.customerRewardAmount}
+                        orderAmount={o.orderAmount}
+                        completedAt={o.completedAt}
+                        earlyApprovalReason={o.earlyApprovalReason}
                       />
                     </td>
                   </tr>
