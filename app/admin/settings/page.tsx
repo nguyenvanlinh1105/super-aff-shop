@@ -2,6 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { Card } from "@/components/ui/Card";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { CommissionRuleForm } from "@/components/admin/CommissionRuleForm";
+import { CommissionRuleHistory } from "@/components/admin/CommissionRuleHistory";
 import { CategoryRateForm } from "@/components/admin/CategoryRateForm";
 import { ChangePasswordForm } from "@/components/account/ChangePasswordForm";
 import { AdminMfaSetupCard } from "@/components/admin/AdminMfaSetupCard";
@@ -25,6 +26,7 @@ export default async function AdminSettingsPage() {
 
   const [
     activeRule,
+    commissionRules,
     categoryRates,
     tiktokPlatform,
     lazadaPlatform,
@@ -36,6 +38,15 @@ export default async function AdminSettingsPage() {
       where: { active: true },
       orderBy: { createdAt: "desc" },
     }),
+    prisma.commissionRule.findMany({
+      orderBy: { createdAt: "desc" },
+      include: {
+        createdByUser: {
+          select: { id: true, fullName: true, email: true },
+        },
+      },
+      take: 50,
+    }),
     prisma.categoryCommissionRate.findMany({ orderBy: { sortOrder: "asc" } }),
     prisma.platform.findUnique({ where: { code: "TIKTOK" } }),
     prisma.platform.findUnique({ where: { code: "LAZADA" } }),
@@ -46,6 +57,62 @@ export default async function AdminSettingsPage() {
       orderBy: { createdAt: "desc" },
     }),
   ]);
+
+  const commissionHistory = commissionRules.map((r) => ({
+    id: r.id,
+    name: r.name,
+    taxRate: Number(r.taxRate),
+    customerRate: Number(r.customerRate),
+    systemRate: Number(r.systemRate),
+    referralRate:
+      Number(r.referralRate) <= 1
+        ? Math.round(Number(r.referralRate) * 1000) / 10
+        : Number(r.referralRate),
+    maxReferralOrders: r.maxReferralOrders,
+    referralValidityMonths: r.referralValidityMonths,
+    active: r.active,
+    createdAt: r.createdAt.toISOString(),
+    createdByUser: r.createdByUser
+      ? {
+          id: r.createdByUser.id,
+          fullName: r.createdByUser.fullName,
+          email: r.createdByUser.email,
+        }
+      : null,
+  }));
+
+  if (commissionHistory.length === 0 && activeRule) {
+    commissionHistory.push({
+      id: activeRule.id,
+      name: activeRule.name,
+      taxRate: Number(activeRule.taxRate),
+      customerRate: Number(activeRule.customerRate),
+      systemRate: Number(activeRule.systemRate),
+      referralRate:
+        Number(activeRule.referralRate) <= 1
+          ? Math.round(Number(activeRule.referralRate) * 1000) / 10
+          : Number(activeRule.referralRate),
+      maxReferralOrders: activeRule.maxReferralOrders,
+      referralValidityMonths: activeRule.referralValidityMonths,
+      active: true,
+      createdAt: activeRule.createdAt.toISOString(),
+      createdByUser: null,
+    });
+  } else if (commissionHistory.length === 0) {
+    commissionHistory.push({
+      id: "default-rule",
+      name: "Cấu hình Mặc định",
+      taxRate: 10.98,
+      customerRate: 80,
+      systemRate: 20,
+      referralRate: 5,
+      maxReferralOrders: 5,
+      referralValidityMonths: 6,
+      active: true,
+      createdAt: new Date().toISOString(),
+      createdByUser: null,
+    });
+  }
 
   return (
     <div className="flex flex-col gap-6 fade-in pb-8">
@@ -122,29 +189,37 @@ export default async function AdminSettingsPage() {
         botAccount={telegramAccount}
       />
 
-      {/* Commission rule card */}
-      <div className="rounded-3xl bg-white shadow-sm border border-neutral-200/70 p-6 sm:p-8">
-        <div className="flex items-center gap-3.5 mb-6 pb-4 border-b border-neutral-200/70">
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-rose-500 to-pink-600 text-white flex items-center justify-center shadow-md shadow-rose-500/20 shrink-0">
-            <Settings size={20} strokeWidth={2.2} />
+      {/* Commission rule card & history */}
+      <div className="rounded-3xl bg-white shadow-sm border border-neutral-200/70 p-6 sm:p-8 flex flex-col gap-8">
+        <div>
+          <div className="flex items-center gap-3.5 mb-6 pb-4 border-b border-neutral-200/70">
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-rose-500 to-pink-600 text-white flex items-center justify-center shadow-md shadow-rose-500/20 shrink-0">
+              <Settings size={20} strokeWidth={2.2} />
+            </div>
+            <div>
+              <h2 className="text-base sm:text-lg font-black text-neutral-900 tracking-tight leading-snug">
+                Tỷ Lệ Chia Sẻ Hoa Hồng Cashback
+              </h2>
+              <p className="text-xs text-neutral-500 font-medium mt-0.5">
+                Cấu hình tỷ lệ chia sẻ hoa hồng giữa Khách hàng, Hệ thống và Thưởng giới thiệu bạn bè (Referral).
+              </p>
+            </div>
           </div>
-          <div>
-            <h2 className="text-base sm:text-lg font-black text-neutral-900 tracking-tight leading-snug">
-              Tỷ Lệ Chia Sẻ Hoa Hồng Cashback
-            </h2>
-            <p className="text-xs text-neutral-500 font-medium mt-0.5">
-              Cấu hình tỷ lệ chia sẻ hoa hồng giữa Khách hàng, Hệ thống và Thưởng giới thiệu bạn bè (Referral).
-            </p>
-          </div>
+          <CommissionRuleForm
+            key={activeRule?.id ?? "default"}
+            taxRate={Number(activeRule?.taxRate ?? 10.98)}
+            customerRate={Number(activeRule?.customerRate ?? 80)}
+            systemRate={Number(activeRule?.systemRate ?? 20)}
+            referralRate={Number(activeRule?.referralRate ?? 0.05) * 100}
+            maxReferralOrders={activeRule?.maxReferralOrders ?? 5}
+            referralValidityMonths={activeRule?.referralValidityMonths ?? 6}
+          />
         </div>
-        <CommissionRuleForm
-          taxRate={Number(activeRule?.taxRate ?? 10.98)}
-          customerRate={Number(activeRule?.customerRate ?? 80)}
-          systemRate={Number(activeRule?.systemRate ?? 20)}
-          referralRate={Number(activeRule?.referralRate ?? 0.05) * 100}
-          maxReferralOrders={activeRule?.maxReferralOrders ?? 5}
-          referralValidityMonths={activeRule?.referralValidityMonths ?? 6}
-        />
+
+        {/* ─── BẢNG HIỂN THỊ LỊCH SỬ CẬP NHẬT PHÂN BỔ HOA HỒNG ─── */}
+        <div className="pt-6 border-t border-neutral-200/80">
+          <CommissionRuleHistory history={commissionHistory} />
+        </div>
       </div>
 
       {/* Category commission rate table */}

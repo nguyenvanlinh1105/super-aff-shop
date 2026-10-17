@@ -23,6 +23,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Dữ liệu không hợp lệ" }, { status: 400 });
   }
 
+  const prevActive = await prisma.commissionRule.findFirst({
+    where: { active: true },
+    orderBy: { createdAt: "desc" },
+  });
+
   await prisma.commissionRule.updateMany({
     where: { active: true },
     data: { active: false },
@@ -42,10 +47,57 @@ export async function POST(req: NextRequest) {
     },
   });
 
+  try {
+    await prisma.auditLog.create({
+      data: {
+        actorUserId: session.userId,
+        entityType: "commission_rule",
+        entityId: rule.id,
+        action: "update_commission_rule",
+        beforeData: prevActive
+          ? JSON.stringify({
+              taxRate: Number(prevActive.taxRate),
+              customerRate: Number(prevActive.customerRate),
+              systemRate: Number(prevActive.systemRate),
+              referralRate: Number(prevActive.referralRate),
+              maxReferralOrders: prevActive.maxReferralOrders,
+              referralValidityMonths: prevActive.referralValidityMonths,
+            })
+          : null,
+        afterData: JSON.stringify({
+          taxRate,
+          customerRate,
+          systemRate,
+          referralRate,
+          maxReferralOrders,
+          referralValidityMonths,
+        }),
+      },
+    });
+  } catch (auditErr) {
+    console.warn("Lỗi ghi audit log khi đổi commission rule:", auditErr);
+  }
+
   return NextResponse.json({ rule });
 }
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const { searchParams } = new URL(req.url);
+  const wantHistory = searchParams.get("history") === "1" || searchParams.get("history") === "true";
+
+  if (wantHistory) {
+    const history = await prisma.commissionRule.findMany({
+      orderBy: { createdAt: "desc" },
+      include: {
+        createdByUser: {
+          select: { id: true, fullName: true, email: true },
+        },
+      },
+      take: 50,
+    });
+    return NextResponse.json({ history });
+  }
+
   const rule = await prisma.commissionRule.findFirst({
     where: { active: true },
     orderBy: { createdAt: "desc" },
